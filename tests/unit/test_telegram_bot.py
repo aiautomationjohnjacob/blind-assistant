@@ -376,13 +376,25 @@ async def test_send_response_no_voice_when_tts_returns_none():
 
 
 @pytest.mark.asyncio
-async def test_start_loads_users_before_polling(mock_keyring, mock_telegram_application):
+async def test_start_loads_users_before_polling(mock_keyring):
     """start() must load allowed users from keychain before beginning to poll."""
     bot = _make_bot()
+
+    # Build a self-contained mock for the full Telegram Application lifecycle
+    mock_app = MagicMock()
+    mock_app.run_polling = MagicMock()
+    mock_app.add_handler = MagicMock()
+    mock_builder = MagicMock()
+    mock_builder.token.return_value = mock_builder
+    mock_builder.build.return_value = mock_app
 
     with (
         patch("blind_assistant.security.credentials.get_credential", return_value="12345"),
         patch("blind_assistant.security.credentials.require_credential", return_value="fake_token"),
+        patch("telegram.ext.Application") as mock_app_cls,
+        patch("telegram.ext.ApplicationBuilder", return_value=mock_builder),
+        patch("telegram.ext.MessageHandler"),
+        patch("telegram.ext.filters"),
     ):
         await bot.start()
 
@@ -391,14 +403,25 @@ async def test_start_loads_users_before_polling(mock_keyring, mock_telegram_appl
 
 
 @pytest.mark.asyncio
-async def test_start_calls_run_polling(mock_keyring, mock_telegram_application):
+async def test_start_calls_run_polling(mock_keyring):
     """start() calls run_polling() on the Application."""
     bot = _make_bot()
+
+    mock_app = MagicMock()
+    mock_app.run_polling = MagicMock()
+    mock_app.add_handler = MagicMock()
+    mock_builder = MagicMock()
+    mock_builder.token.return_value = mock_builder
+    mock_builder.build.return_value = mock_app
 
     with (
         patch("blind_assistant.security.credentials.get_credential", return_value="111"),
         patch("blind_assistant.security.credentials.require_credential", return_value="fake_token"),
+        patch("telegram.ext.Application"),
+        patch("telegram.ext.ApplicationBuilder", return_value=mock_builder),
+        patch("telegram.ext.MessageHandler"),
+        patch("telegram.ext.filters"),
     ):
         await bot.start()
 
-    mock_telegram_application.run_polling.assert_called_once()
+    mock_app.run_polling.assert_called_once()
