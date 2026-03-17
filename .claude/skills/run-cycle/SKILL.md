@@ -152,7 +152,10 @@ feasibility. (2) Identify the 5 highest-impact integration opportunities ranked 
 many blind users they help and how immediately useful they are. (3) What does the
 'self-expanding' capability need to look like architecturally — how does the app discover,
 vet, and install new tools/APIs at runtime safely?
-Write docs/GAP_ANALYSIS.md and docs/INTEGRATION_MAP.md. Be specific and opinionated."
+
+Output your findings as a concise dated section to be appended to docs/LESSONS.md under
+the heading '## Gap Analysis — [date]'. Do NOT create a new GAP_ANALYSIS.md file.
+Be specific and opinionated. Max 80 lines."
 
 **B. Security Model**
 Use `security-specialist` agent:
@@ -164,18 +167,25 @@ tokenization only, never store raw card numbers, mandatory risk-disclosure warni
 (spoken aloud) before any financial details are accepted; (5) self-installing tools —
 supply chain vetting process; (6) credential storage (OS keychain, not .env files);
 (7) conversation log encryption.
-Write docs/SECURITY_MODEL.md with specific technical recommendations and code patterns."
+
+Output your recommendations as a concise dated section to be appended to docs/LESSONS.md
+under the heading '## Security Model — [date]'. Do NOT create a SECURITY_MODEL.md file
+unless you are writing actual code patterns that will be referenced by implementers.
+Max 60 lines."
 
 **C. Ethics Requirements**
 Use `ethics-advisor` agent:
 "Read docs/PRODUCT_BRIEF.md. This AI will control a blind person's computer, store their
 personal knowledge base, have 24/7 Telegram access, and make purchases on their behalf.
 What autonomy safeguards, consent mechanisms, and dependency-prevention measures are
-non-negotiable? Write docs/ETHICS_REQUIREMENTS.md."
+non-negotiable?
+
+Output your requirements as a concise dated section appended to docs/LESSONS.md under
+'## Ethics Requirements — [date]'. Do NOT create ETHICS_REQUIREMENTS.md. Max 40 lines."
 
 After A, B, C complete → use `tech-lead` agent:
-"Read docs/PRODUCT_BRIEF.md, GAP_ANALYSIS.md, INTEGRATION_MAP.md, SECURITY_MODEL.md,
-ETHICS_REQUIREMENTS.md. Design the complete technical architecture.
+"Read docs/PRODUCT_BRIEF.md, and the Gap Analysis / Security Model / Ethics sections
+just added to docs/LESSONS.md. Design the complete technical architecture.
 Key requirements: (1) voice-only installation — blind user sets up entirely without seeing
 anything; (2) Telegram bot as primary 24/7 interface; (3) security model must be implemented
 as described; (4) integrate existing tools, don't rebuild them; (5) Python preferred for AI
@@ -196,9 +206,13 @@ for you that nothing else does today? Format each as:
 Aggregate all 15+ stories into `docs/USER_STORIES.md`.
 
 Then use `nonprofit-ceo` agent:
-"Read docs/USER_STORIES.md, GAP_ANALYSIS.md, ARCHITECTURE.md.
+"Read docs/USER_STORIES.md and docs/ARCHITECTURE.md.
 Prioritize these user stories by mission impact. Which 5 stories, if implemented, would
-most change a blind person's life? Which should we build first? Write docs/FEATURE_PRIORITY.md."
+most change a blind person's life? Which should we build first?
+
+Append your priority ranking as a section to docs/USER_STORIES.md under
+'## Priority Ranking (nonprofit-ceo)'. Do NOT create FEATURE_PRIORITY.md — keep this
+in USER_STORIES.md so there's one source of truth for user needs."
 
 Finally → create the project scaffold:
 Use `tech-lead` agent:
@@ -212,7 +226,7 @@ Make it real, working code — not placeholders."
 
 ### Phase 2+ execution:
 
-Read `docs/FEATURE_PRIORITY.md` and `docs/USER_STORIES.md`.
+Read `docs/USER_STORIES.md` (the Priority Ranking section at the bottom has feature priorities).
 Find the highest-priority story that has NO implementation in src/.
 
 Use `tech-lead` to break it into 3-5 implementation tasks with clear file targets.
