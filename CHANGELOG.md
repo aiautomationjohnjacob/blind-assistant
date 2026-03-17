@@ -6,50 +6,102 @@ Format: [Semantic Versioning](https://semver.org/). Types: `Added`, `Changed`, `
 
 ---
 
-## [Unreleased] — Phase 2: Core Build Sprint
+## [Unreleased] — Phase 3: Blind User Testing
 
 ### Added
-- **Food ordering checkout loop** (Cycle 10): Complete conversational flow for ordering food.
-  The assistant navigates to DoorDash, reads restaurant options aloud, waits for the user's
-  spoken choice, navigates to the restaurant, presents menu items, adds the selected item
-  to the cart, runs mandatory financial risk disclosure, and places the order. All steps use
-  Claude to reason about live page content — no site-specific wrappers.
-- **ConfirmationGate.wait_for_response()**: New method for collecting free-text user responses
-  in multi-step conversational flows (not just yes/no).
-- **Tool registry + installer** (Cycle 9): Agents can install new tools (Playwright, etc.) at
-  runtime with user confirmation. Includes voice-guided tool installation.
-- **BrowserTool**: Playwright wrapper for autonomous web navigation. Claude reasons about any
-  web page as a human would — no site-specific code.
-- **Voice recording endpoint** (Cycle 7): `/api/transcribe` accepts raw audio, transcribes via
-  Whisper, returns text. Powers voice-first input on all clients.
-- **Second Brain vault** (Cycles 5–6): Encrypted Obsidian-compatible markdown notes stored
-  locally. Voice-queried via the orchestrator.
-- **Security: financial risk disclosure** (Cycle 3): Mandatory spoken warning fires before any
-  payment-adjacent action. Cannot be skipped.
+- **Android TalkBack E2E tests** (Cycle 19): Full test suite for Android TalkBack accessibility.
+  ADBClient wrapper interacts with an Android emulator or real device. Tests verify content
+  descriptions, touch target sizes (44dp minimum), TalkBack focus navigation, the risk
+  disclosure flow, and confirmation prompts. Runs in CI on release tags via the e2e-android job.
+- **iOS VoiceOver E2E tests** (Cycle 19): Full test suite for iOS VoiceOver. SimctlClient
+  wrapper interacts with the iOS Simulator via xcrun simctl. Tests guard against "Double-tap to..."
+  hint regression (fixed in Cycle 11), verify visual-only language is absent, and check risk
+  disclosure and live region announcements. Runs on macOS CI runners via ios-e2e.yml.
+- **Web staging deployment** (Cycle 18): netlify.toml and deploy-staging.yml automate web app
+  deployment to Netlify on every push to main. Requires NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID
+  GitHub secrets (one-time operator setup — see README).
+- **Web E2E accessibility tests** (Cycles 15, 18): 22 Playwright tests verify WCAG 2.1 AA
+  compliance for the web app: keyboard navigation, ARIA labels, aria-live status announcements,
+  focus management, no visual-only instructions, correct language attribute, and page title.
+  Tests cover both the main screen and the food ordering flow.
+- **Voice installer: native app priority** (Cycle 17): Setup wizard now presents the native app
+  (Android/iOS) as Step 1 and Telegram as optional Step 5. Server address is auto-discovered
+  via local network socket so mobile devices can connect without manual IP entry.
+- **Unit tests for previously uncovered modules** (Cycle 16): 118 new tests covering Telegram
+  bot, second brain query, screen redaction, and screen observer.
+- **Live Playwright integration tests** (Cycle 12): 11 real browser integration tests verify
+  food ordering end-to-end with a real browser. Auto-skip when system dependencies are absent.
+- **Mobile app setup wizard** (Cycle 6): SetupWizardScreen walks a new user through server
+  configuration entirely by voice using Expo SecureStore.
+- **Real voice recording on mobile** (Cycle 7): 2-press voice recording in the mobile app.
+  POST /transcribe endpoint transcribes audio via Whisper and returns text.
+- **API rate limiting** (Cycle 6): RateLimitMiddleware (configurable window + limit).
 
 ### Changed
-- **Telegram demoted to secondary interface** (Cycle 4 architecture decision): Native apps
-  (Android, iOS, Desktop, Web) are the primary clients. Telegram remains available for power
-  users who want remote command access.
-- **Client framework selected** (Cycle 4): React Native + Expo for Android/iOS/Web;
-  Electron/Tauri for Desktop. Python stays backend-only.
+- **VoiceOver accessibility hints** (Cycle 11): All 7 hints changed from "Double-tap to..."
+  to outcome-first language e.g. "Starts recording your message."
+- **Haptic feedback on voice recording** (Cycle 11): Medium haptic on start, Light on stop.
+- **Web app CSP** (Cycle 18): connect-src restricted to api.blind-assistant.org in production.
 
 ### Fixed
-- **CI: ruff lint errors** (Cycle 10): 45 accumulated formatting/lint errors resolved. `ruff
-  format` now runs before every CI check.
-- **CI: pip-audit failure** (Cycle 10): `openai-whisper` setup.py uses `pkg_resources`
-  (removed from Python 3.12+ stdlib). Fixed by installing `setuptools` in the audit step.
+- **CI fully green after security updates** (Cycle 14): cryptography, Pillow, starlette, and
+  fastapi upgraded to patch 11 CVEs. All 7 CI jobs green.
+- **CI: 56 mypy type errors** (Cycle 13): Type annotations corrected across 7 source files.
+- **CI: ruff lint errors** (Cycles 10, 16): Accumulated formatting errors resolved.
+- **CI: pip-audit failure** (Cycle 10): openai-whisper requires setuptools on Python 3.12+.
+- **CI path bug for Android E2E** (Cycle 19): e2e-android was looking in tests/e2e/android/;
+  corrected to tests/e2e/platforms/android/.
+- **Expo web export** (Cycle 15): App.tsx shim enables `npx expo export --platform web`.
 
 ### Security
-- Screen content containing passwords or PII is never sent to external APIs (redaction layer).
+- Screen content containing passwords or PII is never sent to external APIs.
 - All vault data encrypted with AES-256-GCM using a user passphrase-derived key.
-- Payment card numbers never stored; Stripe tokenization planned for Phase 3.
+- Payment card numbers never stored; Stripe tokenization planned for Phase 4.
+- 11 CVEs patched in Cycle 14 (cryptography, Pillow, starlette, fastapi).
 
 ---
 
-## Test Coverage (Phase 2 — current)
+## [Unreleased — Phase 2 Complete] — Core Build Sprint
 
-- **482 tests** passing (465 unit, 17 E2E backend)
+### Added
+- **Food ordering checkout loop** (Cycle 10): Complete 11-step conversational flow for ordering
+  food by voice. Claude navigates DoorDash, reads options aloud, waits for spoken choice,
+  reads the menu, adds items, runs mandatory financial risk disclosure, and places the order.
+  No site-specific wrappers — Claude reasons about live page content.
+- **ConfirmationGate.wait_for_response()**: Collects free-text user responses in multi-step flows.
+- **Tool registry + installer** (Cycle 9): Runtime tool installation with user confirmation.
+  Curated registry prevents supply-chain attacks.
+- **BrowserTool**: Playwright wrapper for autonomous web navigation.
+- **Voice recording endpoint** (Cycle 7): POST /transcribe accepts raw audio, returns text.
+- **Second Brain vault** (Cycles 5–6): Encrypted Obsidian-compatible markdown notes stored
+  locally. Voice-queried. Passphrase prompt recovery added (Cycle 3).
+- **Security: financial risk disclosure** (Cycle 3): Mandatory spoken warning before any
+  payment-adjacent action. Cannot be skipped.
+- **Backend REST API server** (Cycle 4): FastAPI at localhost:8000. Endpoints: /query,
+  /remember, /describe, /task, /profile, /health. Bearer token auth. Rate limiting.
+- **React Native + Expo mobile skeleton** (Cycle 5): clients/mobile/ with MainScreen.tsx.
+
+### Changed
+- **Telegram demoted to secondary interface** (Cycle 4): Native apps are primary.
+- **Client framework selected** (Cycle 4): React Native + Expo for Android/iOS/Web.
+
+### Fixed
+- Wake-word-only input bug: "assistant" alone now correctly prompts "Yes?" (Cycle 5).
+- Vault microsecond filename uniqueness (Cycle 2).
+
+### Security
+- OS keychain for all credentials (never .env files in production).
+- AES-256-GCM vault encryption; key derived from passphrase + per-vault salt.
+
+---
+
+## Test Coverage (Phase 3 — current)
+
+- **641 Python unit tests** passing (all modules)
+- **25 platform E2E tests** (Android TalkBack + iOS VoiceOver — run on release tags)
+- **22 web E2E tests** (Playwright, Chromium + Firefox)
+- **117 JS tests** (Jest + jest-expo)
+- **11 integration tests** (Playwright browser — skip locally, run in CI)
 - **Security modules**: 100% line and branch coverage
 - **Overall backend**: ≥80% coverage enforced in CI
 
