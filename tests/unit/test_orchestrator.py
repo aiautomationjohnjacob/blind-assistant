@@ -84,23 +84,27 @@ class TestOrchestratorInit:
 
     async def test_initialize_sets_initialized(self, minimal_config, mock_keyring):
         orch = Orchestrator(minimal_config)
-        # Imports happen inside initialize() — patch at their original module paths
-        with patch("blind_assistant.core.planner.Planner"), \
-             patch("blind_assistant.tools.registry.ToolRegistry") as MockRegistry, \
-             patch("blind_assistant.core.confirmation.ConfirmationGate"), \
-             patch("blind_assistant.core.context.ContextManager") as MockCtx:
 
-            MockRegistry.return_value.load = AsyncMock()
-            MockCtx.return_value.initialize = AsyncMock()
+        # Patch the classes at their source modules (lazy imports inside initialize())
+        mock_planner = MagicMock()
+        mock_registry = MagicMock()
+        mock_registry.load = AsyncMock()
+        mock_gate = MagicMock()
+        mock_ctx = MagicMock()
+        mock_ctx.initialize = AsyncMock()
 
-            # The imports inside initialize() will create real objects;
-            # just verify no exception and flag is set
-            try:
-                await orch.initialize()
-            except Exception:
-                pass  # May fail due to missing deps — we just test the flag logic
+        with patch("blind_assistant.core.planner.Planner", return_value=mock_planner), \
+             patch("blind_assistant.tools.registry.ToolRegistry", return_value=mock_registry), \
+             patch("blind_assistant.core.confirmation.ConfirmationGate", return_value=mock_gate), \
+             patch("blind_assistant.core.context.ContextManager", return_value=mock_ctx):
+            # Override the import mechanism by patching the builtins import
+            # Simpler: just patch the modules that initialize() imports
+            import sys
+            from unittest.mock import MagicMock as MM
 
-        # Even if sub-component init fails, the test demonstrates the flow exists
+            await orch.initialize()
+
+        assert orch._initialized
 
     async def test_handle_message_raises_if_not_initialized(
         self, minimal_config, standard_context
