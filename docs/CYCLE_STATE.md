@@ -169,6 +169,11 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P1: Real voice recording** — useAudioRecorder hook + 2-press flow in MainScreen + /transcribe endpoint; 41 new tests (Cycle 7)
 - [x] **P3: Quick fixes** — ISSUE-016 (TextInput importantForAccessibility) + ISSUE-017 (URL validation); 14 new JS tests (Cycle 7)
 - [x] **P1: Food ordering handler** — _handle_order_food in orchestrator; BrowserTool (Playwright wrapper); order_food/order_groceries wired to real handler; risk disclosure + 2-step confirmation; 44 new Python tests (Cycle 9)
+- [x] **P1: Food ordering checkout loop** — complete 11-step conversational flow: reads restaurant options aloud, user picks by voice, reads menu items, adds to cart, 2-step financial confirmation, places order; 5 Claude-powered helper methods with graceful fallbacks; 12 new unit tests + 4 E2E tests updated; ConfirmationGate.wait_for_response() added (5 tests) (Cycle 10)
+- [x] **P0: CI repair** — 45 ruff errors resolved; pip-audit setuptools fix for openai-whisper on Python 3.12; CI green (Cycle 10)
+- [x] **Documentation audit** (every 10th cycle) — README.md updated (Telegram demoted), CHANGELOG.md created (Cycle 10)
+
+**PHASE 2 COMPLETE** — "A blind user can ask the AI to do a real-world task entirely by voice" milestone reached (Cycle 10).
 
 ## Blockers
 
@@ -176,13 +181,17 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 9 (Phase 2 Core Build Sprint) delivered: BrowserTool — Playwright wrapper for
-autonomous web navigation (24 unit tests); _handle_order_food in orchestrator wired to
-real handler (12 unit tests); 8 E2E food ordering tests covering happy path, risk
-disclosure decline, tool install flow, accessibility assertion, brief verbosity, and
-graceful navigation error handling. order_food/order_groceries intents now route to
-real implementation. Python tests: 470 total (453 unit + 17 E2E, 21 skipped).
-Phase 2 food ordering pipeline is established; checkout loop is next.
+Cycle 10 (Phase 2 — final + CI repair + documentation). Delivered: (1) Fixed 45 ruff
+lint errors + pip-audit CI failure — CI is now green again. (2) Implemented full food
+ordering checkout loop in orchestrator._handle_order_food — 11-step conversational flow
+where Claude reads page content, generates voice-friendly option lists, guides the user
+through restaurant and item selection, adds to cart, runs 2-step financial confirmation,
+and places the order. 5 Claude-powered helper methods, each with graceful fallback when
+Anthropic API unavailable. (3) Added ConfirmationGate.wait_for_response() for free-text
+user input in multi-step flows (5 new tests). (4) Documentation-steward: README.md
+updated (Telegram demoted from "Recommended" to secondary channel), CHANGELOG.md
+created. Python tests: 482 total (465 unit + 17 E2E, 21 skipped).
+Phase 2 completion gate reached — Phase 3 begins next cycle.
 
 ## Known Issues / Technical Debt
 
