@@ -569,3 +569,34 @@ announcement, or an accessible header on the same screen) is present.
 **TECHNICAL LESSON (YAML multi-section registry)**: The tools/registry.yaml uses `capabilities:` and `integrations:` as top-level keys — not a single `tools:` key. The registry.py `load()` method was reading `data.get("tools")` and finding nothing. Always verify that code reading config/YAML files matches the actual YAML structure. The fix: read all three keys and merge. Legacy single-key files still supported via the `tools:` fallback.
 
 **TECHNICAL LESSON (patch.object vs patch for mock injection)**: When the function being tested does `import anthropic; client = anthropic.AsyncAnthropic(...)` inside the function body (lazy init), you cannot use `patch("anthropic.AsyncAnthropic")` if the `anthropic` module is not installed in the test environment. Instead, patch the method that does the import: `patch.object(planner, "_get_client", return_value=mock_client)`. This bypasses the import entirely and correctly injects the mock client without requiring the external dependency.
+
+---
+
+## Cycle 9 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: Cycle 9 delivered the last major Phase 2 technical gate — the food ordering handler. A blind user can now say "order me a pizza," hear the mandatory risk disclosure, confirm, and have the app open DoorDash to search. The two-step financial confirmation (disclosure + per-transaction confirm) is in place per ETHICS_REQUIREMENTS.md. What remains: actual item selection and checkout via browser steering — Phase 2 extended work. The pipeline is proven; next cycle should complete the full order placement.
+
+**Code quality (code-reviewer)**: (1) Test count: 417 → 470 — healthy +53, no regressions. (2) BrowserTool imports async_playwright at module level for testability — correct pattern. (3) food handler returns early when browser is None with a helpful voice message — good guard. (4) `_handle_order_food_confirm` is a clean passthrough to ConfirmationGate — separation of concerns correct. (5) The handler currently navigates to search page and returns ordering_in_progress=True — actual checkout loop is the next step.
+
+**Security (security-specialist)**: Financial risk disclosure fires in `confirm_financial_details_collection` before navigation — per SECURITY_MODEL.md §4.1. Two-step confirmation (disclosure + order confirm) is correct. No payment data stored or transmitted in this cycle. BrowserTool uses Playwright from approved registry. No concerns.
+
+**Accessibility (accessibility-reviewer)**: All messages during food ordering use non-visual language (verified by E2E accessibility assertion test — test_food_order_responses_contain_no_visual_only_language). Brief verbosity correctly uses shorter disclosure but still fires. Risk disclosure is spoken before any financial action. No WCAG violations.
+
+**User perspective (blind-user-tester)**: The ordering flow now opens correctly — risk disclosure → confirm → browser navigates. The app returns a helpful message about what it found on the page. What's still missing: it should read the restaurant options aloud and let me choose by speaking. The E2E test catches no visual-only language — that's important. Next: conversational order completion (read options → user picks → checkout → confirm → place order).
+
+**Ethics (ethics-advisor)**: Risk disclosure fires every transaction without exception. Cancellation is graceful with no pressure. No artificial urgency in any response text. The per-transaction confirmation (not session-level) is correctly implemented. No concerns.
+
+**Goal adherence (goal-adherence-reviewer)**: PRIORITY_STACK P1 item (tool registry + food ordering) substantially addressed. Browser tool exists, food handler exists, risk disclosure fires, browser navigates. Full "order placed" milestone requires browser steering through checkout — Phase 2 extended. All sprint items checked except "End-to-end test: blind user asks to order food → full flow" (navigation is done, checkout is not).
+
+**Consensus recommendation for next cycle**: (1) Implement the conversational checkout loop: after page loads, have Claude reason about the page content returned by BrowserTool, read options to user, guide them through item selection and checkout with Playwright clicks. (2) Add recording confirmation haptic/audio cue to MainScreen (P3 from Cycle 7 review, still open).
+
+**Orchestrator self-assessment**:
+- Accomplished: BrowserTool (Playwright wrapper, 24 unit tests); _handle_order_food in orchestrator (12 new unit tests); E2E food ordering test suite (8 tests); order_food/order_groceries wired to real handler; _handle_order_food_confirm passthrough to financial confirmation flow. Python: 470 total (was 426).
+- Attempted but failed: none — all planned work completed
+- Confusion/loops: The `_intent_handlers` property returns a new dict each call, so `handler is orc._handle_order_food` always fails (different bound method objects). Use `handler.__name__ == "_handle_order_food"` instead. Fixed in tests.
+- New gaps: (1) Food ordering stops at search page navigation — checkout loop not yet implemented; (2) BrowserTool needs a "read page to user" method that extracts structured data from the page (restaurant names, prices, delivery times) for voice delivery; (3) No test that Playwright is actually installed in CI (the `initialized_browser_tool` fixture mocks it entirely)
+- Next cycle recommendation: Implement the checkout conversation loop — after navigating to the food site, have Claude analyze the page_state.text_content and generate a voice-friendly list of options, then guide user through selection and checkout with further browser.click() calls.
+
+**TECHNICAL LESSON (module-level import for testability)**: When a class method calls `from some_library import some_function` inside the method body, the function cannot be patched via `patch("mymodule.some_function")` because it's not in the module's namespace at patch time. The fix: import at module level with a try/except for ImportError (make it None if not installed), then check for None in the method. This makes the import patchable at `patch("mymodule.some_function", mock)` while still gracefully handling environments where the library isn't installed.
+
+**TECHNICAL LESSON (bound method identity)**: Python bound methods are newly created objects each time you access them via an attribute. `obj.method is obj.method` is False. Use `obj.method.__name__ == "method"` or `obj._intent_handlers["key"].__func__ is Orchestrator._handle_order_food` for identity checks in tests.

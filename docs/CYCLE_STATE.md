@@ -168,6 +168,7 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P3: Rate limiting** — RateLimitMiddleware in api_server.py; 8 new Python tests (Cycle 6)
 - [x] **P1: Real voice recording** — useAudioRecorder hook + 2-press flow in MainScreen + /transcribe endpoint; 41 new tests (Cycle 7)
 - [x] **P3: Quick fixes** — ISSUE-016 (TextInput importantForAccessibility) + ISSUE-017 (URL validation); 14 new JS tests (Cycle 7)
+- [x] **P1: Food ordering handler** — _handle_order_food in orchestrator; BrowserTool (Playwright wrapper); order_food/order_groceries wired to real handler; risk disclosure + 2-step confirmation; 44 new Python tests (Cycle 9)
 
 ## Blockers
 
