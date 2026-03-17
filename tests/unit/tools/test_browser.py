@@ -63,12 +63,11 @@ async def initialized_browser_tool(
 ) -> BrowserTool:
     """A BrowserTool that has been initialized (Playwright mocked)."""
     tool = BrowserTool()
-    with patch("blind_assistant.tools.browser.async_playwright") as mock_apw:
-        # async_playwright() returns a context manager — mock __aenter__
-        mock_apw.return_value.__aenter__ = AsyncMock(return_value=mock_playwright_instance)
-        mock_apw.return_value.__aexit__ = AsyncMock(return_value=None)
-        # The tool calls `await async_playwright().start()` — so mock start()
-        mock_apw.return_value.start = AsyncMock(return_value=mock_playwright_instance)
+    # Patch async_playwright at the module level so initialize() picks up the mock.
+    # The callable must return an object with .start() that returns the playwright instance.
+    mock_apw_callable = MagicMock()
+    mock_apw_callable.return_value.start = AsyncMock(return_value=mock_playwright_instance)
+    with patch("blind_assistant.tools.browser.async_playwright", mock_apw_callable):
         await tool.initialize()
     return tool
 
