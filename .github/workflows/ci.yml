@@ -147,7 +147,8 @@ jobs:
           cache: pip
 
       - name: Install audit tools
-        run: pip install pip-audit bandit
+        # setuptools needed because openai-whisper's setup.py uses pkg_resources
+        run: pip install pip-audit bandit setuptools
 
       - name: Audit dependencies for known CVEs
         # --no-deps: check listed packages only, skip dependency resolution
