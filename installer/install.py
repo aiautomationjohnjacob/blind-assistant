@@ -22,9 +22,8 @@ The installer will speak these requirements to you if they are not met.
 """
 
 import asyncio
-import sys
-import os
 import logging
+import sys
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -314,9 +313,9 @@ class VoiceInstaller:
         for some visual configuration steps.
         """
         from blind_assistant.security.credentials import (
-            store_credential,
-            TELEGRAM_BOT_TOKEN,
             TELEGRAM_ALLOWED_USER_IDS,
+            TELEGRAM_BOT_TOKEN,
+            store_credential,
         )
 
         self._speak(STEP_TELEGRAM_OPTIONAL_INTRO)
@@ -373,7 +372,7 @@ class VoiceInstaller:
 
     async def _setup_claude(self) -> bool:
         """Guide user through Claude API key setup."""
-        from blind_assistant.security.credentials import store_credential, CLAUDE_API_KEY
+        from blind_assistant.security.credentials import CLAUDE_API_KEY, store_credential
 
         self._speak(STEP_CLAUDE_INTRO)
         response = self._wait_for_input()
@@ -401,7 +400,7 @@ class VoiceInstaller:
 
     async def _setup_elevenlabs(self) -> None:
         """Optional ElevenLabs voice setup."""
-        from blind_assistant.security.credentials import store_credential, ELEVENLABS_API_KEY
+        from blind_assistant.security.credentials import ELEVENLABS_API_KEY, store_credential
 
         self._speak(STEP_ELEVENLABS_INTRO)
         response = self._wait_for_input()
@@ -438,6 +437,7 @@ class VoiceInstaller:
 
         # Create the vault
         from pathlib import Path
+
         from blind_assistant.second_brain.encryption import VaultKey, generate_salt
 
         vault_path = Path.home() / "blind-assistant-vault"
@@ -488,7 +488,7 @@ class VoiceInstaller:
                 self._speak("Software installed successfully.")
             else:
                 self._speak(
-                    f"Some software didn't install correctly. "
+                    "Some software didn't install correctly. "
                     "This might cause some features not to work. "
                     "We can try to fix this later."
                 )
@@ -511,7 +511,7 @@ class VoiceInstaller:
 
         # Test Claude API (required)
         try:
-            from blind_assistant.security.credentials import get_credential, CLAUDE_API_KEY
+            from blind_assistant.security.credentials import CLAUDE_API_KEY, get_credential
             if get_credential(CLAUDE_API_KEY):
                 required_passed += 1
                 self._speak("Claude AI connection: ready.")
@@ -528,11 +528,11 @@ class VoiceInstaller:
 
         # Test Telegram (optional — just report, do not count against total)
         try:
-            from blind_assistant.security.credentials import get_credential, TELEGRAM_BOT_TOKEN
+            from blind_assistant.security.credentials import TELEGRAM_BOT_TOKEN, get_credential
             if get_credential(TELEGRAM_BOT_TOKEN):
                 self._speak("Telegram remote access: configured (optional).")
-        except Exception:
-            pass  # Telegram is optional; silent skip is correct here
+        except Exception:  # noqa: S110 — Telegram is optional; silent skip is intentional
+            pass
 
         if required_passed == required_total:
             self._speak(

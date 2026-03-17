@@ -14,18 +14,16 @@ Tests the VoiceInstaller class behavior:
 
 from __future__ import annotations
 
-import asyncio
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 # The installer lives outside src/ so we add its parent to sys.path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from installer.install import VoiceInstaller, STEP_COMPLETE, STEP_APP_INTRO
-
+from installer.install import STEP_APP_INTRO, STEP_COMPLETE, VoiceInstaller
 
 # ─────────────────────────────────────────────────────────────
 # Fixtures
@@ -172,9 +170,8 @@ def test_init_tts_handles_import_error(installer):
 
 async def test_run_returns_false_when_user_not_ready(installer):
     """run() must return False and abort if user says 'no' at welcome prompt."""
-    with patch.object(installer, "_wait_for_input", return_value="no"):
-        with patch.object(installer, "_init_tts"):
-            result = await installer.run()
+    with patch.object(installer, "_wait_for_input", return_value="no"), patch.object(installer, "_init_tts"):
+        result = await installer.run()
     assert result is False
 
 
