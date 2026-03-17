@@ -38,6 +38,10 @@
           {
             "type": "command",
             "command": "bash -c 'cd \"$CLAUDE_PROJECT_DIR\" && git add -A && if git status --short | grep -q .; then git commit -m \"auto: $(date +%H:%M) — agent changes\" 2>/dev/null && git push 2>/dev/null || git pull --rebase && git push 2>/dev/null; fi; true'"
+          },
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"file_path\\\",\\\"\\\"))\" 2>/dev/null || echo \"\"); if echo \"$FILE\" | grep -q \"/src/\"; then cd \"$CLAUDE_PROJECT_DIR\" && python3 -m pytest tests/ --tb=no -q --no-header 2>&1 | tail -4 || true; fi; true'"
           }
         ]
       }
@@ -48,7 +52,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'CMD=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"command\\\",\\\"\\\"))\" 2>/dev/null || echo \"\"); if echo \"$CMD\" | grep -qE \"rm -rf \\.|git push --force|DROP TABLE|DELETE FROM\"; then echo \"Blocked: potentially destructive — needs explicit confirmation\" >&2; exit 2; fi; true'"
+            "command": "bash -c 'CMD=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"command\\\",\\\"\\\"))\" 2>/dev/null || echo \"\"); if echo \"$CMD\" | grep -qE \"rm -rf \\.|git push --force|DROP TABLE|DELETE FROM\"; then echo \"Blocked: potentially destructive — needs explicit confirmation\" >&2; exit 2; fi; if echo \"$CMD\" | grep -qiE \"(rm|unlink|rmdir|git rm).*(test_|_test|/tests/)\"; then echo \"BLOCKED: Cannot delete test files. Fix failing tests by fixing the implementation.\" >&2; exit 2; fi; true'"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"file_path\\\",\\\"\\\"))\" 2>/dev/null || echo \"\"); CONTENT=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(len(d.get(\\\"content\\\",\\\"\\\")))\" 2>/dev/null || echo \"999\"); if echo \"$FILE\" | grep -qE \"test_.*\\.py$|_test\\.py$\"; then if [ \"$CONTENT\" -lt 50 ] 2>/dev/null; then echo \"WARNING: Writing a very short test file ($CONTENT chars). Test files should have real assertions, not be empty or trivial.\" >&2; fi; fi; true'"
           }
         ]
       }

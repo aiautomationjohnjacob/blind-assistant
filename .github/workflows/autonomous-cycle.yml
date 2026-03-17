@@ -83,6 +83,49 @@ jobs:
           fi
           git push || true
 
+      # ── Run tests after every cycle ──────────────────────────
+      - name: Install test dependencies
+        if: always()
+        run: |
+          pip install \
+            pytest \
+            pytest-asyncio \
+            pytest-cov \
+            pytest-mock \
+            respx \
+            httpx \
+            keyring \
+            cryptography 2>/dev/null || true
+          pip install -r requirements.txt 2>/dev/null || true
+          pip install -e . 2>/dev/null || true
+
+      - name: Run test suite post-cycle
+        id: run_tests
+        if: always()
+        run: |
+          if [ -d "tests" ] && [ "$(find tests/ -name 'test_*.py' | wc -l)" -gt "0" ]; then
+            pytest tests/ \
+              --cov=src/blind_assistant \
+              --cov-report=term-missing \
+              --cov-fail-under=80 \
+              --tb=short \
+              -q \
+              2>&1 | tee test-results.log
+            echo "tests_ran=true" >> $GITHUB_OUTPUT
+          else
+            echo "No tests found — skipping coverage check."
+            echo "tests_ran=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_number }}
+          path: test-results.log
+          retention-days: 30
+          if-no-files-found: ignore
+
       - name: Upload cycle log as artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -91,15 +134,34 @@ jobs:
           path: cycle-output.log
           retention-days: 30
 
-      - name: Create issue if cycle failed
+      - name: Create issue if cycle or tests failed
         if: failure()
         uses: actions/github-script@v7
         with:
           script: |
+            const testsRan = '${{ steps.run_tests.outputs.tests_ran }}' === 'true';
+            const title = testsRan
+              ? `Tests failing after autonomous cycle — Run #${context.runNumber}`
+              : `Autonomous cycle failed — Run #${context.runNumber}`;
+
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Autonomous cycle failed — Run #${context.runNumber}`,
-              body: `The autonomous development cycle failed.\n\nRun: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nCheck cycle-output.log artifact for details.`,
-              labels: ['cycle-failure', 'needs-review']
+              title: title,
+              body: [
+                '## Autonomous cycle failure',
+                '',
+                `**Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                '',
+                testsRan
+                  ? '**Tests failed after this cycle.** The autonomous loop has introduced a regression. DO NOT add new features until tests pass. Fix the failing tests by fixing the implementation — never by deleting or weakening tests.'
+                  : '**The cycle itself crashed.** Check cycle-output.log artifact for details.',
+                '',
+                '## Next steps',
+                '1. Read the failing test output in the test-results artifact',
+                '2. Identify which src/ file the failure is in',
+                '3. Fix the implementation (not the test)',
+                '4. Push the fix — CI will re-run automatically',
+              ].join('\n'),
+              labels: ['ci-failure', 'P0', 'needs-review', 'regression']
             })
