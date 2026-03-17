@@ -155,8 +155,9 @@ class VoiceInstaller:
         try:
             import pyttsx3
             self._tts = pyttsx3.init()
-            self._tts.setProperty("rate", 160)  # Slightly slower for clarity
-            self._tts.setProperty("volume", 0.95)
+            if self._tts is not None:  # pyttsx3.init() can return None on some systems
+                self._tts.setProperty("rate", 160)  # Slightly slower for clarity
+                self._tts.setProperty("volume", 0.95)
         except ImportError:
             print(
                 "\nWARNING: pyttsx3 not installed. "
