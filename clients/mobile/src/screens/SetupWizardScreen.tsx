@@ -344,7 +344,7 @@ export function SetupWizardScreen({
           onPress={handleReEnterToken}
           accessibilityRole="button"
           accessibilityLabel="Re-enter token"
-          accessibilityHint="Double-tap to go back and change your token."
+          accessibilityHint="Returns to token entry to change your token."
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text style={styles.buttonTextSecondary}>Re-enter</Text>
