@@ -402,7 +402,7 @@ export function SetupWizardScreen({
         onPress={handleStartApp}
         accessibilityRole="button"
         accessibilityLabel="Start Blind Assistant"
-        accessibilityHint="Double-tap to open the main screen and start using the assistant."
+        accessibilityHint="Opens the main assistant screen."
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <Text style={styles.buttonText}>Start</Text>
