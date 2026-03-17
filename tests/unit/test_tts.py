@@ -174,17 +174,19 @@ class TestElevenLabsTTS:
 
     def test_speed_maps_to_stability_formula(self):
         """Stability formula: max(0.1, min(0.9, 1.0 - (speed - 0.5) * 0.4))."""
+        import pytest
+
         # speed=0.5 → stability = 1.0 - 0 = 1.0 → clamped to 0.9
         s05 = max(0.1, min(0.9, 1.0 - (0.5 - 0.5) * 0.4))
-        assert s05 == 0.9
+        assert s05 == pytest.approx(0.9)
 
         # speed=1.0 → stability = 1.0 - 0.2 = 0.8
         s10 = max(0.1, min(0.9, 1.0 - (1.0 - 0.5) * 0.4))
-        assert s10 == 0.8
+        assert s10 == pytest.approx(0.8)
 
         # speed=2.0 → stability = 1.0 - 0.6 = 0.4
         s20 = max(0.1, min(0.9, 1.0 - (2.0 - 0.5) * 0.4))
-        assert s20 == 0.4
+        assert s20 == pytest.approx(0.4)
 
         # Slower speed → higher stability (voice sounds more deliberate)
         assert s05 > s10 > s20
