@@ -134,7 +134,9 @@ def test_speak_works_without_tts_engine(installer):
 def test_init_tts_sets_engine_on_success(installer):
     """_init_tts must set _tts when pyttsx3 is available."""
     engine = MagicMock()
-    with patch("pyttsx3.init", return_value=engine):
+    mock_pyttsx3 = MagicMock()
+    mock_pyttsx3.init.return_value = engine
+    with patch.dict(sys.modules, {"pyttsx3": mock_pyttsx3}):
         installer._init_tts()
     assert installer._tts is engine
 
