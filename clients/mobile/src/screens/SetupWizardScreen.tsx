@@ -254,7 +254,7 @@ export function SetupWizardScreen({
         onPress={handleContinueFromWelcome}
         accessibilityRole="button"
         accessibilityLabel="Continue to token entry"
-        accessibilityHint="Double-tap to proceed to the next setup step."
+        accessibilityHint="Proceeds to the token entry step."
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <Text style={styles.buttonText}>Continue</Text>
