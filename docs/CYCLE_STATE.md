@@ -183,6 +183,8 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P1: Live food ordering validation (ISSUE-021)** — 11 real Playwright integration tests in tests/integration/test_browser_tool_real.py; auto-skip when system deps unavailable; CI job 'integration-browser' added to ci.yml (Cycle 12)
 - [x] **P3: ISSUE-020** — Platform hint "Double-tap to activate" removed from MainScreen.tsx; Platform import + platformHint style removed; 24 JS tests pass (Cycle 12)
 - [x] **P0: CI repair (ISSUE-022)** — 56 mypy type errors resolved across 9 files; openai-whisper setuptools build failure fixed in test/integration-browser CI jobs; ruff clean; 465 Python tests passing (Cycle 13)
+- [x] **P0: CI fully green (Cycle 14)** — 11 CVEs patched (cryptography, Pillow, starlette, fastapi upgraded); pip-audit switched to installed-env mode with --no-build-isolation; 5 new mypy errors from updated type stubs fixed (VoiceSettings, AsyncAnthropic, run_polling); Playwright libasound2 virtual package workaround; ALL 7 CI jobs green on run 23218631525
+- [ ] **P2: Close stale GitHub CI-failure issues** — 20+ historical issues from before CI was fixed
 - [ ] **P2: End-to-end food ordering on real device** — Android TalkBack + iOS VoiceOver
 - [ ] **P2: Voice installer** — voice-guided setup from fresh install; update Telegram refs to native app
 - [ ] **P2: Web app** — WCAG 2.1 AA at blind-assistant.org; fix Expo web export Metro config
