@@ -383,12 +383,12 @@ jobs:
             libasound2-dev
 
       - name: Install project dependencies
-        # setuptools must be pre-installed because openai-whisper uses legacy setup.py
-        # with pkg_resources (a setuptools component). Without it, pip build isolation
-        # fails to find pkg_resources when building the wheel.
+        # openai-whisper uses legacy setup.py with pkg_resources. --no-build-isolation
+        # prevents pip from creating an isolated build env that lacks pkg_resources
+        # (separated from setuptools in >=71). The outer env has setuptools with pkg_resources.
         run: |
           pip install setuptools
-          pip install -r requirements.txt
+          pip install -r requirements.txt --no-build-isolation
           pip install pytest pytest-asyncio pytest-cov
 
       - name: Install project (editable)
