@@ -168,7 +168,13 @@ significant effort. Python is NOT appropriate for Android/iOS clients.
 specifically on: (1) TalkBack/VoiceOver accessibility quality, (2) development speed,
 (3) ability to call the Python REST backend. Document decision in ARCHITECTURE.md and
 CYCLE_STATE.md Decisions Made table.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 4 — Decision: React Native + Expo. Documented in
+ARCHITECTURE.md under '## Client App Framework Decision'. Key rationale: React Native
+renders to native views (native a11y tree), Flutter uses custom rendering engine with
+a parallel semantic tree — unacceptable for blind-user-first product. Client code will
+live in `clients/` directory. Android and iOS share one codebase. Expo Web for the
+web app. Electron/Tauri for Desktop (deferred to Phase 3).
 
 ### ISSUE-010: No multi-platform E2E test infrastructure
 **Severity**: MEDIUM
