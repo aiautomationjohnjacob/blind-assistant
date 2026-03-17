@@ -111,3 +111,6 @@
 | ISSUE-004: ResponseCallback type alias + 9 annotated method signatures in orchestrator.py | 2026-03-17 | 11 |
 | Cross-platform accessibility audit (code-level): VoiceOver/TalkBack issues found + fixed | 2026-03-17 | 11 |
 | Total test count Cycle 11: 465 Python (unchanged); 117 JS tests (was 114, +3 haptic tests) | 2026-03-17 | 11 |
+| ISSUE-021: 11 real Playwright integration tests in tests/integration/test_browser_tool_real.py; CI job 'integration-browser' added | 2026-03-17 | 12 |
+| ISSUE-020: "Double-tap to activate" platform hint removed from MainScreen.tsx; Platform import + platformHint style removed | 2026-03-17 | 12 |
+| Total test count Cycle 12: 482 Python (unchanged); 117 JS (unchanged); +11 integration tests (skip locally) | 2026-03-17 | 12 |
