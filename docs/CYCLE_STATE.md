@@ -176,12 +176,13 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 7 (Phase 2 Core Build Sprint) delivered: ISSUE-015 resolved — real voice recording
-in MainScreen using expo-av; new `useAudioRecorder` hook encapsulates recording lifecycle;
-backend POST /transcribe added (base64 audio → Whisper → text); JS API client extended
-with `transcribe()` method; ISSUE-016 (importantForAccessibility on TextInput) and
-ISSUE-017 (URL scheme validation) also resolved. Python tests: 363 (354 unit + 9 E2E,
-21 skipped). JS tests: 114. The mobile app is now a real voice assistant.
+Cycle 9 (Phase 2 Core Build Sprint) delivered: BrowserTool — Playwright wrapper for
+autonomous web navigation (24 unit tests); _handle_order_food in orchestrator wired to
+real handler (12 unit tests); 8 E2E food ordering tests covering happy path, risk
+disclosure decline, tool install flow, accessibility assertion, brief verbosity, and
+graceful navigation error handling. order_food/order_groceries intents now route to
+real implementation. Python tests: 470 total (453 unit + 17 E2E, 21 skipped).
+Phase 2 food ordering pipeline is established; checkout loop is next.
 
 ## Known Issues / Technical Debt
 
