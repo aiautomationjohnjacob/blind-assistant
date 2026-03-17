@@ -768,7 +768,9 @@ class Orchestrator:
             response_callback=update,
         )
 
-    async def _handle_high_stakes_stub(self, intent, context: UserContext, update) -> dict:
+    async def _handle_high_stakes_stub(
+        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
+    ) -> dict:
         """Placeholder for high-stakes intents not yet fully implemented."""
         return {
             "text": (
