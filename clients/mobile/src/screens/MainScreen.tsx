@@ -35,6 +35,7 @@ import {
   Text,
   View,
 } from "react-native";
+import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
 import { type QueryResponse, getAPIClient } from "@services/api";
 import { useAudioRecorder } from "@hooks/useAudioRecorder";
