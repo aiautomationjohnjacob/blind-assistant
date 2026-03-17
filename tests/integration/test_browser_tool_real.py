@@ -24,11 +24,9 @@ Per testing.md: integration tests use real file I/O and real browser but no real
 external APIs (food ordering sites).
 """
 
-import asyncio
 import os
 import threading
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-from pathlib import Path
 
 import pytest
 
