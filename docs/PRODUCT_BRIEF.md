@@ -156,7 +156,7 @@ A blind user can:
 
 1. Which existing tools (from the synthesis list above) should we integrate vs rebuild?
 2. What does the most accessible "installer" look like for a blind user?
-3. How does Telegram bot integration work as the primary multi-device interface?
+3. ~~How does Telegram bot integration work as the primary multi-device interface?~~ — ANSWERED: it doesn't. Native apps are primary; Telegram is secondary/super-user only (2026-03-17).
 4. What is the minimum viable "life assistant" — the first 5 things a newly blind user
    would want to be able to do that they currently can't?
 5. What does a Second Brain look like for a blind person — what structure, what queries,

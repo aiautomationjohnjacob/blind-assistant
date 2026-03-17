@@ -112,7 +112,10 @@ nothing cached, and non-interference with other fields.
 Dorothy (elder) may need more time; Marcus (power user) might want less.
 **Impact**: Poor fit for users on either end of the speed spectrum.
 **Proposed fix**: Read from `config.yaml voice.prompt_timeout_seconds` with default 120.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 4 — `_collect_vault_passphrase` now reads
+`config.get("voice", {}).get("prompt_timeout_seconds", 120)`. 3 tests added in
+test_orchestrator.py covering configured value, default value, and early-timeout path.
 
 ### ISSUE-007: Native voice E2E demo not yet delivered
 **Severity**: HIGH
