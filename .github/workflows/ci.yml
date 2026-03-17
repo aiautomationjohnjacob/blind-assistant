@@ -347,11 +347,11 @@ jobs:
   # ──────────────────────────────────────────────────────────
 
   # ──────────────────────────────────────────────────────────
-  # JOB 7: Create GitHub issue if CI fails on main
+  # JOB 8: Create GitHub issue if CI fails on main
   # ──────────────────────────────────────────────────────────
   notify-failure:
     name: Create issue on main branch failure
-    needs: [lint, typecheck, test, security, e2e-web]
+    needs: [lint, typecheck, test, test-js, security, e2e-web]
     if: failure() && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
