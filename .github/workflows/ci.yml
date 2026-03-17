@@ -156,15 +156,15 @@ jobs:
           cache: pip
 
       - name: Install audit tools and project dependencies
-        # setuptools must be pre-installed before openai-whisper because it uses
-        # legacy setup.py with pkg_resources. We install all requirements first,
-        # then run pip-audit against the installed environment (no -r flag) so
-        # pip-audit never needs to build wheels itself.
+        # openai-whisper uses legacy setup.py with pkg_resources. --no-build-isolation
+        # uses the outer env (where setuptools ships pkg_resources) instead of creating
+        # an isolated build env that lacks it. We install all requirements first, then
+        # run pip-audit against the installed environment (no -r flag) so pip-audit
+        # never needs to build wheels itself.
         run: |
           pip install setuptools
           pip install pip-audit bandit
-          pip install -r requirements.txt --no-build-isolation 2>/dev/null || \
-            pip install -r requirements.txt 2>/dev/null || true
+          pip install -r requirements.txt --no-build-isolation
 
       - name: Audit dependencies for known CVEs
         # Audit the currently-installed environment (not -r requirements.txt)
