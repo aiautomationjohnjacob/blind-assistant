@@ -11,13 +11,12 @@ import asyncio
 import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 # Type alias for the optional async progress callback used throughout the orchestrator.
 # Callers (API server, voice interface) may pass this to receive real-time status updates.
-ResponseCallback = Optional[Callable[[str], Awaitable[None]]]
+ResponseCallback = Callable[[str], Awaitable[None]] | None
 
 
 @dataclass
