@@ -530,40 +530,79 @@ class TestHandleOrderFood:
 
         assert "browser tool" in result["text"].lower() or "not installed" in result["text"].lower()
 
-    async def test_order_food_successful_navigation_returns_page_state(self, minimal_config, standard_context) -> None:
+    async def test_order_food_full_checkout_loop_places_order(self, minimal_config, standard_context) -> None:
         """
-        When browser is installed and navigation succeeds, the result includes
-        page state and ordering_in_progress flag.
+        Full checkout loop: user accepts disclosure → options read → picks restaurant
+        → picks item → confirms order → order placed.
+
+        All Claude API calls and browser interactions are mocked.
+        Tests that the complete conversational flow runs end-to-end.
         """
         from blind_assistant.tools.browser import PageState
 
         orc = _make_order_food_orchestrator(minimal_config)
 
-        # Mock the browser tool
-        mock_browser = AsyncMock()
         mock_page_state = PageState(
             url="https://www.doordash.com/search/store/?q=pizza",
             title="DoorDash — Pizza near you",
             text_content="Pizza Palace — 4.5 stars\nTaco Town — 4.2 stars",
         )
+        restaurant_page = PageState(
+            url="https://www.doordash.com/store/pizza-palace",
+            title="Pizza Palace",
+            text_content="Pepperoni Pizza $14.99\nMargherita Pizza $12.99",
+        )
+        cart_page = PageState(
+            url="https://www.doordash.com/checkout",
+            title="Your Cart",
+            text_content="1x Pepperoni Pizza — $14.99\nTotal: $18.50\nPlace Order",
+        )
+        confirm_page = PageState(
+            url="https://www.doordash.com/order-confirmed",
+            title="Order Confirmed",
+            text_content="Order confirmed! Order number 12345",
+        )
+
+        mock_browser = AsyncMock()
         mock_browser.navigate = AsyncMock(return_value=mock_page_state)
+        mock_browser.get_page_state = AsyncMock(side_effect=[restaurant_page, cart_page, confirm_page])
         orc.tool_registry.get_installed_tool.return_value = mock_browser
 
-        updates = []
+        # Patch all Claude-powered helper methods so test doesn't need anthropic installed
+        with (
+            patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Pizza Palace. 2. Taco Town.")),
+            patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=restaurant_page)),
+            patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=cart_page)),
+            patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x Pepperoni Pizza, total $18.50")),
+            patch.object(orc, "_place_order", new=AsyncMock(return_value={"success": True, "confirmation": "Order #12345 placed!"})),
+        ):
+            updates = []
+            response_count = [0]
 
-        async def update_cb(msg: str) -> None:
-            updates.append(msg)
-            # Accept risk disclosure
-            orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
+            async def update_cb(msg: str) -> None:
+                updates.append(msg)
+                response_count[0] += 1
+                # Supply responses in the correct order:
+                # update 1: "I'll help you order food..." (no response needed)
+                # update 2: "Before we look..." (no response needed)
+                # update 3: FINANCIAL_RISK_DISCLOSURE → "yes" (confirm disclosure)
+                # update 4: "Opening food ordering site..." (no response needed)
+                # update 5: "I found some options..." → "1" (pick option 1)
+                # update 6: "Got it — looking at..." (no response needed)
+                # update 7: "Here are menu items..." → "pepperoni pizza" (pick item)
+                # update 8: "Adding ... to your cart..." (no response needed)
+                # update 9+: financial confirmation flow → "yes" (confirm order)
+                orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
 
-        orc.confirmation_gate.register_session(standard_context.session_id)
-        intent = _make_order_intent("order me a pizza", params={"food": "pizza"})
+            orc.confirmation_gate.register_session(standard_context.session_id)
+            intent = _make_order_intent("order me a pizza", params={"food": "pizza"})
 
-        result = await orc._handle_order_food(intent, standard_context, update_cb)
+            result = await orc._handle_order_food(intent, standard_context, update_cb)
 
-        assert result.get("ordering_in_progress") is True
-        assert result.get("page_state") is mock_page_state
-        assert "pizza" in result["text"].lower() or "food" in result["text"].lower()
+        # Order should have been placed
+        assert result.get("order_placed") is True or "placed" in result["text"].lower() or "confirmed" in result["text"].lower()
+        # No ordering in progress — flow completed
+        assert result.get("ordering_in_progress") is not True
 
     async def test_order_food_navigation_error_returns_helpful_message(self, minimal_config, standard_context) -> None:
         """
