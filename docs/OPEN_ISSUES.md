@@ -399,3 +399,17 @@ entire test infrastructure was invisible to the team; Phase 3 advancement was bl
 **Resolved in**: Cycle 13 (commit 687e58b) — all 56 mypy errors resolved across 9 files.
 Ruff clean (0 errors). 465 unit tests still passing. setuptools added to CI test and
 integration-browser jobs. mypy: "Success: no issues found in 32 source files".
+**Cycle 14 follow-up**: pip-audit was still failing (installed-env mode needed). 11 CVEs in
+cryptography/Pillow/starlette/fastapi patched. 5 new mypy errors from updated type stubs fixed.
+Playwright install-deps libasound2 virtual package workaround added. CI fully green (run 23218631525).
+
+### ISSUE-023: 20+ stale P0 GitHub issues from historical CI failures
+**Severity**: LOW
+**Category**: process, housekeeping
+**Detected by**: Cycle 14 gap scan
+**Detected**: 2026-03-17
+**Description**: Before Cycle 14, every push to main triggered a CI failure GitHub issue. This
+generated 20+ P0 issues that are now stale since CI is fixed. They clutter the issue tracker
+and make it hard to see real open issues. All can be closed with a note that the root cause
+(mypy errors + CVEs + pip-audit mode) was fixed in Cycle 14.
+**Status**: OPEN (pending batch close in Cycle 15)
