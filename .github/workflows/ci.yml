@@ -53,6 +53,8 @@ jobs:
           pip install mypy
           # Install stubs for typed libraries
           pip install types-PyYAML types-python-dateutil
+          # setuptools must be pre-installed for openai-whisper (legacy setup.py)
+          pip install setuptools
           # Install project deps so mypy can resolve imports
           pip install -r requirements.txt 2>/dev/null || true
 
