@@ -341,6 +341,65 @@ jobs:
           retention-days: 14
 
   # ──────────────────────────────────────────────────────────
+  # JOB 7: Browser integration tests (real Playwright + local HTML fixtures)
+  # Addresses ISSUE-021: validates BrowserTool on real (non-mocked) Playwright.
+  # Does NOT make external network calls — serves test HTML from a local fixture.
+  # Runs on every push because it's fast (<30s) and requires no device hardware.
+  # ──────────────────────────────────────────────────────────
+  integration-browser:
+    name: Browser integration tests (BrowserTool + real Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            ffmpeg \
+            libportaudio2 libportaudiocpp0 portaudio19-dev \
+            tesseract-ocr \
+            libasound2-dev
+
+      - name: Install project dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+
+      - name: Install project (editable)
+        run: pip install -e . 2>/dev/null || pip install -e . --no-build-isolation 2>/dev/null || true
+
+      - name: Install Playwright system dependencies
+        # This is the step that requires root — available in GitHub Actions
+        run: playwright install-deps chromium
+
+      - name: Install Playwright Chromium browser
+        run: playwright install chromium
+
+      - name: Run browser integration tests
+        # PLAYWRIGHT_AVAILABLE=1 overrides the skip in the test file
+        env:
+          PLAYWRIGHT_AVAILABLE: "1"
+        run: |
+          pytest tests/integration/test_browser_tool_real.py \
+            -v \
+            --tb=short \
+            2>&1 | tee integration-browser.log
+
+      - name: Upload browser test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-browser-log-${{ github.run_number }}
+          path: integration-browser.log
+          retention-days: 14
+
+  # ──────────────────────────────────────────────────────────
   # NOTE: iOS E2E tests (iOS Simulator) require a macOS runner
   # and Xcode. These are expensive and run only on release tags
   # in a separate workflow: .github/workflows/ios-e2e.yml
