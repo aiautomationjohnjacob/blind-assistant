@@ -378,3 +378,24 @@ against a live food ordering site (DoorDash) still pending — requires Claude A
 and a test account, which is Phase 4 scope. BrowserTool code paths are validated.
 **Remaining**: Verify CI integration-browser job passes on next push; validate against
 real food site when Claude API test credentials are available.
+
+### ISSUE-022: 56 mypy type errors blocking all CI jobs on every push
+**Severity**: CRITICAL
+**Category**: ci, architecture
+**Detected by**: Cycle 13 orientation (gh issue list showed 20+ P0 CI-failure issues)
+**Detected**: 2026-03-17
+**Description**: All CI jobs were failing because mypy reported 56 type errors across 9
+source files. Errors fell into 4 categories: (1) Optional-typed attributes (orchestrator
+planner/tool_registry/confirmation_gate/context_manager, browser tool _page/_browser/
+_playwright, telegram bot _app, voice interface _context) used without None-narrowing;
+(2) cryptography library AESGCM/PBKDF2HMAC returning Any instead of bytes; (3) keyring
+returning Any; (4) AsyncGenerator misuse in bytes.join(). The openai-whisper build failure
+(setuptools not pre-installed in test/integration-browser jobs) was also causing failures.
+**Impact**: Every feature commit triggered a P0 GitHub issue; no CI was passing; the
+entire test infrastructure was invisible to the team; Phase 3 advancement was blocked.
+**Proposed fix**: Add `from __future__ import annotations`, TYPE_CHECKING imports,
+`assert is not None` narrowing, explicit type casts, and pre-install setuptools in CI.
+**Status**: RESOLVED
+**Resolved in**: Cycle 13 (commit 687e58b) — all 56 mypy errors resolved across 9 files.
+Ruff clean (0 errors). 465 unit tests still passing. setuptools added to CI test and
+integration-browser jobs. mypy: "Success: no issues found in 32 source files".
