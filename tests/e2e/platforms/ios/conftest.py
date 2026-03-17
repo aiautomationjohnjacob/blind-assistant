@@ -20,12 +20,12 @@ Per testing.md: iOS E2E tests use xcrun simctl.
 
 from __future__ import annotations
 
+# ruff: noqa: S603, S607  -- subprocess calls use xcrun (macOS system tool); args controlled by tests
 import json
 import shutil
 import subprocess
 import tempfile
 import time
-from pathlib import Path
 
 import pytest
 
