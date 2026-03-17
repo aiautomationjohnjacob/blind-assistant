@@ -244,7 +244,9 @@ class Orchestrator:
         response_text = await q.add_note_from_voice(content=content, context=context)
         return {"text": response_text}
 
-    async def _handle_query_note(self, intent, context: UserContext, update) -> dict:
+    async def _handle_query_note(
+        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
+    ) -> dict:
         """Query the Second Brain vault for matching notes."""
         await update("Searching your notes...")
         vault = await self._get_vault(context, response_callback=update)
