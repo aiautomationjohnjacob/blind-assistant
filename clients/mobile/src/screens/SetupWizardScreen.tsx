@@ -431,7 +431,7 @@ export function SetupWizardScreen({
         onPress={handleRetry}
         accessibilityRole="button"
         accessibilityLabel="Retry setup"
-        accessibilityHint="Double-tap to start the setup wizard again."
+        accessibilityHint="Restarts the setup wizard from the beginning."
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <Text style={styles.buttonText}>Retry</Text>
