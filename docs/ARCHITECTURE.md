@@ -51,6 +51,77 @@ targets.
 
 ---
 
+## Client App Framework Decision
+
+> Decision made: Cycle 4 — 2026-03-17
+> Made by: tech-lead agent
+> Input: PRODUCT_BRIEF.md, ARCHITECTURE.md, blind-user-tester persona, ios/android-accessibility-expert agents
+> Status: DECIDED — no further re-evaluation needed for Phase 2/3
+
+### Decision: React Native + Expo
+
+**Framework: React Native with Expo SDK** for Android, iOS, and Web.
+**Desktop (Windows/macOS)**: Electron or Tauri wrapping the web client — deferred to Phase 3.
+
+### Evaluation
+
+| Criterion | React Native (Expo) | Flutter | Native Swift/Kotlin |
+|-----------|---------------------|---------|---------------------|
+| TalkBack accessibility | Native rendering = native a11y tree. TalkBack reads real Android Views. | Custom rendering engine; semantic wrapper required; known screen reader gaps in Flutter 2.x-3.x | Gold standard |
+| VoiceOver accessibility | Same: native iOS Views = UIAccessibility works automatically | Semantics widget overhead; VoiceOver scroll behaviour gaps | Gold standard |
+| Shared codebase iOS+Android | Yes — 1 codebase | Yes — 1 codebase | No — 2 codebases |
+| Web support | Expo Web shares most components | Flutter Web has serious screen reader gaps in Chromium/Firefox | N/A |
+| Python backend integration | fetch / axios — trivial | http package — equivalent | URLSession / Retrofit — equivalent |
+| Setup without visual interaction | Expo Go deep-link or standalone install; no QR required on device | Same | Same |
+| Contributor pool | Largest JS/TS + React community | Smaller Dart community | Largest overall but platform-split |
+| Voice-first UI patterns | react-native-tts, react-native-voice, Expo AV — all well-maintained | flutter_tts, speech_to_text — less mature | AVSpeechSynthesizer / TTS — most mature |
+
+### Why React Native wins for a blind-user-first product
+
+**The accessibility tree argument**: React Native renders to native OS widgets, which means
+TalkBack and VoiceOver interact with the same accessibility system they were designed for.
+Flutter renders via its own engine and must manually populate a parallel semantic tree —
+this creates a maintenance gap and has historically caused bugs where custom Flutter widgets
+are invisible to screen readers, or where scroll/focus behaviour doesn't match expectations.
+
+For a product where accessibility is the core value proposition, using a framework that
+natively integrates with the accessibility system is the correct tradeoff even if it means
+slightly less visual rendering flexibility.
+
+**The web sharing argument**: The web app at blind-assistant.org must be WCAG 2.1 AA.
+Expo Web lets us share form validation logic, API client code, and accessibility patterns
+between the mobile apps and the web app. Flutter Web's accessibility in Chromium had
+documented issues as recently as 2024 and is still less reliable than React/HTML.
+
+**The community argument**: Blind users' specific React Native issues get fixed because
+React Native's accessibility bugs affect all React Native apps (millions of them), creating
+strong commercial pressure to fix them quickly. Flutter's blind user base is smaller, so
+accessibility issues may sit longer.
+
+### What this means for implementation
+
+- Client apps live in `clients/` directory (not in `src/` — that's Python only)
+- **Android app**: `clients/android/` — React Native (Expo managed workflow)
+- **iOS app**: `clients/ios/` — Same codebase as Android via Expo
+- **Web app**: `clients/web/` — Expo Web (shared components + React Native Web)
+- **Desktop**: `clients/desktop/` — Electron/Tauri wrapper around web client (Phase 3)
+- **Education site**: `clients/education/` — Pure React (not React Native Web) for full HTML/semantic control
+- API base URL is read from `config.json` in each client — points to `http://localhost:8000` for dev
+- Client authentication: Bearer token stored in device Secure Enclave / Android Keystore (not plain storage)
+- All TTS/STT in mobile clients is handled by the backend (not device TTS) for voice quality consistency
+  — exception: installer/setup wizard uses device TTS so it works before the server is configured
+
+### Known risks and mitigations
+
+| Risk | Mitigation |
+|------|-----------|
+| React Native upgrade churn | Pin Expo SDK version; upgrade on 6-month cadence |
+| Web accessibility gaps in React Native Web | Test every component with NVDA+Chrome before shipping |
+| Client code split from backend | REST API contracts are versioned; breaking changes increment API version |
+| Expo Go required for dev | Use standalone build for production testing — no Expo Go dependency |
+
+---
+
 ## Execution Model: Phone Talks to User's Own Machine
 
 This is the core architectural pattern — and it's what makes the tool powerful:

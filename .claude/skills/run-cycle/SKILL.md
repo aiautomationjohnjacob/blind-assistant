@@ -30,7 +30,8 @@ Read these — in order of importance. Stop reading a doc once you have what you
 cat docs/CYCLE_STATE.md          # phase, cycle#, sprint items, ⚠ notices
 cat docs/PRIORITY_STACK.md       # ordered work queue — top 5 items are what matter
 cat docs/OPEN_ISSUES.md          # blockers and known gaps
-tail -80 docs/LESSONS.md         # recent lessons only — not the full history
+head -120 docs/LESSONS.md        # ALWAYS read the top — founder directives live here
+tail -60 docs/LESSONS.md         # ALSO read the bottom — most recent cycle review
 git log --oneline -10
 git status
 ```
