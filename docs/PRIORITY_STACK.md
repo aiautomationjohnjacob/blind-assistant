@@ -14,26 +14,25 @@
 5. **P4 — IMPROVEMENT**: Enhancement that improves the product meaningfully
 6. **P5 — CREATIVE**: New idea or integration opportunity worth exploring
 
-## Current Stack
+## Current Stack (Phase 2 — Core Build Sprint)
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P2 | Run Phase 1: gap analysis + integration map + security model | CYCLE_STATE.md | 2026-03-17 |
-| P2 | Tech-lead architecture decision | CYCLE_STATE.md | 2026-03-17 |
-| P2 | Initial project scaffold (voice-only setup) | CYCLE_STATE.md | 2026-03-17 |
-| P2 | User stories from all 5 blind personas | CYCLE_STATE.md | 2026-03-17 |
-| P2 | Design self-expanding capability (how app installs tools at runtime safely) | PRODUCT_BRIEF examples | 2026-03-17 |
-| P2 | Design risk-disclosure flow for payment/banking details (spoken warning + confirmation) | PRODUCT_BRIEF examples | 2026-03-17 |
-| P2 | Payment tokenization architecture (Stripe tokens — never store raw card numbers) | security model | 2026-03-17 |
-| P2 | Second Brain / personal knowledge base design (voice-first, encrypted, conversational query) | PRODUCT_BRIEF synthesis vision | 2026-03-17 |
-| P3 | Set up CHANGELOG.md with initial entry | open source | 2026-03-17 |
-| P3 | Populate ROADMAP.md once FEATURE_PRIORITY.md exists | open source | 2026-03-17 |
-| P3 | Create good-first-issue labels and 5 starter issues once scaffold exists | open source | 2026-03-17 |
-| P3 | Education website: scaffold accessible static site (Astro/Eleventy) at website/ | education | 2026-03-17 |
-| P3 | Education website: author Course 1 — How to use Blind Assistant | education | 2026-03-17 |
-| P3 | Cloud architecture: design Telegram webhook hosting (Railway/Fly.io) and document in ARCHITECTURE.md | cloud-architect | 2026-03-17 |
-| P2 | Research+action compound task design (research options → user chooses → AI executes) | PRODUCT_BRIEF trip booking example | 2026-03-17 |
-| P2 | Telegram bot architecture as primary 24/7 multi-device interface | PRODUCT_BRIEF synthesis vision | 2026-03-17 |
+| P2 | Implement Telegram bot: receive text + voice, reply with text + voice | ARCHITECTURE.md Task 1 | 2026-03-17 |
+| P2 | Implement Whisper STT pipeline (voice messages → transcribed text) | ARCHITECTURE.md Task 1 | 2026-03-17 |
+| P2 | Implement TTS pipeline (ElevenLabs + pyttsx3 fallback, speed control) | ARCHITECTURE.md Task 1 | 2026-03-17 |
+| P2 | Implement screen observer: screenshot + Claude Vision description | ARCHITECTURE.md Task 2 | 2026-03-17 |
+| P2 | Implement screen redaction: detect and mask passwords + financial screens | ARCHITECTURE.md Task 2 | 2026-03-17 |
+| P2 | Implement Second Brain vault: add/query notes by voice, encrypted | ARCHITECTURE.md Task 3 | 2026-03-17 |
+| P2 | Implement orchestrator + planner: intent → tools → execute | ARCHITECTURE.md Task 4 | 2026-03-17 |
+| P2 | End-to-end test: voice → Telegram → transcribe → intent → tool → response | Phase 2 gate | 2026-03-17 |
+| P2 | Voice installer: complete voice-guided setup from fresh Python install | ARCHITECTURE.md Task 5 | 2026-03-17 |
+| P2 | Risk disclosure flow: payment confirmation with spoken warning (full test) | SECURITY_MODEL.md | 2026-03-17 |
+| P3 | Voice local interface stub (microphone + speaker on local device) | ARCHITECTURE.md | 2026-03-17 |
+| P3 | MCP memory server integration (cross-session user preferences) | INTEGRATION_MAP.md | 2026-03-17 |
+| P3 | Add unit tests for security/credentials.py and second_brain/encryption.py | testing.md | 2026-03-17 |
+| P3 | Set up CHANGELOG.md and populate ROADMAP.md | open source | 2026-03-17 |
+| P3 | Cloud hosting: document Telegram webhook on Railway/Fly.io | cloud-architect | 2026-03-17 |
 
 ## Completed Items
 
