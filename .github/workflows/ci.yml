@@ -437,6 +437,7 @@ jobs:
                 `- Tests/coverage (JS — clients/mobile/): ${{ needs.test-js.result }}`,
                 `- Security: ${{ needs.security.result }}`,
                 `- Web E2E (Playwright): ${{ needs.e2e-web.result }}`,
+                `- Browser integration (BrowserTool + real Playwright): ${{ needs.integration-browser.result }}`,
                 '',
                 '## What to do',
                 '1. Click the run link above and read the failing step',
