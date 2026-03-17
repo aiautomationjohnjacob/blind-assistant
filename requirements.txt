@@ -32,7 +32,7 @@ cryptography==46.0.5            # AES-256-GCM vault encryption; 42.0.5 → 46.0.
 keyring==24.3.0                 # OS keychain credential storage
 
 # Image Processing
-Pillow==10.3.0                  # Screenshot manipulation; 10.2.0 → 10.3.0 fixes CVE-2024-28219 (buffer overflow)
+Pillow==12.1.1                  # Screenshot manipulation; upgraded to fix CVE-2024-28219 + CVE-2026-25990
 pytesseract==0.3.10             # Local OCR (sensitive screen fallback)
 
 # HTTP Client
