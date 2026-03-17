@@ -200,19 +200,23 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 16 (Phase 3 — missing unit tests resolved). Wrote 118 new unit tests across 4 files:
-test_telegram_bot.py (24), test_query.py (49), test_redaction.py (27), test_screen_observer.py (18).
-Ruff format CI blocker from Cycle 15 fixed. Total: 583 unit tests.
-
 Cycle 17 (Phase 3 — voice installer refactored + web E2E CI confirmed). Voice installer now has
 _setup_native_app() as Step 1 (tells user to install Blind Assistant app via TalkBack/VoiceOver
 app store, gives server address). Telegram demoted to optional Step 5 with explicit sighted-help
 warning. 58 new installer unit tests written. 641 unit tests passing. Web E2E CI run 23219936377
 confirmed ALL 7 jobs green (including e2e-web Playwright accessibility tests).
 
-Cycle 18 priority:
-1. **P2: End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver (use AVD emulator)
-2. **P2: Web app deployed**: Netlify/Vercel staging deploy for real NVDA+Chrome testing
+Cycle 18 (Phase 3 — web staging deploy + food ordering web E2E). netlify.toml + deploy-staging.yml
+created for auto-deploy on push to main (requires NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID secrets —
+ISSUE-029). 11 new Playwright food ordering accessibility tests: keyboard reach, aria-live='polite',
+confirmation prompts in live regions, no visual-only instructions, focus management. WEB_APP_URL env
+var override added so staging workflow can test against real Netlify URL. 22 web E2E tests total.
+641 Python unit tests unchanged. Ruff clean.
+
+Cycle 19 priority:
+1. **P2: End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver (use AVD emulator in CI if available)
+2. **P2: ISSUE-029**: Add Netlify secrets — manual step needed; document in README for operators
+3. **P3: Android TalkBack device test**: expo build:android + AVD
 
 ## Known Issues / Technical Debt
 
