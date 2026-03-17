@@ -1,5 +1,5 @@
 /**
- * Tests for MainScreen — accessibility + interaction
+ * Tests for MainScreen — accessibility + voice interaction
  *
  * Key assertions:
  * 1. Every interactive element has an accessibilityLabel
@@ -7,6 +7,12 @@
  * 3. Status text uses accessibilityLiveRegion="polite" (announced on change)
  * 4. No interactive elements are hidden from the accessibility tree
  * 5. Response text is accessible to braille display users
+ *
+ * Voice recording flow (ISSUE-015 resolved):
+ * - First press → startRecording called, state changes to "listening"
+ * - Second press → stopRecording called, audio → transcribe → query → TTS
+ * - Empty transcription → "didn't catch that" spoken, returns to idle
+ * - Microphone permission denied → error spoken
  *
  * Per CLAUDE.md accessibility rules:
  * - Every interactive element MUST have an accessible name
@@ -38,14 +44,30 @@ jest.mock("expo-speech", () => ({
 // the SettingsManager circular/native-module error in Node-based Jest.
 
 const mockQuery = jest.fn();
+const mockTranscribe = jest.fn();
 
 jest.mock("@services/api", () => ({
   ...jest.requireActual("@services/api"),
   getAPIClient: () => ({
     query: mockQuery,
+    transcribe: mockTranscribe,
   }),
   configureAPIClient: jest.fn(),
   resetAPIClient: jest.fn(),
+}));
+
+// Mock the audio recorder hook — avoids any expo-av native module dependency in tests
+const mockStartRecording = jest.fn();
+const mockStopRecording = jest.fn();
+
+jest.mock("@hooks/useAudioRecorder", () => ({
+  useAudioRecorder: jest.fn(() => ({
+    isRecording: false,
+    recorderState: "idle",
+    startRecording: mockStartRecording,
+    stopRecording: mockStopRecording,
+    lastError: null,
+  })),
 }));
 
 // ─────────────────────────────────────────────────────────────
@@ -54,11 +76,25 @@ jest.mock("@services/api", () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+
   // Spy on AccessibilityInfo.announceForAccessibility after jest-expo preset
   // has already loaded the react-native mock. This is the correct pattern for
   // patching individual methods without triggering the SettingsManager native
   // module error that happens when jest.requireActual("react-native") is called.
   jest.spyOn(AccessibilityInfo, "announceForAccessibility").mockImplementation(() => {});
+
+  // Default: recording returns base64 audio
+  mockStartRecording.mockResolvedValue(undefined);
+  mockStopRecording.mockResolvedValue("SGVsbG8gV29ybGQ="); // base64 "Hello World"
+
+  // Default: transcribe returns a user message
+  mockTranscribe.mockResolvedValue({
+    text: "What can you help me with?",
+    language: "en",
+    session_id: "test",
+  });
+
+  // Default: query returns AI response
   mockQuery.mockResolvedValue({
     text: "I can help you with many tasks.",
     spoken_text: null,
@@ -74,7 +110,6 @@ beforeEach(() => {
 describe("MainScreen — accessibility", () => {
   it("renders the main container with an accessibilityLabel", () => {
     render(<MainScreen />);
-    // The root View should be identifiable by screen readers
     expect(screen.getByLabelText(/blind assistant main screen/i)).toBeTruthy();
   });
 
@@ -120,41 +155,167 @@ describe("MainScreen — accessibility", () => {
 });
 
 // ─────────────────────────────────────────────────────────────
-// Tests: Interaction
+// Tests: Voice interaction flow (ISSUE-015)
 // ─────────────────────────────────────────────────────────────
 
-describe("MainScreen — interaction", () => {
-  it("calls the API when the button is pressed", async () => {
+describe("MainScreen — voice recording flow", () => {
+  it("calls startRecording on first button press", async () => {
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+    fireEvent.press(button);
+
+    await waitFor(() => {
+      expect(mockStartRecording).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("announces 'Listening' when recording starts", async () => {
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+    fireEvent.press(button);
+
+    await waitFor(() => {
+      expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith(
+        expect.stringMatching(/listening/i)
+      );
+    });
+  });
+
+  it("calls transcribe with the audio base64 after second press", async () => {
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+
+    // First press: start recording
+    fireEvent.press(button);
+    await waitFor(() => {
+      expect(mockStartRecording).toHaveBeenCalledTimes(1);
+    });
+
+    // Second press: stop and process
+    fireEvent.press(button);
+    await waitFor(() => {
+      expect(mockTranscribe).toHaveBeenCalledWith(
+        expect.objectContaining({ audio_base64: "SGVsbG8gV29ybGQ=" })
+      );
+    });
+  });
+
+  it("sends the transcript to /query after transcription", async () => {
     render(<MainScreen />);
     const button = screen.getByRole("button");
 
     fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
 
     await waitFor(() => {
-      expect(mockQuery).toHaveBeenCalledTimes(1);
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "What can you help me with?" })
+      );
     });
   });
 
-  it("speaks the API response via TTS", async () => {
-    mockQuery.mockResolvedValue({
-      text: "I can help you navigate your computer.",
-      spoken_text: null,
-      follow_up_prompt: null,
-      session_id: "test",
-    });
-
+  it("speaks the AI response via TTS after query", async () => {
     render(<MainScreen />);
-    fireEvent.press(screen.getByRole("button"));
+    const button = screen.getByRole("button");
+
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
 
     await waitFor(() => {
       expect(Speech.speak).toHaveBeenCalledWith(
-        expect.stringContaining("I can help you navigate"),
+        expect.stringContaining("I can help you with many tasks"),
         expect.any(Object)
       );
     });
   });
 
-  it("prefers spoken_text over text for TTS", async () => {
+  it("shows transcript on screen for braille display users", async () => {
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
+
+    await waitFor(() => {
+      expect(screen.getByText("What can you help me with?")).toBeTruthy();
+    });
+  });
+
+  it("speaks 'didn't catch that' when transcription returns empty string", async () => {
+    mockStopRecording.mockResolvedValue("SGVsbG8=");
+    mockTranscribe.mockResolvedValue({ text: "   ", language: null, session_id: "test" });
+
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
+
+    await waitFor(() => {
+      expect(Speech.speak).toHaveBeenCalledWith(
+        expect.stringMatching(/didn't catch that/i),
+        expect.any(Object)
+      );
+    });
+    expect(mockQuery).not.toHaveBeenCalled();
+  });
+
+  it("speaks 'no audio captured' when stopRecording returns null", async () => {
+    mockStopRecording.mockResolvedValue(null);
+
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
+
+    await waitFor(() => {
+      expect(Speech.speak).toHaveBeenCalledWith(
+        expect.stringMatching(/no audio captured/i),
+        expect.any(Object)
+      );
+    });
+  });
+
+  it("speaks error message when transcribe API call fails", async () => {
+    mockTranscribe.mockRejectedValue(new Error("Network error"));
+
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
+
+    await waitFor(() => {
+      expect(Speech.speak).toHaveBeenCalledWith(
+        expect.stringMatching(/something went wrong/i),
+        expect.any(Object)
+      );
+    });
+  });
+
+  it("speaks error and recovers when microphone permission denied", async () => {
+    mockStartRecording.mockRejectedValue(new Error("Microphone permission denied"));
+
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+    fireEvent.press(button);
+
+    await waitFor(() => {
+      expect(Speech.speak).toHaveBeenCalledWith(
+        expect.stringMatching(/could not access microphone/i),
+        expect.any(Object)
+      );
+    });
+  });
+
+  it("prefers spoken_text over text for TTS playback", async () => {
     mockQuery.mockResolvedValue({
       text: "A detailed explanation that is quite long.",
       spoken_text: "Short version.",
@@ -163,13 +324,14 @@ describe("MainScreen — interaction", () => {
     });
 
     render(<MainScreen />);
-    fireEvent.press(screen.getByRole("button"));
+    const button = screen.getByRole("button");
+
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
 
     await waitFor(() => {
-      expect(Speech.speak).toHaveBeenCalledWith(
-        "Short version.",
-        expect.any(Object)
-      );
+      expect(Speech.speak).toHaveBeenCalledWith("Short version.", expect.any(Object));
     });
   });
 
@@ -182,43 +344,44 @@ describe("MainScreen — interaction", () => {
     });
 
     render(<MainScreen />);
-    fireEvent.press(screen.getByRole("button"));
+    const button = screen.getByRole("button");
+
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
 
     await waitFor(() => {
       const calls = (Speech.speak as jest.Mock).mock.calls.map((c) => c[0] as string);
       expect(calls.some((t) => t.includes("Would you like me to read it back?"))).toBe(true);
     });
   });
+});
 
-  it("speaks an error message when the API fails", async () => {
-    mockQuery.mockRejectedValue(new Error("Network error"));
+// ─────────────────────────────────────────────────────────────
+// Tests: Button state management
+// ─────────────────────────────────────────────────────────────
 
-    render(<MainScreen />);
-    fireEvent.press(screen.getByRole("button"));
-
-    await waitFor(() => {
-      expect(Speech.speak).toHaveBeenCalledWith(
-        expect.stringMatching(/something went wrong/i),
-        expect.any(Object)
-      );
-    });
-  });
-
-  it("button is disabled while request is in flight", async () => {
-    // Make the query never resolve during this test
+describe("MainScreen — button state", () => {
+  it("button is disabled while query is in flight", async () => {
+    // Make query hang so we can observe the thinking state
+    mockTranscribe.mockResolvedValue({ text: "order food", language: "en", session_id: "test" });
     mockQuery.mockReturnValue(new Promise(() => {}));
 
     render(<MainScreen />);
     const button = screen.getByRole("button");
+
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
     fireEvent.press(button);
 
-    // Button should become disabled while thinking
     await waitFor(() => {
-      expect(button.props.accessibilityState?.disabled).toBe(true);
+      expect(mockQuery).toHaveBeenCalled();
     });
+    // Button should be disabled while thinking
+    expect(button.props.accessibilityState?.disabled).toBe(true);
   });
 
-  it("displays the response text for braille display users", async () => {
+  it("displays the AI response text for braille display users", async () => {
     mockQuery.mockResolvedValue({
       text: "This text is for braille users.",
       spoken_text: "Short.",
@@ -227,13 +390,16 @@ describe("MainScreen — interaction", () => {
     });
 
     render(<MainScreen />);
-    fireEvent.press(screen.getByRole("button"));
+    const button = screen.getByRole("button");
 
-    // The SHORT version is spoken; the TEXT version is rendered (for braille)
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
+
     await waitFor(() => {
-      // spoken_text is used for TTS
+      // spoken_text "Short." is used for TTS
       expect(Speech.speak).toHaveBeenCalledWith("Short.", expect.any(Object));
-      // text is displayed on screen for braille display
+      // The short text is displayed in the response area for braille users
       expect(screen.getByText("Short.")).toBeTruthy();
     });
   });
