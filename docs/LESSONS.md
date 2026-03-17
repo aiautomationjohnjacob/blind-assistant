@@ -886,3 +886,64 @@ deps still install, and the integration tests pass. The real fix is to upgrade p
 - Pending: 20+ stale GitHub CI-failure issues still open (noise in tracker).
 - Pending: Expo web export still broken (Metro AppEntry.js vs app/index.tsx).
 - Next cycle (15): project-inspector must run (every 5th cycle rule).
+
+---
+
+## Cycle 15 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: Cycle 15 advances the web platform meaningfully. The Expo web
+bundle now builds, and 11 Playwright accessibility tests will run in CI for the first time.
+Fixing the food ordering E2E test restores full confidence in the Phase 2 completion milestone.
+The next critical gap is deploying the web app somewhere blind users can actually try it — even
+a Netlify/Vercel preview deploy would let us test with real screen readers. The project-inspector
+gap scan revealed 4 src/ files with no unit tests — this is technical debt that accumulates risk.
+
+**Code quality (code-reviewer)**: All changes this cycle are correct and clean. App.tsx shim is
+minimal and well-documented. conftest.py stub for pytest-playwright gracefully handles the
+dual-environment requirement (unit test job vs e2e-web CI job). The context_manager mock in
+test_food_ordering.py is the correct fix — the test helper was simply missing a dependency that
+was added to the production code. No test count decrease. Ruff and mypy clean. One observation:
+the web E2E tests will need to be re-validated once CI runs them — the ARIA assertions assume
+the React Native Web rendering produces the expected DOM structure.
+
+**Security (security-specialist)**: No security concerns in this cycle. Web E2E tests are
+read-only browser checks. The static web server (Python http.server) exposes no sensitive data.
+
+**Accessibility (accessibility-reviewer)**: 11 new web E2E tests cover 8 WCAG 2.1 AA success
+criteria. Keyboard navigation, ARIA roles/labels, language attribute, page title, and
+aria-live regions are all tested. The tests are written with clear failure messages that explain
+the accessibility impact — excellent for maintainability. Gap: SC 1.4.3 (Color Contrast) is
+not yet automated — requires axe-core integration (Phase 4 item).
+
+**User perspective (blind-user-tester)**: The fixes this cycle are enablers, not features.
+A real blind user still cannot try the web app without setting up a local dev environment.
+The most important next step is making the web app accessible at a public URL. Even a staging
+deploy would let us test with real NVDA+Chrome users rather than just automated tests.
+
+**Ethics (ethics-advisor)**: No ethics concerns. Improving test infrastructure and fixing
+build tooling is straightforward quality work with no autonomy or dependency implications.
+
+**Goal adherence (goal-adherence-reviewer)**: Phase 3 target: "No SHOWSTOPPER issues from any
+persona across all scenarios AND device-simulator captures passing screenshots for Android, iOS,
+and Web." This cycle unblocks the Web path. The web bundle can now be built and tested. Web E2E
+tests are wired. The food ordering flow is fully tested end-to-end. Remaining Phase 3 blockers:
+(1) web app deployed at a real URL; (2) Android/iOS emulator tests.
+
+**Consensus recommendation for next cycle**: (1) Write the missing unit tests for telegram_bot.py,
+query.py, redaction.py, and screen_observer.py (ISSUE-028 — medium severity technical debt).
+(2) Verify the web E2E tests actually pass in CI after the App.tsx + CI job fixes, and look at
+CI run results to find and fix any ARIA/accessibility failures the tests discover.
+
+**Orchestrator self-assessment**:
+- Accomplished: App.tsx shim (Expo web export works); web E2E tests rewritten (11 tests, CI
+  wired); CI e2e-web job fully rebuilt; conftest.py stub for graceful skip; test_food_ordering.py
+  E2E test fixed (context_manager mock); `e2e` + `web` pytest markers registered; ISSUE-023
+  status corrected; ISSUE-024 through ISSUE-028 added to OPEN_ISSUES.md; ISSUE-010 updated.
+- Attempted but failed: none — all planned items completed.
+- Confusion/loops: none this cycle.
+- New gaps: ISSUE-028 (4 src/ files without unit tests) is the highest-priority finding.
+  The web E2E tests may fail on first CI run if React Native Web's DOM structure differs from
+  what the tests expect — need to verify CI output on next push.
+- Next cycle recommendation: Write missing unit tests (ISSUE-028) + verify web E2E CI results.
+  If web E2E tests fail on first run, fix the ARIA assertions to match actual DOM output from
+  React Native Web rendering.

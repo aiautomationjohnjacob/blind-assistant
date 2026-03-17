@@ -184,13 +184,14 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P3: ISSUE-020** — Platform hint "Double-tap to activate" removed from MainScreen.tsx; Platform import + platformHint style removed; 24 JS tests pass (Cycle 12)
 - [x] **P0: CI repair (ISSUE-022)** — 56 mypy type errors resolved across 9 files; openai-whisper setuptools build failure fixed in test/integration-browser CI jobs; ruff clean; 465 Python tests passing (Cycle 13)
 - [x] **P0: CI fully green (Cycle 14)** — 11 CVEs patched (cryptography, Pillow, starlette, fastapi upgraded); pip-audit switched to installed-env mode with --no-build-isolation; 5 new mypy errors from updated type stubs fixed (VoiceSettings, AsyncAnthropic, run_polling); Playwright libasound2 virtual package workaround; ALL 7 CI jobs green on run 23218631525
-- [ ] **P2: Close stale GitHub CI-failure issues** — 20+ historical issues from before CI was fixed
+- [x] **P2: Close stale GitHub CI-failure issues** — batch-closed 79 stale issues in Cycle 14 (commit d593482)
+- [x] **P2: Fix Expo web export** — App.tsx shim added (Cycle 15); `npx expo export --platform web` builds successfully; 11 web E2E accessibility tests added; CI e2e-web job rebuilt to actually run tests (Cycle 15)
+- [ ] **P2: Missing unit tests (ISSUE-028)** — telegram_bot.py, query.py, redaction.py, screen_observer.py have no unit tests; Phase 1/2 technical debt
 - [ ] **P2: End-to-end food ordering on real device** — Android TalkBack + iOS VoiceOver
 - [ ] **P2: Voice installer** — voice-guided setup from fresh install; update Telegram refs to native app
-- [ ] **P2: Web app** — WCAG 2.1 AA at blind-assistant.org; fix Expo web export Metro config
+- [ ] **P2: Web app deployed** — WCAG 2.1 AA verification requires real deployment (Netlify/Vercel staging); web E2E CI tests now exist
 - [ ] **P3: Android TalkBack device test** — expo build + AVD
 - [ ] **P3: iOS VoiceOver device test** — expo build:ios + xcrun simctl
-- [ ] **P3: Close stale GitHub CI-failure issues** — 20+ historical issues from before CI was fixed
 
 ## Blockers
 
