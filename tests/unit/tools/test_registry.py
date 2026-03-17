@@ -32,15 +32,17 @@ from blind_assistant.tools.registry import ToolRegistry, REGISTRY_PATH, AUDIT_LO
 
 @pytest.fixture
 def minimal_registry_yaml(tmp_path: Path) -> Path:
-    """Write a minimal registry.yaml into a temp location and return its path."""
+    """Write a minimal registry.yaml using the current capabilities/integrations format."""
     content = """
-tools:
+capabilities:
   - name: browser
     package: playwright
     version: "1.40.0"
     description: "a web browser I can control"
     task_description: "navigate websites to complete tasks"
     class: "blind_assistant.tools.browser.BrowserTool"
+
+integrations:
   - name: stripe_payments
     package: stripe
     version: "7.3.0"
@@ -54,8 +56,8 @@ tools:
 
 @pytest.fixture
 def empty_registry_yaml(tmp_path: Path) -> Path:
-    """Write a registry.yaml with no tools (empty list)."""
-    content = "tools: []\n"
+    """Write a registry.yaml with empty capabilities and integrations lists."""
+    content = "capabilities: []\nintegrations: []\n"
     registry_file = tmp_path / "registry.yaml"
     registry_file.write_text(content)
     return registry_file
