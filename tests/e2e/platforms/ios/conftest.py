@@ -23,7 +23,9 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import tempfile
 import time
+from pathlib import Path
 
 import pytest
 
@@ -39,24 +41,24 @@ class SimctlClient:
         """
         self._udid = device_udid
 
-    def shell(self, command: str) -> str:
-        """Run a simctl command and return stdout."""
-        result = subprocess.run(
-            ["xcrun", "simctl", *command.split()],
+    def _run(self, args: list[str], timeout: int = 30) -> subprocess.CompletedProcess:  # type: ignore[type-arg]
+        """Run xcrun simctl with the given args and return the CompletedProcess."""
+        # noqa: S603 -- xcrun is a macOS system tool, args are controlled by tests
+        return subprocess.run(  # noqa: S603, S607
+            ["xcrun", "simctl", *args],
             capture_output=True,
             text=True,
-            timeout=30,
+            timeout=timeout,
         )
+
+    def shell(self, command: str) -> str:
+        """Run a simctl command and return stdout."""
+        result = self._run(command.split())
         return result.stdout
 
     def list_devices(self) -> list[dict]:  # type: ignore[type-arg]
         """Return a list of available simulator devices."""
-        result = subprocess.run(
-            ["xcrun", "simctl", "list", "devices", "--json"],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
+        result = self._run(["list", "devices", "--json"])
         data = json.loads(result.stdout)
         devices = []
         for runtime_devices in data.get("devices", {}).values():
@@ -72,72 +74,52 @@ class SimctlClient:
 
     def launch_app(self, bundle_id: str = "org.blindassistant.app") -> None:
         """Launch the Blind Assistant app on the booted simulator."""
-        subprocess.run(
-            ["xcrun", "simctl", "launch", self._udid, bundle_id],
-            capture_output=True,
-            timeout=30,
-        )
+        self._run(["launch", self._udid, bundle_id])
         time.sleep(2)
 
     def terminate_app(self, bundle_id: str = "org.blindassistant.app") -> None:
         """Terminate the app on the booted simulator."""
-        subprocess.run(
-            ["xcrun", "simctl", "terminate", self._udid, bundle_id],
-            capture_output=True,
-            timeout=10,
-        )
+        self._run(["terminate", self._udid, bundle_id], timeout=10)
 
     def enable_voiceover(self) -> None:
         """Enable VoiceOver on the booted simulator."""
-        subprocess.run(
-            ["xcrun", "simctl", "spawn", self._udid,
-             "notifyutil", "-p", "com.apple.accessibility.voiceover.notification.start"],
-            capture_output=True,
-            timeout=10,
-        )
+        self._run([
+            "spawn", self._udid,
+            "notifyutil", "-p",
+            "com.apple.accessibility.voiceover.notification.start",
+        ], timeout=10)
         time.sleep(1)
 
     def disable_voiceover(self) -> None:
         """Disable VoiceOver on the booted simulator."""
-        subprocess.run(
-            ["xcrun", "simctl", "spawn", self._udid,
-             "notifyutil", "-p", "com.apple.accessibility.voiceover.notification.stop"],
-            capture_output=True,
-            timeout=10,
-        )
+        self._run([
+            "spawn", self._udid,
+            "notifyutil", "-p",
+            "com.apple.accessibility.voiceover.notification.stop",
+        ], timeout=10)
 
-    def screenshot(self, output_path: str = "/tmp/simctl_screenshot.png") -> str:
+    def screenshot(self, output_path: str | None = None) -> str:
         """Capture a simulator screenshot and save it to the given path."""
-        subprocess.run(
-            ["xcrun", "simctl", "io", self._udid, "screenshot", output_path],
-            capture_output=True,
-            timeout=15,
-        )
+        if output_path is None:
+            # Use a temp file rather than a hardcoded /tmp path
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                output_path = tmp.name
+        self._run(["io", self._udid, "screenshot", output_path], timeout=15)
         return output_path
 
     def get_accessibility_tree(self, bundle_id: str = "org.blindassistant.app") -> str:
         """
         Return the accessibility tree for the app via the Accessibility Inspector CLI.
 
-        This uses the axe command-line tool if available, or falls back to
-        simctl spawn to dump the UI hierarchy via the accessibility API.
+        Tries the built-in accessibility audit (Xcode 15+), then falls back to
+        the view hierarchy enumerate command.
         """
         # Try using the built-in accessibility audit (Xcode 15+)
-        result = subprocess.run(
-            ["xcrun", "simctl", "accessibility", self._udid, "audit", "--bundle-id", bundle_id],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
+        result = self._run(["accessibility", self._udid, "audit", "--bundle-id", bundle_id])
         if result.returncode == 0:
             return result.stdout
         # Fallback: dump the view hierarchy via simctl
-        result = subprocess.run(
-            ["xcrun", "simctl", "io", self._udid, "enumerate", bundle_id],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
+        result = self._run(["io", self._udid, "enumerate", bundle_id])
         return result.stdout
 
 
@@ -147,7 +129,7 @@ def simctl_available() -> bool:
     if shutil.which("xcrun") is None:
         return False
     # Check that at least one simulator is booted
-    result = subprocess.run(
+    result = subprocess.run(  # noqa: S603, S607
         ["xcrun", "simctl", "list", "devices", "--json"],
         capture_output=True,
         text=True,
@@ -173,7 +155,7 @@ def simctl(simctl_available: bool) -> SimctlClient:  # type: ignore[return]
 
     Skips the entire test module if xcrun is not available or no simulator is booted.
     iOS tests require macOS with Xcode and a running iOS Simulator.
-    These tests run only in the macOS CI workflow (separate from the main ci.yml).
+    These tests run only in the macOS CI workflow (.github/workflows/ios-e2e.yml).
     """
     if not simctl_available:
         pytest.skip(
