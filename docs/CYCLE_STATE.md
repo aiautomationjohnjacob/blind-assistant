@@ -248,11 +248,11 @@ Cycle 20 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 18.** Phase 3 in progress. Web staging deploy infrastructure complete
-(netlify.toml + CI deploy workflow). 11 food ordering web E2E accessibility tests added.
-641 Python unit tests. 22 web E2E Playwright tests (CI). Ruff clean.
+**Loop completed Cycle 19.** Phase 3 in progress. Android TalkBack + iOS VoiceOver E2E test
+infrastructure complete (ADBClient, SimctlClient, 17 new platform E2E tests). CI path bug fixed.
+ios-e2e.yml macOS workflow created. ISSUE-029 Netlify docs in README. 641 Python unit tests. Ruff clean.
 
-The most important work for Cycle 19 (Phase 3: Blind User Testing):
-1. **P2: End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver.
-2. **P2: ISSUE-029**: Netlify secrets setup — document the one-time operator task in README.md.
-3. **Every 10th cycle (Cycle 20)**: documentation-steward should run (update README, CHANGELOG, docstrings).
+The most important work for Cycle 20 (Phase 3: Blind User Testing):
+1. **Every-10th-cycle**: documentation-steward run (README, CHANGELOG, CONTRIBUTING.md, docstrings)
+2. **P3: Unit tests for ADB/simctl helper functions** — device-free, fast, improves coverage
+3. **P3: Android TalkBack device test** — trigger release tag to run AVD CI job
