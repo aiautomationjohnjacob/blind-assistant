@@ -546,26 +546,35 @@ async def test_handle_message_routes_order_food_through_pipeline(
     1. Classifies intent as order_food
     2. Checks if browser is installed (it is — mocked as installed)
     3. Calls _handle_order_food which fires risk disclosure
-    4. Returns a response
+    4. Completes the full checkout loop and returns a response
 
     This is the highest-level integration test for the food ordering path.
+    Claude-powered helpers are patched so this test does not require anthropic.
     """
     orc, mock_browser, gate = _make_orchestrator_with_mock_browser(config, mock_food_page_state, installed=True)
     gate.register_session(user_context.session_id)
 
     response_count = [0]
 
-    async def update_cb(msg: str) -> None:
-        response_count[0] += 1
-        # Accept any confirmation
-        gate.submit_response(user_context.session_id, "yes")
+    with (
+        patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Pizza Palace.")),
+        patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=mock_food_page_state)),
+        patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=mock_food_page_state)),
+        patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x pizza")),
+        patch.object(orc, "_place_order", new=AsyncMock(return_value={"success": True})),
+    ):
 
-    # The full handle_message call
-    response = await orc.handle_message(
-        text="order me a pizza",
-        context=user_context,
-        response_callback=update_cb,
-    )
+        async def update_cb(msg: str) -> None:
+            response_count[0] += 1
+            # Accept any confirmation
+            gate.submit_response(user_context.session_id, "yes")
+
+        # The full handle_message call
+        response = await orc.handle_message(
+            text="order me a pizza",
+            context=user_context,
+            response_callback=update_cb,
+        )
 
     # Should have gotten some response back
     assert response is not None
