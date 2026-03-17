@@ -124,6 +124,9 @@ def _make_orchestrator_with_mock_browser(
 
     mock_browser = MagicMock(spec=BrowserTool)
     mock_browser.navigate = AsyncMock(return_value=mock_page_state)
+    # get_page_state is called during checkout navigation steps
+    mock_browser.get_page_state = AsyncMock(return_value=mock_page_state)
+    mock_browser.click = AsyncMock()
 
     if installed:
         mock_registry.get_installed_tool.return_value = mock_browser
