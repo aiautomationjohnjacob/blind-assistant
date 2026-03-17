@@ -58,11 +58,11 @@ New wiring in run-cycle:
 
 ## Current Phase
 
-**Phase**: 2 — Core Build Sprint
+**Phase**: 3 — Blind User Testing
 **Status**: IN PROGRESS
 **Started**: 2026-03-17
 **Last active**: 2026-03-17
-**Cycles completed**: 12
+**Cycles completed**: 13
 
 ## Phase Definitions
 
