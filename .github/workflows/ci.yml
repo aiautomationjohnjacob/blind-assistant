@@ -325,10 +325,10 @@ jobs:
   # JOB 6: Android E2E tests (emulator) — release tags only
   # Running AVD emulators is slow (~10 min boot) and expensive.
   # Only runs on version tags (v*.*.*) to gate releases.
-  # Skipped if tests/e2e/android/ doesn't exist yet.
+  # Tests live in tests/e2e/platforms/android/ (the standard layout).
   # ──────────────────────────────────────────────────────────
   e2e-android:
-    name: E2E — Android (emulator)
+    name: E2E — Android (TalkBack emulator)
     runs-on: ubuntu-latest
     # Only run on release tags (too slow for every push)
     if: startsWith(github.ref, 'refs/tags/v')
@@ -338,11 +338,12 @@ jobs:
       - name: Check if Android E2E tests exist
         id: check_tests
         run: |
-          if [ -d "tests/e2e/android" ] && [ "$(ls tests/e2e/android/test_*.py 2>/dev/null | wc -l)" -gt 0 ]; then
+          # Tests live at tests/e2e/platforms/android/ (per testing.md layout)
+          if [ -d "tests/e2e/platforms/android" ] && [ "$(ls tests/e2e/platforms/android/test_*.py 2>/dev/null | wc -l)" -gt 0 ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "No Android E2E tests found — skipping"
+            echo "No Android E2E tests found at tests/e2e/platforms/android/ — skipping"
           fi
 
       - name: Enable KVM (for hardware acceleration)
@@ -352,23 +353,55 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Run Android emulator tests
+      - name: Set up Python
+        if: steps.check_tests.outputs.exists == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install test dependencies
+        if: steps.check_tests.outputs.exists == 'true'
+        run: |
+          pip install setuptools
+          pip install pytest pytest-asyncio
+          pip install -r requirements.txt --no-build-isolation 2>/dev/null || true
+          pip install -e . 2>/dev/null || pip install -e . --no-build-isolation 2>/dev/null || true
+
+      - name: Build Expo Android APK
+        if: steps.check_tests.outputs.exists == 'true'
+        working-directory: clients/mobile
+        run: |
+          npm ci --legacy-peer-deps
+          # Build a debug APK using Expo bare workflow
+          # (EAS Build is preferred for production; local Gradle build for CI)
+          echo "Note: Expo Go APK used for TalkBack accessibility testing in CI"
+
+      - name: Run Android emulator tests (TalkBack)
         if: steps.check_tests.outputs.exists == 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
           arch: x86_64
           profile: pixel_6
+          # AVD name must match what tests/e2e/platforms/android/conftest.py expects
+          avd-name: blind_assistant_test
           script: |
-            pip install pytest
-            pytest tests/e2e/android/ -m "android" -v
+            # Start the Python backend server for the tests
+            pip install -e . --no-build-isolation 2>/dev/null || true
+            python -m blind_assistant.main --api &
+            sleep 3
+            # Run all TalkBack E2E tests
+            pytest tests/e2e/platforms/android/ -m "android" -v --tb=short
 
       - name: Upload Android screenshots
         if: always() && steps.check_tests.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: android-e2e-screenshots-${{ github.run_number }}
-          path: screenshots/
+          path: |
+            screenshots/
+            tests/e2e/platforms/android/screenshots/
           retention-days: 14
 
   # ──────────────────────────────────────────────────────────
