@@ -85,17 +85,19 @@ async def test_initialize_sets_initialized_flag(
     tool = BrowserTool()
     assert not tool._initialized
 
-    with patch("blind_assistant.tools.browser.async_playwright") as mock_apw:
-        mock_apw.return_value.start = AsyncMock(return_value=mock_playwright_instance)
+    mock_apw_callable = MagicMock()
+    mock_apw_callable.return_value.start = AsyncMock(return_value=mock_playwright_instance)
+    with patch("blind_assistant.tools.browser.async_playwright", mock_apw_callable):
         await tool.initialize()
 
     assert tool._initialized
 
 
 async def test_initialize_raises_on_import_error() -> None:
-    """initialize() re-raises ImportError when playwright is not installed."""
+    """initialize() raises ImportError when async_playwright is None (not installed)."""
     tool = BrowserTool()
-    with patch("blind_assistant.tools.browser.async_playwright", side_effect=ImportError("no playwright")):
+    # Simulate playwright not being installed — async_playwright module-level var is None
+    with patch("blind_assistant.tools.browser.async_playwright", None):
         with pytest.raises(ImportError):
             await tool.initialize()
 
@@ -105,8 +107,9 @@ async def test_initialize_raises_on_launch_error(mock_playwright_instance: Async
     tool = BrowserTool()
     mock_playwright_instance.chromium.launch = AsyncMock(side_effect=Exception("launch failed"))
 
-    with patch("blind_assistant.tools.browser.async_playwright") as mock_apw:
-        mock_apw.return_value.start = AsyncMock(return_value=mock_playwright_instance)
+    mock_apw_callable = MagicMock()
+    mock_apw_callable.return_value.start = AsyncMock(return_value=mock_playwright_instance)
+    with patch("blind_assistant.tools.browser.async_playwright", mock_apw_callable):
         with pytest.raises(Exception, match="launch failed"):
             await tool.initialize()
 
