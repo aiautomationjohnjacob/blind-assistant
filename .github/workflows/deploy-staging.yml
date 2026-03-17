@@ -1,0 +1,123 @@
+name: Deploy — Web Staging (Netlify)
+
+# Deploys the Expo web app to Netlify staging on every push to main.
+# This gives real users a URL to test with actual screen readers (NVDA+Chrome,
+# VoiceOver+Safari) — which is NOT possible with CI-only tests.
+#
+# Prerequisites (one-time setup — done by a sighted developer with Netlify access):
+#   1. Create a Netlify site at app.netlify.com (or `netlify init`)
+#   2. Add two GitHub repository secrets:
+#      - NETLIFY_AUTH_TOKEN: from app.netlify.com/user/applications
+#      - NETLIFY_SITE_ID: from your site's "Site settings → Site ID"
+#   3. Push to main — this workflow auto-deploys.
+#
+# Accessibility note:
+#   The staging URL is posted as a GitHub deployment so the team can find it
+#   in the "Environments" tab. The URL is also added to the step summary for
+#   easy access by keyboard-only GitHub users (NVDA reads the summary).
+#
+# Why Netlify (not Vercel):
+#   Netlify's free tier supports unlimited deploys; the netlify.toml in the repo
+#   root fully controls the build, so no Netlify UI configuration is needed once
+#   the secrets are added. This minimises visual setup required.
+
+on:
+  push:
+    branches: [main]
+  # Allow manual deploys from the GitHub Actions UI (keyboard accessible)
+  workflow_dispatch:
+
+# Only run the latest deploy — cancel any in-progress deploy when a new push arrives
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+jobs:
+  deploy-web-staging:
+    name: Build and deploy to Netlify staging
+    runs-on: ubuntu-latest
+    # Skip if Netlify secrets are not configured (e.g., forks without secrets)
+    if: ${{ vars.NETLIFY_AUTH_TOKEN != '' || secrets.NETLIFY_AUTH_TOKEN != '' }}
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.deploy_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: clients/mobile/package-lock.json
+
+      - name: Install JS dependencies
+        working-directory: clients/mobile
+        run: npm ci --legacy-peer-deps
+
+      - name: Build Expo web bundle
+        working-directory: clients/mobile
+        # EXPO_PUBLIC_API_BASE_URL is read by app.config.ts at build time.
+        # Override it here for staging; Netlify reads netlify.toml for production builds.
+        env:
+          EXPO_PUBLIC_API_BASE_URL: https://api-staging.blind-assistant.org
+        run: npx expo export --platform web
+
+      - name: Install Netlify CLI
+        run: npm install -g netlify-cli
+
+      - name: Deploy to Netlify (staging — draft URL)
+        id: deploy
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          # --dir: the built output directory (matches netlify.toml publish)
+          # --message: shown in Netlify deploy log
+          # Output is captured to extract the deploy URL
+          DEPLOY_OUTPUT=$(netlify deploy \
+            --dir clients/mobile/dist \
+            --message "Deploy from commit ${{ github.sha }} — ${{ github.event.head_commit.message }}" \
+            --json 2>&1)
+          echo "Netlify deploy output:"
+          echo "$DEPLOY_OUTPUT"
+          DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('deploy_url', d.get('url', '')))" 2>/dev/null || echo "")
+          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "### Web Staging Deploy" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**URL**: $DEPLOY_URL" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Test with: NVDA + Chrome, VoiceOver + Safari, TalkBack + Chrome Mobile" >> $GITHUB_STEP_SUMMARY
+
+      - name: Run web E2E accessibility tests against staging URL
+        # Run the Playwright tests against the real staging deploy instead of localhost.
+        # This is the gold standard: real CDN, real HTTPS, real browser.
+        env:
+          WEB_APP_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          if [ -n "$WEB_APP_URL" ]; then
+            pip install playwright pytest pytest-asyncio pytest-playwright
+            playwright install chromium
+            playwright install-deps chromium || true
+            # Override the URL used by the tests
+            WEB_APP_URL="$WEB_APP_URL" pytest tests/e2e/platforms/web/ \
+              --browser chromium \
+              --screenshot on \
+              -v 2>&1 | tee e2e-staging.log || true
+            echo "### Staging E2E Results" >> $GITHUB_STEP_SUMMARY
+            tail -20 e2e-staging.log >> $GITHUB_STEP_SUMMARY || true
+          else
+            echo "Staging URL not available — skipping E2E tests"
+          fi
+
+      - name: Upload staging E2E screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-e2e-screenshots-${{ github.run_number }}
+          path: |
+            test-results/
+            e2e-staging.log
+            screenshots/
+          retention-days: 14
