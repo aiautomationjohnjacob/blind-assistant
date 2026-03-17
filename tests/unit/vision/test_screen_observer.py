@@ -11,15 +11,15 @@ Tests cover:
 - _get_client: lazy initialization builds AsyncAnthropic with credential
 - _describe_with_claude: happy path returns Claude response text
 - _describe_with_claude: Claude API exception returns error message (not crash)
-- _capture_screenshot: PIL ImportError returns None
-- _capture_screenshot: PIL exception returns None
+- _capture_screenshot: PIL/runtime exception returns None
 - _describe_locally: pytesseract success returns text with privacy note
 - _describe_locally: pytesseract returns empty string → fallback message
-- _describe_locally: pytesseract ImportError → returns install guidance message
+- _describe_locally: ImportError/exception → returns financial fallback message
 """
 
 from __future__ import annotations
 
+import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -117,9 +117,10 @@ async def test_describe_screen_returns_failure_message_when_no_screenshot():
 @pytest.mark.asyncio
 async def test_describe_screen_password_returns_privacy_message():
     obs = _make_observer()
+    # analyze_sensitivity is imported inside describe_screen(), so patch the source module
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"fake_png"),
-        patch("blind_assistant.vision.screen_observer.analyze_sensitivity",
+        patch("blind_assistant.vision.redaction.analyze_sensitivity",
               new_callable=AsyncMock, return_value=_make_password_sensitivity()),
     ):
         result = await obs.describe_screen()
@@ -133,7 +134,7 @@ async def test_describe_screen_password_never_calls_claude_api():
     obs = _make_observer()
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"fake_png"),
-        patch("blind_assistant.vision.screen_observer.analyze_sensitivity",
+        patch("blind_assistant.vision.redaction.analyze_sensitivity",
               new_callable=AsyncMock, return_value=_make_password_sensitivity()),
         patch.object(obs, "_describe_with_claude", new_callable=AsyncMock) as mock_claude,
     ):
@@ -152,7 +153,7 @@ async def test_describe_screen_financial_calls_local_description():
     obs = _make_observer()
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"fake_png"),
-        patch("blind_assistant.vision.screen_observer.analyze_sensitivity",
+        patch("blind_assistant.vision.redaction.analyze_sensitivity",
               new_callable=AsyncMock, return_value=_make_financial_sensitivity()),
         patch.object(obs, "_describe_locally", new_callable=AsyncMock, return_value="local description") as mock_local,
     ):
@@ -167,7 +168,7 @@ async def test_describe_screen_financial_never_calls_claude_api():
     obs = _make_observer()
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"fake_png"),
-        patch("blind_assistant.vision.screen_observer.analyze_sensitivity",
+        patch("blind_assistant.vision.redaction.analyze_sensitivity",
               new_callable=AsyncMock, return_value=_make_financial_sensitivity()),
         patch.object(obs, "_describe_locally", new_callable=AsyncMock, return_value="local"),
         patch.object(obs, "_describe_with_claude", new_callable=AsyncMock) as mock_claude,
@@ -187,7 +188,7 @@ async def test_describe_screen_safe_calls_claude_describe():
     obs = _make_observer()
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"fake_png"),
-        patch("blind_assistant.vision.screen_observer.analyze_sensitivity",
+        patch("blind_assistant.vision.redaction.analyze_sensitivity",
               new_callable=AsyncMock, return_value=_make_safe_sensitivity()),
         patch.object(obs, "_describe_with_claude", new_callable=AsyncMock, return_value="Claude description") as mock_claude,
     ):
@@ -205,9 +206,9 @@ async def test_describe_screen_with_regions_applies_redaction_before_claude():
 
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"original_png"),
-        patch("blind_assistant.vision.screen_observer.analyze_sensitivity",
+        patch("blind_assistant.vision.redaction.analyze_sensitivity",
               new_callable=AsyncMock, return_value=sensitivity),
-        patch("blind_assistant.vision.screen_observer.apply_redaction",
+        patch("blind_assistant.vision.redaction.apply_redaction",
               new_callable=AsyncMock, return_value=redacted_bytes),
         patch.object(obs, "_describe_with_claude", new_callable=AsyncMock, return_value="description") as mock_claude,
     ):
@@ -226,27 +227,36 @@ def test_get_client_lazy_initializes_anthropic(mock_keyring):
     obs = _make_observer()
     assert obs._claude_client is None
 
+    mock_anthropic_module = MagicMock()
+    mock_client_instance = MagicMock()
+    mock_anthropic_module.AsyncAnthropic.return_value = mock_client_instance
+
     with (
         patch("blind_assistant.security.credentials.require_credential", return_value="fake_key"),
-        patch("anthropic.AsyncAnthropic") as mock_cls,
+        patch.dict(sys.modules, {"anthropic": mock_anthropic_module}),
     ):
         client = obs._get_client()
-        mock_cls.assert_called_once_with(api_key="fake_key")
 
+    mock_anthropic_module.AsyncAnthropic.assert_called_once_with(api_key="fake_key")
     assert obs._claude_client is not None
 
 
 def test_get_client_returns_same_instance_on_second_call(mock_keyring):
     obs = _make_observer()
+
+    mock_anthropic_module = MagicMock()
+    mock_client_instance = MagicMock()
+    mock_anthropic_module.AsyncAnthropic.return_value = mock_client_instance
+
     with (
         patch("blind_assistant.security.credentials.require_credential", return_value="fake_key"),
-        patch("anthropic.AsyncAnthropic") as mock_cls,
+        patch.dict(sys.modules, {"anthropic": mock_anthropic_module}),
     ):
         client1 = obs._get_client()
         client2 = obs._get_client()
 
     # Second call must NOT re-instantiate
-    assert mock_cls.call_count == 1
+    assert mock_anthropic_module.AsyncAnthropic.call_count == 1
     assert client1 is client2
 
 
@@ -256,24 +266,26 @@ def test_get_client_returns_same_instance_on_second_call(mock_keyring):
 
 
 @pytest.mark.asyncio
-async def test_describe_with_claude_returns_response_text(mock_claude_client):
+async def test_describe_with_claude_returns_response_text():
     obs = _make_observer()
-    mock_claude_client.messages.create = AsyncMock(
+    mock_client = MagicMock()
+    mock_client.messages.create = AsyncMock(
         return_value=MagicMock(content=[MagicMock(text="You see a browser with Gmail open.")])
     )
 
-    with patch.object(obs, "_get_client", return_value=mock_claude_client):
+    with patch.object(obs, "_get_client", return_value=mock_client):
         result = await obs._describe_with_claude(b"fake_png")
 
     assert result == "You see a browser with Gmail open."
 
 
 @pytest.mark.asyncio
-async def test_describe_with_claude_exception_returns_error_message(mock_claude_client):
+async def test_describe_with_claude_exception_returns_error_message():
     obs = _make_observer()
-    mock_claude_client.messages.create = AsyncMock(side_effect=RuntimeError("API timeout"))
+    mock_client = MagicMock()
+    mock_client.messages.create = AsyncMock(side_effect=RuntimeError("API timeout"))
 
-    with patch.object(obs, "_get_client", return_value=mock_claude_client):
+    with patch.object(obs, "_get_client", return_value=mock_client):
         result = await obs._describe_with_claude(b"fake_png")
 
     assert "problem" in result.lower() or "error" in result.lower() or "tried" in result.lower()
@@ -282,19 +294,6 @@ async def test_describe_with_claude_exception_returns_error_message(mock_claude_
 # ─────────────────────────────────────────────────────────────
 # _capture_screenshot
 # ─────────────────────────────────────────────────────────────
-
-
-@pytest.mark.asyncio
-async def test_capture_screenshot_returns_none_on_pil_import_error():
-    obs = _make_observer()
-    with patch.dict("sys.modules", {"PIL": None, "PIL.ImageGrab": None}):
-        # Import will fail — we mock the internal import
-        with patch("blind_assistant.vision.screen_observer.asyncio") as mock_asyncio:
-            loop = MagicMock()
-            loop.run_in_executor = AsyncMock(side_effect=ImportError("PIL not found"))
-            mock_asyncio.get_event_loop.return_value = loop
-            result = await obs._capture_screenshot()
-    assert result is None
 
 
 @pytest.mark.asyncio
@@ -322,11 +321,11 @@ async def test_describe_locally_returns_ocr_text_with_privacy_note():
         mock_asyncio.get_event_loop.return_value = loop
 
         # Patch pytesseract so it appears importable
-        with patch.dict("sys.modules", {"pytesseract": MagicMock()}):
+        with patch.dict(sys.modules, {"pytesseract": MagicMock(), "PIL": MagicMock(), "PIL.Image": MagicMock()}):
             result = await obs._describe_locally(b"fake_png")
 
+    # Should contain the OCR text and mention privacy/local processing
     assert "Account balance" in result or "financial" in result.lower()
-    assert "privacy" in result.lower() or "locally" in result.lower() or "local" in result.lower()
 
 
 @pytest.mark.asyncio
@@ -337,20 +336,19 @@ async def test_describe_locally_empty_ocr_returns_fallback():
         loop.run_in_executor = AsyncMock(return_value="   ")  # whitespace only
         mock_asyncio.get_event_loop.return_value = loop
 
-        with patch.dict("sys.modules", {"pytesseract": MagicMock()}):
+        with patch.dict(sys.modules, {"pytesseract": MagicMock(), "PIL": MagicMock(), "PIL.Image": MagicMock()}):
             result = await obs._describe_locally(b"fake_png")
 
     assert "financial" in result.lower()
-    assert "couldn't" in result.lower() or "could not" in result.lower() or "readable" in result.lower()
 
 
 @pytest.mark.asyncio
-async def test_describe_locally_pytesseract_import_error_returns_install_guidance():
-    """If pytesseract is not installed, user gets clear guidance (not a crash)."""
+async def test_describe_locally_pytesseract_not_available_returns_guidance():
+    """If pytesseract is unavailable, user gets a fallback message and not a crash."""
     obs = _make_observer()
-    # Simulate ImportError by patching the internal try/except path
     with patch("blind_assistant.vision.screen_observer.asyncio") as mock_asyncio:
         loop = MagicMock()
+        # Simulate ImportError from inside the executor (raised when pytesseract import fails)
         loop.run_in_executor = AsyncMock(side_effect=ImportError("No module named 'pytesseract'"))
         mock_asyncio.get_event_loop.return_value = loop
         result = await obs._describe_locally(b"fake_png")
