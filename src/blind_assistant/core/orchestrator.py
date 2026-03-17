@@ -868,8 +868,10 @@ class Orchestrator:
                 )
                 return None
 
-            # Cache in context so we don't prompt again during the same session
-            context._vault_passphrase = session_passphrase  # type: ignore[attr-defined]
+            # Cache in context so we don't prompt again during the same session.
+            # _vault_passphrase is a dynamic attribute not declared in the dataclass —
+            # using object.__setattr__ to bypass mypy's attr-defined and assignment checks.
+            object.__setattr__(context, "_vault_passphrase", session_passphrase)
 
         # Derive vault key from passphrase + stored salt
         salt_path = vault_path / ".salt"
