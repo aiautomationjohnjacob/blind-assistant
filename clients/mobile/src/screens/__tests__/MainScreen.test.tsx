@@ -136,8 +136,14 @@ describe("MainScreen — accessibility", () => {
   it("main button has an accessibilityHint for first-time users", () => {
     render(<MainScreen />);
     const button = screen.getByRole("button");
-    // VoiceOver reads the hint after the label — important for discoverability
-    expect(button.props.accessibilityHint).toMatch(/double-tap/i);
+    // Hint must exist and be meaningful — it describes what happens when activated.
+    // Per VoiceOver/TalkBack guidelines, hints must NOT say "Double-tap" or "tap" —
+    // screen readers already tell users how to activate (VoiceOver says "Activate",
+    // TalkBack says "Double-tap"). The hint should describe the outcome.
+    expect(button.props.accessibilityHint).toBeTruthy();
+    expect(button.props.accessibilityHint.length).toBeGreaterThan(10);
+    // Ensure we don't regress to VoiceOver-incorrect "double-tap" hint wording
+    expect(button.props.accessibilityHint).not.toMatch(/double-tap/i);
   });
 
   it("status text uses accessibilityLiveRegion='polite'", () => {
