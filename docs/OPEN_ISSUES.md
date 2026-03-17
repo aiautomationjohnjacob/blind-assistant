@@ -98,7 +98,10 @@ zeroing is defense-in-depth.
 **Impact**: Passphrase remains in heap memory until garbage collected after session ends.
 **Proposed fix**: Add `context.clear_sensitive()` method that sets `_vault_passphrase = None`
 and call it in session teardown paths.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 4 — `UserContext.clear_sensitive()` added to orchestrator.py;
+4 unit tests added in test_orchestrator.py covering clearing, idempotency, no-op when
+nothing cached, and non-interference with other fields.
 
 ### ISSUE-006: Passphrase prompt timeout is hardcoded at 120 seconds
 **Severity**: LOW
