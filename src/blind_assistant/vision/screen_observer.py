@@ -49,7 +49,7 @@ class ScreenObserver:
 
     def __init__(self, config: dict) -> None:
         self.config = config
-        self._claude_client = None
+        self._claude_client: AsyncAnthropic | None = None
 
     def _get_client(self):
         """Lazy Claude client initialization."""
