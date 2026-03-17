@@ -45,7 +45,8 @@ def derive_key(passphrase: str, salt: bytes) -> bytes:
         salt=salt,
         iterations=PBKDF2_ITERATIONS,
     )
-    return kdf.derive(passphrase.encode("utf-8"))
+    # PBKDF2HMAC.derive returns Any — cast to bytes for type safety
+    return bytes(kdf.derive(passphrase.encode("utf-8")))
 
 
 def generate_salt() -> bytes:
