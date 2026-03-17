@@ -6,12 +6,13 @@
  * receives text/voice responses.
  *
  * Per the backend API contract (src/blind_assistant/interfaces/api_server.py):
- *   POST /query   — send user message, receive text + optional spoken text
- *   POST /remember — add voice note to Second Brain
- *   POST /describe — request screen description (desktop only)
- *   POST /task    — execute a real-world agentic task
- *   GET  /profile — fetch user preferences
- *   GET  /health  — liveness check (no auth required)
+ *   POST /query      — send user message, receive text + optional spoken text
+ *   POST /transcribe — send base64 audio bytes; receive Whisper transcription
+ *   POST /remember   — add voice note to Second Brain
+ *   POST /describe   — request screen description (desktop only)
+ *   POST /task       — execute a real-world agentic task
+ *   GET  /profile    — fetch user preferences
+ *   GET  /health     — liveness check (no auth required)
  */
 
 // ─────────────────────────────────────────────────────────────
