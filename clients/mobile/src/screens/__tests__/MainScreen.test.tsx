@@ -39,6 +39,19 @@ jest.mock("expo-speech", () => ({
   stop: jest.fn(),
 }));
 
+// Mock expo-haptics — impactAsync is the recording start/stop confirmation cue.
+// This mock prevents native Taptic Engine calls in the test environment while
+// allowing assertions that haptic feedback was requested at the right times.
+const mockImpactAsync = jest.fn().mockResolvedValue(undefined);
+jest.mock("expo-haptics", () => ({
+  impactAsync: mockImpactAsync,
+  ImpactFeedbackStyle: {
+    Light: "light",
+    Medium: "medium",
+    Heavy: "heavy",
+  },
+}));
+
 // jest-expo preset already mocks react-native. We patch AccessibilityInfo
 // via jest.spyOn in beforeEach (below) rather than jest.mock, which avoids
 // the SettingsManager circular/native-module error in Node-based Jest.
