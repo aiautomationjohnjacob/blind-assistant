@@ -60,6 +60,12 @@ to work in parallel, review each other's work, and commit progress continuously.
 - **blind-power-user** — Expert; demands efficiency, speed, minimal verbosity
 - **deafblind-user** — Uses refreshable braille display; no audio channel available
 
+### Technical Implementation Agents
+- **backend-developer** — Writes Python implementation code; async, Claude API, voice pipelines
+- **integration-engineer** — Builds service integrations: Telegram, Obsidian, Whisper,
+  ElevenLabs, DoorDash, travel APIs, Home Assistant, Stripe tokenization
+- **devops-engineer** — Packaging (PyPI), voice-guided installer, CI/CD, release automation
+
 ### Computer Interaction Agents (Screen & System)
 - **screen-observer** — Takes screenshots, describes screen state using vision AI
 - **computer-use-tester** — Drives actual workflows via Playwright/Desktop Commander
@@ -74,6 +80,10 @@ to work in parallel, review each other's work, and commit progress continuously.
 - **ethics-advisor** — Ensures AI enhances autonomy, not dependency; informed consent
 - **security-specialist** — Implementation security audit: encryption, credential storage,
   Telegram security, plain-text sensitive data, prompt injection, dependency CVEs
+
+### Open Source & Community Agents
+- **open-source-steward** — Community health, CONTRIBUTING.md, issue triage, PR reviews,
+  CHANGELOG, release notes; ensures blind contributors feel especially welcome
 
 ### Nonprofit Operations Agents
 - **grant-writer** — Frames impact in grant language; identifies fundable milestones
