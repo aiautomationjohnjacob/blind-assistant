@@ -103,12 +103,8 @@ def mock_pip_failure() -> MagicMock:
 async def test_load_reads_tools_from_yaml(minimal_registry_yaml: Path) -> None:
     """load() populates _available from a valid registry.yaml."""
     registry = ToolRegistry()
-    with patch.object(
-        type(registry), "__class__", ToolRegistry
-    ):
-        # Patch REGISTRY_PATH used inside load()
-        with patch("blind_assistant.tools.registry.REGISTRY_PATH", minimal_registry_yaml):
-            await registry.load()
+    with patch("blind_assistant.tools.registry.REGISTRY_PATH", minimal_registry_yaml):
+        await registry.load()
 
     assert "browser" in registry._available
     assert "stripe_payments" in registry._available
