@@ -402,7 +402,7 @@ class TestConfirmLocally:
         """Silence/timeout returns False (conservative default)."""
         interface._context = MagicMock(speech_rate=1.0)
 
-        async def hang_forever():
+        async def hang_forever(duration_seconds=5.0):  # noqa: ARG001
             await asyncio.sleep(999)
 
         with patch(
