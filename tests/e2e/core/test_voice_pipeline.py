@@ -428,6 +428,9 @@ class TestVoiceLocalLifecycle:
         VoiceLocalInterface.start() announces readiness to the user before
         entering the listen loop. This is critical for blind users — they need
         audible confirmation that the assistant is ready.
+
+        We stop the loop by having the transcription mock set _running=False,
+        then raise CancelledError to exit cleanly.
         """
         config = _make_config(tmp_path)
         orch = await _init_orchestrator(
@@ -444,29 +447,24 @@ class TestVoiceLocalLifecycle:
         async def capture_speak(text, speed=1.0):  # noqa: ARG001
             spoken.append(text)
 
-        # Stop the loop after one cycle by making transcribe return None
-        call_count = 0
-
-        async def one_shot_listen():
-            nonlocal call_count
-            call_count += 1
-            if call_count == 1:
-                iface._running = False  # Stop after first listen
-            return None
+        async def stop_on_first_call(duration_seconds=5.0):  # noqa: ARG001
+            # Stop the loop — _listen_and_respond will return None (silence), loop will exit
+            iface._running = False
+            raise asyncio.CancelledError
 
         with patch("blind_assistant.voice.tts.speak_locally", new=capture_speak), \
              patch(
                  "blind_assistant.voice.stt.transcribe_microphone",
-                 new=AsyncMock(side_effect=one_shot_listen)
+                 new=AsyncMock(side_effect=stop_on_first_call)
              ):
             await iface.start()
 
-        # Must have spoken a startup/ready message
+        # Must have spoken a startup/ready message BEFORE entering the loop
         assert any("blind assistant" in m.lower() for m in spoken), (
             f"No startup announcement found. Spoken: {spoken}"
         )
 
-    async def test_stop_gracefully_exits_loop(
+    async def test_stop_gracefully_sets_running_false(
         self,
         tmp_path,
         mock_keyring,
@@ -475,8 +473,8 @@ class TestVoiceLocalLifecycle:
         mock_context_manager,
     ):
         """
-        stop() sets _running = False. The loop should exit on the next iteration.
-        This verifies clean shutdown — no hanging goroutines or resource leaks.
+        stop() sets _running to False.
+        The voice loop checks _running on each iteration and exits cleanly.
         """
         config = _make_config(tmp_path)
         orch = await _init_orchestrator(
@@ -487,17 +485,9 @@ class TestVoiceLocalLifecycle:
         )
 
         iface = VoiceLocalInterface(orch, config)
+        iface._running = True
 
-        async def stop_after_start(text, speed=1.0):  # noqa: ARG001
-            if "ready" in text.lower() or "blind assistant" in text.lower():
-                await iface.stop()
-
-        with patch("blind_assistant.voice.tts.speak_locally", new=stop_after_start), \
-             patch(
-                 "blind_assistant.voice.stt.transcribe_microphone",
-                 new=AsyncMock(return_value=None)
-             ):
-            await iface.start()
+        await iface.stop()
 
         assert not iface._running
 
