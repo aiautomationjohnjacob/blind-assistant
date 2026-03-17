@@ -1,3 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+develop-eggs/
+pip-wheel-metadata/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv
+env/
+venv/
+ENV/
+
+# SECURITY: Never commit credentials or secrets
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+secrets.yaml
+credentials.json
+token.json
+service_account.json
+keyring_backup*
+
+# Personal data — never commit vault contents
+**/blind-assistant-vault/
+*.md.enc
+.index.enc
+install_log.json
+conversation_log*
+audit_log*
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
 # Dependencies
 node_modules/
 .pnp
