@@ -377,6 +377,69 @@ describe("MainScreen — voice recording flow", () => {
 });
 
 // ─────────────────────────────────────────────────────────────
+// Tests: Haptic feedback (ISSUE-open since Cycle 7)
+// ─────────────────────────────────────────────────────────────
+//
+// TalkBack/VoiceOver users cannot see the button color change when recording starts.
+// A medium-weight haptic on start and a light haptic on stop give non-visual confirmation.
+// Per blind-user-tester review (Cycle 7, 9, 10): "I need to know recording actually started."
+
+describe("MainScreen — haptic recording cues", () => {
+  it("fires a medium haptic when recording starts (first button press)", async () => {
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+
+    fireEvent.press(button);
+
+    await waitFor(() => {
+      expect(mockStartRecording).toHaveBeenCalledTimes(1);
+    });
+
+    // Medium impact fires after state transitions to "listening"
+    expect(mockImpactAsync).toHaveBeenCalledWith("medium");
+  });
+
+  it("fires a light haptic when recording stops (second button press)", async () => {
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+
+    // Start recording
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+
+    // Stop recording
+    fireEvent.press(button);
+    await waitFor(() => {
+      // Two haptics should have fired: medium on start, light on stop
+      expect(mockImpactAsync).toHaveBeenCalledTimes(2);
+      const calls = mockImpactAsync.mock.calls.map((c) => c[0]);
+      expect(calls[0]).toBe("medium"); // start
+      expect(calls[1]).toBe("light");  // stop
+    });
+  });
+
+  it("haptic failure does not crash the recording flow", async () => {
+    // expo-haptics may not be available on all devices (e.g. older Android, iPad
+    // without Taptic Engine). The implementation silently ignores haptic errors.
+    mockImpactAsync.mockRejectedValueOnce(new Error("Haptics unavailable"));
+
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+
+    // Should not throw even when haptics fails
+    fireEvent.press(button);
+    await waitFor(() => {
+      expect(mockStartRecording).toHaveBeenCalledTimes(1);
+    });
+
+    // Screen reader announcement should still fire as the primary cue
+    expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith(
+      expect.stringMatching(/listening/i)
+    );
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
 // Tests: Button state management
 // ─────────────────────────────────────────────────────────────
 
