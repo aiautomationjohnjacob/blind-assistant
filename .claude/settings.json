@@ -21,6 +21,16 @@
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"=== BLIND ASSISTANT — SESSION STARTED ===\"; echo \"Current phase:\"; grep \"\\*\\*Phase\\*\\*\" \"$CLAUDE_PROJECT_DIR/docs/CYCLE_STATE.md\" | head -3; echo \"Last cycle:\"; grep -A 2 \"## Last Cycle Summary\" \"$CLAUDE_PROJECT_DIR/docs/CYCLE_STATE.md\" | tail -2; echo \"Tip: Run /run-cycle to continue autonomous development.\"'"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -38,7 +48,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'CMD=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"command\\\",\\\"\\\"))\"); if echo \"$CMD\" | grep -qE \"rm -rf \\.|git push --force|drop table|DELETE FROM\"; then echo \"Blocked: potentially destructive command requires explicit confirmation\" >&2; exit 2; fi; exit 0'"
+            "command": "bash -c 'CMD=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"command\\\",\\\"\\\"))\" 2>/dev/null || echo \"\"); if echo \"$CMD\" | grep -qE \"rm -rf \\.|git push --force|drop table|DELETE FROM\"; then echo \"Blocked: potentially destructive command requires explicit confirmation\" >&2; exit 2; fi; exit 0'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cd \"$CLAUDE_PROJECT_DIR\" && git add -A && git status --short | grep -q . && git commit -m \"auto: session end — saving state\" && git push 2>/dev/null || true; echo \"State saved to git.\"'"
           }
         ]
       }
