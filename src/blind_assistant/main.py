@@ -44,6 +44,7 @@ async def start_services(config: dict) -> None:
     # API server — primary connection point for all native client apps
     if config.get("api_server_enabled", False):
         from blind_assistant.interfaces.api_server import APIServer
+
         api_server = APIServer(orchestrator, config)
         tasks.append(asyncio.create_task(api_server.start(), name="api_server"))
         logger.info("REST API server starting on localhost:8000...")
@@ -72,12 +73,10 @@ async def start_services(config: dict) -> None:
 def load_config() -> dict:
     """Load configuration from config.yaml."""
     import yaml
+
     config_path = Path(__file__).parent.parent.parent / "config.yaml"
     if not config_path.exists():
-        logger.error(
-            "config.yaml not found. "
-            "Run the installer first: python installer/install.py"
-        )
+        logger.error("config.yaml not found. Run the installer first: python installer/install.py")
         sys.exit(1)
     with open(config_path) as f:
         return yaml.safe_load(f)
@@ -96,9 +95,7 @@ def configure_logging(debug: bool = False) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Blind Assistant — AI life companion for blind users"
-    )
+    parser = argparse.ArgumentParser(description="Blind Assistant — AI life companion for blind users")
     parser.add_argument(
         "--setup",
         action="store_true",
@@ -126,6 +123,7 @@ def main() -> None:
     if args.setup:
         # Run voice-guided installer
         from installer.install import run_installer
+
         asyncio.run(run_installer())
         return
 

@@ -83,14 +83,10 @@ class TelegramBot:
         self._app = Application.builder().token(token).build()
 
         # Handle text messages
-        self._app.add_handler(
-            MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_text)
-        )
+        self._app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self._handle_text))
 
         # Handle voice messages
-        self._app.add_handler(
-            MessageHandler(filters.VOICE, self._handle_voice)
-        )
+        self._app.add_handler(MessageHandler(filters.VOICE, self._handle_voice))
 
         logger.info("Telegram bot starting...")
         await self._app.run_polling()
@@ -153,12 +149,11 @@ class TelegramBot:
             audio_bytes = await voice_file.download_as_bytearray()
 
             from blind_assistant.voice.stt import transcribe_audio
+
             transcript = await transcribe_audio(bytes(audio_bytes))
 
             if not transcript:
-                await update.message.reply_text(
-                    "I couldn't make out what you said. Could you try again?"
-                )
+                await update.message.reply_text("I couldn't make out what you said. Could you try again?")
                 return
 
             logger.info(f"Transcribed: {transcript[:60]}...")
@@ -178,8 +173,7 @@ class TelegramBot:
         except Exception as e:
             logger.error(f"Voice message handling failed: {e}", exc_info=True)
             await update.message.reply_text(
-                "I had trouble processing your voice message. "
-                "You can also type your message if that's easier."
+                "I had trouble processing your voice message. You can also type your message if that's easier."
             )
 
     async def _send_response(self, update, response, user_context) -> None:
@@ -194,6 +188,7 @@ class TelegramBot:
         if user_context.output_mode != "text_only":
             try:
                 from blind_assistant.voice.tts import synthesize_speech
+
                 spoken = response.spoken_text or response.text
                 audio_bytes = await synthesize_speech(
                     text=spoken,

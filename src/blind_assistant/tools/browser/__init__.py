@@ -28,6 +28,7 @@ except ImportError:  # pragma: no cover — Playwright not installed in all envi
 @dataclass
 class PageState:
     """Snapshot of the current browser page state."""
+
     url: str
     title: str
     # Text content visible on the page (used by Claude to reason about next action)
@@ -41,6 +42,7 @@ class PageState:
 @dataclass
 class BrowserAction:
     """A single browser action to take."""
+
     action_type: str  # "navigate", "click", "type", "select", "screenshot"
     # Target element (CSS selector or text to find)
     target: str = ""
@@ -76,10 +78,7 @@ class BrowserTool:
                 "playwright not installed — browser tool unavailable. "
                 "Install it with: pip install playwright && playwright install chromium"
             )
-            raise ImportError(
-                "playwright is not installed. "
-                "Run: pip install playwright && playwright install chromium"
-            )
+            raise ImportError("playwright is not installed. Run: pip install playwright && playwright install chromium")
         try:
             self._playwright = await async_playwright().start()
             # Use Chromium for best screen reader compatibility testing
@@ -225,9 +224,7 @@ class BrowserTool:
     def _require_initialized(self) -> None:
         """Raise if browser has not been initialized."""
         if not self._initialized or not self._page:
-            raise RuntimeError(
-                "BrowserTool not initialized. Call await browser_tool.initialize() first."
-            )
+            raise RuntimeError("BrowserTool not initialized. Call await browser_tool.initialize() first.")
 
 
 class BrowserSession:

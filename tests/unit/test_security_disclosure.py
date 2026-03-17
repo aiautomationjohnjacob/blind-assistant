@@ -35,6 +35,7 @@ pytestmark = pytest.mark.security
 # is_confirmation
 # ─────────────────────────────────────────────────────────────
 
+
 class TestIsConfirmation:
     @pytest.mark.parametrize("keyword", list(CONFIRMATION_KEYWORDS))
     def test_returns_true_for_all_confirmation_keywords(self, keyword):
@@ -69,6 +70,7 @@ class TestIsConfirmation:
 # is_cancellation
 # ─────────────────────────────────────────────────────────────
 
+
 class TestIsCancellation:
     @pytest.mark.parametrize("keyword", list(CANCELLATION_KEYWORDS))
     def test_returns_true_for_all_cancellation_keywords(self, keyword):
@@ -98,6 +100,7 @@ class TestIsCancellation:
 # Disclosure text content requirements
 # (non-negotiable safety properties)
 # ─────────────────────────────────────────────────────────────
+
 
 class TestFinancialRiskDisclosure:
     def test_disclosure_is_not_empty(self):
@@ -167,6 +170,7 @@ class TestTelegramSecurityNotice:
 # Template format tests
 # ─────────────────────────────────────────────────────────────
 
+
 class TestTemplates:
     def test_order_confirmation_has_order_summary_placeholder(self):
         assert "{order_summary}" in ORDER_CONFIRMATION_TEMPLATE
@@ -175,10 +179,7 @@ class TestTemplates:
         assert "{total_amount}" in ORDER_CONFIRMATION_TEMPLATE
 
     def test_order_confirmation_is_formattable(self):
-        result = ORDER_CONFIRMATION_TEMPLATE.format(
-            order_summary="1x Large Pizza",
-            total_amount="$18.50"
-        )
+        result = ORDER_CONFIRMATION_TEMPLATE.format(order_summary="1x Large Pizza", total_amount="$18.50")
         assert "1x Large Pizza" in result
         assert "$18.50" in result
 
@@ -188,9 +189,7 @@ class TestTemplates:
 
     def test_install_consent_is_formattable(self):
         result = INSTALL_CONSENT_TEMPLATE.format(
-            task_description="order food",
-            package_name="doordash-api",
-            package_description="food delivery integration"
+            task_description="order food", package_name="doordash-api", package_description="food delivery integration"
         )
         assert "order food" in result
         assert "doordash-api" in result
@@ -207,6 +206,7 @@ class TestTemplates:
 # Keyword set completeness
 # ─────────────────────────────────────────────────────────────
 
+
 class TestKeywordSets:
     def test_confirmation_keywords_not_empty(self):
         assert len(CONFIRMATION_KEYWORDS) >= 5
@@ -216,9 +216,7 @@ class TestKeywordSets:
 
     def test_no_overlap_between_sets(self):
         overlap = CONFIRMATION_KEYWORDS & CANCELLATION_KEYWORDS
-        assert overlap == set(), (
-            f"Keywords appear in both confirmation and cancellation sets: {overlap}"
-        )
+        assert overlap == set(), f"Keywords appear in both confirmation and cancellation sets: {overlap}"
 
     def test_all_keywords_are_lowercase(self):
         for kw in CONFIRMATION_KEYWORDS | CANCELLATION_KEYWORDS:

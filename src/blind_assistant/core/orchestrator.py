@@ -17,12 +17,13 @@ logger = logging.getLogger(__name__)
 @dataclass
 class UserContext:
     """Everything the orchestrator knows about the current user and session."""
+
     user_id: str
     session_id: str
-    verbosity: str = "standard"       # "brief" | "standard" | "detailed"
-    speech_rate: float = 1.0          # 1.0 = normal; 0.7 = slower (Dorothy)
-    output_mode: str = "voice_text"   # "voice_text" | "text_only" (Jordan)
-    braille_mode: bool = False        # True = format for 40-char braille display
+    verbosity: str = "standard"  # "brief" | "standard" | "detailed"
+    speech_rate: float = 1.0  # 1.0 = normal; 0.7 = slower (Dorothy)
+    output_mode: str = "voice_text"  # "voice_text" | "text_only" (Jordan)
+    braille_mode: bool = False  # True = format for 40-char braille display
     preferences: dict = field(default_factory=dict)
     conversation_history: list = field(default_factory=list)
 
@@ -43,7 +44,8 @@ class UserContext:
 @dataclass
 class Response:
     """The orchestrator's response to a user message."""
-    text: str                          # Always present (for braille display)
+
+    text: str  # Always present (for braille display)
     spoken_text: str | None = None  # If different from text (e.g., shorter)
     follow_up_prompt: str | None = None  # What to ask the user next
     requires_confirmation: bool = False
@@ -132,13 +134,11 @@ class Orchestrator:
                 if not self.tool_registry.is_installed(tool_name):
                     tool_info = self.tool_registry.get_available_tool(tool_name)
                     if tool_info:
-                        installed = await self._offer_tool_install(
-                            tool_name, tool_info, context, update
-                        )
+                        installed = await self._offer_tool_install(tool_name, tool_info, context, update)
                         if not installed:
                             return Response(
                                 text=f"Okay, I won't install {tool_name}. "
-                                     "Let me know if there's another way I can help."
+                                "Let me know if there's another way I can help."
                             )
 
             # 3. Execute the intent
@@ -187,10 +187,7 @@ class Orchestrator:
             if success:
                 await update(f"{tool_name} is now ready.")
                 return True
-            await update(
-                f"I wasn't able to install {tool_name}. "
-                "Let me try a different approach."
-            )
+            await update(f"I wasn't able to install {tool_name}. Let me try a different approach.")
             return False
         return False
 
@@ -211,6 +208,7 @@ class Orchestrator:
         """Capture and describe the current screen."""
         await update("Taking a look at your screen...")
         from blind_assistant.vision.screen_observer import ScreenObserver
+
         observer = ScreenObserver(self.config)
         description = await observer.describe_screen()
         return {"text": description}
@@ -227,6 +225,7 @@ class Orchestrator:
                 )
             }
         from blind_assistant.second_brain.query import VaultQuery
+
         q = VaultQuery(vault)
         # The note content is in the intent parameters or the raw description
         content = intent.parameters.get("content") or intent.description
@@ -245,6 +244,7 @@ class Orchestrator:
                 )
             }
         from blind_assistant.second_brain.query import VaultQuery
+
         q = VaultQuery(vault)
         query_text = intent.parameters.get("query") or intent.description
         response_text = await q.answer_query(query=query_text, context=context)
@@ -257,6 +257,7 @@ class Orchestrator:
             import anthropic
 
             from blind_assistant.security.credentials import CLAUDE_API_KEY, require_credential
+
             api_key = require_credential(CLAUDE_API_KEY)
             client = anthropic.AsyncAnthropic(api_key=api_key)
 
@@ -275,12 +276,7 @@ class Orchestrator:
             return {"text": response.content[0].text}
         except Exception as e:
             logger.error(f"General question failed: {e}", exc_info=True)
-            return {
-                "text": (
-                    "I wasn't able to answer that right now. "
-                    f"Error: {str(e)}"
-                )
-            }
+            return {"text": (f"I wasn't able to answer that right now. Error: {str(e)}")}
 
     async def _handle_order_food(self, intent, context: UserContext, update) -> dict:
         """
@@ -307,28 +303,20 @@ class Orchestrator:
             food_query = intent.description
 
         await update(
-            f"I'll help you order food. "
-            f"I'm going to search for {food_query or 'food delivery options'} near you."
+            f"I'll help you order food. I'm going to search for {food_query or 'food delivery options'} near you."
         )
 
         # Step 2: Financial risk disclosure — MANDATORY before any payment discussion
         # Use the full confirm_financial_details_collection flow which fires the
         # spoken disclosure and waits for explicit acknowledgment.
-        await update(
-            "Before we look at ordering options, I need to share some important information."
-        )
+        await update("Before we look at ordering options, I need to share some important information.")
         user_acknowledged = await self.confirmation_gate.confirm_financial_details_collection(
             context=context,
             response_callback=update,
         )
 
         if not user_acknowledged:
-            return {
-                "text": (
-                    "No problem — I won't proceed with the order. "
-                    "You can ask me again any time."
-                )
-            }
+            return {"text": ("No problem — I won't proceed with the order. You can ask me again any time.")}
 
         # Step 3: Use the browser tool to search for food ordering options
         browser_tool = self.tool_registry.get_installed_tool("browser")
@@ -447,9 +435,7 @@ class Orchestrator:
         from blind_assistant.second_brain.encryption import VaultKey
         from blind_assistant.second_brain.vault import EncryptedVault
 
-        vault_path = Path(
-            self.config.get("vault_path", os.path.expanduser("~/.blind-assistant/vault"))
-        )
+        vault_path = Path(self.config.get("vault_path", os.path.expanduser("~/.blind-assistant/vault")))
 
         key = VaultKey()
 
@@ -500,6 +486,7 @@ class Orchestrator:
             # First time: create vault directory and generate salt
             vault_path.mkdir(parents=True, exist_ok=True)
             from blind_assistant.second_brain.encryption import generate_salt
+
             salt = generate_salt()
             salt_path.write_bytes(salt)
             logger.info("New vault initialised: generated and stored salt.")
@@ -524,9 +511,7 @@ class Orchestrator:
 
         # Let the user know notes are unlocked, and offer to remember for next session
         await response_callback(
-            "Notes unlocked. "
-            "Say 'remember my passphrase' to store it securely so you "
-            "don't need to enter it next time."
+            "Notes unlocked. Say 'remember my passphrase' to store it securely so you don't need to enter it next time."
         )
         return vault
 
@@ -541,9 +526,7 @@ class Orchestrator:
         (elder, needs more time) and Marcus (power user, wants less).
         """
         # Read timeout from config — allows per-user customisation in config.yaml
-        timeout_seconds: float = float(
-            self.config.get("voice", {}).get("prompt_timeout_seconds", 120)
-        )
+        timeout_seconds: float = float(self.config.get("voice", {}).get("prompt_timeout_seconds", 120))
         self.confirmation_gate.register_session(context.session_id)
         queue = self.confirmation_gate._response_queues[context.session_id]
         try:
@@ -592,14 +575,10 @@ class Orchestrator:
         Break at sentence boundaries; avoid emoji and special chars.
         """
         import re
+
         # Remove emoji
         emoji_pattern = re.compile(
-            "["
-            "\U0001F600-\U0001F64F"
-            "\U0001F300-\U0001F5FF"
-            "\U0001F680-\U0001F6FF"
-            "\U0001F1E0-\U0001F1FF"
-            "]+",
+            "[\U0001f600-\U0001f64f\U0001f300-\U0001f5ff\U0001f680-\U0001f6ff\U0001f1e0-\U0001f1ff]+",
             flags=re.UNICODE,
         )
         text = emoji_pattern.sub("", text)
@@ -620,5 +599,5 @@ class Orchestrator:
         ]
         for preamble in preambles:
             if text.startswith(preamble):
-                text = text[len(preamble):]
+                text = text[len(preamble) :]
         return text

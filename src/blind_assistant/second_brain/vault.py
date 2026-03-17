@@ -25,12 +25,12 @@ logger = logging.getLogger(__name__)
 
 # Subdirectories in the vault
 VAULT_DIRS = {
-    "daily": "daily",           # Daily notes
-    "health": "health",         # Medications, appointments, conditions
-    "people": "people",         # Contacts and relationships
-    "tasks": "tasks",           # To-dos and follow-ups
-    "finance": "finance",       # Financial notes (extra sensitive)
-    "general": "general",       # Everything else
+    "daily": "daily",  # Daily notes
+    "health": "health",  # Medications, appointments, conditions
+    "people": "people",  # Contacts and relationships
+    "tasks": "tasks",  # To-dos and follow-ups
+    "finance": "finance",  # Financial notes (extra sensitive)
+    "general": "general",  # Everything else
 }
 
 
@@ -120,9 +120,7 @@ class EncryptedVault:
         logger.info(f"Note added: {filename}")
         return filename
 
-    async def search(
-        self, query: str, limit: int = 5
-    ) -> list[dict]:
+    async def search(self, query: str, limit: int = 5) -> list[dict]:
         """
         Search vault for notes matching a query.
 
@@ -170,6 +168,7 @@ class EncryptedVault:
             body = content
             if len(parts) >= 3:
                 import yaml
+
                 metadata = yaml.safe_load(parts[1]) or {}
                 body = parts[2].strip()
 
@@ -217,9 +216,7 @@ class EncryptedVault:
         for enc_file in self.vault_path.rglob("*.md.enc"):
             note = await self._read_note(enc_file)
             if note:
-                keywords = self._extract_keywords(
-                    note["content"] + " " + note["title"]
-                )
+                keywords = self._extract_keywords(note["content"] + " " + note["title"])
                 rel_path = str(enc_file.relative_to(self.vault_path))
                 self._index[rel_path] = keywords
         await self._save_index()
@@ -227,19 +224,50 @@ class EncryptedVault:
     def _extract_keywords(self, text: str) -> list[str]:
         """Extract searchable keywords from text."""
         import re
+
         # Remove markdown formatting
         text = re.sub(r"[#*_`\[\]()]", " ", text)
         # Lowercase and split
         words = text.lower().split()
         # Filter stop words and short words
         stop_words = {
-            "the", "a", "an", "and", "or", "but", "in", "on", "at",
-            "to", "for", "of", "with", "by", "from", "is", "was",
-            "are", "were", "be", "been", "have", "had", "do", "did",
-            "will", "would", "could", "should", "may", "might",
-            "i", "me", "my", "we", "you", "it", "its",
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "from",
+            "is",
+            "was",
+            "are",
+            "were",
+            "be",
+            "been",
+            "have",
+            "had",
+            "do",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
+            "may",
+            "might",
+            "i",
+            "me",
+            "my",
+            "we",
+            "you",
+            "it",
+            "its",
         }
-        return [
-            w for w in words
-            if len(w) > 2 and w not in stop_words and w.isalpha()
-        ]
+        return [w for w in words if len(w) > 2 and w not in stop_words and w.isalpha()]

@@ -70,9 +70,7 @@ class TestMainScreenKeyboardNavigation:
         """
         await page.goto("http://localhost:19006")
         await page.keyboard.press("Tab")
-        focused = await page.evaluate(
-            "window.getComputedStyle(document.activeElement).outline"
-        )
+        focused = await page.evaluate("window.getComputedStyle(document.activeElement).outline")
         # Should not be "none" or "0px none"
         assert "none" not in focused or "px" in focused
 

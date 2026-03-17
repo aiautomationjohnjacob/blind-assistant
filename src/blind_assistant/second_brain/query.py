@@ -98,10 +98,7 @@ class VaultQuery:
             Confirmation message to speak to the user
         """
         if not self.vault.key.is_unlocked:
-            return (
-                "Your notes vault is locked. "
-                "Please unlock your vault first."
-            )
+            return "Your notes vault is locked. Please unlock your vault first."
 
         # Infer category from content
         category = _infer_category(content)
@@ -121,10 +118,7 @@ class VaultQuery:
 
         except Exception as e:
             logger.error(f"Failed to add note: {e}", exc_info=True)
-            return (
-                "I had trouble saving that note. "
-                "Please try again."
-            )
+            return "I had trouble saving that note. Please try again."
 
     def _format_single_result(self, note: dict, context) -> str:
         """Format a single vault search result for speech."""
@@ -139,15 +133,11 @@ class VaultQuery:
         excerpt = _trim_for_speech(content, MAX_SPOKEN_EXCERPT_LENGTH)
 
         if context.braille_mode:
-            return _format_for_braille(
-                f"Note: {title}\n{date_label}\n{excerpt}"
-            )
+            return _format_for_braille(f"Note: {title}\n{date_label}\n{excerpt}")
 
         return f"Here's what I found. {date_label}: {title}. {excerpt}"
 
-    def _format_multiple_results(
-        self, results: list[dict], context
-    ) -> str:
+    def _format_multiple_results(self, results: list[dict], context) -> str:
         """Format multiple vault search results for speech."""
         count = len(results)
         intro = f"I found {count} notes that might be relevant."
@@ -162,10 +152,7 @@ class VaultQuery:
         if context.braille_mode:
             parts = [f"Found {count} notes:"]
             for i, note in enumerate(results, 1):
-                parts.append(
-                    f"{i}. {note.get('title','Untitled')} — "
-                    f"{_format_date_label(note.get('date', ''))}"
-                )
+                parts.append(f"{i}. {note.get('title', 'Untitled')} — {_format_date_label(note.get('date', ''))}")
             return _format_for_braille("\n".join(parts))
 
         other_count = count - 1
@@ -173,18 +160,17 @@ class VaultQuery:
             f"There {'is' if other_count == 1 else 'are'} also "
             f"{other_count} other {'note' if other_count == 1 else 'notes'}. "
             "Say 'read the next one' to hear more."
-            if other_count > 0 else ""
+            if other_count > 0
+            else ""
         )
 
-        return (
-            f"{intro} The most relevant: {date_label}, titled {title}. "
-            f"{excerpt} {suffix}".strip()
-        )
+        return f"{intro} The most relevant: {date_label}, titled {title}. {excerpt} {suffix}".strip()
 
 
 # ──────────────────────────────────────────────
 # Utility functions
 # ──────────────────────────────────────────────
+
 
 def _infer_category(content: str) -> str:
     """
@@ -194,22 +180,63 @@ def _infer_category(content: str) -> str:
     content_lower = content.lower()
 
     health_keywords = {
-        "doctor", "appointment", "medication", "prescription", "hospital",
-        "health", "blood pressure", "diagnosis", "symptoms", "insurance",
-        "pharmacy", "specialist", "therapy", "treatment",
+        "doctor",
+        "appointment",
+        "medication",
+        "prescription",
+        "hospital",
+        "health",
+        "blood pressure",
+        "diagnosis",
+        "symptoms",
+        "insurance",
+        "pharmacy",
+        "specialist",
+        "therapy",
+        "treatment",
     }
     finance_keywords = {
-        "bank", "payment", "invoice", "bill", "credit", "debit", "loan",
-        "mortgage", "rent", "tax", "budget", "insurance", "claim", "money",
-        "dollars", "price", "cost", "expense", "account",
+        "bank",
+        "payment",
+        "invoice",
+        "bill",
+        "credit",
+        "debit",
+        "loan",
+        "mortgage",
+        "rent",
+        "tax",
+        "budget",
+        "insurance",
+        "claim",
+        "money",
+        "dollars",
+        "price",
+        "cost",
+        "expense",
+        "account",
     }
     people_keywords = {
-        "called", "texted", "emailed", "met with", "birthday", "address",
-        "phone number", "contact",
+        "called",
+        "texted",
+        "emailed",
+        "met with",
+        "birthday",
+        "address",
+        "phone number",
+        "contact",
     }
     tasks_keywords = {
-        "todo", "to-do", "to do", "need to", "must", "remember to",
-        "don't forget", "follow up", "call back", "schedule",
+        "todo",
+        "to-do",
+        "to do",
+        "need to",
+        "must",
+        "remember to",
+        "don't forget",
+        "follow up",
+        "call back",
+        "schedule",
     }
 
     if any(kw in content_lower for kw in health_keywords):
@@ -241,6 +268,7 @@ def _extract_topic_hint(content: str) -> str:
     """Extract a 2-3 word topic hint from note content for the confirmation message."""
     # Use the first few significant words
     import re
+
     words = re.findall(r"\b[a-zA-Z]{4,}\b", content)
     stop_words = {"that", "this", "with", "from", "have", "will", "said"}
     significant = [w for w in words if w.lower() not in stop_words]

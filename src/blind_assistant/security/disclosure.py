@@ -32,8 +32,7 @@ FINANCIAL_RISK_DISCLOSURE_BRIEF = (
 
 # Screen protection notice for financial pages
 FINANCIAL_SCREEN_PROTECTION_NOTICE = (
-    "I can see a financial page. "
-    "I'm protecting this screen — I won't send screenshots of it to any external service."
+    "I can see a financial page. I'm protecting this screen — I won't send screenshots of it to any external service."
 )
 
 # Order confirmation template
@@ -50,10 +49,7 @@ INSTALL_CONSENT_TEMPLATE = (
 )
 
 # Action confirmation template
-ACTION_CONFIRMATION_TEMPLATE = (
-    "I'm about to {action_description}. "
-    "Say confirm to proceed, or cancel to stop."
-)
+ACTION_CONFIRMATION_TEMPLATE = "I'm about to {action_description}. Say confirm to proceed, or cancel to stop."
 
 # Telegram non-E2E notice (shown at setup)
 TELEGRAM_SECURITY_NOTICE = """
@@ -66,13 +62,32 @@ a secure channel instead.
 
 # Confirmation keywords (case-insensitive)
 CONFIRMATION_KEYWORDS = {
-    "yes", "confirm", "ok", "okay", "do it", "go ahead",
-    "sure", "proceed", "continue", "i understand", "yep", "yeah"
+    "yes",
+    "confirm",
+    "ok",
+    "okay",
+    "do it",
+    "go ahead",
+    "sure",
+    "proceed",
+    "continue",
+    "i understand",
+    "yep",
+    "yeah",
 }
 
 CANCELLATION_KEYWORDS = {
-    "no", "cancel", "stop", "never mind", "nevermind", "abort",
-    "don't", "dont", "skip", "nope", "nah"
+    "no",
+    "cancel",
+    "stop",
+    "never mind",
+    "nevermind",
+    "abort",
+    "don't",
+    "dont",
+    "skip",
+    "nope",
+    "nah",
 }
 
 

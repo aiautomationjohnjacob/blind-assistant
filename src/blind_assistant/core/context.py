@@ -44,9 +44,7 @@ class ContextManager:
             braille_mode=False,
         )
 
-    async def update_preference(
-        self, user_id: str, key: str, value: str
-    ) -> None:
+    async def update_preference(self, user_id: str, key: str, value: str) -> None:
         """Update a user preference in persistent storage."""
         # TODO: Implement with MCP memory server in Task 4
         logger.info(f"Preference update for {user_id}: {key} = {value}")

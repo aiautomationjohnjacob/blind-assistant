@@ -40,6 +40,7 @@ pytestmark = pytest.mark.security
 # generate_salt
 # ─────────────────────────────────────────────────────────────
 
+
 class TestGenerateSalt:
     def test_returns_bytes(self):
         assert isinstance(generate_salt(), bytes)
@@ -56,6 +57,7 @@ class TestGenerateSalt:
 # ─────────────────────────────────────────────────────────────
 # derive_key
 # ─────────────────────────────────────────────────────────────
+
 
 class TestDeriveKey:
     def test_returns_bytes(self, sample_passphrase):
@@ -89,9 +91,7 @@ class TestDeriveKey:
 
     def test_uses_high_iteration_count(self):
         # 600,000 iterations is the NIST recommendation for PBKDF2-SHA256
-        assert PBKDF2_ITERATIONS >= 600_000, (
-            f"PBKDF2 iterations ({PBKDF2_ITERATIONS}) below NIST minimum of 600,000"
-        )
+        assert PBKDF2_ITERATIONS >= 600_000, f"PBKDF2 iterations ({PBKDF2_ITERATIONS}) below NIST minimum of 600,000"
 
     def test_key_does_not_contain_passphrase(self, sample_passphrase):
         salt = os.urandom(32)
@@ -102,6 +102,7 @@ class TestDeriveKey:
 # ─────────────────────────────────────────────────────────────
 # encrypt / decrypt
 # ─────────────────────────────────────────────────────────────
+
 
 class TestEncryptDecrypt:
     def test_roundtrip_preserves_plaintext(self):
@@ -173,6 +174,7 @@ class TestEncryptDecrypt:
 # encrypt_string / decrypt_string
 # ─────────────────────────────────────────────────────────────
 
+
 class TestEncryptDecryptString:
     def test_roundtrip(self):
         key = os.urandom(32)
@@ -199,6 +201,7 @@ class TestEncryptDecryptString:
 # ─────────────────────────────────────────────────────────────
 # VaultKey
 # ─────────────────────────────────────────────────────────────
+
 
 class TestVaultKey:
     def test_initially_locked(self):

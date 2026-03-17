@@ -97,9 +97,7 @@ class ConfirmationGate:
         Returns:
             True if confirmed, False otherwise
         """
-        message = ACTION_CONFIRMATION_TEMPLATE.format(
-            action_description=action_description
-        )
+        message = ACTION_CONFIRMATION_TEMPLATE.format(action_description=action_description)
 
         if response_callback:
             await response_callback(message)
@@ -124,17 +122,12 @@ class ConfirmationGate:
         """
         if response_callback is None:
             logger.warning(
-                "confirm_financial_action called without response_callback — "
-                "user will not hear the risk disclosure"
+                "confirm_financial_action called without response_callback — user will not hear the risk disclosure"
             )
             return False
 
         # Step 1: Risk disclosure — ALWAYS fires, every time
-        disclosure = (
-            FINANCIAL_RISK_DISCLOSURE_BRIEF
-            if context.verbosity == "brief"
-            else FINANCIAL_RISK_DISCLOSURE
-        )
+        disclosure = FINANCIAL_RISK_DISCLOSURE_BRIEF if context.verbosity == "brief" else FINANCIAL_RISK_DISCLOSURE
         await response_callback(disclosure)
         understood = await self.wait_for_confirmation(context, timeout=timeout)
 
@@ -165,10 +158,6 @@ class ConfirmationGate:
         if response_callback is None:
             return False
 
-        disclosure = (
-            FINANCIAL_RISK_DISCLOSURE_BRIEF
-            if context.verbosity == "brief"
-            else FINANCIAL_RISK_DISCLOSURE
-        )
+        disclosure = FINANCIAL_RISK_DISCLOSURE_BRIEF if context.verbosity == "brief" else FINANCIAL_RISK_DISCLOSURE
         await response_callback(disclosure)
         return await self.wait_for_confirmation(context, timeout=timeout)

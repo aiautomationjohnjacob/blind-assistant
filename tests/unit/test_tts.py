@@ -58,13 +58,16 @@ class TestSynthesizeSpeech:
         """When ElevenLabs succeeds, returns its audio bytes directly."""
         fake_audio = b"fake_mp3_audio"
 
-        with patch(
-            "blind_assistant.voice.tts._elevenlabs_tts",
-            return_value=fake_audio,
-        ) as mock_el, patch(
-            "blind_assistant.voice.tts._pyttsx3_tts",
-            return_value=b"local_audio",
-        ) as mock_local:
+        with (
+            patch(
+                "blind_assistant.voice.tts._elevenlabs_tts",
+                return_value=fake_audio,
+            ) as mock_el,
+            patch(
+                "blind_assistant.voice.tts._pyttsx3_tts",
+                return_value=b"local_audio",
+            ) as mock_local,
+        ):
             from blind_assistant.voice.tts import synthesize_speech
 
             result = await synthesize_speech("Hello world")
@@ -77,13 +80,16 @@ class TestSynthesizeSpeech:
         """When ElevenLabs returns None, falls back to local pyttsx3."""
         local_audio = b"local_wav_audio"
 
-        with patch(
-            "blind_assistant.voice.tts._elevenlabs_tts",
-            return_value=None,
-        ), patch(
-            "blind_assistant.voice.tts._pyttsx3_tts",
-            return_value=local_audio,
-        ) as mock_local:
+        with (
+            patch(
+                "blind_assistant.voice.tts._elevenlabs_tts",
+                return_value=None,
+            ),
+            patch(
+                "blind_assistant.voice.tts._pyttsx3_tts",
+                return_value=local_audio,
+            ) as mock_local,
+        ):
             from blind_assistant.voice.tts import synthesize_speech
 
             result = await synthesize_speech("Hello world")
@@ -93,12 +99,15 @@ class TestSynthesizeSpeech:
 
     async def test_returns_none_when_both_unavailable(self):
         """When both ElevenLabs and pyttsx3 fail, returns None."""
-        with patch(
-            "blind_assistant.voice.tts._elevenlabs_tts",
-            return_value=None,
-        ), patch(
-            "blind_assistant.voice.tts._pyttsx3_tts",
-            return_value=None,
+        with (
+            patch(
+                "blind_assistant.voice.tts._elevenlabs_tts",
+                return_value=None,
+            ),
+            patch(
+                "blind_assistant.voice.tts._pyttsx3_tts",
+                return_value=None,
+            ),
         ):
             from blind_assistant.voice.tts import synthesize_speech
 
@@ -108,13 +117,16 @@ class TestSynthesizeSpeech:
 
     async def test_passes_speed_to_both_tts_backends(self):
         """Speed parameter is forwarded to both ElevenLabs and fallback."""
-        with patch(
-            "blind_assistant.voice.tts._elevenlabs_tts",
-            return_value=None,
-        ) as mock_el, patch(
-            "blind_assistant.voice.tts._pyttsx3_tts",
-            return_value=b"audio",
-        ) as mock_local:
+        with (
+            patch(
+                "blind_assistant.voice.tts._elevenlabs_tts",
+                return_value=None,
+            ) as mock_el,
+            patch(
+                "blind_assistant.voice.tts._pyttsx3_tts",
+                return_value=b"audio",
+            ) as mock_local,
+        ):
             from blind_assistant.voice.tts import synthesize_speech
 
             await synthesize_speech("text", speed=0.75)
@@ -124,12 +136,15 @@ class TestSynthesizeSpeech:
 
     async def test_handles_empty_text_without_crashing(self):
         """Empty string input is forwarded to backends without crashing."""
-        with patch(
-            "blind_assistant.voice.tts._elevenlabs_tts",
-            return_value=None,
-        ), patch(
-            "blind_assistant.voice.tts._pyttsx3_tts",
-            return_value=None,
+        with (
+            patch(
+                "blind_assistant.voice.tts._elevenlabs_tts",
+                return_value=None,
+            ),
+            patch(
+                "blind_assistant.voice.tts._pyttsx3_tts",
+                return_value=None,
+            ),
         ):
             from blind_assistant.voice.tts import synthesize_speech
 
@@ -228,9 +243,9 @@ class TestPyttsx3TTS:
     def test_speech_rate_calculation(self):
         """Words-per-minute = int(200 * speed). Verify at common speeds."""
         # This tests the math inline — not dependent on pyttsx3 being installed.
-        assert int(200 * 0.75) == 150   # Dorothy's slow speed
-        assert int(200 * 1.0) == 200    # Normal speed
-        assert int(200 * 1.5) == 300    # Marcus's fast speed
+        assert int(200 * 0.75) == 150  # Dorothy's slow speed
+        assert int(200 * 1.0) == 200  # Normal speed
+        assert int(200 * 1.5) == 300  # Marcus's fast speed
 
 
 # ─────────────────────────────────────────────────────────────

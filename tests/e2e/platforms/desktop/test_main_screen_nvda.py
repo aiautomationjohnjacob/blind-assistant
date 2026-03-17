@@ -40,15 +40,12 @@ class TestDesktopCLIWithNVDA:
         Acceptable: 'Say assistant followed by your request.'
         """
         startup_message = (
-            "Blind Assistant is ready. "
-            "Say 'assistant' followed by your request. "
-            "Or just speak and I will listen."
+            "Blind Assistant is ready. Say 'assistant' followed by your request. Or just speak and I will listen."
         )
         visual_only_terms = ["click", "tap", "see", "look", "view", "watch"]
         for term in visual_only_terms:
             assert term not in startup_message.lower(), (
-                f"Visual-only term '{term}' found in startup message. "
-                "Replace with voice/keyboard equivalent."
+                f"Visual-only term '{term}' found in startup message. Replace with voice/keyboard equivalent."
             )
 
     def test_error_message_gives_recovery_path(self):
@@ -57,9 +54,6 @@ class TestDesktopCLIWithNVDA:
         'I had trouble with that request. Could you try again or rephrase it?'
         Not just: 'Error.'
         """
-        error_message = (
-            "I had trouble with that request. "
-            "Could you try again or rephrase it?"
-        )
+        error_message = "I had trouble with that request. Could you try again or rephrase it?"
         # Must give a path forward
         assert any(word in error_message.lower() for word in ["try", "say", "speak", "rephrase"])

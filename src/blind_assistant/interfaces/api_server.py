@@ -90,8 +90,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         """Check rate limit before passing the request to the route handler."""
         # Extract client IP — X-Forwarded-For for reverse-proxy setups
         forwarded_for = request.headers.get("X-Forwarded-For")
-        client_ip = forwarded_for.split(",")[0].strip() if forwarded_for else (
-            request.client.host if request.client else "unknown"
+        client_ip = (
+            forwarded_for.split(",")[0].strip()
+            if forwarded_for
+            else (request.client.host if request.client else "unknown")
         )
 
         if request.url.path == "/health":
@@ -111,6 +113,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         return await call_next(request)
 
+
 # ─────────────────────────────────────────────────────────────
 # Request / Response models
 # ─────────────────────────────────────────────────────────────
@@ -118,6 +121,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 class QueryRequest(BaseModel):
     """User sends a text (or pre-transcribed voice) message."""
+
     message: str
     session_id: str = "default"
     # Optional user preferences override (e.g. speed, verbosity)
@@ -128,45 +132,52 @@ class QueryRequest(BaseModel):
 
 class QueryResponse(BaseModel):
     """Text response plus optional metadata for TTS."""
+
     text: str
-    spoken_text: str | None = None       # Shorter spoken version if different from text
+    spoken_text: str | None = None  # Shorter spoken version if different from text
     follow_up_prompt: str | None = None  # Next question to ask the user, if any
     session_id: str = "default"
 
 
 class RememberRequest(BaseModel):
     """Store a voice note in the user's Second Brain vault."""
-    content: str       # Transcribed voice note content
+
+    content: str  # Transcribed voice note content
     session_id: str = "default"
 
 
 class RememberResponse(BaseModel):
     """Confirmation that the note was stored."""
-    text: str          # Spoken confirmation (e.g. "Note saved")
+
+    text: str  # Spoken confirmation (e.g. "Note saved")
     note_id: str | None = None
 
 
 class DescribeRequest(BaseModel):
     """Request a description of the current desktop screen."""
+
     session_id: str = "default"
-    region: dict | None = None    # Optional {x, y, width, height} for partial capture
+    region: dict | None = None  # Optional {x, y, width, height} for partial capture
 
 
 class DescribeResponse(BaseModel):
     """Screen description as text."""
+
     text: str
     session_id: str = "default"
 
 
 class TaskRequest(BaseModel):
     """Execute a high-stakes agentic task (food order, booking, etc.)."""
+
     task_description: str
     session_id: str = "default"
 
 
 class TaskResponse(BaseModel):
     """Outcome of a task execution."""
-    text: str                 # Summary of what happened
+
+    text: str  # Summary of what happened
     completed: bool = False
     requires_confirmation: bool = False
     confirmation_prompt: str | None = None
@@ -174,6 +185,7 @@ class TaskResponse(BaseModel):
 
 class ProfileResponse(BaseModel):
     """User's current preferences and configuration."""
+
     user_id: str
     verbosity: str
     speech_rate: float
@@ -183,6 +195,7 @@ class ProfileResponse(BaseModel):
 
 class TranscribeRequest(BaseModel):
     """Audio transcription request — base64-encoded audio bytes from the client microphone."""
+
     # Audio file as base64 string (WAV, M4A, OGG, or any format supported by Whisper/ffmpeg).
     # Maximum ~10 MB of audio (about 5 minutes of speech at 16kHz mono WAV).
     audio_base64: str
@@ -193,13 +206,15 @@ class TranscribeRequest(BaseModel):
 
 class TranscribeResponse(BaseModel):
     """Transcribed text from the submitted audio clip."""
-    text: str               # Transcribed speech — empty string if nothing detected
-    language: str | None    # Language Whisper detected (e.g. "en", "es")
+
+    text: str  # Transcribed speech — empty string if nothing detected
+    language: str | None  # Language Whisper detected (e.g. "en", "es")
     session_id: str = "default"
 
 
 class HealthResponse(BaseModel):
     """Server health — no auth required."""
+
     status: str = "ok"
     version: str = "0.1.0"
 
@@ -228,8 +243,7 @@ class APIServer:
         app = FastAPI(
             title="Blind Assistant API",
             description=(
-                "REST API connecting all client apps (Android, iOS, Desktop, Web) "
-                "to the Blind Assistant backend."
+                "REST API connecting all client apps (Android, iOS, Desktop, Web) to the Blind Assistant backend."
             ),
             version="0.1.0",
             # Disable auto-generated docs in production to avoid leaking API shape
@@ -296,22 +310,19 @@ class APIServer:
         provided_token = auth_header.removeprefix("Bearer ").strip()
 
         from blind_assistant.security.credentials import API_SERVER_TOKEN, get_credential
+
         stored_token = get_credential(API_SERVER_TOKEN)
 
         if not stored_token:
             # No token configured yet — check if we're in dev/bypass mode
             if self.config.get("api_auth_disabled", False):
                 logger.warning(
-                    "API auth is disabled (api_auth_disabled=true in config). "
-                    "This is only safe for local development."
+                    "API auth is disabled (api_auth_disabled=true in config). This is only safe for local development."
                 )
                 return "dev_user"
             raise HTTPException(
                 status_code=401,
-                detail=(
-                    "API server token not configured. "
-                    "Run the setup wizard: python installer/install.py --setup"
-                ),
+                detail=("API server token not configured. Run the setup wizard: python installer/install.py --setup"),
             )
 
         if provided_token != stored_token:

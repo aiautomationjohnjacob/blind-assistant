@@ -32,9 +32,7 @@ async def _load_model(model_name: str = DEFAULT_MODEL):
             logger.info(f"Loading Whisper model: {model_name}")
             # Run in thread pool to avoid blocking event loop
             loop = asyncio.get_event_loop()
-            _whisper_model = await loop.run_in_executor(
-                None, _load_whisper_sync, model_name
-            )
+            _whisper_model = await loop.run_in_executor(None, _load_whisper_sync, model_name)
             logger.info("Whisper model loaded.")
     return _whisper_model
 
@@ -42,6 +40,7 @@ async def _load_model(model_name: str = DEFAULT_MODEL):
 def _load_whisper_sync(model_name: str):
     """Synchronous Whisper model loading (runs in thread pool)."""
     import whisper
+
     return whisper.load_model(model_name)
 
 
@@ -83,7 +82,7 @@ async def transcribe_audio(
                     tmp_path,
                     language=language,
                     fp16=False,  # CPU-safe
-                )
+                ),
             )
             transcript = result.get("text", "").strip()
             logger.debug(f"Transcribed: {transcript[:60]}...")
@@ -125,7 +124,7 @@ async def transcribe_microphone(
                 samplerate=sample_rate,
                 channels=1,
                 dtype="int16",
-            )
+            ),
         )
         await loop.run_in_executor(None, sd.wait)
 
@@ -137,10 +136,7 @@ async def transcribe_microphone(
         return await transcribe_audio(audio_bytes)
 
     except ImportError:
-        logger.error(
-            "sounddevice or scipy not installed. "
-            "Install with: pip install sounddevice scipy"
-        )
+        logger.error("sounddevice or scipy not installed. Install with: pip install sounddevice scipy")
         return None
     except Exception as e:
         logger.error(f"Microphone recording failed: {e}", exc_info=True)

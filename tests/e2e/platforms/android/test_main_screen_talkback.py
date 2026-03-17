@@ -43,8 +43,10 @@ class TestTalkBackNavigation:
         Some apps crash when launched with TalkBack due to missing content descriptions.
         """
         # Enable TalkBack
-        adb.shell("settings put secure enabled_accessibility_services "
-                  "com.samsung.android.accessibility.axb/com.samsung.android.accessibility.axb.TalkBackService")
+        adb.shell(
+            "settings put secure enabled_accessibility_services "
+            "com.samsung.android.accessibility.axb/com.samsung.android.accessibility.axb.TalkBackService"
+        )
         # Launch the app
         adb.shell("am start -n org.blindassistant.app/.MainActivity")
         # Verify no crash
@@ -59,8 +61,9 @@ class TestTalkBackNavigation:
         # Dump accessibility window content
         adb.shell("uiautomator dump /sdcard/screen.xml")
         xml = adb.pull("/sdcard/screen.xml")
-        assert 'content-desc="Speak to assistant"' in xml or \
-               'content-desc=' in xml, "Main button has no content description"
+        assert 'content-desc="Speak to assistant"' in xml or "content-desc=" in xml, (
+            "Main button has no content description"
+        )
 
     def test_focus_follows_logical_reading_order(self, adb):
         """

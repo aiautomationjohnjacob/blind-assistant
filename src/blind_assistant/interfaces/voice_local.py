@@ -102,9 +102,7 @@ class VoiceLocalInterface:
 
         # Record a fixed-duration utterance
         # Future: add voice activity detection (VAD) for smarter cutoff
-        transcript = await transcribe_microphone(
-            duration_seconds=self._record_duration
-        )
+        transcript = await transcribe_microphone(duration_seconds=self._record_duration)
 
         if not transcript or not transcript.strip():
             # Silence or background noise — just loop
@@ -125,7 +123,7 @@ class VoiceLocalInterface:
         clean_transcript = transcript
         wake_idx = transcript.lower().find(self._wake_word)
         if wake_idx != -1:
-            after_wake = transcript[wake_idx + len(self._wake_word):].strip()
+            after_wake = transcript[wake_idx + len(self._wake_word) :].strip()
             # User said only the wake word ("assistant") with nothing after it if after_wake is empty
             clean_transcript = after_wake or ""
 
@@ -135,9 +133,7 @@ class VoiceLocalInterface:
                 speed=self._context.speech_rate,
             )
             # Listen for the actual request
-            transcript2 = await transcribe_microphone(
-                duration_seconds=self._record_duration
-            )
+            transcript2 = await transcribe_microphone(duration_seconds=self._record_duration)
             if transcript2 and transcript2.strip():
                 clean_transcript = transcript2.strip()
             else:
@@ -168,14 +164,11 @@ class VoiceLocalInterface:
         except Exception as e:
             logger.error(f"Error processing voice input: {e}", exc_info=True)
             await speak_locally(
-                "I had trouble with that request. "
-                "Could you try again or rephrase it?",
+                "I had trouble with that request. Could you try again or rephrase it?",
                 speed=self._context.speech_rate,
             )
 
-    async def confirm_locally(
-        self, prompt: str, timeout: float = 10.0
-    ) -> bool:
+    async def confirm_locally(self, prompt: str, timeout: float = 10.0) -> bool:
         """
         Ask a yes/no question via voice and wait for voice response.
         Used for local confirmation flows (not via Telegram).

@@ -64,9 +64,7 @@ def standard_context():
 
 
 class TestGetVaultKeychainHappyPath:
-    async def test_returns_vault_when_keychain_has_key(
-        self, orchestrator_with_gate, standard_context, tmp_vault_path
-    ):
+    async def test_returns_vault_when_keychain_has_key(self, orchestrator_with_gate, standard_context, tmp_vault_path):
         """When keychain has the vault key, vault is returned without prompting."""
         # Build a real key and encode it as the keychain would store it
         salt = generate_salt()
@@ -82,9 +80,7 @@ class TestGetVaultKeychainHappyPath:
             "blind_assistant.security.credentials.get_credential",
             return_value=encoded_key,
         ):
-            vault = await orchestrator_with_gate._get_vault(
-                standard_context, response_callback=callback
-            )
+            vault = await orchestrator_with_gate._get_vault(standard_context, response_callback=callback)
 
         assert vault is not None
         # Keychain path should not send any messages to the user
@@ -97,42 +93,30 @@ class TestGetVaultKeychainHappyPath:
 
 
 class TestGetVaultPassphrasePrompt:
-    async def test_prompts_when_no_keychain_key(
-        self, orchestrator_with_gate, standard_context, tmp_vault_path
-    ):
+    async def test_prompts_when_no_keychain_key(self, orchestrator_with_gate, standard_context, tmp_vault_path):
         """When keychain is empty, the user is prompted for a passphrase."""
         messages_sent = []
 
         async def callback(msg):
             messages_sent.append(msg)
             # Immediately supply the passphrase so the flow can complete
-            orchestrator_with_gate.confirmation_gate.submit_response(
-                standard_context.session_id, "test_passphrase_123"
-            )
+            orchestrator_with_gate.confirmation_gate.submit_response(standard_context.session_id, "test_passphrase_123")
 
         with patch("blind_assistant.security.credentials.get_credential", return_value=None):
-            vault = await orchestrator_with_gate._get_vault(
-                standard_context, response_callback=callback
-            )
+            vault = await orchestrator_with_gate._get_vault(standard_context, response_callback=callback)
 
         assert vault is not None
         # Must have sent a prompt message to the user
         prompt_messages = [m for m in messages_sent if "passphrase" in m.lower()]
         assert len(prompt_messages) >= 1
 
-    async def test_no_callback_returns_none_silently(
-        self, orchestrator_with_gate, standard_context
-    ):
+    async def test_no_callback_returns_none_silently(self, orchestrator_with_gate, standard_context):
         """Without a response_callback, cannot prompt user — returns None but logs."""
         with patch("blind_assistant.security.credentials.get_credential", return_value=None):
-            vault = await orchestrator_with_gate._get_vault(
-                standard_context, response_callback=None
-            )
+            vault = await orchestrator_with_gate._get_vault(standard_context, response_callback=None)
         assert vault is None
 
-    async def test_returns_none_when_passphrase_times_out(
-        self, orchestrator_with_gate, standard_context
-    ):
+    async def test_returns_none_when_passphrase_times_out(self, orchestrator_with_gate, standard_context):
         """If user doesn't respond within timeout, vault returns None with voice message."""
         messages_sent = []
 
@@ -147,19 +131,14 @@ class TestGetVaultPassphrasePrompt:
         orchestrator_with_gate._collect_vault_passphrase = _mock_collect
 
         with patch("blind_assistant.security.credentials.get_credential", return_value=None):
-            vault = await orchestrator_with_gate._get_vault(
-                standard_context, response_callback=callback
-            )
+            vault = await orchestrator_with_gate._get_vault(standard_context, response_callback=callback)
 
         assert vault is None
         # User must have received an explanatory message
         assert len(messages_sent) >= 1
         # The message must mention the vault is still locked or no passphrase received
         explanation = " ".join(messages_sent)
-        assert any(
-            keyword in explanation.lower()
-            for keyword in ["locked", "passphrase", "did not", "no"]
-        )
+        assert any(keyword in explanation.lower() for keyword in ["locked", "passphrase", "did not", "no"])
 
     async def test_returns_none_with_voice_message_on_wrong_passphrase(
         self, orchestrator_with_gate, standard_context, tmp_vault_path
@@ -188,9 +167,7 @@ class TestGetVaultPassphrasePrompt:
                 side_effect=ValueError("Invalid passphrase"),
             ),
         ):
-            vault = await orchestrator_with_gate._get_vault(
-                standard_context, response_callback=callback
-            )
+            vault = await orchestrator_with_gate._get_vault(standard_context, response_callback=callback)
 
         assert vault is None
         # User must have received an error message
@@ -199,9 +176,7 @@ class TestGetVaultPassphrasePrompt:
         # Cached passphrase must be cleared so next attempt can re-prompt
         assert not hasattr(standard_context, "_vault_passphrase")
 
-    async def test_caches_passphrase_in_session(
-        self, orchestrator_with_gate, standard_context, tmp_vault_path
-    ):
+    async def test_caches_passphrase_in_session(self, orchestrator_with_gate, standard_context, tmp_vault_path):
         """After successful unlock, passphrase is cached to avoid re-prompting."""
         messages_sent = []
         prompt_count = [0]
@@ -217,9 +192,7 @@ class TestGetVaultPassphrasePrompt:
                 )
 
         with patch("blind_assistant.security.credentials.get_credential", return_value=None):
-            vault1 = await orchestrator_with_gate._get_vault(
-                standard_context, response_callback=callback
-            )
+            vault1 = await orchestrator_with_gate._get_vault(standard_context, response_callback=callback)
 
         assert vault1 is not None
         # Passphrase must be cached in context
@@ -233,29 +206,21 @@ class TestGetVaultPassphrasePrompt:
 
 
 class TestCollectVaultPassphrase:
-    async def test_returns_passphrase_from_queue(
-        self, orchestrator_with_gate, standard_context
-    ):
+    async def test_returns_passphrase_from_queue(self, orchestrator_with_gate, standard_context):
         """Returns the string submitted to the confirmation gate queue."""
         orchestrator_with_gate.confirmation_gate.register_session(standard_context.session_id)
-        orchestrator_with_gate.confirmation_gate.submit_response(
-            standard_context.session_id, "  my_secret_phrase  "
-        )
+        orchestrator_with_gate.confirmation_gate.submit_response(standard_context.session_id, "  my_secret_phrase  ")
         result = await orchestrator_with_gate._collect_vault_passphrase(standard_context)
         assert result == "my_secret_phrase"
 
-    async def test_returns_none_on_timeout(
-        self, orchestrator_with_gate, standard_context
-    ):
+    async def test_returns_none_on_timeout(self, orchestrator_with_gate, standard_context):
         """Returns None if no response arrives before timeout."""
         # Patch asyncio.wait_for to simulate timeout immediately
         with patch("asyncio.wait_for", side_effect=asyncio.TimeoutError):
             result = await orchestrator_with_gate._collect_vault_passphrase(standard_context)
         assert result is None
 
-    async def test_strips_whitespace_from_passphrase(
-        self, orchestrator_with_gate, standard_context
-    ):
+    async def test_strips_whitespace_from_passphrase(self, orchestrator_with_gate, standard_context):
         """Passphrase is stripped of leading/trailing whitespace."""
         orchestrator_with_gate.confirmation_gate.register_session(standard_context.session_id)
         orchestrator_with_gate.confirmation_gate.submit_response(
@@ -264,13 +229,9 @@ class TestCollectVaultPassphrase:
         result = await orchestrator_with_gate._collect_vault_passphrase(standard_context)
         assert result == "passphrase with spaces"
 
-    async def test_empty_response_returns_none(
-        self, orchestrator_with_gate, standard_context
-    ):
+    async def test_empty_response_returns_none(self, orchestrator_with_gate, standard_context):
         """Empty or whitespace-only response returns None (not an empty string)."""
         orchestrator_with_gate.confirmation_gate.register_session(standard_context.session_id)
-        orchestrator_with_gate.confirmation_gate.submit_response(
-            standard_context.session_id, "   "
-        )
+        orchestrator_with_gate.confirmation_gate.submit_response(standard_context.session_id, "   ")
         result = await orchestrator_with_gate._collect_vault_passphrase(standard_context)
         assert result is None

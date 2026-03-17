@@ -47,6 +47,7 @@ class ToolRegistry:
         """
         if REGISTRY_PATH.exists():
             import yaml
+
             with open(REGISTRY_PATH) as f:
                 data = yaml.safe_load(f) or {}
 
@@ -56,11 +57,7 @@ class ToolRegistry:
             all_tools.extend(data.get("integrations") or [])
             all_tools.extend(data.get("tools") or [])  # legacy key — still supported
 
-            self._available = {
-                tool["name"]: tool
-                for tool in all_tools
-                if isinstance(tool, dict) and "name" in tool
-            }
+            self._available = {tool["name"]: tool for tool in all_tools if isinstance(tool, dict) and "name" in tool}
             logger.info(f"Loaded {len(self._available)} available tools from registry")
         else:
             logger.warning(f"Tool registry not found at {REGISTRY_PATH}")
@@ -120,7 +117,10 @@ class ToolRegistry:
             install_target = f"{package}=={version}" if version else package
 
             proc = await asyncio.create_subprocess_exec(
-                "pip", "install", "--quiet", install_target,
+                "pip",
+                "install",
+                "--quiet",
+                install_target,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
@@ -164,22 +164,18 @@ class ToolRegistry:
         # PasswordDeleteError is silenced since missing credentials are not an error condition.
         cred_key = f"tool_{tool_name}_credentials"
         from blind_assistant.security.credentials import delete_credential
+
         try:
             delete_credential(cred_key)
         except Exception:
             # Credential not stored — that's fine; tool may have been installed but never
             # configured with API credentials. Log at DEBUG to avoid noisy warnings.
-            logger.debug(
-                f"No stored credentials to remove for tool {tool_name!r} "
-                "(may not have been configured)"
-            )
+            logger.debug(f"No stored credentials to remove for tool {tool_name!r} (may not have been configured)")
 
         logger.info(f"Tool uninstalled: {tool_name}")
         return True
 
-    async def _log_installation(
-        self, tool_name: str, package: str, tool_info: dict
-    ) -> None:
+    async def _log_installation(self, tool_name: str, package: str, tool_info: dict) -> None:
         """Append installation to audit log."""
         import datetime
 
@@ -195,13 +191,15 @@ class ToolRegistry:
                     log_entries = []
 
         # Append new entry
-        log_entries.append({
-            "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
-            "tool_name": tool_name,
-            "package": package,
-            "reason": tool_info.get("task_description", ""),
-            "user_confirmed": True,  # always true — user confirmed before this is called
-        })
+        log_entries.append(
+            {
+                "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
+                "tool_name": tool_name,
+                "package": package,
+                "reason": tool_info.get("task_description", ""),
+                "user_confirmed": True,  # always true — user confirmed before this is called
+            }
+        )
 
         with open(AUDIT_LOG_PATH, "w") as f:
             json.dump(log_entries, f, indent=2)
@@ -211,6 +209,7 @@ class ToolRegistry:
         try:
             module_path, class_name = class_path.rsplit(".", 1)
             import importlib
+
             module = importlib.import_module(module_path)
             cls = getattr(module, class_name)
             return cls()

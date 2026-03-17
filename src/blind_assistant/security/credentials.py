@@ -37,10 +37,7 @@ def store_credential(key: str, value: str) -> None:
         keyring.set_password(SERVICE_NAME, key, value)
         logger.debug(f"Credential stored: {key}")
     except keyring.errors.KeyringError as e:
-        raise RuntimeError(
-            f"Could not store credential '{key}'. "
-            f"The OS keychain may not be available: {e}"
-        ) from e
+        raise RuntimeError(f"Could not store credential '{key}'. The OS keychain may not be available: {e}") from e
 
 
 def get_credential(key: str) -> str | None:
@@ -146,4 +143,4 @@ ELEVENLABS_API_KEY = "elevenlabs_api_key"
 STRIPE_SECRET_KEY = "stripe_secret_key"
 STRIPE_PAYMENT_METHOD = "stripe_payment_method_token"
 VAULT_PASSPHRASE_HINT = "vault_passphrase_hint"  # Hint only, never the passphrase itself
-API_SERVER_TOKEN = "api_server_token"             # Bearer token for the REST API server
+API_SERVER_TOKEN = "api_server_token"  # Bearer token for the REST API server

@@ -29,6 +29,7 @@ pytestmark = pytest.mark.unit
 # Fixtures
 # ─────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def minimal_config():
     return {
@@ -78,6 +79,7 @@ def braille_context():
 # Orchestrator — initialization
 # ─────────────────────────────────────────────────────────────
 
+
 class TestOrchestratorInit:
     def test_not_initialized_on_create(self, minimal_config):
         orch = Orchestrator(minimal_config)
@@ -94,10 +96,12 @@ class TestOrchestratorInit:
         mock_ctx = MagicMock()
         mock_ctx.initialize = AsyncMock()
 
-        with patch("blind_assistant.core.planner.Planner", return_value=mock_planner), \
-             patch("blind_assistant.tools.registry.ToolRegistry", return_value=mock_registry), \
-             patch("blind_assistant.core.confirmation.ConfirmationGate", return_value=mock_gate), \
-             patch("blind_assistant.core.context.ContextManager", return_value=mock_ctx):
+        with (
+            patch("blind_assistant.core.planner.Planner", return_value=mock_planner),
+            patch("blind_assistant.tools.registry.ToolRegistry", return_value=mock_registry),
+            patch("blind_assistant.core.confirmation.ConfirmationGate", return_value=mock_gate),
+            patch("blind_assistant.core.context.ContextManager", return_value=mock_ctx),
+        ):
             # Override the import mechanism by patching the builtins import
             # Simpler: just patch the modules that initialize() imports
 
@@ -105,9 +109,7 @@ class TestOrchestratorInit:
 
         assert orch._initialized
 
-    async def test_handle_message_raises_if_not_initialized(
-        self, minimal_config, standard_context
-    ):
+    async def test_handle_message_raises_if_not_initialized(self, minimal_config, standard_context):
         orch = Orchestrator(minimal_config)
         with pytest.raises(RuntimeError, match="not initialized"):
             await orch.handle_message("hello", standard_context)
@@ -116,6 +118,7 @@ class TestOrchestratorInit:
 # ─────────────────────────────────────────────────────────────
 # Response formatting
 # ─────────────────────────────────────────────────────────────
+
 
 class TestFormatResponse:
     def test_plain_text_response(self, minimal_config, standard_context):
@@ -141,13 +144,16 @@ class TestFormatResponse:
         # Should have newlines between sentences
         assert "\n" in result.text
 
-    @pytest.mark.parametrize("preamble", [
-        "Certainly! ",
-        "Of course! ",
-        "Great question! ",
-        "Sure! ",
-        "Absolutely! ",
-    ])
+    @pytest.mark.parametrize(
+        "preamble",
+        [
+            "Certainly! ",
+            "Of course! ",
+            "Great question! ",
+            "Sure! ",
+            "Absolutely! ",
+        ],
+    )
     def test_brief_mode_strips_preambles(self, minimal_config, brief_context, preamble):
         orch = Orchestrator(minimal_config)
         result = orch._format_response(
@@ -169,6 +175,7 @@ class TestFormatResponse:
 # ─────────────────────────────────────────────────────────────
 # ConfirmationGate
 # ─────────────────────────────────────────────────────────────
+
 
 class TestConfirmationGateBasic:
     def test_register_session(self):
@@ -238,6 +245,7 @@ class TestConfirmationGateActions:
         gate.register_session(standard_context.session_id)
 
         messages_sent = []
+
         async def callback(msg):
             messages_sent.append(msg)
             # Auto-respond with confirm
@@ -310,6 +318,7 @@ class TestConfirmationGateActions:
         gate.register_session(brief_context.session_id)
 
         disclosures_sent = []
+
         async def callback(msg):
             disclosures_sent.append(msg)
             gate.submit_response(brief_context.session_id, "yes")
@@ -398,6 +407,7 @@ class TestConfigurablePassphraseTimeout:
         orc = Orchestrator(config)
         # Manually initialise only the confirmation gate (skip full initialize)
         from blind_assistant.core.confirmation import ConfirmationGate
+
         orc.confirmation_gate = ConfirmationGate()
 
         ctx = UserContext(user_id="u", session_id="test-timeout-session")
@@ -423,9 +433,7 @@ class TestConfigurablePassphraseTimeout:
         result = await orc._collect_vault_passphrase(ctx)
         assert result == "my-passphrase"
 
-    async def test_passphrase_timeout_returns_none_on_empty_queue_short_timeout(
-        self, minimal_config
-    ):
+    async def test_passphrase_timeout_returns_none_on_empty_queue_short_timeout(self, minimal_config):
         """With a 0.05s timeout and no response, returns None immediately."""
         from blind_assistant.core.confirmation import ConfirmationGate
 
@@ -449,6 +457,7 @@ def _make_order_food_orchestrator(minimal_config: dict) -> Orchestrator:
     _handle_order_food: confirmation_gate, tool_registry.
     """
     from blind_assistant.core.confirmation import ConfirmationGate
+
     orc = Orchestrator(minimal_config)
     orc.confirmation_gate = ConfirmationGate()
     orc.tool_registry = MagicMock()
@@ -473,9 +482,7 @@ def _make_order_intent(
 class TestHandleOrderFood:
     """Tests for Orchestrator._handle_order_food — Phase 2 completion."""
 
-    async def test_order_food_user_declines_risk_disclosure(
-        self, minimal_config, standard_context
-    ) -> None:
+    async def test_order_food_user_declines_risk_disclosure(self, minimal_config, standard_context) -> None:
         """
         If the user says 'no' to the risk disclosure, the order is cancelled
         and a reassuring message is returned.
@@ -484,6 +491,7 @@ class TestHandleOrderFood:
 
         # User immediately declines when disclosure fires
         updates = []
+
         async def update_cb(msg: str) -> None:
             updates.append(msg)
             # Submit "no" on the first disclosure message
@@ -499,9 +507,7 @@ class TestHandleOrderFood:
         # Browser tool should not be called at all
         orc.tool_registry.get_installed_tool.assert_not_called()
 
-    async def test_order_food_browser_not_installed_returns_guidance(
-        self, minimal_config, standard_context
-    ) -> None:
+    async def test_order_food_browser_not_installed_returns_guidance(self, minimal_config, standard_context) -> None:
         """
         If the user confirms risk disclosure but browser tool isn't installed,
         return a helpful message instead of crashing.
@@ -511,6 +517,7 @@ class TestHandleOrderFood:
         orc.tool_registry.get_installed_tool.return_value = None
 
         updates = []
+
         async def update_cb(msg: str) -> None:
             updates.append(msg)
             # Submit "yes" to the risk disclosure
@@ -523,9 +530,7 @@ class TestHandleOrderFood:
 
         assert "browser tool" in result["text"].lower() or "not installed" in result["text"].lower()
 
-    async def test_order_food_successful_navigation_returns_page_state(
-        self, minimal_config, standard_context
-    ) -> None:
+    async def test_order_food_successful_navigation_returns_page_state(self, minimal_config, standard_context) -> None:
         """
         When browser is installed and navigation succeeds, the result includes
         page state and ordering_in_progress flag.
@@ -545,6 +550,7 @@ class TestHandleOrderFood:
         orc.tool_registry.get_installed_tool.return_value = mock_browser
 
         updates = []
+
         async def update_cb(msg: str) -> None:
             updates.append(msg)
             # Accept risk disclosure
@@ -559,9 +565,7 @@ class TestHandleOrderFood:
         assert result.get("page_state") is mock_page_state
         assert "pizza" in result["text"].lower() or "food" in result["text"].lower()
 
-    async def test_order_food_navigation_error_returns_helpful_message(
-        self, minimal_config, standard_context
-    ) -> None:
+    async def test_order_food_navigation_error_returns_helpful_message(self, minimal_config, standard_context) -> None:
         """
         If browser navigation raises an exception, a helpful error message is
         returned instead of propagating the exception.
@@ -573,6 +577,7 @@ class TestHandleOrderFood:
         orc.tool_registry.get_installed_tool.return_value = mock_browser
 
         updates = []
+
         async def update_cb(msg: str) -> None:
             updates.append(msg)
             orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
@@ -584,9 +589,7 @@ class TestHandleOrderFood:
 
         assert "trouble" in result["text"].lower() or "network timeout" in result["text"].lower()
 
-    async def test_order_food_uses_intent_description_when_no_params(
-        self, minimal_config, standard_context
-    ) -> None:
+    async def test_order_food_uses_intent_description_when_no_params(self, minimal_config, standard_context) -> None:
         """
         When intent has no 'food' or 'query' params, the description is used
         as the food query — no crash.
@@ -605,6 +608,7 @@ class TestHandleOrderFood:
         orc.tool_registry.get_installed_tool.return_value = mock_browser
 
         updates = []
+
         async def update_cb(msg: str) -> None:
             updates.append(msg)
             orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
@@ -618,9 +622,7 @@ class TestHandleOrderFood:
         # Should not crash — result should be valid
         assert "text" in result
 
-    async def test_order_food_restaurant_param_changes_search_url(
-        self, minimal_config, standard_context
-    ) -> None:
+    async def test_order_food_restaurant_param_changes_search_url(self, minimal_config, standard_context) -> None:
         """
         When a restaurant param is provided, the URL search uses the restaurant name.
         """
@@ -630,13 +632,16 @@ class TestHandleOrderFood:
 
         navigate_urls = []
         mock_browser = AsyncMock()
+
         async def mock_navigate(url: str) -> PageState:
             navigate_urls.append(url)
             return PageState(url=url, title="DoorDash", text_content="Results")
+
         mock_browser.navigate = mock_navigate
         orc.tool_registry.get_installed_tool.return_value = mock_browser
 
         updates = []
+
         async def update_cb(msg: str) -> None:
             updates.append(msg)
             orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
@@ -650,9 +655,7 @@ class TestHandleOrderFood:
         assert navigate_urls, "navigate() was not called"
         assert "Pizza+Palace" in navigate_urls[0] or "Pizza" in navigate_urls[0]
 
-    async def test_order_food_confirm_calls_financial_confirmation(
-        self, minimal_config, standard_context
-    ) -> None:
+    async def test_order_food_confirm_calls_financial_confirmation(self, minimal_config, standard_context) -> None:
         """
         _handle_order_food_confirm() correctly calls confirm_financial_action,
         which fires risk disclosure + order summary before any charge.
@@ -660,6 +663,7 @@ class TestHandleOrderFood:
         orc = _make_order_food_orchestrator(minimal_config)
 
         updates = []
+
         async def update_cb(msg: str) -> None:
             updates.append(msg)
             # Accept risk disclosure then confirm order
@@ -675,16 +679,13 @@ class TestHandleOrderFood:
         )
 
         # First response should have been the risk disclosure
-        assert any("risk" in u.lower() or "financial" in u.lower() or "payment" in u.lower()
-                   for u in updates), (
+        assert any("risk" in u.lower() or "financial" in u.lower() or "payment" in u.lower() for u in updates), (
             "Risk disclosure was not sent to user before order confirmation"
         )
         # Result is bool — True = confirmed, False = declined
         assert isinstance(result, bool)
 
-    async def test_order_food_brief_context_gets_short_disclosure(
-        self, minimal_config, brief_context
-    ) -> None:
+    async def test_order_food_brief_context_gets_short_disclosure(self, minimal_config, brief_context) -> None:
         """
         In brief verbosity mode, the risk disclosure uses the short version.
         The short disclosure is shorter than the full disclosure.
@@ -696,6 +697,7 @@ class TestHandleOrderFood:
         orc = _make_order_food_orchestrator(minimal_config)
 
         disclosures = []
+
         async def update_cb(msg: str) -> None:
             # Collect all messages that look like the financial disclosure
             if "risk" in msg.lower() or "payment" in msg.lower() or "financial" in msg.lower():
@@ -715,13 +717,12 @@ class TestHandleOrderFood:
             # The disclosure sent should be the brief version
             assert len(disclosures[0]) <= len(FINANCIAL_RISK_DISCLOSURE)
 
-    async def test_order_food_brief_context_disclosure_fires(
-        self, minimal_config, brief_context
-    ) -> None:
+    async def test_order_food_brief_context_disclosure_fires(self, minimal_config, brief_context) -> None:
         """Brief context still fires a risk disclosure (just shorter)."""
         orc = _make_order_food_orchestrator(minimal_config)
 
         update_count = [0]
+
         async def update_cb(msg: str) -> None:
             update_count[0] += 1
             orc.confirmation_gate.submit_response(brief_context.session_id, "yes")
@@ -738,9 +739,7 @@ class TestHandleOrderFood:
         # Should have sent at least 2 messages: disclosure + order confirm
         assert update_count[0] >= 2, "Expected disclosure + order confirmation messages"
 
-    async def test_order_groceries_intent_uses_same_handler(
-        self, minimal_config, standard_context
-    ) -> None:
+    async def test_order_groceries_intent_uses_same_handler(self, minimal_config, standard_context) -> None:
         """
         order_groceries intent routes to _handle_order_food (same flow).
         Verifies the intent handler map is correct by comparing __name__.

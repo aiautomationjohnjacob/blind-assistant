@@ -248,9 +248,7 @@ def test_query_orchestrator_exception_returns_500():
     orc = MagicMock()
     orc.handle_message = AsyncMock(side_effect=RuntimeError("unexpected crash"))
     orc.context_manager = MagicMock()
-    orc.context_manager.load_user_context = AsyncMock(
-        return_value=UserContext(user_id="u", session_id="s")
-    )
+    orc.context_manager.load_user_context = AsyncMock(return_value=UserContext(user_id="u", session_id="s"))
     with _make_server(orchestrator=orc) as (_, client):
         resp = client.post("/query", json={"message": "hello"}, headers=VALID_HEADERS)
     assert resp.status_code == 500
@@ -263,9 +261,7 @@ def test_query_500_message_is_safe():
     orc = MagicMock()
     orc.handle_message = AsyncMock(side_effect=ValueError("internal secret"))
     orc.context_manager = MagicMock()
-    orc.context_manager.load_user_context = AsyncMock(
-        return_value=UserContext(user_id="u", session_id="s")
-    )
+    orc.context_manager.load_user_context = AsyncMock(return_value=UserContext(user_id="u", session_id="s"))
     with _make_server(orchestrator=orc) as (_, client):
         resp = client.post("/query", json={"message": "hello"}, headers=VALID_HEADERS)
     body = resp.json()
@@ -366,9 +362,7 @@ def test_task_completed_false_when_confirmation_required():
         )
     )
     orc.context_manager = MagicMock()
-    orc.context_manager.load_user_context = AsyncMock(
-        return_value=UserContext(user_id="u", session_id="s")
-    )
+    orc.context_manager.load_user_context = AsyncMock(return_value=UserContext(user_id="u", session_id="s"))
     with _make_server(orchestrator=orc) as (_, client):
         resp = client.post(
             "/task",
@@ -580,9 +574,12 @@ def test_transcribe_requires_auth():
 def test_transcribe_returns_transcribed_text():
     """POST /transcribe returns the text from Whisper STT."""
     b64_audio = "SGVsbG8gV29ybGQ="  # base64("Hello World") — valid base64
-    with _make_server() as (_, client), patch(
-        "blind_assistant.voice.stt.transcribe_audio",
-        new=AsyncMock(return_value="Hello World"),
+    with (
+        _make_server() as (_, client),
+        patch(
+            "blind_assistant.voice.stt.transcribe_audio",
+            new=AsyncMock(return_value="Hello World"),
+        ),
     ):
         resp = client.post(
             "/transcribe",
@@ -596,9 +593,12 @@ def test_transcribe_returns_transcribed_text():
 def test_transcribe_returns_empty_string_on_silence():
     """POST /transcribe returns empty string when Whisper detects no speech."""
     b64_audio = "AAAA"  # valid base64 that decodes to non-empty bytes
-    with _make_server() as (_, client), patch(
-        "blind_assistant.voice.stt.transcribe_audio",
-        new=AsyncMock(return_value=None),
+    with (
+        _make_server() as (_, client),
+        patch(
+            "blind_assistant.voice.stt.transcribe_audio",
+            new=AsyncMock(return_value=None),
+        ),
     ):
         resp = client.post(
             "/transcribe",
@@ -624,6 +624,7 @@ def test_transcribe_returns_400_on_invalid_base64():
 def test_transcribe_empty_audio_base64_returns_empty_text():
     """POST /transcribe with base64 that decodes to empty bytes returns empty text immediately."""
     import base64 as b64
+
     # base64 of b"" is an empty string, but b64encode(b"") = b"" which encodes to ""
     # Let's test with a base64 that decodes to zero bytes
     empty_b64 = b64.b64encode(b"").decode()  # ""
@@ -641,9 +642,12 @@ def test_transcribe_passes_language_hint_to_stt():
     """POST /transcribe passes the language hint to transcribe_audio."""
     b64_audio = "SGVsbG8="
     mock_stt = AsyncMock(return_value="Hola")
-    with _make_server() as (_, client), patch(
-        "blind_assistant.voice.stt.transcribe_audio",
-        new=mock_stt,
+    with (
+        _make_server() as (_, client),
+        patch(
+            "blind_assistant.voice.stt.transcribe_audio",
+            new=mock_stt,
+        ),
     ):
         client.post(
             "/transcribe",
@@ -659,9 +663,12 @@ def test_transcribe_passes_language_hint_to_stt():
 def test_transcribe_echoes_session_id():
     """POST /transcribe echoes the session_id from the request."""
     b64_audio = "SGVsbG8="
-    with _make_server() as (_, client), patch(
-        "blind_assistant.voice.stt.transcribe_audio",
-        new=AsyncMock(return_value="test"),
+    with (
+        _make_server() as (_, client),
+        patch(
+            "blind_assistant.voice.stt.transcribe_audio",
+            new=AsyncMock(return_value="test"),
+        ),
     ):
         resp = client.post(
             "/transcribe",
@@ -724,6 +731,7 @@ def test_transcribe_413_message_mentions_limit():
 def test_transcribe_small_payload_is_not_rejected():
     """POST /transcribe accepts a small (realistic) audio payload without 413."""
     import base64 as b64
+
     # 1 second of 16kHz mono audio ≈ 32 kB WAV ≈ 44 kB base64 — well within limit
     small_audio = b"RIFF" + b"\x00" * 1000  # fake WAV header + silence
     small_b64 = b64.b64encode(small_audio).decode()

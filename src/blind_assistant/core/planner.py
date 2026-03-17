@@ -13,11 +13,12 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Intent:
     """A classified user intent."""
-    type: str                          # e.g., "screen_description", "order_food", "add_note"
-    description: str                   # Plain English description
+
+    type: str  # e.g., "screen_description", "order_food", "add_note"
+    description: str  # Plain English description
     required_tools: list[str] = field(default_factory=list)
     parameters: dict = field(default_factory=dict)
-    is_high_stakes: bool = False       # True if requires confirmation
+    is_high_stakes: bool = False  # True if requires confirmation
     confidence: float = 1.0
 
 
@@ -34,9 +35,9 @@ INTENT_TOOL_MAP = {
     "screen_description": ["screen_observer"],
     "navigate_app": ["screen_observer", "desktop_control"],
     "fill_form": ["screen_observer", "browser"],
-    "order_food": ["browser"],           # Claude navigates the ordering site via browser
-    "order_groceries": ["browser"],      # Same: any grocery site navigated via browser
-    "book_travel": ["browser"],          # Any travel site navigated via browser
+    "order_food": ["browser"],  # Claude navigates the ordering site via browser
+    "order_groceries": ["browser"],  # Same: any grocery site navigated via browser
+    "book_travel": ["browser"],  # Any travel site navigated via browser
     "add_note": ["second_brain"],
     "query_note": ["second_brain"],
     "smart_home": ["home_assistant"],
@@ -45,8 +46,12 @@ INTENT_TOOL_MAP = {
 }
 
 HIGH_STAKES_INTENTS = {
-    "order_food", "order_groceries", "book_travel",
-    "send_email", "delete_files", "install_tool",
+    "order_food",
+    "order_groceries",
+    "book_travel",
+    "send_email",
+    "delete_files",
+    "install_tool",
 }
 
 # System prompt for intent classification
@@ -93,6 +98,7 @@ class Planner:
             import anthropic
 
             from blind_assistant.security.credentials import CLAUDE_API_KEY, require_credential
+
             api_key = require_credential(CLAUDE_API_KEY)
             self._client = anthropic.AsyncAnthropic(api_key=api_key)
         return self._client
@@ -125,10 +131,7 @@ class Planner:
             return Intent(
                 type=intent_type,
                 description=result.get("description", text),
-                required_tools=result.get(
-                    "required_tools",
-                    INTENT_TOOL_MAP.get(intent_type, [])
-                ),
+                required_tools=result.get("required_tools", INTENT_TOOL_MAP.get(intent_type, [])),
                 parameters=result.get("parameters", {}),
                 is_high_stakes=intent_type in HIGH_STAKES_INTENTS,
                 confidence=result.get("confidence", 1.0),

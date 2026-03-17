@@ -83,8 +83,10 @@ class TestTranscribeAudio:
             deleted_files.append(path)
             real_unlink(path)
 
-        with patch("blind_assistant.voice.stt._load_model", return_value=mock_model), \
-             patch("os.unlink", side_effect=tracking_unlink):
+        with (
+            patch("blind_assistant.voice.stt._load_model", return_value=mock_model),
+            patch("os.unlink", side_effect=tracking_unlink),
+        ):
             from blind_assistant.voice.stt import transcribe_audio
 
             await transcribe_audio(b"audio_data")
@@ -106,8 +108,10 @@ class TestTranscribeAudio:
             with contextlib.suppress(FileNotFoundError):
                 real_unlink(path)
 
-        with patch("blind_assistant.voice.stt._load_model", return_value=mock_model), \
-             patch("os.unlink", side_effect=tracking_unlink):
+        with (
+            patch("blind_assistant.voice.stt._load_model", return_value=mock_model),
+            patch("os.unlink", side_effect=tracking_unlink),
+        ):
             from blind_assistant.voice.stt import transcribe_audio
 
             await transcribe_audio(b"audio_data")
@@ -239,16 +243,19 @@ class TestTranscribeMicrophone:
             transcribed_bytes.append(audio_bytes)
             return "test transcript"
 
-        with patch.dict(
-            "sys.modules",
-            {
-                "sounddevice": mock_sd,
-                "numpy": mock_np,
-                "scipy": MagicMock(),
-                "scipy.io": mock_scipy_io,
-                "scipy.io.wavfile": mock_wav,
-            },
-        ), patch("blind_assistant.voice.stt.transcribe_audio", side_effect=mock_transcribe):
+        with (
+            patch.dict(
+                "sys.modules",
+                {
+                    "sounddevice": mock_sd,
+                    "numpy": mock_np,
+                    "scipy": MagicMock(),
+                    "scipy.io": mock_scipy_io,
+                    "scipy.io.wavfile": mock_wav,
+                },
+            ),
+            patch("blind_assistant.voice.stt.transcribe_audio", side_effect=mock_transcribe),
+        ):
             from blind_assistant.voice.stt import transcribe_microphone
 
             result = await transcribe_microphone(duration_seconds=1.0)

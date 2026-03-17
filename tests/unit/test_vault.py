@@ -35,6 +35,7 @@ pytestmark = pytest.mark.unit
 # EncryptedVault — lifecycle
 # ─────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def vault_key(sample_passphrase):
     vk = VaultKey()
@@ -158,20 +159,24 @@ class TestEncryptedVaultSearch:
 # VaultQuery — category inference
 # ─────────────────────────────────────────────────────────────
 
+
 class TestInferCategory:
-    @pytest.mark.parametrize("content,expected", [
-        ("Doctor appointment at 2pm", "health"),
-        ("prescription renewal needed", "health"),
-        ("blood pressure reading today", "health"),
-        ("pay the rent invoice", "finance"),
-        ("my bank account balance", "finance"),
-        ("credit card bill is due", "finance"),
-        ("remember to call the plumber", "tasks"),
-        ("need to follow up with John", "tasks"),
-        ("met with Sarah today", "people"),
-        ("happy birthday reminder", "people"),  # birthday → people (birthday reminders are people-related)
-        ("today was a good day", "general"),
-    ])
+    @pytest.mark.parametrize(
+        "content,expected",
+        [
+            ("Doctor appointment at 2pm", "health"),
+            ("prescription renewal needed", "health"),
+            ("blood pressure reading today", "health"),
+            ("pay the rent invoice", "finance"),
+            ("my bank account balance", "finance"),
+            ("credit card bill is due", "finance"),
+            ("remember to call the plumber", "tasks"),
+            ("need to follow up with John", "tasks"),
+            ("met with Sarah today", "people"),
+            ("happy birthday reminder", "people"),  # birthday → people (birthday reminders are people-related)
+            ("today was a good day", "general"),
+        ],
+    )
     def test_category_inference(self, content, expected):
         result = _infer_category(content)
         assert result == expected, f"'{content}' → got '{result}', expected '{expected}'"
@@ -186,6 +191,7 @@ class TestInferCategory:
 # ─────────────────────────────────────────────────────────────
 # VaultQuery — speech formatting
 # ─────────────────────────────────────────────────────────────
+
 
 class TestTrimForSpeech:
     def test_short_text_unchanged(self):
@@ -226,18 +232,21 @@ class TestFormatDateLabel:
 
     def test_today(self):
         from datetime import datetime
+
         today = datetime.now().isoformat()
         label = _format_date_label(today)
         assert "today" in label.lower()
 
     def test_yesterday(self):
         from datetime import datetime, timedelta
+
         yesterday = (datetime.now() - timedelta(days=1)).isoformat()
         label = _format_date_label(yesterday)
         assert "yesterday" in label.lower()
 
     def test_days_ago(self):
         from datetime import datetime, timedelta
+
         three_days_ago = (datetime.now() - timedelta(days=3)).isoformat()
         label = _format_date_label(three_days_ago)
         assert "3" in label or "three" in label.lower() or "days" in label.lower()
@@ -248,9 +257,7 @@ class TestFormatForBraille:
         text = "This is a longer sentence that needs to be broken down for a braille display properly."
         result = _format_for_braille(text)
         for line in result.split("\n"):
-            assert len(line) <= BRAILLE_LINE_WIDTH, (
-                f"Line too long for braille ({len(line)} chars): '{line}'"
-            )
+            assert len(line) <= BRAILLE_LINE_WIDTH, f"Line too long for braille ({len(line)} chars): '{line}'"
 
     def test_strips_markdown(self):
         text = "# Header\n**Bold** and _italic_"
@@ -284,9 +291,11 @@ class TestExtractTopicHint:
 # VaultQuery — answer_query and add_note_from_voice
 # ─────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def mock_user_context():
     from unittest.mock import MagicMock
+
     ctx = MagicMock()
     ctx.braille_mode = False
     ctx.verbosity = "standard"
@@ -296,6 +305,7 @@ def mock_user_context():
 @pytest.fixture
 def mock_braille_context():
     from unittest.mock import MagicMock
+
     ctx = MagicMock()
     ctx.braille_mode = True
     ctx.verbosity = "standard"
@@ -332,17 +342,13 @@ class TestVaultQueryAnswerQuery:
         # Should mention there are multiple results
         assert any(char.isdigit() for char in result) or "note" in result.lower()
 
-    async def test_braille_mode_formats_for_braille(
-        self, vault, sample_note_content, mock_braille_context
-    ):
+    async def test_braille_mode_formats_for_braille(self, vault, sample_note_content, mock_braille_context):
         # When note not found (search for something not in note), should get braille-formatted message
         q = VaultQuery(vault)
         result = await q.answer_query("banking insurance claim", mock_braille_context)
         # Braille mode: each line should fit in BRAILLE_LINE_WIDTH (no-results path)
         for line in result.split("\n"):
-            assert len(line) <= BRAILLE_LINE_WIDTH, (
-                f"Line too long ({len(line)} chars): {line!r}"
-            )
+            assert len(line) <= BRAILLE_LINE_WIDTH, f"Line too long ({len(line)} chars): {line!r}"
 
 
 class TestVaultQueryAddNote:

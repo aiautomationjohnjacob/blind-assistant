@@ -62,8 +62,7 @@ def test_intent_tool_map_order_food_uses_browser() -> None:
         "See ARCHITECTURE.md: Claude navigates ordering sites autonomously via browser."
     )
     assert "ordering" not in INTENT_TOOL_MAP["order_food"], (
-        "'ordering' is not a valid registry tool name. "
-        "The tool registry has 'browser' for all web navigation tasks."
+        "'ordering' is not a valid registry tool name. The tool registry has 'browser' for all web navigation tasks."
     )
 
 
@@ -93,23 +92,27 @@ def test_all_intent_types_have_entries() -> None:
     """Every intent type in HIGH_STAKES_INTENTS that maps to an action has a tool entry."""
     # These are the intents the orchestrator's _intent_handlers supports
     supported_intents = {
-        "screen_description", "navigate_app", "fill_form", "order_food",
-        "order_groceries", "book_travel", "add_note", "query_note",
-        "smart_home", "search_web", "general_question",
+        "screen_description",
+        "navigate_app",
+        "fill_form",
+        "order_food",
+        "order_groceries",
+        "book_travel",
+        "add_note",
+        "query_note",
+        "smart_home",
+        "search_web",
+        "general_question",
     }
     for intent_type in supported_intents:
-        assert intent_type in INTENT_TOOL_MAP, (
-            f"Intent type '{intent_type}' has no entry in INTENT_TOOL_MAP"
-        )
+        assert intent_type in INTENT_TOOL_MAP, f"Intent type '{intent_type}' has no entry in INTENT_TOOL_MAP"
 
 
 def test_high_stakes_intents_are_subset_of_intent_tool_map() -> None:
     """Every HIGH_STAKES_INTENT that needs tools is in INTENT_TOOL_MAP."""
     # order_food, order_groceries, book_travel must all be in the map
     for intent_type in {"order_food", "order_groceries", "book_travel"}:
-        assert intent_type in INTENT_TOOL_MAP, (
-            f"High-stakes intent '{intent_type}' is missing from INTENT_TOOL_MAP"
-        )
+        assert intent_type in INTENT_TOOL_MAP, f"High-stakes intent '{intent_type}' is missing from INTENT_TOOL_MAP"
 
 
 # ─────────────────────────────────────────────────────────────
@@ -180,9 +183,7 @@ def mock_planner_client() -> MagicMock:
     return MagicMock()
 
 
-async def test_classify_intent_returns_intent_from_api(
-    planner: Planner, mock_planner_client: MagicMock
-) -> None:
+async def test_classify_intent_returns_intent_from_api(planner: Planner, mock_planner_client: MagicMock) -> None:
     """classify_intent parses a valid JSON Claude response into an Intent."""
     response_payload = {
         "type": "order_food",
@@ -191,9 +192,7 @@ async def test_classify_intent_returns_intent_from_api(
         "parameters": {"restaurant": "pizza place"},
         "confidence": 0.95,
     }
-    mock_planner_client.messages.create = AsyncMock(
-        return_value=_make_claude_response(response_payload)
-    )
+    mock_planner_client.messages.create = AsyncMock(return_value=_make_claude_response(response_payload))
 
     with patch.object(planner, "_get_client", return_value=mock_planner_client):
         context = MagicMock()
@@ -207,9 +206,7 @@ async def test_classify_intent_returns_intent_from_api(
     assert intent.is_high_stakes is True  # order_food is in HIGH_STAKES_INTENTS
 
 
-async def test_classify_intent_falls_back_on_invalid_json(
-    planner: Planner, mock_planner_client: MagicMock
-) -> None:
+async def test_classify_intent_falls_back_on_invalid_json(planner: Planner, mock_planner_client: MagicMock) -> None:
     """classify_intent returns general_question fallback when API returns non-JSON."""
     bad_response = MagicMock()
     bad_response.content = [MagicMock(text="I cannot classify that right now.")]
@@ -224,9 +221,7 @@ async def test_classify_intent_falls_back_on_invalid_json(
     assert intent.required_tools == []
 
 
-async def test_classify_intent_falls_back_on_api_exception(
-    planner: Planner, mock_planner_client: MagicMock
-) -> None:
+async def test_classify_intent_falls_back_on_api_exception(planner: Planner, mock_planner_client: MagicMock) -> None:
     """classify_intent returns general_question fallback when Claude API raises."""
     mock_planner_client.messages.create = AsyncMock(side_effect=Exception("API error"))
 
@@ -250,17 +245,13 @@ async def test_classify_intent_marks_high_stakes_correctly(
         "parameters": {},
         "confidence": 0.9,
     }
-    mock_planner_client.messages.create = AsyncMock(
-        return_value=_make_claude_response(response_payload)
-    )
+    mock_planner_client.messages.create = AsyncMock(return_value=_make_claude_response(response_payload))
 
     with patch.object(planner, "_get_client", return_value=mock_planner_client):
         context = MagicMock()
         intent = await planner.classify_intent("some task", context)
 
-    assert intent.is_high_stakes is True, (
-        f"Intent type '{high_stakes_type}' should be marked high_stakes"
-    )
+    assert intent.is_high_stakes is True, f"Intent type '{high_stakes_type}' should be marked high_stakes"
 
 
 async def test_classify_intent_general_question_not_high_stakes(
@@ -274,9 +265,7 @@ async def test_classify_intent_general_question_not_high_stakes(
         "parameters": {},
         "confidence": 0.99,
     }
-    mock_planner_client.messages.create = AsyncMock(
-        return_value=_make_claude_response(response_payload)
-    )
+    mock_planner_client.messages.create = AsyncMock(return_value=_make_claude_response(response_payload))
 
     with patch.object(planner, "_get_client", return_value=mock_planner_client):
         context = MagicMock()
@@ -295,9 +284,7 @@ async def test_classify_intent_uses_fallback_tools_from_map_when_api_omits_them(
         # required_tools omitted — should fall back to INTENT_TOOL_MAP["search_web"]
         "confidence": 0.8,
     }
-    mock_planner_client.messages.create = AsyncMock(
-        return_value=_make_claude_response(response_payload)
-    )
+    mock_planner_client.messages.create = AsyncMock(return_value=_make_claude_response(response_payload))
 
     with patch.object(planner, "_get_client", return_value=mock_planner_client):
         context = MagicMock()

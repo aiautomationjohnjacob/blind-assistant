@@ -16,6 +16,7 @@ from blind_assistant.tools.browser import BrowserSession, BrowserTool, PageState
 # Fixtures
 # ─────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def mock_page() -> AsyncMock:
     """A fully mocked Playwright page object."""
@@ -76,6 +77,7 @@ async def initialized_browser_tool(
 # Initialization tests
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_initialize_sets_initialized_flag(
     mock_page: AsyncMock,
     mock_browser: AsyncMock,
@@ -119,6 +121,7 @@ async def test_initialize_raises_on_launch_error(mock_playwright_instance: Async
 # _require_initialized guard
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_navigate_raises_when_not_initialized() -> None:
     """Navigation before initialize() raises RuntimeError."""
     tool = BrowserTool()
@@ -158,6 +161,7 @@ async def test_take_screenshot_raises_when_not_initialized() -> None:
 # Navigation tests
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_navigate_calls_goto(
     initialized_browser_tool: BrowserTool,
     mock_page: AsyncMock,
@@ -186,6 +190,7 @@ async def test_navigate_returns_page_state(
 # ─────────────────────────────────────────────────────────────
 # Page state tests
 # ─────────────────────────────────────────────────────────────
+
 
 async def test_get_page_state_truncates_long_content(
     initialized_browser_tool: BrowserTool,
@@ -220,6 +225,7 @@ async def test_get_page_state_short_content_not_truncated(
 # Click tests
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_click_by_selector(
     initialized_browser_tool: BrowserTool,
     mock_page: AsyncMock,
@@ -252,6 +258,7 @@ async def test_click_raises_on_playwright_error(
 # Type text tests
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_type_text_uses_fill_when_clear_first(
     initialized_browser_tool: BrowserTool,
     mock_page: AsyncMock,
@@ -274,6 +281,7 @@ async def test_type_text_uses_type_when_no_clear(
 # Screenshot tests
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_take_screenshot_returns_bytes(
     initialized_browser_tool: BrowserTool,
     mock_page: AsyncMock,
@@ -287,6 +295,7 @@ async def test_take_screenshot_returns_bytes(
 # ─────────────────────────────────────────────────────────────
 # Wait for text tests
 # ─────────────────────────────────────────────────────────────
+
 
 async def test_wait_for_text_returns_true_when_found(
     initialized_browser_tool: BrowserTool,
@@ -312,6 +321,7 @@ async def test_wait_for_text_returns_false_on_timeout(
 # Find elements tests
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_find_elements_returns_text_list(
     initialized_browser_tool: BrowserTool,
     mock_page: AsyncMock,
@@ -334,6 +344,7 @@ async def test_find_elements_returns_text_list(
 # Close tests
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_close_shuts_down_browser(
     initialized_browser_tool: BrowserTool,
 ) -> None:
@@ -347,10 +358,13 @@ async def test_close_shuts_down_browser(
 # BrowserSession context manager tests
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_browser_session_initializes_and_closes() -> None:
     """BrowserSession context manager calls initialize() and close()."""
-    with patch.object(BrowserTool, "initialize", new_callable=AsyncMock) as mock_init, \
-         patch.object(BrowserTool, "close", new_callable=AsyncMock) as mock_close:
+    with (
+        patch.object(BrowserTool, "initialize", new_callable=AsyncMock) as mock_init,
+        patch.object(BrowserTool, "close", new_callable=AsyncMock) as mock_close,
+    ):
         async with BrowserSession() as browser:
             assert browser is not None
             mock_init.assert_called_once()
@@ -359,8 +373,10 @@ async def test_browser_session_initializes_and_closes() -> None:
 
 async def test_browser_session_closes_on_exception() -> None:
     """BrowserSession still calls close() even if an exception occurs inside."""
-    with patch.object(BrowserTool, "initialize", new_callable=AsyncMock), \
-         patch.object(BrowserTool, "close", new_callable=AsyncMock) as mock_close:
+    with (
+        patch.object(BrowserTool, "initialize", new_callable=AsyncMock),
+        patch.object(BrowserTool, "close", new_callable=AsyncMock) as mock_close,
+    ):
         with pytest.raises(ValueError, match="test error"):
             async with BrowserSession():
                 raise ValueError("test error")

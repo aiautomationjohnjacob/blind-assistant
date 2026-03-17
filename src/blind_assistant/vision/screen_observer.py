@@ -51,6 +51,7 @@ class ScreenObserver:
             import anthropic
 
             from blind_assistant.security.credentials import CLAUDE_API_KEY, require_credential
+
             api_key = require_credential(CLAUDE_API_KEY)
             self._claude_client = anthropic.AsyncAnthropic(api_key=api_key)
         return self._claude_client
@@ -100,16 +101,12 @@ class ScreenObserver:
 
         # 5. Apply redaction to any sensitive regions found
         if sensitivity.regions_to_redact:
-            screenshot_bytes = await apply_redaction(
-                screenshot_bytes, sensitivity.regions_to_redact
-            )
+            screenshot_bytes = await apply_redaction(screenshot_bytes, sensitivity.regions_to_redact)
 
         # 6. Send to Claude Vision API
         return await self._describe_with_claude(screenshot_bytes)
 
-    async def _capture_screenshot(
-        self, region: tuple | None = None
-    ) -> bytes | None:
+    async def _capture_screenshot(self, region: tuple | None = None) -> bytes | None:
         """
         Capture screenshot in memory.
         Returns PNG bytes, or None on failure.
@@ -179,10 +176,7 @@ class ScreenObserver:
 
         except Exception as e:
             logger.error(f"Claude Vision API failed: {e}", exc_info=True)
-            return (
-                "I tried to describe your screen but ran into a problem. "
-                f"Error: {str(e)}"
-            )
+            return f"I tried to describe your screen but ran into a problem. Error: {str(e)}"
 
     async def _describe_locally(self, screenshot_bytes: bytes) -> str:
         """

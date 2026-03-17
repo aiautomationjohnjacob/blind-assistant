@@ -59,9 +59,11 @@ async def _init_orchestrator(config: dict, mock_planner, mock_registry, mock_ctx
     """Initialize orchestrator with mocked sub-components."""
     orch = Orchestrator(config)
 
-    with patch("blind_assistant.core.planner.Planner", return_value=mock_planner), \
-         patch("blind_assistant.tools.registry.ToolRegistry", return_value=mock_registry), \
-         patch("blind_assistant.core.context.ContextManager", return_value=mock_ctx_mgr):
+    with (
+        patch("blind_assistant.core.planner.Planner", return_value=mock_planner),
+        patch("blind_assistant.tools.registry.ToolRegistry", return_value=mock_registry),
+        patch("blind_assistant.core.context.ContextManager", return_value=mock_ctx_mgr),
+    ):
         await orch.initialize()
 
     return orch
@@ -76,6 +78,7 @@ async def _init_orchestrator(config: dict, mock_planner, mock_registry, mock_ctx
 def mock_planner_general_question():
     """Planner classifies any message as 'general_question' (no tool needed)."""
     from blind_assistant.core.planner import Intent
+
     planner = MagicMock()
     planner.classify_intent = AsyncMock(
         return_value=Intent(
@@ -168,10 +171,13 @@ class TestVoicePipelineHappyPath:
             braille_mode=False,
         )
 
-        with patch(
-            "blind_assistant.voice.stt.transcribe_microphone",
-            new=AsyncMock(return_value=voice_input),
-        ), patch("blind_assistant.voice.tts.speak_locally", new=AsyncMock()):
+        with (
+            patch(
+                "blind_assistant.voice.stt.transcribe_microphone",
+                new=AsyncMock(return_value=voice_input),
+            ),
+            patch("blind_assistant.voice.tts.speak_locally", new=AsyncMock()),
+        ):
             await iface._listen_and_respond()
 
         assert len(received_texts) == 1
@@ -219,15 +225,16 @@ class TestVoicePipelineHappyPath:
         async def capture_speak(text, speed=1.0):  # noqa: ARG001
             spoken.append(text)
 
-        with patch(
-            "blind_assistant.voice.stt.transcribe_microphone",
-            new=AsyncMock(return_value="assistant what is the weather"),
-        ), patch("blind_assistant.voice.tts.speak_locally", new=capture_speak):
+        with (
+            patch(
+                "blind_assistant.voice.stt.transcribe_microphone",
+                new=AsyncMock(return_value="assistant what is the weather"),
+            ),
+            patch("blind_assistant.voice.tts.speak_locally", new=capture_speak),
+        ):
             await iface._listen_and_respond()
 
-        assert any(expected_reply in m for m in spoken), (
-            f"Expected reply not spoken. Got: {spoken}"
-        )
+        assert any(expected_reply in m for m in spoken), f"Expected reply not spoken. Got: {spoken}"
 
     async def test_response_callback_streams_interim_updates(
         self,
@@ -271,10 +278,13 @@ class TestVoicePipelineHappyPath:
         async def capture_speak(text, speed=1.0):  # noqa: ARG001
             interim_spoken.append(text)
 
-        with patch(
-            "blind_assistant.voice.stt.transcribe_microphone",
-            new=AsyncMock(return_value="assistant explain quantum computing"),
-        ), patch("blind_assistant.voice.tts.speak_locally", new=capture_speak):
+        with (
+            patch(
+                "blind_assistant.voice.stt.transcribe_microphone",
+                new=AsyncMock(return_value="assistant explain quantum computing"),
+            ),
+            patch("blind_assistant.voice.tts.speak_locally", new=capture_speak),
+        ):
             await iface._listen_and_respond()
 
         # Interim "thinking" message must be spoken
@@ -330,11 +340,13 @@ class TestVoicePipelineOrchestratorIntegration:
         mock_anthropic_module = MagicMock()
         mock_anthropic_module.AsyncAnthropic = MagicMock(return_value=mock_client_instance)
 
-        with patch.dict("sys.modules", {"anthropic": mock_anthropic_module}), \
-             patch(
-                 "blind_assistant.security.credentials.require_credential",
-                 return_value="fake_key",
-             ):
+        with (
+            patch.dict("sys.modules", {"anthropic": mock_anthropic_module}),
+            patch(
+                "blind_assistant.security.credentials.require_credential",
+                return_value="fake_key",
+            ),
+        ):
             response = await orch.handle_message(
                 text="What is the capital of France?",
                 context=context,
@@ -393,11 +405,13 @@ class TestVoicePipelineOrchestratorIntegration:
             "see diagram",
         ]
 
-        with patch.dict("sys.modules", {"anthropic": mock_anthropic_mod}), \
-             patch(
-                 "blind_assistant.security.credentials.require_credential",
-                 return_value="fake_key",
-             ):
+        with (
+            patch.dict("sys.modules", {"anthropic": mock_anthropic_mod}),
+            patch(
+                "blind_assistant.security.credentials.require_credential",
+                return_value="fake_key",
+            ),
+        ):
             response = await orch.handle_message(
                 text="What is the capital of France?",
                 context=context,
@@ -452,17 +466,14 @@ class TestVoiceLocalLifecycle:
             iface._running = False
             raise asyncio.CancelledError
 
-        with patch("blind_assistant.voice.tts.speak_locally", new=capture_speak), \
-             patch(
-                 "blind_assistant.voice.stt.transcribe_microphone",
-                 new=AsyncMock(side_effect=stop_on_first_call)
-             ):
+        with (
+            patch("blind_assistant.voice.tts.speak_locally", new=capture_speak),
+            patch("blind_assistant.voice.stt.transcribe_microphone", new=AsyncMock(side_effect=stop_on_first_call)),
+        ):
             await iface.start()
 
         # Must have spoken a startup/ready message BEFORE entering the loop
-        assert any("blind assistant" in m.lower() for m in spoken), (
-            f"No startup announcement found. Spoken: {spoken}"
-        )
+        assert any("blind assistant" in m.lower() for m in spoken), f"No startup announcement found. Spoken: {spoken}"
 
     async def test_stop_gracefully_sets_running_false(
         self,

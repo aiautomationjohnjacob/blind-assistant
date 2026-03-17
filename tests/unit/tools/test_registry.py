@@ -161,9 +161,7 @@ async def test_load_handles_null_tools_key(tmp_path: Path) -> None:
 async def test_load_supports_legacy_tools_key(tmp_path: Path) -> None:
     """load() correctly reads tools from a legacy registry using only the 'tools:' key."""
     yaml_file = tmp_path / "registry.yaml"
-    yaml_file.write_text(
-        "tools:\n  - name: legacy_tool\n    package: oldpkg\n    description: old\n"
-    )
+    yaml_file.write_text("tools:\n  - name: legacy_tool\n    package: oldpkg\n    description: old\n")
     registry = ToolRegistry()
     with patch("blind_assistant.tools.registry.REGISTRY_PATH", yaml_file):
         await registry.load()
@@ -198,9 +196,7 @@ def test_get_available_tool_returns_none_for_unknown_tool() -> None:
 def test_get_available_tool_returns_metadata_after_load() -> None:
     """get_available_tool returns the full tool metadata dict."""
     registry = ToolRegistry()
-    registry._available = {
-        "browser": {"name": "browser", "package": "playwright", "version": "1.40.0"}
-    }
+    registry._available = {"browser": {"name": "browser", "package": "playwright", "version": "1.40.0"}}
     result = registry.get_available_tool("browser")
     assert result is not None
     assert result["package"] == "playwright"
@@ -266,66 +262,61 @@ async def test_install_tool_runs_pip_with_correct_args(
 ) -> None:
     """install_tool calls pip install playwright==1.40.0 for the browser tool."""
     registry = ToolRegistry()
-    registry._available = {
-        "browser": {"package": "playwright", "version": "1.40.0"}
-    }
+    registry._available = {"browser": {"package": "playwright", "version": "1.40.0"}}
 
     audit_log = tmp_path / "install_log.json"
 
-    with patch("asyncio.create_subprocess_exec", return_value=mock_pip_success) as mock_exec, \
-         patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log):
-        result = await registry.install_tool(
-            "browser", registry._available["browser"]
-        )
+    with (
+        patch("asyncio.create_subprocess_exec", return_value=mock_pip_success) as mock_exec,
+        patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log),
+    ):
+        result = await registry.install_tool("browser", registry._available["browser"])
 
     assert result is True
     mock_exec.assert_called_once_with(
-        "pip", "install", "--quiet", "playwright==1.40.0",
+        "pip",
+        "install",
+        "--quiet",
+        "playwright==1.40.0",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
 
 
-async def test_install_tool_without_version_uses_bare_package_name(
-    mock_pip_success: MagicMock, tmp_path: Path
-) -> None:
+async def test_install_tool_without_version_uses_bare_package_name(mock_pip_success: MagicMock, tmp_path: Path) -> None:
     """install_tool uses just the package name when version is not specified."""
     registry = ToolRegistry()
-    registry._available = {
-        "http_client": {"package": "aiohttp"}
-    }
+    registry._available = {"http_client": {"package": "aiohttp"}}
 
     audit_log = tmp_path / "install_log.json"
 
-    with patch("asyncio.create_subprocess_exec", return_value=mock_pip_success) as mock_exec, \
-         patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log):
+    with (
+        patch("asyncio.create_subprocess_exec", return_value=mock_pip_success) as mock_exec,
+        patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log),
+    ):
         await registry.install_tool("http_client", registry._available["http_client"])
 
     call_args = mock_exec.call_args[0]
     assert call_args[3] == "aiohttp"  # no ==version suffix
 
 
-async def test_install_tool_returns_false_on_pip_failure(
-    mock_pip_failure: MagicMock, tmp_path: Path
-) -> None:
+async def test_install_tool_returns_false_on_pip_failure(mock_pip_failure: MagicMock, tmp_path: Path) -> None:
     """install_tool returns False when pip exits non-zero."""
     registry = ToolRegistry()
-    registry._available = {
-        "browser": {"package": "playwright", "version": "1.40.0"}
-    }
+    registry._available = {"browser": {"package": "playwright", "version": "1.40.0"}}
 
     audit_log = tmp_path / "install_log.json"
 
-    with patch("asyncio.create_subprocess_exec", return_value=mock_pip_failure), \
-         patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log):
+    with (
+        patch("asyncio.create_subprocess_exec", return_value=mock_pip_failure),
+        patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log),
+    ):
         result = await registry.install_tool("browser", registry._available["browser"])
 
     assert result is False
 
 
-async def test_install_tool_writes_audit_log(
-    mock_pip_success: MagicMock, tmp_path: Path
-) -> None:
+async def test_install_tool_writes_audit_log(mock_pip_success: MagicMock, tmp_path: Path) -> None:
     """install_tool writes an entry to the audit log with correct fields."""
     registry = ToolRegistry()
     tool_info = {
@@ -336,8 +327,10 @@ async def test_install_tool_writes_audit_log(
     registry._available = {"browser": tool_info}
     audit_log = tmp_path / "install_log.json"
 
-    with patch("asyncio.create_subprocess_exec", return_value=mock_pip_success), \
-         patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log):
+    with (
+        patch("asyncio.create_subprocess_exec", return_value=mock_pip_success),
+        patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log),
+    ):
         await registry.install_tool("browser", tool_info)
 
     assert audit_log.exists()
@@ -350,9 +343,7 @@ async def test_install_tool_writes_audit_log(
     assert "timestamp" in entries[0]
 
 
-async def test_install_tool_appends_to_existing_audit_log(
-    mock_pip_success: MagicMock, tmp_path: Path
-) -> None:
+async def test_install_tool_appends_to_existing_audit_log(mock_pip_success: MagicMock, tmp_path: Path) -> None:
     """install_tool appends to an existing audit log (doesn't overwrite)."""
     audit_log = tmp_path / "install_log.json"
     # Pre-populate with one existing entry
@@ -370,8 +361,10 @@ async def test_install_tool_appends_to_existing_audit_log(
     registry = ToolRegistry()
     registry._available = {"browser": {"package": "playwright", "version": "1.40.0"}}
 
-    with patch("asyncio.create_subprocess_exec", return_value=mock_pip_success), \
-         patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log):
+    with (
+        patch("asyncio.create_subprocess_exec", return_value=mock_pip_success),
+        patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log),
+    ):
         await registry.install_tool("browser", registry._available["browser"])
 
     entries = json.loads(audit_log.read_text())
@@ -380,16 +373,16 @@ async def test_install_tool_appends_to_existing_audit_log(
     assert entries[1]["tool_name"] == "browser"
 
 
-async def test_install_tool_creates_audit_log_parent_dir(
-    mock_pip_success: MagicMock, tmp_path: Path
-) -> None:
+async def test_install_tool_creates_audit_log_parent_dir(mock_pip_success: MagicMock, tmp_path: Path) -> None:
     """install_tool creates parent directory for audit log if it doesn't exist."""
     audit_log = tmp_path / "subdir" / "deep" / "install_log.json"
     registry = ToolRegistry()
     registry._available = {"browser": {"package": "playwright", "version": "1.40.0"}}
 
-    with patch("asyncio.create_subprocess_exec", return_value=mock_pip_success), \
-         patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log):
+    with (
+        patch("asyncio.create_subprocess_exec", return_value=mock_pip_success),
+        patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log),
+    ):
         await registry.install_tool("browser", registry._available["browser"])
 
     assert audit_log.exists()
@@ -400,19 +393,17 @@ async def test_install_tool_creates_audit_log_parent_dir(
 # ─────────────────────────────────────────────────────────────
 
 
-async def test_install_tool_succeeds_without_class_field(
-    mock_pip_success: MagicMock, tmp_path: Path
-) -> None:
+async def test_install_tool_succeeds_without_class_field(mock_pip_success: MagicMock, tmp_path: Path) -> None:
     """install_tool returns True even when no class field is present in tool_info."""
     registry = ToolRegistry()
     registry._available = {"http_client": {"package": "aiohttp", "version": "3.9.3"}}
     audit_log = tmp_path / "install_log.json"
 
-    with patch("asyncio.create_subprocess_exec", return_value=mock_pip_success), \
-         patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log):
-        result = await registry.install_tool(
-            "http_client", registry._available["http_client"]
-        )
+    with (
+        patch("asyncio.create_subprocess_exec", return_value=mock_pip_success),
+        patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log),
+    ):
+        result = await registry.install_tool("http_client", registry._available["http_client"])
 
     assert result is True
     # No tool instance added since no class to instantiate
@@ -432,16 +423,16 @@ async def test_install_tool_returns_false_on_subprocess_exception(
     registry._available = {"browser": {"package": "playwright", "version": "1.40.0"}}
     audit_log = tmp_path / "install_log.json"
 
-    with patch("asyncio.create_subprocess_exec", side_effect=OSError("no pip")), \
-         patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log):
+    with (
+        patch("asyncio.create_subprocess_exec", side_effect=OSError("no pip")),
+        patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log),
+    ):
         result = await registry.install_tool("browser", registry._available["browser"])
 
     assert result is False
 
 
-async def test_install_tool_handles_corrupted_audit_log_gracefully(
-    mock_pip_success: MagicMock, tmp_path: Path
-) -> None:
+async def test_install_tool_handles_corrupted_audit_log_gracefully(mock_pip_success: MagicMock, tmp_path: Path) -> None:
     """install_tool starts fresh if existing audit log contains invalid JSON."""
     audit_log = tmp_path / "install_log.json"
     audit_log.write_text("NOT VALID JSON{{{")
@@ -449,8 +440,10 @@ async def test_install_tool_handles_corrupted_audit_log_gracefully(
     registry = ToolRegistry()
     registry._available = {"browser": {"package": "playwright", "version": "1.40.0"}}
 
-    with patch("asyncio.create_subprocess_exec", return_value=mock_pip_success), \
-         patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log):
+    with (
+        patch("asyncio.create_subprocess_exec", return_value=mock_pip_success),
+        patch("blind_assistant.tools.registry.AUDIT_LOG_PATH", audit_log),
+    ):
         result = await registry.install_tool("browser", registry._available["browser"])
 
     # Should succeed — corrupted log was reset
@@ -500,6 +493,7 @@ async def test_uninstall_tool_handles_missing_credentials_gracefully() -> None:
     registry._installed["browser"] = MagicMock()
 
     import keyring.errors
+
     with patch(
         "blind_assistant.security.credentials.delete_credential",
         side_effect=keyring.errors.PasswordDeleteError("not found"),
@@ -519,9 +513,7 @@ async def test_uninstall_tool_handles_missing_credentials_gracefully() -> None:
 async def test_instantiate_tool_returns_none_for_bad_module_path() -> None:
     """_instantiate_tool returns None if the module path cannot be imported."""
     registry = ToolRegistry()
-    result = await registry._instantiate_tool(
-        "blind_assistant.tools.nonexistent_module.SomeClass"
-    )
+    result = await registry._instantiate_tool("blind_assistant.tools.nonexistent_module.SomeClass")
     assert result is None
 
 
@@ -529,9 +521,7 @@ async def test_instantiate_tool_returns_none_for_bad_class_name() -> None:
     """_instantiate_tool returns None if the class doesn't exist in the module."""
     registry = ToolRegistry()
     # The module exists but the class does not
-    result = await registry._instantiate_tool(
-        "blind_assistant.tools.registry.NonExistentClass"
-    )
+    result = await registry._instantiate_tool("blind_assistant.tools.registry.NonExistentClass")
     assert result is None
 
 
@@ -539,9 +529,7 @@ async def test_instantiate_tool_returns_instance_when_class_exists() -> None:
     """_instantiate_tool returns an instance of the class when path is valid."""
     registry = ToolRegistry()
     # ToolRegistry itself is a valid class in a valid module
-    result = await registry._instantiate_tool(
-        "blind_assistant.tools.registry.ToolRegistry"
-    )
+    result = await registry._instantiate_tool("blind_assistant.tools.registry.ToolRegistry")
     assert result is not None
     assert isinstance(result, ToolRegistry)
 
@@ -562,10 +550,7 @@ async def test_install_tool_refuses_tool_not_in_available_registry() -> None:
     registry._available = {"browser": {"package": "playwright"}}
 
     # Attempting to install a tool NOT in _available must fail
-    result = await registry.install_tool(
-        "malicious_package",
-        {"package": "malicious_package", "version": "1.0.0"}
-    )
+    result = await registry.install_tool("malicious_package", {"package": "malicious_package", "version": "1.0.0"})
 
     assert result is False
 

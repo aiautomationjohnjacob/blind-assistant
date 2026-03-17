@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Key derivation parameters
 PBKDF2_ITERATIONS = 600_000
 SALT_SIZE = 32  # bytes
-KEY_SIZE = 32   # 256 bits for AES-256
+KEY_SIZE = 32  # 256 bits for AES-256
 
 
 def derive_key(passphrase: str, salt: bytes) -> bytes:
@@ -122,6 +122,7 @@ class VaultKey:
         Returns True if successful.
         """
         from blind_assistant.security.credentials import get_credential
+
         encoded_key = get_credential("vault_key")
         if encoded_key:
             self._key = base64.b64decode(encoded_key)
@@ -134,6 +135,7 @@ class VaultKey:
         if self._key is None:
             raise RuntimeError("No key to store — unlock the vault first.")
         from blind_assistant.security.credentials import store_credential
+
         store_credential("vault_key", base64.b64encode(self._key).decode())
         logger.debug("Vault key stored in keychain.")
 
@@ -148,7 +150,5 @@ class VaultKey:
 
     def get_key(self) -> bytes:
         if self._key is None:
-            raise RuntimeError(
-                "Vault is locked. Please unlock with your passphrase first."
-            )
+            raise RuntimeError("Vault is locked. Please unlock with your passphrase first.")
         return self._key

@@ -19,9 +19,9 @@ logger = logging.getLogger(__name__)
 
 class SensitivityLevel(Enum):
     SAFE = "safe"
-    REDACTED = "redacted"    # Sensitive regions removed; safe to send
+    REDACTED = "redacted"  # Sensitive regions removed; safe to send
     FINANCIAL = "financial"  # Financial screen; use local only
-    PASSWORD = "password"    # Password fields; never send to API
+    PASSWORD = "password"  # Password fields; never send to API
 
 
 @dataclass
@@ -39,16 +39,38 @@ ACCOUNT_NUMBER_PATTERN = re.compile(r"\b\d{8,17}\b")
 
 # Financial domain patterns (used for URL/title detection)
 FINANCIAL_DOMAINS = {
-    "bank", "chase", "wellsfargo", "bankofamerica", "citibank",
-    "paypal", "venmo", "cashapp", "zelle", "mint", "ynab",
-    "creditcard", "creditkarma", "robinhood", "fidelity", "vanguard",
-    "schwab", "etrade", "coinbase", "crypto",
+    "bank",
+    "chase",
+    "wellsfargo",
+    "bankofamerica",
+    "citibank",
+    "paypal",
+    "venmo",
+    "cashapp",
+    "zelle",
+    "mint",
+    "ynab",
+    "creditcard",
+    "creditkarma",
+    "robinhood",
+    "fidelity",
+    "vanguard",
+    "schwab",
+    "etrade",
+    "coinbase",
+    "crypto",
 }
 
 # Keywords indicating password fields in nearby text
 PASSWORD_KEYWORDS = {
-    "password", "passcode", "pin", "passphrase", "secret",
-    "new password", "confirm password", "current password",
+    "password",
+    "passcode",
+    "pin",
+    "passphrase",
+    "secret",
+    "new password",
+    "confirm password",
+    "current password",
 }
 
 
@@ -126,7 +148,7 @@ async def apply_redaction(
         img = Image.open(io.BytesIO(screenshot_bytes))
         draw = ImageDraw.Draw(img)
 
-        for (x, y, w, h) in regions:
+        for x, y, w, h in regions:
             draw.rectangle([x, y, x + w, y + h], fill="black")
 
         buffer = io.BytesIO()

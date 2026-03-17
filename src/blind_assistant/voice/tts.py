@@ -87,10 +87,7 @@ async def _elevenlabs_tts(
         )
 
         # Collect all chunks
-        audio_bytes = b"".join(
-            chunk async for chunk in audio_generator
-            if isinstance(chunk, bytes)
-        )
+        audio_bytes = b"".join(chunk async for chunk in audio_generator if isinstance(chunk, bytes))
         return audio_bytes if audio_bytes else None
 
     except Exception as e:
@@ -123,9 +120,7 @@ async def _pyttsx3_tts(
             engine.setProperty("rate", int(200 * speed))
             engine.setProperty("volume", 0.9)
 
-            with tempfile.NamedTemporaryFile(
-                suffix=".wav", delete=False
-            ) as tmp:
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
                 tmp_path = tmp.name
 
             try:

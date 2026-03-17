@@ -31,6 +31,7 @@ pytestmark = pytest.mark.e2e
 # Fixtures
 # ─────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def config() -> dict:
     """Minimal config for E2E food ordering tests."""
@@ -105,14 +106,16 @@ def _make_orchestrator_with_mock_browser(
 
     # Mock planner to classify any message as "order_food"
     mock_planner = MagicMock()
-    mock_planner.classify_intent = AsyncMock(return_value=Intent(
-        type="order_food",
-        description="order a pizza",
-        required_tools=["browser"],
-        parameters={"food": "pizza"},
-        is_high_stakes=True,
-        confidence=0.95,
-    ))
+    mock_planner.classify_intent = AsyncMock(
+        return_value=Intent(
+            type="order_food",
+            description="order a pizza",
+            required_tools=["browser"],
+            parameters={"food": "pizza"},
+            is_high_stakes=True,
+            confidence=0.95,
+        )
+    )
     orc.planner = mock_planner
 
     # Mock tool registry
@@ -145,6 +148,7 @@ def _make_orchestrator_with_mock_browser(
 # E2E test 1: Happy path — user accepts risk disclosure, browser navigates
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_food_order_happy_path_disclosure_accepted(
     config: dict,
     user_context: UserContext,
@@ -157,9 +161,7 @@ async def test_food_order_happy_path_disclosure_accepted(
 
     Verifies: disclosure fires, browser navigates, result has page_state.
     """
-    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(
-        config, mock_food_page_state, installed=True
-    )
+    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(config, mock_food_page_state, installed=True)
     gate.register_session(user_context.session_id)
 
     updates: list[str] = []
@@ -186,10 +188,9 @@ async def test_food_order_happy_path_disclosure_accepted(
 
     # Risk disclosure must have been sent
     all_updates = " ".join(updates).lower()
-    assert any(
-        keyword in all_updates
-        for keyword in ("risk", "payment", "financial", "financial information")
-    ), f"Risk disclosure not found in updates: {updates}"
+    assert any(keyword in all_updates for keyword in ("risk", "payment", "financial", "financial information")), (
+        f"Risk disclosure not found in updates: {updates}"
+    )
 
     # Browser must have been asked to navigate
     mock_browser.navigate.assert_called_once()
@@ -205,6 +206,7 @@ async def test_food_order_happy_path_disclosure_accepted(
 # E2E test 2: User declines risk disclosure — order cancelled
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_food_order_risk_disclosure_declined(
     config: dict,
     user_context: UserContext,
@@ -214,9 +216,7 @@ async def test_food_order_risk_disclosure_declined(
     User says "no" to risk disclosure → order cancelled →
     browser never called → reassuring message returned.
     """
-    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(
-        config, mock_food_page_state, installed=True
-    )
+    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(config, mock_food_page_state, installed=True)
     gate.register_session(user_context.session_id)
 
     updates: list[str] = []
@@ -245,10 +245,9 @@ async def test_food_order_risk_disclosure_declined(
 
     # Response should be a cancellation message (reassuring, no pressure)
     response_text = result["text"].lower()
-    assert any(
-        phrase in response_text
-        for phrase in ("no problem", "won't proceed", "any time", "cancel")
-    ), f"Expected cancellation message, got: {result['text']}"
+    assert any(phrase in response_text for phrase in ("no problem", "won't proceed", "any time", "cancel")), (
+        f"Expected cancellation message, got: {result['text']}"
+    )
 
     # CRITICAL: No artificial urgency (ETHICS_REQUIREMENTS.md)
     assert "now or never" not in response_text
@@ -260,6 +259,7 @@ async def test_food_order_risk_disclosure_declined(
 # E2E test 3: Tool install flow — browser not installed, user confirms install
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_food_order_triggers_browser_install_when_not_installed(
     config: dict,
     user_context: UserContext,
@@ -269,9 +269,7 @@ async def test_food_order_triggers_browser_install_when_not_installed(
     When browser tool is not installed, the orchestrator offers to install it.
     User says "yes" → tool installs → then asks user to request food again.
     """
-    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(
-        config, mock_food_page_state, installed=False
-    )
+    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(config, mock_food_page_state, installed=False)
     gate.register_session(user_context.session_id)
 
     updates: list[str] = []
@@ -302,6 +300,7 @@ async def test_food_order_triggers_browser_install_when_not_installed(
 # E2E test 4: Accessibility assertion — no visual-only language
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_food_order_responses_contain_no_visual_only_language(
     config: dict,
     user_context: UserContext,
@@ -314,9 +313,7 @@ async def test_food_order_responses_contain_no_visual_only_language(
 
     This is the accessibility assertion required for all E2E tests.
     """
-    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(
-        config, mock_food_page_state, installed=True
-    )
+    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(config, mock_food_page_state, installed=True)
     gate.register_session(user_context.session_id)
 
     updates: list[str] = []
@@ -363,6 +360,7 @@ async def test_food_order_responses_contain_no_visual_only_language(
 # E2E test 5: Brief verbosity — disclosure is shorter but still fires
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_food_order_brief_user_gets_shorter_disclosure(
     config: dict,
     brief_user_context: UserContext,
@@ -374,9 +372,7 @@ async def test_food_order_brief_user_gets_shorter_disclosure(
     """
     from blind_assistant.security.disclosure import FINANCIAL_RISK_DISCLOSURE
 
-    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(
-        config, mock_food_page_state, installed=True
-    )
+    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(config, mock_food_page_state, installed=True)
     gate.register_session(brief_user_context.session_id)
 
     risk_messages: list[str] = []
@@ -414,6 +410,7 @@ async def test_food_order_brief_user_gets_shorter_disclosure(
 # E2E test 6: Order confirmation uses correct financial flow
 # ─────────────────────────────────────────────────────────────
 
+
 async def test_food_order_confirm_fires_full_financial_confirmation(
     config: dict,
     user_context: UserContext,
@@ -427,9 +424,7 @@ async def test_food_order_confirm_fires_full_financial_confirmation(
     This test verifies that BOTH confirmations are required before any order completes.
     Per ETHICS_REQUIREMENTS.md: per-transaction confirmation, not session-level.
     """
-    orc, _, gate = _make_orchestrator_with_mock_browser(
-        config, mock_food_page_state, installed=True
-    )
+    orc, _, gate = _make_orchestrator_with_mock_browser(config, mock_food_page_state, installed=True)
     gate.register_session(user_context.session_id)
 
     updates: list[str] = []
@@ -450,15 +445,12 @@ async def test_food_order_confirm_fires_full_financial_confirmation(
 
     # Must have received at least 2 messages: disclosure + order confirmation
     assert confirmation_count[0] >= 2, (
-        f"Expected at least 2 confirmation messages (disclosure + order), "
-        f"got {confirmation_count[0]}"
+        f"Expected at least 2 confirmation messages (disclosure + order), got {confirmation_count[0]}"
     )
 
     # The order summary must appear in one of the messages
     all_text = " ".join(updates)
-    assert "Pepperoni Pizza" in all_text or "21.98" in all_text, (
-        "Order summary not shown to user before confirmation"
-    )
+    assert "Pepperoni Pizza" in all_text or "21.98" in all_text, "Order summary not shown to user before confirmation"
 
     # Result should be True (user confirmed both steps)
     assert result is True
@@ -467,6 +459,7 @@ async def test_food_order_confirm_fires_full_financial_confirmation(
 # ─────────────────────────────────────────────────────────────
 # E2E test 7: Navigation error — graceful degradation
 # ─────────────────────────────────────────────────────────────
+
 
 async def test_food_order_navigation_error_does_not_crash(
     config: dict,
@@ -486,6 +479,7 @@ async def test_food_order_navigation_error_does_not_crash(
     gate.register_session(user_context.session_id)
 
     response_count = [0]
+
     async def update_cb(msg: str) -> None:
         response_count[0] += 1
         gate.submit_response(user_context.session_id, "yes")
@@ -505,15 +499,15 @@ async def test_food_order_navigation_error_does_not_crash(
 
     assert "text" in result
     response_lower = result["text"].lower()
-    assert any(
-        phrase in response_lower
-        for phrase in ("trouble", "connection refused", "try", "different")
-    ), f"Expected helpful error message, got: {result['text']}"
+    assert any(phrase in response_lower for phrase in ("trouble", "connection refused", "try", "different")), (
+        f"Expected helpful error message, got: {result['text']}"
+    )
 
 
 # ─────────────────────────────────────────────────────────────
 # E2E test 8: handle_message routes "order food" to food handler
 # ─────────────────────────────────────────────────────────────
+
 
 async def test_handle_message_routes_order_food_through_pipeline(
     config: dict,
@@ -529,9 +523,7 @@ async def test_handle_message_routes_order_food_through_pipeline(
 
     This is the highest-level integration test for the food ordering path.
     """
-    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(
-        config, mock_food_page_state, installed=True
-    )
+    orc, mock_browser, gate = _make_orchestrator_with_mock_browser(config, mock_food_page_state, installed=True)
     gate.register_session(user_context.session_id)
 
     response_count = [0]

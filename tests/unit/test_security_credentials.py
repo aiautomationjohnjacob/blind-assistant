@@ -40,6 +40,7 @@ pytestmark = pytest.mark.security
 # store_credential
 # ─────────────────────────────────────────────────────────────
 
+
 class TestStoreCredential:
     def test_stores_value_in_keychain(self, mock_keyring):
         store_credential("test_key", "test_value")
@@ -50,13 +51,17 @@ class TestStoreCredential:
         assert ("blind-assistant", "my_key") in mock_keyring.store
 
     def test_raises_runtime_error_when_keychain_unavailable(self):
-        with patch("keyring.set_password", side_effect=keyring.errors.KeyringError("no keychain")), \
-             pytest.raises(RuntimeError, match="OS keychain may not be available"):
+        with (
+            patch("keyring.set_password", side_effect=keyring.errors.KeyringError("no keychain")),
+            pytest.raises(RuntimeError, match="OS keychain may not be available"),
+        ):
             store_credential("key", "value")
 
     def test_runtime_error_message_includes_key_name(self):
-        with patch("keyring.set_password", side_effect=keyring.errors.KeyringError("err")), \
-             pytest.raises(RuntimeError, match="my_important_key"):
+        with (
+            patch("keyring.set_password", side_effect=keyring.errors.KeyringError("err")),
+            pytest.raises(RuntimeError, match="my_important_key"),
+        ):
             store_credential("my_important_key", "value")
 
     def test_overwrites_existing_value(self, mock_keyring):
@@ -68,6 +73,7 @@ class TestStoreCredential:
 # ─────────────────────────────────────────────────────────────
 # get_credential
 # ─────────────────────────────────────────────────────────────
+
 
 class TestGetCredential:
     def test_returns_stored_value(self, mock_keyring):
@@ -98,6 +104,7 @@ class TestGetCredential:
 # delete_credential
 # ─────────────────────────────────────────────────────────────
 
+
 class TestDeleteCredential:
     def test_returns_true_when_deleted(self, mock_keyring):
         store_credential("to_delete", "value")
@@ -123,6 +130,7 @@ class TestDeleteCredential:
 # ─────────────────────────────────────────────────────────────
 # require_credential
 # ─────────────────────────────────────────────────────────────
+
 
 class TestRequireCredential:
     def test_returns_value_when_present(self, mock_keyring):
@@ -152,6 +160,7 @@ class TestRequireCredential:
 # list_stored_keys
 # ─────────────────────────────────────────────────────────────
 
+
 class TestListStoredKeys:
     def test_returns_empty_list_when_no_registry(self, mock_keyring):
         assert list_stored_keys() == []
@@ -159,6 +168,7 @@ class TestListStoredKeys:
     def test_returns_keys_from_registry(self, mock_keyring):
         # Manually set the key registry
         import keyring as kr
+
         kr.set_password(SERVICE_NAME, "_key_registry", "telegram_bot_token,claude_api_key")
         keys = list_stored_keys()
         assert "telegram_bot_token" in keys
@@ -166,6 +176,7 @@ class TestListStoredKeys:
 
     def test_strips_whitespace_from_keys(self, mock_keyring):
         import keyring as kr
+
         kr.set_password(SERVICE_NAME, "_key_registry", " key1 , key2 ")
         keys = list_stored_keys()
         assert "key1" in keys
@@ -173,6 +184,7 @@ class TestListStoredKeys:
 
     def test_does_not_return_empty_entries(self, mock_keyring):
         import keyring as kr
+
         kr.set_password(SERVICE_NAME, "_key_registry", "key1,,key2,")
         keys = list_stored_keys()
         assert "" not in keys
@@ -186,6 +198,7 @@ class TestListStoredKeys:
 # ─────────────────────────────────────────────────────────────
 # _register_key / _unregister_key
 # ─────────────────────────────────────────────────────────────
+
 
 class TestKeyRegistry:
     def test_register_key_adds_to_registry(self, mock_keyring):
@@ -215,6 +228,7 @@ class TestKeyRegistry:
 # ─────────────────────────────────────────────────────────────
 # Key name constants (non-negotiable security contract)
 # ─────────────────────────────────────────────────────────────
+
 
 class TestKeyNameConstants:
     """

@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 # EVENT LOOP (asyncio)
 # ─────────────────────────────────────────────────────────────
 
+
 @pytest.fixture(scope="session")
 def event_loop_policy() -> asyncio.DefaultEventLoopPolicy:
     return asyncio.DefaultEventLoopPolicy()
@@ -40,6 +41,7 @@ def event_loop_policy() -> asyncio.DefaultEventLoopPolicy:
 # ─────────────────────────────────────────────────────────────
 # OS KEYCHAIN
 # ─────────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def mock_keyring() -> Generator[MagicMock, None, None]:
@@ -58,18 +60,22 @@ def mock_keyring() -> Generator[MagicMock, None, None]:
     def fake_delete(service: str, key: str) -> None:
         if (service, key) not in store:
             import keyring.errors
+
             raise keyring.errors.PasswordDeleteError(key)
         del store[(service, key)]
 
-    with patch("keyring.set_password", side_effect=fake_set), \
-         patch("keyring.get_password", side_effect=fake_get), \
-         patch("keyring.delete_password", side_effect=fake_delete):
+    with (
+        patch("keyring.set_password", side_effect=fake_set),
+        patch("keyring.get_password", side_effect=fake_get),
+        patch("keyring.delete_password", side_effect=fake_delete),
+    ):
         yield MagicMock(store=store)
 
 
 # ─────────────────────────────────────────────────────────────
 # CLAUDE API
 # ─────────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def mock_claude_response() -> MagicMock:
@@ -89,14 +95,14 @@ def mock_claude_client(mock_claude_response: MagicMock) -> Generator[MagicMock, 
     client.messages.create = MagicMock(return_value=mock_claude_response)
     client.messages.acreate = AsyncMock(return_value=mock_claude_response)
 
-    with patch("anthropic.Anthropic", return_value=client), \
-         patch("anthropic.AsyncAnthropic", return_value=client):
+    with patch("anthropic.Anthropic", return_value=client), patch("anthropic.AsyncAnthropic", return_value=client):
         yield client
 
 
 # ─────────────────────────────────────────────────────────────
 # TELEGRAM BOT
 # ─────────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def mock_telegram_update() -> MagicMock:
@@ -140,11 +146,11 @@ def mock_telegram_application() -> Generator[MagicMock, None, None]:
 # TEXT-TO-SPEECH (ElevenLabs + pyttsx3)
 # ─────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def mock_elevenlabs() -> Generator[MagicMock, None, None]:
     """Mock ElevenLabs so no real audio is generated."""
-    with patch("elevenlabs.generate", return_value=b"fake_audio_bytes"), \
-         patch("elevenlabs.play"):
+    with patch("elevenlabs.generate", return_value=b"fake_audio_bytes"), patch("elevenlabs.play"):
         yield
 
 
@@ -164,6 +170,7 @@ def mock_pyttsx3() -> Generator[MagicMock, None, None]:
 # SPEECH-TO-TEXT (Whisper)
 # ─────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def mock_whisper() -> Generator[MagicMock, None, None]:
     """Mock Whisper STT so no model download or GPU is needed in tests."""
@@ -177,6 +184,7 @@ def mock_whisper() -> Generator[MagicMock, None, None]:
 # ─────────────────────────────────────────────────────────────
 # FILE SYSTEM
 # ─────────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def temp_vault_dir() -> Generator[Path, None, None]:
@@ -196,6 +204,7 @@ def temp_dir() -> Generator[Path, None, None]:
 # AUDIO I/O (sounddevice)
 # ─────────────────────────────────────────────────────────────
 
+
 @pytest.fixture(autouse=True)
 def suppress_audio() -> Generator[None, None, None]:
     """
@@ -206,9 +215,8 @@ def suppress_audio() -> Generator[None, None, None]:
     """
     try:
         import sounddevice  # noqa: F401 — just checking if installed
-        with patch("sounddevice.rec", return_value=MagicMock()), \
-             patch("sounddevice.play"), \
-             patch("sounddevice.wait"):
+
+        with patch("sounddevice.rec", return_value=MagicMock()), patch("sounddevice.play"), patch("sounddevice.wait"):
             yield
     except ImportError:
         # sounddevice not installed — audio suppression is a no-op
@@ -219,6 +227,7 @@ def suppress_audio() -> Generator[None, None, None]:
 # ─────────────────────────────────────────────────────────────
 # SAMPLE DATA
 # ─────────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def sample_user_id() -> int:
