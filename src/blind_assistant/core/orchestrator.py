@@ -918,6 +918,8 @@ class Orchestrator:
         """
         # Read timeout from config — allows per-user customisation in config.yaml
         timeout_seconds: float = float(self.config.get("voice", {}).get("prompt_timeout_seconds", 120))
+        # Assert narrows Optional type — _collect_vault_passphrase only called after initialize()
+        assert self.confirmation_gate is not None
         self.confirmation_gate.register_session(context.session_id)
         queue = self.confirmation_gate._response_queues[context.session_id]
         try:
