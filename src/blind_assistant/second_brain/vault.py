@@ -102,9 +102,10 @@ class EncryptedVault:
             f"{content}\n"
         )
 
-        # Safe filename: date + sanitized title
+        # Safe filename: date with microseconds + sanitized title
+        # Microseconds ensure uniqueness when multiple notes are added in the same second
         safe_title = "".join(c for c in title if c.isalnum() or c in " -_")[:50]
-        filename = f"{now.strftime('%Y%m%d_%H%M%S')}_{safe_title}.md.enc"
+        filename = f"{now.strftime('%Y%m%d_%H%M%S')}_{now.microsecond:06d}_{safe_title}.md.enc"
 
         subdir = VAULT_DIRS.get(category, "general")
         note_path = self.vault_path / subdir / filename
