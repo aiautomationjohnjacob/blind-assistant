@@ -96,6 +96,7 @@ def configure_logging(debug: bool = False) -> None:
 
 
 def main() -> None:
+    """Parse CLI arguments and launch the selected interface (setup / voice / Telegram / API)."""
     parser = argparse.ArgumentParser(description="Blind Assistant — AI life companion for blind users")
     parser.add_argument(
         "--setup",
