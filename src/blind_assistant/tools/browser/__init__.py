@@ -183,6 +183,7 @@ class BrowserTool:
         Returns: Updated page state
         """
         self._require_initialized()
+        assert self._page is not None  # guaranteed by _require_initialized; narrows type for mypy
         if clear_first:
             await self._page.fill(selector, value, timeout=10_000)
         else:
