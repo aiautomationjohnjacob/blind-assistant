@@ -283,8 +283,8 @@ export function MainScreen(): React.JSX.Element {
         accessibilityLabel={getButtonLabel()}
         accessibilityHint={
           state === "listening"
-            ? "Double-tap to stop recording and send your voice request."
-            : "Double-tap to start recording. Tap again when done speaking."
+            ? "Stops recording and sends your voice request to the assistant."
+            : "Starts recording your voice. Activate again when done speaking."
         }
         accessibilityState={{ disabled: isButtonDisabled }}
         // Minimum 44dp touch target (Android accessibility guideline)
