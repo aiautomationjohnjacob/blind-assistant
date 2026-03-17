@@ -100,14 +100,16 @@ to work in parallel, review each other's work, and commit progress continuously.
   to OPEN_ISSUES.md and PRIORITY_STACK.md
 
 ### Platform Accessibility Agents
-- **ios-accessibility-expert** — iOS VoiceOver, Switch Control, AssistiveTouch; ensures Telegram
-  bot messages are accessible in iOS TalkBack; no emoji in TTS, no visual-only instructions
-- **android-accessibility-expert** — Android TalkBack, BrailleBack, Switch Access; message
-  formatting for TalkBack; Telegram Android integration; gesture-based setup instructions
-- **windows-accessibility-expert** — NVDA and JAWS on Windows; the NVDA keyboard-only test is
-  the project's accessibility floor; installer must use pyttsx3 before any GUI; console-only input
-- **macos-accessibility-expert** — macOS VoiceOver (shares architecture with iOS VoiceOver);
-  macOS Keychain integration; pyttsx3 nsss backend; Terminal.app VoiceOver compatibility
+- **ios-accessibility-expert** — Native iOS app + Safari web app; VoiceOver, Switch Control,
+  AssistiveTouch; UIAccessibility API; Siri Shortcuts integration; Dynamic Type support
+- **android-accessibility-expert** — Native Android app + Chrome web app; TalkBack, BrailleBack,
+  Switch Access, Voice Access; Android Accessibility API; gesture-based navigation patterns
+- **windows-accessibility-expert** — Native desktop app + Chrome/Firefox web app; NVDA and JAWS;
+  the NVDA keyboard-only test is the project's accessibility floor; NVDA Browse/Forms Mode
+- **macos-accessibility-expert** — Native macOS app + Safari web app; VoiceOver (shares
+  NSAccessibility architecture with iOS); macOS Keychain; Terminal.app VoiceOver compatibility
+- **web-accessibility-expert** — Cross-browser web app + education website; covers NVDA+Chrome,
+  NVDA+Firefox, VoiceOver+Safari, TalkBack+Chrome, JAWS+Chrome; WCAG 2.1 AA; semantic HTML first
 
 ### Infrastructure & Education Agents
 - **cloud-architect** — Designs cloud infrastructure in planning mode (no live accounts yet);
