@@ -27,7 +27,7 @@ Test strategy:
 
 Per testing.md: Android E2E tests use ADB and AVD.
 Per CLAUDE.md: TalkBack tests are Android accessibility floor.
-Per ARCHITECTURE.md: React Native + Expo renders to native views → native a11y tree.
+Per ARCHITECTURE.md: React Native + Expo renders to native views -> native a11y tree.
 
 NOTE: These tests require:
   1. Android SDK + ADB installed
@@ -45,6 +45,7 @@ the backend before pytest. See .github/workflows/ci.yml.
 from __future__ import annotations
 
 import os
+import re
 import time
 
 import pytest
@@ -62,25 +63,24 @@ BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:8000")
 
 def _parse_content_descriptions(xml: str) -> list[str]:
     """Extract all content-desc values from a uiautomator XML dump."""
-    import re
-
     return re.findall(r'content-desc="([^"]*)"', xml)
 
 
 def _parse_bounds(xml: str) -> list[tuple[int, int, int, int]]:
     """Extract all bounds from a uiautomator XML dump as (x1, y1, x2, y2) tuples."""
-    import re
-
     raw = re.findall(r'bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', xml)
     return [(int(a), int(b), int(c), int(d)) for a, b, c, d in raw]
 
 
-def _touch_target_size(bounds: tuple[int, int, int, int], dp_per_px: float = 2.75) -> tuple[float, float]:
-    """Return the touch target size in dp from pixel bounds."""
-    x1, y1, x2, y2 = bounds
-    width_dp = (x2 - x1) / dp_per_px
-    height_dp = (y2 - y1) / dp_per_px
-    return width_dp, height_dp
+def _backend_reachable() -> bool:
+    """Return True if the Python backend is running and healthy."""
+    try:
+        import httpx
+
+        resp = httpx.get(f"{BACKEND_URL}/health", timeout=5)
+        return resp.status_code == 200
+    except Exception:  # noqa: BLE001
+        return False
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ class TestTalkBackLaunch:
         Every interactive element must have a contentDescription.
 
         TalkBack reads contentDescription to tell a blind user what each element is.
-        If an element has no description, TalkBack says "unlabelled element" — which
+        If an element has no description, TalkBack says "unlabelled element" -- which
         gives no information and forces the user to guess. This is a WCAG 4.1.2 failure.
         """
         adb.enable_talkback()  # type: ignore[attr-defined]
@@ -139,8 +139,6 @@ class TestTalkBackLaunch:
             )
 
             # No interactive button should have an empty content description
-            import re
-
             empty_buttons = re.findall(
                 r'<node[^>]*class="android\.widget\.Button"[^>]*content-desc=""[^>]*/?>',
                 xml,
@@ -205,8 +203,8 @@ class TestTouchTargets:
         all_bounds = _parse_bounds(xml)
 
         # Find the largest interactive button (the main talk button)
-        # On a Pixel 6 (1080x2400 at 411dpi), 44dp ≈ 121px
-        min_px = 44 * 2.75  # ~121px (2.75 is typical density for Pixel 6)
+        # On a Pixel 6 (1080x2400 at 411dpi), 44dp is approximately 121px
+        min_px = 44 * 2.75  # ~121px (2.75 is typical density factor for Pixel 6)
 
         # At least one button must meet the minimum
         large_enough = [
@@ -229,17 +227,17 @@ class TestFoodOrderingTalkBackFlow:
     """
     End-to-end food ordering flow with TalkBack enabled.
 
-    Phase 3 scenario: blind user says "order me food" → risk disclosure → confirmation.
+    Phase 3 scenario: blind user says "order me food" -> risk disclosure -> confirmation.
     This is the highest-priority Phase 3 test for Android.
     """
 
     def test_order_food_intent_reachable_by_talkback(self, adb: object) -> None:
         """
-        The food ordering flow must be initiatable by keyboard/TalkBack navigation alone.
+        The food ordering flow must be initiatable by TalkBack navigation alone.
 
         A blind user navigates to the press-to-talk button using TalkBack swipe-right,
         double-taps to activate, and then speaks "order me food". This test verifies
-        that the button is reachable in the accessibility focus order — it must appear
+        that the button is reachable in the accessibility focus order -- it must appear
         in the UI hierarchy and be focusable.
         """
         adb.enable_talkback()  # type: ignore[attr-defined]
@@ -250,8 +248,6 @@ class TestFoodOrderingTalkBackFlow:
             xml = adb.dump_ui_xml()  # type: ignore[attr-defined]
 
             # The main action button must be in the accessibility tree and focusable
-            import re
-
             focusable_nodes = re.findall(
                 r'<node[^>]*focusable="true"[^>]*/?>',
                 xml,
@@ -267,9 +263,14 @@ class TestFoodOrderingTalkBackFlow:
                 n for n in focusable_nodes
                 if "speak" in n.lower() or "record" in n.lower() or "assistant" in n.lower()
             ]
-            # Extract content descriptions from focusable nodes for the error message
+            # Extract content descriptions for the error message (no backslash in f-string)
             cd_pattern = re.compile(r'content-desc="([^"]+)"')
-            focusable_descs = [m.group(1) for n in focusable_nodes for m in [cd_pattern.search(n)] if m]
+            focusable_descs = [
+                m.group(1)
+                for n in focusable_nodes
+                for m in [cd_pattern.search(n)]
+                if m
+            ]
             assert len(speak_nodes) > 0, (
                 "The press-to-talk button is not focusable by TalkBack. "
                 f"All focusable content-descs: {focusable_descs}"
@@ -283,26 +284,17 @@ class TestFoodOrderingTalkBackFlow:
         any prompt asking for financial information.
 
         Per CLAUDE.md non-negotiable: "Risk disclosure is mandatory: whenever the user
-        provides banking or payment details, the app MUST warn them clearly — even if
-        our security is good — that providing financial information to any app carries
-        inherent risk."
+        provides banking or payment details, the app MUST warn them clearly."
 
         This test simulates the food ordering flow via the backend API and checks that
-        the UI displays the disclosure text. In TalkBack, the disclosure must be in
-        an element with a contentDescription that includes a warning.
+        the UI does not crash or go blank after receiving the ordering response.
+        The backend E2E tests in tests/e2e/core/ verify the disclosure text content.
         """
-        import urllib.request
-
-        # Check backend is reachable
-        try:
-            req = urllib.request.Request(
-                f"{BACKEND_URL}/health",
-                method="GET",
+        if not _backend_reachable():
+            pytest.skip(
+                f"Backend not reachable at {BACKEND_URL}. "
+                "Start with: python -m blind_assistant.main --api"
             )
-            with urllib.request.urlopen(req, timeout=5) as resp:
-                assert resp.status == 200
-        except OSError:
-            pytest.skip(f"Backend not reachable at {BACKEND_URL} — start with: python -m blind_assistant.main --api")
 
         # Launch app and trigger food ordering
         adb.enable_talkback()  # type: ignore[attr-defined]
@@ -310,41 +302,29 @@ class TestFoodOrderingTalkBackFlow:
             adb.launch_app(APP_PACKAGE)  # type: ignore[attr-defined]
             time.sleep(2)
 
-            # Navigate to the speak button and activate it
-            # Simulate: swipe-right to navigate, double-tap to activate
+            # Navigate to the speak button and activate it via TalkBack gestures
             adb.swipe_right()  # type: ignore[attr-defined]
             time.sleep(0.5)
             adb.double_tap()  # type: ignore[attr-defined]
             time.sleep(1)
 
-            # Now simulate a voice message text arriving (via API directly)
-            # In a real E2E, the user would speak "order me food"
-            # Here we inject via the API to test the backend-to-UI disclosure flow
+            # Inject an "order me food" request via the API to test the disclosure flow.
+            # In a real E2E the user would speak this; here we inject via the backend
+            # to test the UI response pathway without requiring a real microphone.
             import json
 
-            data = json.dumps({
-                "message": "order me food",
-                "session_id": "talkback_e2e_test",
-            }).encode()
-            req = urllib.request.Request(
-                f"{BACKEND_URL}/query",
-                data=data,
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
-            # We do not assert on the response body here because the risk disclosure
-            # is spoken via TTS. The backend E2E tests verify the disclosure text content.
-            # This test only verifies the UI pathway is accessible.
+            import httpx
 
-            # After a response, check the UI tree for warning/disclosure content
+            httpx.post(
+                f"{BACKEND_URL}/query",
+                json={"message": "order me food", "session_id": "talkback_e2e_test"},
+                timeout=10,
+            )
+
+            # After a response, verify the UI is still intact (not crashed)
             time.sleep(3)
             xml = adb.dump_ui_xml()  # type: ignore[attr-defined]
-            descriptions = _parse_content_descriptions(xml)
-
-            # The app should be showing a response (not crashed, not blank)
-            # We can't assert the specific disclosure text here without a test account,
-            # but we CAN assert the response area is present and has content
-            assert xml != "", "UI dump returned empty — app may have crashed"
+            assert xml != "", "UI dump returned empty -- app may have crashed after ordering request"
         finally:
             adb.disable_talkback()  # type: ignore[attr-defined]
 
@@ -363,8 +343,6 @@ class TestFoodOrderingTalkBackFlow:
         xml = adb.dump_ui_xml()  # type: ignore[attr-defined]
 
         # If there is any confirmation dialog visible, its buttons must be focusable
-        import re
-
         if "confirm" in xml.lower() or "yes" in xml.lower() or "no" in xml.lower():
             # Look for Yes/No buttons in the a11y tree
             yes_no_nodes = re.findall(
@@ -389,7 +367,7 @@ class TestFoodOrderingTalkBackFlow:
 class TestAccessibilitySnapshot:
     """Capture screenshots at key moments for android-accessibility-expert review."""
 
-    def test_capture_main_screen_screenshot(self, adb: object, tmp_path: object) -> None:
+    def test_capture_main_screen_screenshot(self, adb: object) -> None:
         """
         Capture a screenshot of the main screen with TalkBack focus visible.
 
@@ -397,8 +375,6 @@ class TestAccessibilitySnapshot:
         android-accessibility-expert agent. TalkBack focus ring (blue highlight)
         on the correct element confirms visual + programmatic accessibility alignment.
         """
-        import os
-
         adb.enable_talkback()  # type: ignore[attr-defined]
         try:
             adb.launch_app(APP_PACKAGE)  # type: ignore[attr-defined]
@@ -412,8 +388,7 @@ class TestAccessibilitySnapshot:
             os.makedirs("screenshots", exist_ok=True)
             path = adb.screenshot("screenshots/android_talkback_main_screen.png")  # type: ignore[attr-defined]
 
-            # Verify file was created (even if it's a placeholder in unit test mode)
-            # The CI job will produce a real screenshot; unit test mode just verifies flow
+            # Verify screenshot capture returned a path (CI will verify it's a real PNG)
             assert path is not None, "Screenshot capture returned None"
         finally:
             adb.disable_talkback()  # type: ignore[attr-defined]
