@@ -107,7 +107,7 @@ class VaultQuery:
         category = _infer_category(content)
 
         try:
-            filename = await self.vault.add_note(
+            await self.vault.add_note(
                 content=content,
                 category=category,
             )

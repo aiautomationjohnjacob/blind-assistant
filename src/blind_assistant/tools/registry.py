@@ -74,7 +74,7 @@ class ToolRegistry:
                 "name": name,
                 "description": self._available.get(name, {}).get("description", ""),
             }
-            for name in self._installed.keys()
+            for name in self._installed
         ]
 
     async def install_tool(self, tool_name: str, tool_info: dict) -> bool:

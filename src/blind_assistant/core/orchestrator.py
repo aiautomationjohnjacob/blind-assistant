@@ -278,10 +278,18 @@ class Orchestrator:
             )
         }
 
-    async def _get_vault(self, context: UserContext):
+    async def _get_vault(self, context: UserContext, response_callback=None):
         """
         Get or initialize the vault for this user.
-        Returns None if vault cannot be accessed.
+
+        Tries OS keychain first. If keychain has no key, prompts the user for their
+        passphrase via the active interface (voice or Telegram).
+
+        Returns None only if the user cannot or does not provide a passphrase, or if
+        the passphrase is wrong. Always tells the user what is happening — never silent.
+
+        Per ISSUE-001: silent vault failure left blind users unable to access notes with
+        no explanation. This fix speaks a passphrase prompt so they can self-recover.
         """
         import os
         from pathlib import Path
@@ -295,15 +303,96 @@ class Orchestrator:
 
         key = VaultKey()
 
-        # Try OS keychain first
+        # Try OS keychain first (no user interaction needed)
         if key.unlock_from_keychain():
             vault = EncryptedVault(vault_path=vault_path, vault_key=key)
             await vault.initialize()
             return vault
 
-        # Vault not accessible without passphrase in this session
-        logger.warning("Vault key not in keychain — vault locked")
-        return None
+        # Keychain has no key — prompt the user for their passphrase
+        logger.warning("Vault key not in keychain — prompting user for passphrase")
+
+        if response_callback is None:
+            # No interface available to ask the user — log but cannot self-recover
+            logger.error(
+                "Cannot unlock vault: keychain has no key and no response_callback "
+                "available to prompt user for passphrase."
+            )
+            return None
+
+        # Check if passphrase was collected earlier in this session
+        session_passphrase: Optional[str] = getattr(context, "_vault_passphrase", None)
+
+        if session_passphrase is None:
+            await response_callback(
+                "To access your notes, I need your vault passphrase. "
+                "Please say or type your passphrase now. "
+                "Your passphrase will not be stored — it only unlocks your notes for this session."
+            )
+            session_passphrase = await self._collect_vault_passphrase(context)
+
+            if session_passphrase is None:
+                await response_callback(
+                    "I did not receive a passphrase. Your notes remain locked. "
+                    "Say 'unlock my notes' any time to try again."
+                )
+                return None
+
+            # Cache in context so we don't prompt again during the same session
+            context._vault_passphrase = session_passphrase  # type: ignore[attr-defined]
+
+        # Derive vault key from passphrase + stored salt
+        salt_path = vault_path / ".salt"
+        if not salt_path.exists():
+            # First time: create vault directory and generate salt
+            vault_path.mkdir(parents=True, exist_ok=True)
+            from blind_assistant.second_brain.encryption import generate_salt
+            salt = generate_salt()
+            salt_path.write_bytes(salt)
+            logger.info("New vault initialised: generated and stored salt.")
+        else:
+            salt = salt_path.read_bytes()
+
+        try:
+            key.unlock(session_passphrase, salt)
+        except Exception as e:
+            logger.error(f"Vault key derivation failed: {e}")
+            await response_callback(
+                "I could not unlock your notes with that passphrase. "
+                "Please check your passphrase and say 'unlock my notes' to try again."
+            )
+            # Clear the cached wrong passphrase so next attempt can re-prompt
+            if hasattr(context, "_vault_passphrase"):
+                del context._vault_passphrase  # type: ignore[attr-defined]
+            return None
+
+        vault = EncryptedVault(vault_path=vault_path, vault_key=key)
+        await vault.initialize()
+
+        # Let the user know notes are unlocked, and offer to remember for next session
+        await response_callback(
+            "Notes unlocked. "
+            "Say 'remember my passphrase' to store it securely so you "
+            "don't need to enter it next time."
+        )
+        return vault
+
+    async def _collect_vault_passphrase(self, context: UserContext) -> Optional[str]:
+        """
+        Wait for the user to provide their vault passphrase.
+
+        Reuses the confirmation gate's response queue so Telegram messages and
+        local voice input are both routed here automatically.
+        Returns None on timeout (120 seconds).
+        """
+        self.confirmation_gate.register_session(context.session_id)
+        queue = self.confirmation_gate._response_queues[context.session_id]
+        try:
+            response = await asyncio.wait_for(queue.get(), timeout=120)
+            return response.strip() if response and response.strip() else None
+        except asyncio.TimeoutError:
+            logger.info("Vault passphrase prompt timed out after 120 seconds")
+            return None
 
     @property
     def _intent_handlers(self) -> dict:

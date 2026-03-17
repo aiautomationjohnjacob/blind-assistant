@@ -265,7 +265,7 @@ class TestConfirmationGateActions:
             # Respond "yes" to both disclosure and order confirmation
             gate.submit_response(standard_context.session_id, "yes")
 
-        result = await gate.confirm_financial_action(
+        await gate.confirm_financial_action(
             order_summary="1x Large Pizza",
             total_amount="$18.50",
             context=standard_context,

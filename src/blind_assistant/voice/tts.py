@@ -168,4 +168,3 @@ async def speak_locally(
     except Exception as e:
         logger.error(f"Local speak failed: {e}")
         # Print to stdout as last resort — at least something gets through
-        print(f"[SPEECH]: {text}")

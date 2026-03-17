@@ -71,7 +71,7 @@ class TestEncryptedVaultAddNote:
         assert len(filename) > 10
 
     async def test_add_note_creates_encrypted_file(self, vault, temp_vault_dir):
-        filename = await vault.add_note("Doctor appointment note", category="health")
+        await vault.add_note("Doctor appointment note", category="health")
         # Find the file in the vault
         enc_files = list(temp_vault_dir.rglob("*.md.enc"))
         assert len(enc_files) == 1
@@ -202,7 +202,7 @@ class TestTrimForSpeech:
         text = "First sentence. Second sentence. Third sentence."
         result = _trim_for_speech(text, 35)
         # Should break at sentence boundary, not mid-word
-        assert result.endswith(".") or result.endswith("...")
+        assert result.endswith((".", "..."))
 
     def test_strips_markdown(self):
         text = "# Heading\n**Bold text** and _italic_"

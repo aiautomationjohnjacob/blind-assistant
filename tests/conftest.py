@@ -19,11 +19,14 @@ from __future__ import annotations
 
 import asyncio
 import tempfile
-from collections.abc import Generator
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 # ─────────────────────────────────────────────────────────────
 # EVENT LOOP (asyncio)
