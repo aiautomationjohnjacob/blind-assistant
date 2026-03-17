@@ -498,39 +498,53 @@ class VoiceInstaller:
             self._speak("Software installation ran into a problem. We'll continue anyway.")
 
     async def _run_self_test(self) -> None:
-        """Test that key components are working."""
+        """
+        Verify that required components are configured.
+
+        Required (2 checks): Claude AI key + personal vault
+        Optional (reported but not counted): Telegram bot token
+        """
         self._speak("Running a quick test to make sure everything is working...")
 
-        tests_passed = 0
+        required_passed = 0
+        required_total = 2  # Claude + vault
 
-        # Test Claude API
+        # Test Claude API (required)
         try:
             from blind_assistant.security.credentials import get_credential, CLAUDE_API_KEY
             if get_credential(CLAUDE_API_KEY):
-                tests_passed += 1
+                required_passed += 1
                 self._speak("Claude AI connection: ready.")
         except Exception:
-            self._speak("Claude AI: not yet configured.")
+            self._speak("Claude AI: not yet configured. Please re-run setup and enter your API key.")
 
-        # Test Telegram
+        # Test vault (required)
+        vault_path = Path.home() / "blind-assistant-vault"
+        if vault_path.exists():
+            required_passed += 1
+            self._speak("Personal knowledge base: ready.")
+        else:
+            self._speak("Personal knowledge base: not yet set up.")
+
+        # Test Telegram (optional — just report, do not count against total)
         try:
             from blind_assistant.security.credentials import get_credential, TELEGRAM_BOT_TOKEN
             if get_credential(TELEGRAM_BOT_TOKEN):
-                tests_passed += 1
-                self._speak("Telegram connection: ready.")
+                self._speak("Telegram remote access: configured (optional).")
         except Exception:
-            self._speak("Telegram: not yet configured.")
+            pass  # Telegram is optional; silent skip is correct here
 
-        # Test vault
-        vault_path = Path.home() / "blind-assistant-vault"
-        if vault_path.exists():
-            tests_passed += 1
-            self._speak("Personal knowledge base: ready.")
-
-        self._speak(
-            f"{tests_passed} out of 3 components are ready. "
-            "You can start using the assistant now."
-        )
+        if required_passed == required_total:
+            self._speak(
+                "All required components are ready. "
+                "You can start using the assistant now."
+            )
+        else:
+            missing = required_total - required_passed
+            self._speak(
+                f"{missing} required component{'s are' if missing > 1 else ' is'} not yet configured. "
+                "Run setup again to complete the remaining steps."
+            )
 
 
 async def run_installer() -> None:
