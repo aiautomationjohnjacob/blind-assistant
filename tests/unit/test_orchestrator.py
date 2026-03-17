@@ -6,6 +6,8 @@ Covers:
 - ConfirmationGate: registration, submission, wait, timeout
 - Financial confirmation flow (two-step: disclosure + order confirm)
 - Response formatting (braille mode, brief mode, preamble trimming)
+- Food ordering handler (_handle_order_food): risk disclosure, browser navigation,
+  cancellation, missing browser tool, navigation errors
 """
 
 from __future__ import annotations
