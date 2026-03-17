@@ -26,6 +26,19 @@ class UserContext:
     preferences: dict = field(default_factory=dict)
     conversation_history: list = field(default_factory=list)
 
+    def clear_sensitive(self) -> None:
+        """
+        Zero out any cached sensitive data at session end.
+
+        Defense-in-depth: even though OS memory isolation prevents other processes
+        from reading our heap, explicitly clearing the passphrase reduces the window
+        where a memory dump could expose it. Per ISSUE-005.
+        """
+        # Clear vault passphrase if it was cached during this session
+        if hasattr(self, "_vault_passphrase") and self._vault_passphrase is not None:  # type: ignore[attr-defined]
+            self._vault_passphrase = None  # type: ignore[attr-defined]
+        logger.debug(f"Sensitive data cleared for session {self.session_id}")
+
 
 @dataclass
 class Response:
