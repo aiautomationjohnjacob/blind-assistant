@@ -562,3 +562,115 @@ def test_rate_limit_middleware_uses_x_forwarded_for_when_present():
     # Second request from the SAME proxy IP — still allowed (health limit=100)
     resp = client.get("/health", headers={"X-Forwarded-For": "10.0.0.1"})
     assert resp.status_code == 200  # health limit=100, only 2 requests sent
+
+
+# ─────────────────────────────────────────────────────────────
+# /transcribe endpoint
+# ─────────────────────────────────────────────────────────────
+
+
+def test_transcribe_requires_auth():
+    """POST /transcribe returns 401 without an Authorization header."""
+    with _make_server() as (_, client):
+        resp = client.post(
+            "/transcribe",
+            json={"audio_base64": "SGVsbG8="},
+        )
+    assert resp.status_code == 401
+
+
+def test_transcribe_returns_transcribed_text():
+    """POST /transcribe returns the text from Whisper STT."""
+    b64_audio = "SGVsbG8gV29ybGQ="  # base64("Hello World") — valid base64
+    with _make_server() as (_, client):
+        with patch(
+            "blind_assistant.voice.stt.transcribe_audio",
+            new=AsyncMock(return_value="Hello World"),
+        ):
+            resp = client.post(
+                "/transcribe",
+                json={"audio_base64": b64_audio},
+                headers=VALID_HEADERS,
+            )
+    assert resp.status_code == 200
+    assert resp.json()["text"] == "Hello World"
+
+
+def test_transcribe_returns_empty_string_on_silence():
+    """POST /transcribe returns empty string when Whisper detects no speech."""
+    b64_audio = "AAAA"  # valid base64 that decodes to non-empty bytes
+    with _make_server() as (_, client):
+        with patch(
+            "blind_assistant.voice.stt.transcribe_audio",
+            new=AsyncMock(return_value=None),
+        ):
+            resp = client.post(
+                "/transcribe",
+                json={"audio_base64": b64_audio},
+                headers=VALID_HEADERS,
+            )
+    assert resp.status_code == 200
+    assert resp.json()["text"] == ""
+
+
+def test_transcribe_returns_400_on_invalid_base64():
+    """POST /transcribe returns 400 if audio_base64 is not valid base64."""
+    with _make_server() as (_, client):
+        resp = client.post(
+            "/transcribe",
+            json={"audio_base64": "!!! not base64 !!!"},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 400
+    assert "invalid" in resp.json()["detail"].lower()
+
+
+def test_transcribe_empty_audio_base64_returns_empty_text():
+    """POST /transcribe with base64 that decodes to empty bytes returns empty text immediately."""
+    import base64 as b64
+    # base64 of b"" is an empty string, but b64encode(b"") = b"" which encodes to ""
+    # Let's test with a base64 that decodes to zero bytes
+    empty_b64 = b64.b64encode(b"").decode()  # ""
+    with _make_server() as (_, client):
+        resp = client.post(
+            "/transcribe",
+            json={"audio_base64": empty_b64},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 200
+    assert resp.json()["text"] == ""
+
+
+def test_transcribe_passes_language_hint_to_stt():
+    """POST /transcribe passes the language hint to transcribe_audio."""
+    b64_audio = "SGVsbG8="
+    with _make_server() as (_, client):
+        with patch(
+            "blind_assistant.voice.stt.transcribe_audio",
+            new=AsyncMock(return_value="Hola") as mock_stt,
+        ):
+            client.post(
+                "/transcribe",
+                json={"audio_base64": b64_audio, "language": "es"},
+                headers=VALID_HEADERS,
+            )
+            # Verify language was passed through
+            mock_stt.assert_called_once()
+            _, call_kwargs = mock_stt.call_args
+            assert call_kwargs.get("language") == "es"
+
+
+def test_transcribe_echoes_session_id():
+    """POST /transcribe echoes the session_id from the request."""
+    b64_audio = "SGVsbG8="
+    with _make_server() as (_, client):
+        with patch(
+            "blind_assistant.voice.stt.transcribe_audio",
+            new=AsyncMock(return_value="test"),
+        ):
+            resp = client.post(
+                "/transcribe",
+                json={"audio_base64": b64_audio, "session_id": "my-session-xyz"},
+                headers=VALID_HEADERS,
+            )
+    assert resp.json()["session_id"] == "my-session-xyz"
