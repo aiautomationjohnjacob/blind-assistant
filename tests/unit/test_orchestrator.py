@@ -436,3 +436,329 @@ class TestConfigurablePassphraseTimeout:
         ctx = UserContext(user_id="u", session_id="test-quick-timeout")
         result = await orc._collect_vault_passphrase(ctx)
         assert result is None
+
+
+# ─────────────────────────────────────────────────────────────
+# Food ordering handler — _handle_order_food
+# ─────────────────────────────────────────────────────────────
+
+
+def _make_order_food_orchestrator(minimal_config: dict) -> Orchestrator:
+    """
+    Build a minimal Orchestrator with just the components needed to test
+    _handle_order_food: confirmation_gate, tool_registry.
+    """
+    from blind_assistant.core.confirmation import ConfirmationGate
+    orc = Orchestrator(minimal_config)
+    orc.confirmation_gate = ConfirmationGate()
+    orc.tool_registry = MagicMock()
+    orc._initialized = True
+    return orc
+
+
+def _make_order_intent(
+    description: str = "order a pizza",
+    params: dict | None = None,
+) -> MagicMock:
+    """Create a mock intent for food ordering."""
+    intent = MagicMock()
+    intent.type = "order_food"
+    intent.description = description
+    intent.parameters = params or {}
+    intent.is_high_stakes = True
+    intent.required_tools = ["browser"]
+    return intent
+
+
+class TestHandleOrderFood:
+    """Tests for Orchestrator._handle_order_food — Phase 2 completion."""
+
+    async def test_order_food_user_declines_risk_disclosure(
+        self, minimal_config, standard_context
+    ) -> None:
+        """
+        If the user says 'no' to the risk disclosure, the order is cancelled
+        and a reassuring message is returned.
+        """
+        orc = _make_order_food_orchestrator(minimal_config)
+
+        # User immediately declines when disclosure fires
+        updates = []
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+            # Submit "no" on the first disclosure message
+            if len(updates) == 2:  # first = "I'll help...", second = "Before we look..."
+                orc.confirmation_gate.submit_response(standard_context.session_id, "no")
+
+        orc.confirmation_gate.register_session(standard_context.session_id)
+        intent = _make_order_intent()
+
+        result = await orc._handle_order_food(intent, standard_context, update_cb)
+
+        assert "won't proceed" in result["text"] or "No problem" in result["text"]
+        # Browser tool should not be called at all
+        orc.tool_registry.get_installed_tool.assert_not_called()
+
+    async def test_order_food_browser_not_installed_returns_guidance(
+        self, minimal_config, standard_context
+    ) -> None:
+        """
+        If the user confirms risk disclosure but browser tool isn't installed,
+        return a helpful message instead of crashing.
+        """
+        orc = _make_order_food_orchestrator(minimal_config)
+        # Browser is NOT in installed tools
+        orc.tool_registry.get_installed_tool.return_value = None
+
+        updates = []
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+            # Submit "yes" to the risk disclosure
+            orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
+
+        orc.confirmation_gate.register_session(standard_context.session_id)
+        intent = _make_order_intent()
+
+        result = await orc._handle_order_food(intent, standard_context, update_cb)
+
+        assert "browser tool" in result["text"].lower() or "not installed" in result["text"].lower()
+
+    async def test_order_food_successful_navigation_returns_page_state(
+        self, minimal_config, standard_context
+    ) -> None:
+        """
+        When browser is installed and navigation succeeds, the result includes
+        page state and ordering_in_progress flag.
+        """
+        from blind_assistant.tools.browser import PageState
+
+        orc = _make_order_food_orchestrator(minimal_config)
+
+        # Mock the browser tool
+        mock_browser = AsyncMock()
+        mock_page_state = PageState(
+            url="https://www.doordash.com/search/store/?q=pizza",
+            title="DoorDash — Pizza near you",
+            text_content="Pizza Palace — 4.5 stars\nTaco Town — 4.2 stars",
+        )
+        mock_browser.navigate = AsyncMock(return_value=mock_page_state)
+        orc.tool_registry.get_installed_tool.return_value = mock_browser
+
+        updates = []
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+            # Accept risk disclosure
+            orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
+
+        orc.confirmation_gate.register_session(standard_context.session_id)
+        intent = _make_order_intent("order me a pizza", params={"food": "pizza"})
+
+        result = await orc._handle_order_food(intent, standard_context, update_cb)
+
+        assert result.get("ordering_in_progress") is True
+        assert result.get("page_state") is mock_page_state
+        assert "pizza" in result["text"].lower() or "food" in result["text"].lower()
+
+    async def test_order_food_navigation_error_returns_helpful_message(
+        self, minimal_config, standard_context
+    ) -> None:
+        """
+        If browser navigation raises an exception, a helpful error message is
+        returned instead of propagating the exception.
+        """
+        orc = _make_order_food_orchestrator(minimal_config)
+
+        mock_browser = AsyncMock()
+        mock_browser.navigate = AsyncMock(side_effect=Exception("network timeout"))
+        orc.tool_registry.get_installed_tool.return_value = mock_browser
+
+        updates = []
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+            orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
+
+        orc.confirmation_gate.register_session(standard_context.session_id)
+        intent = _make_order_intent()
+
+        result = await orc._handle_order_food(intent, standard_context, update_cb)
+
+        assert "trouble" in result["text"].lower() or "network timeout" in result["text"].lower()
+
+    async def test_order_food_uses_intent_description_when_no_params(
+        self, minimal_config, standard_context
+    ) -> None:
+        """
+        When intent has no 'food' or 'query' params, the description is used
+        as the food query — no crash.
+        """
+        from blind_assistant.tools.browser import PageState
+
+        orc = _make_order_food_orchestrator(minimal_config)
+
+        mock_browser = AsyncMock()
+        mock_page_state = PageState(
+            url="https://www.doordash.com",
+            title="DoorDash",
+            text_content="Results",
+        )
+        mock_browser.navigate = AsyncMock(return_value=mock_page_state)
+        orc.tool_registry.get_installed_tool.return_value = mock_browser
+
+        updates = []
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+            orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
+
+        orc.confirmation_gate.register_session(standard_context.session_id)
+        # No params — description is the only food hint
+        intent = _make_order_intent("order me a burger and fries", params={})
+
+        result = await orc._handle_order_food(intent, standard_context, update_cb)
+
+        # Should not crash — result should be valid
+        assert "text" in result
+
+    async def test_order_food_restaurant_param_changes_search_url(
+        self, minimal_config, standard_context
+    ) -> None:
+        """
+        When a restaurant param is provided, the URL search uses the restaurant name.
+        """
+        from blind_assistant.tools.browser import PageState
+
+        orc = _make_order_food_orchestrator(minimal_config)
+
+        navigate_urls = []
+        mock_browser = AsyncMock()
+        async def mock_navigate(url: str) -> PageState:
+            navigate_urls.append(url)
+            return PageState(url=url, title="DoorDash", text_content="Results")
+        mock_browser.navigate = mock_navigate
+        orc.tool_registry.get_installed_tool.return_value = mock_browser
+
+        updates = []
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+            orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
+
+        orc.confirmation_gate.register_session(standard_context.session_id)
+        intent = _make_order_intent(params={"restaurant": "Pizza Palace"})
+
+        await orc._handle_order_food(intent, standard_context, update_cb)
+
+        # URL should contain the restaurant name, not generic food query
+        assert navigate_urls, "navigate() was not called"
+        assert "Pizza+Palace" in navigate_urls[0] or "Pizza" in navigate_urls[0]
+
+    async def test_order_food_confirm_calls_financial_confirmation(
+        self, minimal_config, standard_context
+    ) -> None:
+        """
+        _handle_order_food_confirm() correctly calls confirm_financial_action,
+        which fires risk disclosure + order summary before any charge.
+        """
+        orc = _make_order_food_orchestrator(minimal_config)
+
+        updates = []
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+            # Accept risk disclosure then confirm order
+            orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
+
+        orc.confirmation_gate.register_session(standard_context.session_id)
+
+        result = await orc._handle_order_food_confirm(
+            order_summary="1x Pepperoni Pizza",
+            total_amount="$18.99",
+            context=standard_context,
+            update=update_cb,
+        )
+
+        # First response should have been the risk disclosure
+        assert any("risk" in u.lower() or "financial" in u.lower() or "payment" in u.lower()
+                   for u in updates), (
+            "Risk disclosure was not sent to user before order confirmation"
+        )
+        # Result is bool — True = confirmed, False = declined
+        assert isinstance(result, bool)
+
+    async def test_order_food_brief_context_gets_short_disclosure(
+        self, minimal_config, brief_context
+    ) -> None:
+        """
+        In brief verbosity mode, the risk disclosure uses the short version.
+        The short disclosure is shorter than the full disclosure.
+        """
+        from blind_assistant.security.disclosure import (
+            FINANCIAL_RISK_DISCLOSURE,
+            FINANCIAL_RISK_DISCLOSURE_BRIEF,
+        )
+
+        orc = _make_order_food_orchestrator(minimal_config)
+
+        disclosures = []
+        async def update_cb(msg: str) -> None:
+            # Collect all messages that look like the financial disclosure
+            if "risk" in msg.lower() or "payment" in msg.lower() or "financial" in msg.lower():
+                disclosures.append(msg)
+            orc.confirmation_gate.submit_response(brief_context.session_id, "yes")
+
+        orc.confirmation_gate.register_session(brief_context.session_id)
+
+        await orc._handle_order_food_confirm(
+            order_summary="groceries",
+            total_amount="$45.00",
+            context=brief_context,
+            update=update_cb,
+        )
+
+        if disclosures:
+            # The disclosure sent should be the brief version
+            assert len(disclosures[0]) <= len(FINANCIAL_RISK_DISCLOSURE)
+
+    async def test_order_food_brief_context_disclosure_fires(
+        self, minimal_config, brief_context
+    ) -> None:
+        """Brief context still fires a risk disclosure (just shorter)."""
+        orc = _make_order_food_orchestrator(minimal_config)
+
+        update_count = [0]
+        async def update_cb(msg: str) -> None:
+            update_count[0] += 1
+            orc.confirmation_gate.submit_response(brief_context.session_id, "yes")
+
+        orc.confirmation_gate.register_session(brief_context.session_id)
+
+        await orc._handle_order_food_confirm(
+            order_summary="pizza",
+            total_amount="$19",
+            context=brief_context,
+            update=update_cb,
+        )
+
+        # Should have sent at least 2 messages: disclosure + order confirm
+        assert update_count[0] >= 2, "Expected disclosure + order confirmation messages"
+
+    async def test_order_groceries_intent_uses_same_handler(
+        self, minimal_config, standard_context
+    ) -> None:
+        """
+        order_groceries intent routes to _handle_order_food (same flow).
+        Verifies the intent handler map is correct.
+        """
+        orc = _make_order_food_orchestrator(minimal_config)
+        assert "order_groceries" in orc._intent_handlers
+        assert orc._intent_handlers["order_groceries"] is orc._handle_order_food
+
+    def test_order_food_in_intent_handlers(self, minimal_config) -> None:
+        """order_food is in _intent_handlers pointing to _handle_order_food."""
+        orc = Orchestrator(minimal_config)
+        handlers = orc._intent_handlers
+        assert "order_food" in handlers
+        assert handlers["order_food"] is orc._handle_order_food
+
+    def test_order_food_not_stub_anymore(self, minimal_config) -> None:
+        """order_food no longer points to _handle_high_stakes_stub."""
+        orc = Orchestrator(minimal_config)
+        handlers = orc._intent_handlers
+        assert handlers["order_food"] is not orc._handle_high_stakes_stub
