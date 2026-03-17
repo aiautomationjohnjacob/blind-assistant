@@ -82,11 +82,12 @@ class Orchestrator:
         self.config = config
         self._initialized = False
 
-        # These are set during initialize()
-        self.planner = None
-        self.tool_registry = None
-        self.confirmation_gate = None
-        self.context_manager = None
+        # These are set during initialize() — typed as Optional to reflect pre-init state.
+        # All access to these must happen after initialize() is called.
+        self.planner: "Planner | None" = None
+        self.tool_registry: "ToolRegistry | None" = None
+        self.confirmation_gate: "ConfirmationGate | None" = None
+        self.context_manager: "ContextManager | None" = None
 
     async def initialize(self) -> None:
         """Initialize all sub-components. Call once at startup."""
