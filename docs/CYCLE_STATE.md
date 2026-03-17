@@ -210,11 +210,16 @@ AsyncAnthropic TYPE_CHECKING for anthropic, run_polling() sync fix for python-te
 (4) playwright install-deps exits 100 on Ubuntu 24.04 for virtual libasound2 package — added `|| true`.
 Result: ALL 7 CI jobs green on run 23218631525.
 
-Cycle 15 priority (this is the 5th cycle in Phase 3, so project-inspector should run):
-1. **Close stale GitHub issues**: 20+ historical P0 CI-failure issues, now noise.
-2. **Fix Expo web export**: Metro AppEntry.js vs app/index.tsx resolution for Expo Router.
-3. **Web platform E2E tests**: Once Expo web export works, run Playwright axe-core audit.
-4. **project-inspector (every 5th cycle)**: run gap scan across entire codebase.
+Cycle 15 (Phase 3 — web platform unblocked + project-inspector gap scan). Fixed Expo web export
+(App.tsx shim). Rebuilt CI e2e-web job to build Expo bundle + serve + run Playwright tests.
+Wrote 11 web E2E accessibility tests (keyboard nav, ARIA, lang, title, focus). Fixed broken
+food ordering E2E test (context_manager mock). Registered `e2e` + `web` pytest markers.
+Project-inspector identified 4 src/ files without unit tests (ISSUE-028).
+
+Cycle 16 priority:
+1. **Write missing unit tests (ISSUE-028)**: telegram_bot.py, query.py, redaction.py, screen_observer.py
+2. **Verify web E2E CI results**: Check if the 11 Playwright tests pass on first CI run; fix ARIA assertions if needed
+3. **Voice installer**: complete voice-guided setup from fresh Python install
 
 ## Known Issues / Technical Debt
 
