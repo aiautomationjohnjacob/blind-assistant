@@ -350,16 +350,10 @@ export function MainScreen(): React.JSX.Element {
         </View>
       ) : null}
 
-      {/* Platform-specific accessibility note (not read by screen readers) */}
-      <Text
-        style={styles.platformHint}
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-      >
-        {Platform.OS === "ios"
-          ? "VoiceOver: Swipe to navigate. Double-tap to activate."
-          : "TalkBack: Explore by touch. Double-tap to activate."}
-      </Text>
+      {/* Developer note: platform hint text removed (ISSUE-020).
+          "Double-tap to activate" contradicts VoiceOver/TalkBack guidelines which say
+          never describe gestures in hints — the OS announces them automatically.
+          The accessibilityHint on the button above already describes the outcome. */}
     </View>
   );
 }
