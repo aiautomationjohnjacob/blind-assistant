@@ -159,9 +159,26 @@ The goal is to integrate existing tools, not reinvent them:
   users cannot easily complete independently
 - **Memory**: MCP memory server (cross-session knowledge graph)
 - **Automation**: n8n or similar for background task workflows
-- **Physical-world tasks**: Shopping/ordering APIs (with explicit user confirmation always)
-- **Python backend**: AI orchestration, second brain, TTS/STT, security, Telegram — stays Python
-- **Client apps**: Android, iOS, web — separate tech decision; communicate with backend via API
+- **Browser as universal adapter**: Playwright navigates ANY website (food ordering, travel,
+  banking, shopping) — no service-specific wrappers; Claude reasons about the page like a
+  human would. Build a specific integration only when browser can't do it (Stripe tokenization,
+  OAuth background refresh). No DoorDashTool, no TravelBookingTool — ever.
+- **Local-first execution**: backend runs on the user's own machine; phone/tablet is a voice
+  terminal only; Second Brain vault never leaves the user's device; cloud is an optional upgrade
+- **Python backend**: AI orchestration, second brain, TTS/STT, security — stays Python
+- **Client apps**: Android, iOS, Desktop, Web — separate tech stack (TBD after ARCH DECISION);
+  communicate with Python backend via REST API; never import from src/
+
+## Recent Architecture Changes (2026-03-17 — read if context is unclear)
+- **Telegram demoted**: native apps are primary; Telegram is secondary/super-user only
+- **Tools = capabilities not wrappers**: ordering/, travel/, home/ stubs in src/ are empty
+  on purpose — the browser tool handles these tasks autonomously
+- **39 agents**: backend-security-expert added; call after any API endpoint work
+- **ARCH DECISION made (Cycle 4)**: React Native + Expo for Android/iOS/Web;
+  Electron/Tauri for Desktop (Phase 3); Education site = pure React
+- **Repo layout**: src/ = Python backend; clients/ = all client apps
+  (clients/android/, clients/ios/, clients/web/, clients/desktop/, clients/education/);
+  clients never import from src/ — call it over HTTP only
 
 ## Non-Negotiable Rules
 - Every interactive element MUST have an accessible name
