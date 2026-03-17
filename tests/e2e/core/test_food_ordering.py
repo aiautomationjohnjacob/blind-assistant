@@ -389,6 +389,7 @@ async def test_food_order_brief_user_gets_shorter_disclosure(
     """
     Power user (brief verbosity) gets a shorter risk disclosure but it MUST still fire.
     The assistant cannot silently skip the disclosure for "experienced" users.
+    Claude-powered helpers are patched so this test does not require anthropic.
     """
     from blind_assistant.security.disclosure import FINANCIAL_RISK_DISCLOSURE
 
@@ -396,25 +397,31 @@ async def test_food_order_brief_user_gets_shorter_disclosure(
     gate.register_session(brief_user_context.session_id)
 
     risk_messages: list[str] = []
-    response_count = [0]
 
-    async def update_cb(msg: str) -> None:
-        response_count[0] += 1
-        if "risk" in msg.lower() or "payment" in msg.lower() or "financial" in msg.lower():
-            risk_messages.append(msg)
-        gate.submit_response(brief_user_context.session_id, "yes")
+    with (
+        patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Pizza Palace.")),
+        patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=mock_food_page_state)),
+        patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=mock_food_page_state)),
+        patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x pizza")),
+        patch.object(orc, "_place_order", new=AsyncMock(return_value={"success": True})),
+    ):
 
-    await orc._handle_order_food(
-        MagicMock(
-            type="order_food",
-            description="order pizza",
-            parameters={"food": "pizza"},
-            is_high_stakes=True,
-            required_tools=["browser"],
-        ),
-        brief_user_context,
-        update_cb,
-    )
+        async def update_cb(msg: str) -> None:
+            if "risk" in msg.lower() or "payment" in msg.lower() or "financial" in msg.lower():
+                risk_messages.append(msg)
+            gate.submit_response(brief_user_context.session_id, "yes")
+
+        await orc._handle_order_food(
+            MagicMock(
+                type="order_food",
+                description="order pizza",
+                parameters={"food": "pizza"},
+                is_high_stakes=True,
+                required_tools=["browser"],
+            ),
+            brief_user_context,
+            update_cb,
+        )
 
     # Disclosure MUST fire even for brief users
     assert risk_messages, "Risk disclosure did not fire for brief/power user — this is a compliance violation"
