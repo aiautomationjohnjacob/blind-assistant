@@ -61,3 +61,8 @@
 | conftest.py suppress_audio ImportError fix | 2026-03-17 | 2 |
 | Voice local interface stub (microphone + speaker) | 2026-03-17 | 2 |
 | Unit tests: security/credentials, disclosure, encryption, vault | 2026-03-17 | 2 |
+| pyproject.toml pythonpath fix (no manual PYTHONPATH needed) | 2026-03-17 | 3 |
+| ISSUE-001 fix: _get_vault passphrase prompt recovery (10 tests) | 2026-03-17 | 3 |
+| TTS unit tests: synthesize_speech, ElevenLabs, pyttsx3, speak_locally (14 tests) | 2026-03-17 | 3 |
+| STT unit tests: transcribe_audio, singleton model, transcribe_microphone (11 tests) | 2026-03-17 | 3 |
+| Total test count: 279 (was 244) | 2026-03-17 | 3 |
