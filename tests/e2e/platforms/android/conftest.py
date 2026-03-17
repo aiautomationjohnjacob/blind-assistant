@@ -51,7 +51,7 @@ class ADBClient:
         # The file is created in the system temp directory (not /tmp directly).
         with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as tmp:
             local_path = tmp.name
-        subprocess.run(  # noqa: S607
+        subprocess.run(
             ["adb", *self._serial_flag, "pull", remote_path, local_path],
             capture_output=True,
             timeout=30,
