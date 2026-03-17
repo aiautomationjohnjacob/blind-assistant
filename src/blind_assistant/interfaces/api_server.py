@@ -368,9 +368,26 @@ class APIServer:
         and returns the transcribed text. The client then passes the text to /query.
 
         Privacy: Whisper runs on the local machine. Speech never leaves the backend server.
-        Max audio size is ~10 MB (enforced by FastAPI body size limit in production).
+
+        Body size limit: max 10 MB of decoded audio bytes (~5 min at 16kHz mono WAV;
+        ~2.7 MB WAV = ~3.6 MB base64). Enforced here before decoding to prevent memory
+        exhaustion from large uploads. Per ISSUE-018.
         """
         await self._authenticate(request)
+
+        # Check base64 string length before decoding — base64 overhead is ~4/3 so
+        # 14_000_000 base64 chars ≈ 10.5 MB decoded. Reject anything larger up front.
+        MAX_AUDIO_B64_CHARS = 14_000_000  # ~10 MB decoded audio limit
+        if len(body.audio_base64) > MAX_AUDIO_B64_CHARS:
+            raise HTTPException(
+                status_code=413,
+                detail=(
+                    f"Audio payload too large. "
+                    f"Maximum is {MAX_AUDIO_B64_CHARS // 1_000_000} MB of audio "
+                    f"(approximately 5 minutes at standard quality). "
+                    "Please trim your recording and try again."
+                ),
+            )
 
         try:
             # Decode base64 audio bytes — invalid base64 raises ValueError
