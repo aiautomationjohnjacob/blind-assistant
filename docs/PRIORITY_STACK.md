@@ -96,3 +96,8 @@
 | ISSUE-016: importantForAccessibility="yes" added to SetupWizardScreen TextInput | 2026-03-17 | 7 |
 | ISSUE-017: URL scheme validation in saveApiBaseUrl() with error message; 7 tests | 2026-03-17 | 7 |
 | Total test count: 363 Python (354 unit + 9 E2E, 21 skipped); 114 JS tests | 2026-03-17 | 7 |
+| Tool registry + installer (Cycle 8): 36 registry tests, 23 planner tests, ISSUE-018 /transcribe 413 limit | 2026-03-17 | 8 |
+| Total test count Cycle 8: 426 Python (417 unit + 9 E2E, 21 skipped); 114 JS tests | 2026-03-17 | 8 |
+| BrowserTool (Playwright wrapper): 24 unit tests; _handle_order_food: 12 unit tests; 8 E2E food ordering tests | 2026-03-17 | 9 |
+| order_food/order_groceries wired to real handler (not stub); risk disclosure + 2-step confirmation in place | 2026-03-17 | 9 |
+| Total test count Cycle 9: 470 Python (453 unit + 17 E2E, 21 skipped); 114 JS tests | 2026-03-17 | 9 |
