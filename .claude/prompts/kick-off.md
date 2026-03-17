@@ -48,19 +48,6 @@ Read, Write, Edit, Bash, Glob, Grep, Agent
 - Never delete or weaken tests — fix the implementation instead
 - Every src/ file needs tests in the same commit
 
-## ⚠ IMPORTANT FOR CYCLE 4 (FIRST RUN AFTER MAJOR CHANGES)
-
-A lot has changed since the last loop ran. Do NOT assume the existing `src/` code is
-correct — it was written before the architecture was clarified and may not reflect
-current requirements (native apps as primary, Telegram as secondary, API-first backend,
-Telegram de-emphasized). The SKILL.md instructs you to run a full codebase audit in
-STEP 1 before picking any new work. Follow that instruction carefully.
-
-The goal on Cycle 4 is:
-1. Run the full codebase audit (code-reviewer on ALL src/ files)
-2. Log discrepancies to OPEN_ISSUES.md
-3. Then work the top P1 item (ARCH DECISION)
-
 ## Begin
 
 Run `/run-cycle` now. This invokes the full orchestration logic with all 9 steps.

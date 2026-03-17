@@ -53,31 +53,31 @@ After reading, state explicitly in your thinking:
 - What does LESSONS.md say to avoid this cycle?
 - Are there any ⚠ scope expansion or architecture change notices in CYCLE_STATE.md?
 
-### ⚠ FULL CODEBASE AUDIT (required when CYCLE_STATE.md has unreviewed scope changes)
+### FULL CODEBASE AUDIT (triggered by unreviewed ⚠ notices in CYCLE_STATE.md)
 
-If CYCLE_STATE.md or LESSONS.md contains scope expansion notices or architecture changes
-that the existing `src/` code may not reflect, do a full audit BEFORE picking any work:
+Check CYCLE_STATE.md for any ⚠ scope expansion or architecture change notices that are
+NOT yet marked `[REVIEWED: Cycle N]`. If any exist, run a full audit BEFORE picking work:
 
 ```bash
-# List all existing src/ files
 find src/ -name "*.py" | sort
-
-# Check what each main file actually does vs what it should do
-# (read the key files: orchestrator, interfaces, voice, second_brain)
 ```
 
-Then call `code-reviewer` with this prompt:
+Call `code-reviewer`:
 "Read ALL files in src/blind_assistant/. For each file, check: (1) does the implementation
 match the current architecture in docs/ARCHITECTURE.md and docs/PRODUCT_BRIEF.md? (2) are
 there any references to Telegram as the primary interface (should be secondary/super-user only)?
 (3) is there any code that contradicts the API-first backend architecture? (4) are there
 security anti-patterns? Report all findings. Do NOT fix anything — output a prioritized
-findings list. For each finding, note: file, line number, severity, and what it contradicts."
+findings list with file, line number, severity, and what it contradicts."
 
-Add any HIGH or CRITICAL findings from this audit to OPEN_ISSUES.md before proceeding.
+Add any HIGH or CRITICAL findings to OPEN_ISSUES.md.
 
-**This full audit is mandatory on Cycle 4** (first cycle after the 2026-03-17 scope expansion).
-On subsequent cycles, only run it if CYCLE_STATE.md has new unreviewed ⚠ notices.
+**After the audit is done**: mark each addressed ⚠ notice in CYCLE_STATE.md as
+`[REVIEWED: Cycle N — findings logged to OPEN_ISSUES.md]` so this audit does NOT
+re-trigger next cycle. Also remove the "MANDATORY FIRST" line from the Loop Status
+section of CYCLE_STATE.md — it has served its purpose.
+
+If all ⚠ notices are already marked REVIEWED: skip this audit entirely.
 
 ---
 
@@ -617,6 +617,9 @@ the review panel above, not a separate section):
 - Increment cycle count
 - Update "Last Cycle Summary" (2-3 sentences)
 - Update any blockers
+- If the full codebase audit ran this cycle: mark each ⚠ notice as `[REVIEWED: Cycle N]`
+  and remove the "MANDATORY FIRST" audit item from the Loop Status section — it is a
+  one-time instruction, not a permanent fixture
 
 **Update `docs/PRIORITY_STACK.md`:**
 - Mark completed items as done (move to Completed table)
