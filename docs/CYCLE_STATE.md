@@ -200,23 +200,19 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 15 (Phase 3 — web platform unblocked + project-inspector gap scan). Fixed Expo web export
-(App.tsx shim). Rebuilt CI e2e-web job to build Expo bundle + serve + run Playwright tests.
-Wrote 11 web E2E accessibility tests (keyboard nav, ARIA, lang, title, focus). Fixed broken
-food ordering E2E test (context_manager mock). Registered `e2e` + `web` pytest markers.
-Project-inspector identified 4 src/ files without unit tests (ISSUE-028).
-
 Cycle 16 (Phase 3 — missing unit tests resolved). Wrote 118 new unit tests across 4 files:
-test_telegram_bot.py (24 tests — whitelist, message routing, TTS fallback, start lifecycle),
-test_query.py (49 tests — VaultQuery answer/add, braille mode, date formatting, _infer_category),
-test_redaction.py (27 tests — password/financial detection, regex patterns, apply_redaction),
-test_screen_observer.py (18 tests — privacy protection flows, lazy Claude client, OCR fallback).
-Also fixed ruff format CI blocker from Cycle 15 (2 web E2E files). Total: 583 unit tests.
+test_telegram_bot.py (24), test_query.py (49), test_redaction.py (27), test_screen_observer.py (18).
+Ruff format CI blocker from Cycle 15 fixed. Total: 583 unit tests.
 
-Cycle 17 priority:
-1. **Verify web E2E CI results**: Check if the 11 Playwright tests pass now that ruff format is fixed
-2. **Voice installer**: complete voice-guided setup from fresh Python install (P2 phase gate item)
-3. **End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver
+Cycle 17 (Phase 3 — voice installer refactored + web E2E CI confirmed). Voice installer now has
+_setup_native_app() as Step 1 (tells user to install Blind Assistant app via TalkBack/VoiceOver
+app store, gives server address). Telegram demoted to optional Step 5 with explicit sighted-help
+warning. 58 new installer unit tests written. 641 unit tests passing. Web E2E CI run 23219936377
+confirmed ALL 7 jobs green (including e2e-web Playwright accessibility tests).
+
+Cycle 18 priority:
+1. **P2: End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver (use AVD emulator)
+2. **P2: Web app deployed**: Netlify/Vercel staging deploy for real NVDA+Chrome testing
 
 ## Known Issues / Technical Debt
 
