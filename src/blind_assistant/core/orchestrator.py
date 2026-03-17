@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from blind_assistant.core.confirmation import ConfirmationGate
     from blind_assistant.core.context import ContextManager
     from blind_assistant.core.planner import Planner
+    from blind_assistant.tools.browser import BrowserTool
     from blind_assistant.tools.registry import ToolRegistry
 
 logger = logging.getLogger(__name__)
