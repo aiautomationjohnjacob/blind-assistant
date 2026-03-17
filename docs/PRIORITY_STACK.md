@@ -22,6 +22,9 @@
 | P2 | Tech-lead architecture decision | CYCLE_STATE.md | 2026-03-17 |
 | P2 | Initial project scaffold (voice-only setup) | CYCLE_STATE.md | 2026-03-17 |
 | P2 | User stories from all 5 blind personas | CYCLE_STATE.md | 2026-03-17 |
+| P2 | Design self-expanding capability (how app installs tools at runtime safely) | PRODUCT_BRIEF examples | 2026-03-17 |
+| P2 | Design risk-disclosure flow for payment/banking details (spoken warning + confirmation) | PRODUCT_BRIEF examples | 2026-03-17 |
+| P2 | Payment tokenization architecture (Stripe tokens — never store raw card numbers) | security model | 2026-03-17 |
 
 ## Completed Items
 

@@ -40,10 +40,18 @@ Phase 5: Polish & Community Ready  → Pending
 - [ ] Phase 1 complete when: integration strategy decided, security model defined, scaffold created
 
 ### Phase 2: Core Build Sprint
-**Goal**: Build the minimum product a blind user can actually try.
-**Agents**: tech-lead, code-reviewer, accessibility-reviewer, blind-user-tester
-**Must include**: screen capture + describe, basic voice I/O, one complete task end-to-end
-**Phase 2 complete when**: A blind user can ask the AI to describe their screen and get a response
+**Goal**: Build the minimum product a blind user can actually try end-to-end.
+**Agents**: tech-lead, code-reviewer, accessibility-reviewer, blind-user-tester, security-specialist
+**Must include**:
+- Screen capture + describe (AI sees and narrates the screen)
+- Basic voice I/O (speak to it, it speaks back)
+- One complete agentic task end-to-end: user asks for something → AI figures out what
+  tools/apps are needed → installs them if missing (with user confirmation) → asks
+  follow-up questions conversationally → completes the task
+- Risk disclosure flow: whenever banking/payment details are requested, the spoken warning
+  must fire before any details are accepted
+**Phase 2 complete when**: A blind user can ask the AI to do a real-world task (e.g. order
+food or book something) entirely by voice, including the app self-installing what it needs
 
 ### Phase 3: Blind User Testing
 **Goal**: All 5 blind user personas can complete core tasks.

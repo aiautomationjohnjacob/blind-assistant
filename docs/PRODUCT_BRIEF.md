@@ -19,7 +19,14 @@ from day one, with zero sighted assistance required.
 The key insight driving this project: **most of what blind people need already exists as
 AI tools — they just can't use them.** The setup requires vision. The interfaces require
 vision. The documentation assumes vision. Our job is to synthesize these existing tools
-into a single accessible layer that works for someone who cannot see at all.
+into a single accessible layer that works for someone who cannot see at all. 
+
+
+### Examples
+
+Lets say a blind person wants to order food, for instance, they just ask our app how to do that and our app will ask them if they would like to install Doordash, once installed the app will ask if they want to input their payment information, once input the app will ask them what they would like to order and submit the order. Similar to how Claude Code works for developers - if it can't do a skill thats needed to accomplish a task, it figures out on its own how to do that task and does it for the user. Note the user might supply banking details, in which case it is important that the app keeps that information secretive or encrypted or something to ensure that the user doesn't get hacked. Even if we come to a reasonable security proof state, the app should notify the user that providing banking details could be risky to any app.
+
+Let's say a blind person wants to book a trip to a destination but doesn't know where. The AI assistant can do research on All the different tools that are currently available to help blind people book vacations It can also book the vacation itself. If it doesn't know how to do that right now, it can figure it out and then ask the user for questions and follow-ups on what exactly it needs in order to accomplish this task. But just by talking to the user, it's able to figure out how to accomplish this task. Similar warnings and security systems should be in place for this as well, since the user would be providing banking information. 
 
 ---
 

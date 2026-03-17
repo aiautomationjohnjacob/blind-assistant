@@ -106,6 +106,14 @@ The goal is to integrate existing tools, not reinvent them:
 - Every feature is tested with at least one blind user persona agent before shipping
 - Security specialist must review any feature that handles credentials or personal data
 - Every action that costs money or sends a communication requires explicit user confirmation
+- **Risk disclosure is mandatory**: whenever the user provides banking or payment details,
+  the app MUST warn them clearly — even if our security is good — that providing financial
+  information to any app carries inherent risk. No exceptions.
+- **Self-expanding is allowed**: the app may install tools, apps, or APIs it needs to
+  complete a task (like Claude Code does) — but it must tell the user what it's installing
+  and why, and get confirmation before doing so
+- **Conversational task completion**: the app resolves tasks through conversation, asking
+  follow-up questions as needed rather than failing silently or requiring upfront specification
 
 ## Git Workflow
 - Feature branches: `feature/description`

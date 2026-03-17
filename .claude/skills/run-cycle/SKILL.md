@@ -139,20 +139,32 @@ State which agents you'll use: "Agents: [list]."
 
 **A. Gap Analyst + Integration Map**
 Use `gap-analyst` agent:
-"Read docs/PRODUCT_BRIEF.md — the Synthesis Vision section is critical.
+"Read docs/PRODUCT_BRIEF.md carefully — the Synthesis Vision AND the Examples section.
+The examples are the core UX model: a blind user says what they want (e.g. 'order me food'
+or 'book me a vacation'), the app figures out what tools it needs, installs them if missing
+(like Claude Code self-expands), asks follow-up questions conversationally, and completes
+the task. This is the pattern for ALL tasks, not just those examples.
+
 Your job: (1) For each existing AI tool mentioned (Obsidian, Open Interpreter, Telegram,
-Whisper, ElevenLabs, Seeing AI, n8n, Home Assistant, shopping APIs) — assess whether it is
-accessible to blind users today and what the gap is. (2) Identify the 5 highest-impact
-integration opportunities. (3) Identify what we should build vs integrate vs skip.
+Whisper, ElevenLabs, Seeing AI, n8n, Home Assistant, DoorDash/Instacart APIs, travel
+booking APIs, Stripe payment tokenization) — assess its accessibility gaps and integration
+feasibility. (2) Identify the 5 highest-impact integration opportunities ranked by how
+many blind users they help and how immediately useful they are. (3) What does the
+'self-expanding' capability need to look like architecturally — how does the app discover,
+vet, and install new tools/APIs at runtime safely?
 Write docs/GAP_ANALYSIS.md and docs/INTEGRATION_MAP.md. Be specific and opinionated."
 
 **B. Security Model**
 Use `security-specialist` agent:
-"Read docs/PRODUCT_BRIEF.md. Design the complete security model for this system.
-Consider: Obsidian vault encryption, Telegram bot authentication (whitelist by user ID),
-screen content before sending to Claude API (redact passwords/financials), credential
-storage (no plain .env files), conversation log encryption, shopping API tokens.
-Write docs/SECURITY_MODEL.md with specific technical recommendations."
+"Read docs/PRODUCT_BRIEF.md including the Examples section. The app will handle payment
+details for tasks like food ordering and travel booking. Design the complete security model.
+Cover: (1) Obsidian vault encryption; (2) Telegram bot auth (whitelist by user ID);
+(3) screen content redaction before sending to Claude API; (4) payment data — use
+tokenization only, never store raw card numbers, mandatory risk-disclosure warning flow
+(spoken aloud) before any financial details are accepted; (5) self-installing tools —
+supply chain vetting process; (6) credential storage (OS keychain, not .env files);
+(7) conversation log encryption.
+Write docs/SECURITY_MODEL.md with specific technical recommendations and code patterns."
 
 **C. Ethics Requirements**
 Use `ethics-advisor` agent:

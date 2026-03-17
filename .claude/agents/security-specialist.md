@@ -66,6 +66,28 @@ personal information — a uniquely high-risk category because these tools:
 - **Model responses**: AI-generated code should be reviewed — a compromised or hallucinated
   code snippet could introduce vulnerabilities.
 
+### Self-Expanding Capability Risks
+The app can install tools, apps, and APIs autonomously (like Claude Code). This introduces:
+- **Supply chain risk**: Installing an unvetted package could introduce malware. Any
+  self-installed dependency must be checked against known registries (npm, PyPI) and have
+  a minimum trust signal (downloads, maintenance, author reputation).
+- **Scope creep**: A newly installed tool may request excessive permissions. The app must
+  never grant a tool more permissions than the specific task requires.
+- **Audit trail**: Every self-installation must be logged with: what was installed, why,
+  when, and what version. User must be told at install time.
+
+### Risk Disclosure Requirements (Non-Negotiable)
+Whenever a user provides banking, payment card, or financial account information:
+1. **Always show a risk warning** regardless of how good our security is. Example:
+   > "Before you share payment details: providing financial information to any app,
+   > including this one, carries some risk. We encrypt your data and never store card
+   > numbers in plain text — but please only share what you're comfortable sharing.
+   > You can remove this information at any time."
+2. The warning must be **spoken aloud** (not silent/visual-only) so blind users receive it
+3. The user must **explicitly confirm** they understood the warning before details are accepted
+4. The app must provide a **clear way to delete** stored financial information at any time
+5. Payment card numbers must **never be stored** — use tokenization (Stripe tokens, etc.)
+
 ## Audit Checklist
 
 When reviewing any feature or PR:
