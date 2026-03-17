@@ -209,8 +209,8 @@ JS tests: 117 (was 114). Python: 465 unit (unchanged). 2 new open issues: ISSUE-
 - `transcribe_microphone` uses fixed duration — needs Voice Activity Detection (VAD) — ISSUE-002
 - Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — not needed (browser handles)
 - `src/blind_assistant/memory/mcp_memory.py` not yet implemented — P3
-- Platform hint text in MainScreen says "Double-tap to activate" (visual-only, LOW) — ISSUE-020
-- Food ordering checkout loop not validated on real Playwright browser — ISSUE-021 (P1)
+- ~~Platform hint text in MainScreen says "Double-tap to activate"~~ — RESOLVED (ISSUE-020, Cycle 12)
+- Food ordering integration tests exist but need CI 'integration-browser' job to pass — ISSUE-021 (verify CI on next push)
 
 ## Decisions Made
 
