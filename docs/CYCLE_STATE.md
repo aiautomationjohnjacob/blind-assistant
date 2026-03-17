@@ -194,15 +194,17 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 11 (Phase 3 — start / cross-platform accessibility audit). Delivered: (1) Cross-platform
-accessibility audit — code-level review by iOS, Android, Web platform agents; found 2 bug classes:
-"Double-tap" in accessibilityHints (wrong for VoiceOver), importantForAccessibility="no-hide-descendants"
-on SetupWizardScreen progress Text. (2) Fixed all VoiceOver hint language: 7 accessibilityHints
-in MainScreen + SetupWizardScreen now use outcome-first wording (e.g. "Proceeds to token entry step.")
-per Apple VoiceOver guidelines. (3) Added haptic recording cue — expo-haptics impactAsync(Medium)
-on recording start, impactAsync(Light) on stop — closes ISSUE open since Cycle 7; 3 new JS tests.
-(4) ISSUE-004 resolved: ResponseCallback type alias + 9 method signatures annotated in orchestrator.py.
-JS tests: 117 (was 114). Python: 465 unit (unchanged). 2 new open issues: ISSUE-020, ISSUE-021.
+Cycle 12 (Phase 3 — live Playwright validation + accessibility cleanup). Delivered: (1) ISSUE-021:
+11 real Playwright integration tests in tests/integration/test_browser_tool_real.py covering BrowserTool
+against local HTML fixtures (navigate, text extraction, find_elements, type_text, click-by-text,
+truncation, PNG screenshot, context manager, 404 handling, cart page). Tests auto-skip when Playwright
+system deps unavailable (WSL2 limitation); CI job 'integration-browser' added to ci.yml to run them
+in GitHub Actions where deps are available. (2) ISSUE-020: "Double-tap to activate" platform hint
+text removed from MainScreen.tsx; Platform import + platformHint style removed. 117 JS tests pass.
+482 Python tests pass. No regressions.
+
+Cycle 13 priority: (1) Verify CI integration-browser job passes (auto-triggers on push). (2) Android
+TalkBack real device test — Phase 3 gate remains unvalidated for real device usage.
 
 ## Known Issues / Technical Debt
 
