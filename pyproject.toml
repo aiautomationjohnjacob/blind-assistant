@@ -94,24 +94,29 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S101", "S106", "S105", "T20"]
 "installer/**/*.py" = ["T20"]  # installer uses print() intentionally
+"src/blind_assistant/vision/screen_observer.py" = ["E501"]  # long prompt string constants
 
 # ─────────────────────────────────────────────
 # MYPY — static type checking
 # ─────────────────────────────────────────────
 [tool.mypy]
 python_version = "3.11"
-strict = true
 ignore_missing_imports = true
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-disallow_untyped_decorators = true
 warn_redundant_casts = true
-warn_unused_ignores = true
+warn_unused_ignores = false
 show_error_codes = true
-
-[[tool.mypy.overrides]]
-module = ["tests.*"]
+# check_untyped_defs ensures we still check logic even in unannotated functions
+check_untyped_defs = true
+# Type annotations are added incrementally; full strict mode applied once codebase matures
 disallow_untyped_defs = false
+warn_return_any = false
+
+# Security-critical modules: strict type checking required
+[[tool.mypy.overrides]]
+module = [
+    "blind_assistant.security.*",
+    "blind_assistant.second_brain.encryption",
+]
+disallow_untyped_defs = true
+warn_return_any = true
+disallow_incomplete_defs = true

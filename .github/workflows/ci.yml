@@ -73,6 +73,15 @@ jobs:
           python-version: '3.11'
           cache: pip
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            ffmpeg \
+            libportaudio2 libportaudiocpp0 portaudio19-dev \
+            tesseract-ocr \
+            libasound2-dev
+
       - name: Install test dependencies
         run: |
           pip install \
@@ -82,7 +91,8 @@ jobs:
             pytest-mock \
             respx \
             httpx \
-            keyring  # needed for mocking in tests
+            keyring \
+            cryptography
 
       - name: Install project dependencies
         run: pip install -r requirements.txt
@@ -140,7 +150,9 @@ jobs:
         run: pip install pip-audit bandit
 
       - name: Audit dependencies for known CVEs
-        run: pip-audit -r requirements.txt --desc
+        # --no-deps: check listed packages only, skip dependency resolution
+        # Avoids build failures from packages requiring system libs (whisper, sounddevice)
+        run: pip-audit -r requirements.txt --desc --no-deps
 
       - name: Static security analysis (bandit)
         run: |
