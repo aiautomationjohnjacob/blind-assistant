@@ -83,7 +83,16 @@ export async function loadApiBaseUrl(): Promise<string | null> {
 
 /**
  * Persist a custom API base URL (for users pointing at a self-hosted backend).
+ *
+ * Validates that the URL uses http:// or https:// to prevent file:, data:, or
+ * javascript: URLs from being stored (SECURITY: ISSUE-017).
  */
 export async function saveApiBaseUrl(url: string): Promise<void> {
+  // Only accept http or https URLs — reject file:, data:, javascript:, etc.
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    throw new Error(
+      `Invalid API base URL: "${url}". URL must start with http:// or https://.`
+    );
+  }
   await SecureStore.setItemAsync(SECURE_KEY_API_BASE_URL, url);
 }
