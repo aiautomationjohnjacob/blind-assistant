@@ -297,6 +297,9 @@ export function SetupWizardScreen({
           "Enter the bearer token from your backend server. " +
           "It is usually 32 or more characters long."
         }
+        // Guarantees TalkBack auto-focuses this field when the token step appears.
+        // Without this, users may need extra swipes to locate the input.
+        importantForAccessibility="yes"
       />
       <Pressable
         style={[styles.button, !tokenInput.trim() && styles.buttonDisabled]}
