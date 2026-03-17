@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'echo \"=== BLIND ASSISTANT — SESSION STARTED ===\"; echo \"Current phase:\"; grep \"\\*\\*Phase\\*\\*\" \"$CLAUDE_PROJECT_DIR/docs/CYCLE_STATE.md\" | head -3; echo \"Last cycle:\"; grep -A 2 \"## Last Cycle Summary\" \"$CLAUDE_PROJECT_DIR/docs/CYCLE_STATE.md\" | tail -2; echo \"Tip: Run /run-cycle to continue autonomous development.\"'"
+            "command": "bash -c 'echo \"╔══════════════════════════════════════╗\"; echo \"║   BLIND ASSISTANT — AUTONOMOUS LOOP  ║\"; echo \"╚══════════════════════════════════════╝\"; echo \"\"; echo \"── Current State ──\"; grep -E \"\\*\\*Phase\\*\\*|\\*\\*Status\\*\\*|\\*\\*Cycles\" \"$CLAUDE_PROJECT_DIR/docs/CYCLE_STATE.md\" 2>/dev/null | head -5; echo \"\"; echo \"── Top Priority ──\"; grep -A 1 \"## Current Stack\" \"$CLAUDE_PROJECT_DIR/docs/PRIORITY_STACK.md\" 2>/dev/null | tail -3; echo \"\"; echo \"── Last Lesson ──\"; tail -8 \"$CLAUDE_PROJECT_DIR/docs/LESSONS.md\" 2>/dev/null; echo \"\"; echo \"Run /run-cycle to continue. Run /retrospective for health check.\"'"
           }
         ]
       }
@@ -37,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'cd \"$CLAUDE_PROJECT_DIR\" && git add -A && git status --short | grep -q . && git commit -m \"auto: $(date +%H:%M) agent code changes\" 2>/dev/null || true'"
+            "command": "bash -c 'cd \"$CLAUDE_PROJECT_DIR\" && git add -A && if git status --short | grep -q .; then git commit -m \"auto: $(date +%H:%M) — agent changes\" 2>/dev/null && git push 2>/dev/null || git pull --rebase && git push 2>/dev/null; fi; true'"
           }
         ]
       }
@@ -48,7 +48,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'CMD=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"command\\\",\\\"\\\"))\" 2>/dev/null || echo \"\"); if echo \"$CMD\" | grep -qE \"rm -rf \\.|git push --force|drop table|DELETE FROM\"; then echo \"Blocked: potentially destructive command requires explicit confirmation\" >&2; exit 2; fi; exit 0'"
+            "command": "bash -c 'CMD=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"command\\\",\\\"\\\"))\" 2>/dev/null || echo \"\"); if echo \"$CMD\" | grep -qE \"rm -rf \\.|git push --force|DROP TABLE|DELETE FROM\"; then echo \"Blocked: potentially destructive — needs explicit confirmation\" >&2; exit 2; fi; true'"
           }
         ]
       }
@@ -58,7 +58,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'cd \"$CLAUDE_PROJECT_DIR\" && git add -A && git status --short | grep -q . && git commit -m \"auto: session end — saving state\" && git push 2>/dev/null || true; echo \"State saved to git.\"'"
+            "command": "bash -c 'cd \"$CLAUDE_PROJECT_DIR\" && git add -A && if git status --short | grep -q .; then git commit -m \"auto: session end — state saved $(date +%H:%M)\" 2>/dev/null; fi && git push 2>/dev/null || git pull --rebase && git push 2>/dev/null; echo \"✓ All changes pushed to GitHub.\"; true'"
           }
         ]
       }
