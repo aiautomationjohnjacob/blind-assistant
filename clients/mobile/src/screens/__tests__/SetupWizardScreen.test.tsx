@@ -113,7 +113,13 @@ describe("SetupWizardScreen — accessibility", () => {
   it("Continue button has an accessibilityHint for screen reader users", () => {
     renderWizard();
     const button = screen.getByRole("button", { name: /continue/i });
-    expect(button.props.accessibilityHint).toMatch(/double-tap/i);
+    // Hint must exist and describe the outcome, NOT use platform-specific gestures.
+    // VoiceOver (iOS) must NOT see "Double-tap" in hints — VoiceOver already announces
+    // the gesture itself. TalkBack (Android) also handles gesture instruction itself.
+    // The hint should describe what will happen: "Proceeds to the token entry step."
+    expect(button.props.accessibilityHint).toBeTruthy();
+    expect(button.props.accessibilityHint.length).toBeGreaterThan(10);
+    expect(button.props.accessibilityHint).not.toMatch(/double-tap/i);
   });
 
   it("speaks welcome instructions on mount via TTS", async () => {
