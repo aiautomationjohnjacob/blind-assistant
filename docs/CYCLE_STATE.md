@@ -169,23 +169,23 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 4 (Phase 2 Core Build Sprint) delivered: full codebase audit (Telegram de-emphasis
-corrected in main.py default + telegram_bot.py docstring), ARCH DECISION (React Native +
-Expo for all client apps — documented in ARCHITECTURE.md), REST API server (api_server.py:
-6 endpoints, Bearer token auth, global safe error handler, 28 tests), ISSUE-005
-(context.clear_sensitive() — 4 tests), ISSUE-006 (configurable passphrase timeout — 3
-tests). Total: 314 tests (was 279), all passing, no regressions. API_SERVER_TOKEN
-credential key added to credentials.py.
+Cycle 5 (Phase 2 Core Build Sprint) delivered: ISSUE-007 resolved (voice pipeline E2E
+proven with 9 tests — STT→orchestrator→TTS, accessibility assertion, API round-trip);
+wake-word-only bug fixed in voice_local.py; 25 unit tests for VoiceLocalInterface;
+React Native Expo skeleton in clients/mobile/ (MainScreen.tsx, API client, 32 JS tests);
+multi-platform E2E test stubs (Web/Android/iOS/Desktop — properly skipped pending
+Phase 3 build pipelines). Python test count: 348 passed, 21 skipped (was 314).
 
 ## Known Issues / Technical Debt
 
-- `transcribe_microphone` uses fixed duration — needs Voice Activity Detection (VAD)
+- `transcribe_microphone` uses fixed duration — needs Voice Activity Detection (VAD) — ISSUE-002
 - Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — Phase 2 work
 - `src/blind_assistant/memory/mcp_memory.py` not yet implemented — Phase 2 work
-- response_callback params in orchestrator lack Optional[Callable] type annotations
-- API server has no rate limiting middleware — acceptable on localhost; required before cloud deploy
-- clients/ directory doesn't exist yet — React Native Expo skeleton must be created (Cycle 5)
-- Voice E2E demo not yet delivered — #1 Phase 2 gate item (ISSUE-007)
+- response_callback params in orchestrator lack Optional[Callable] type annotations — ISSUE-004
+- API server has no rate limiting middleware — acceptable on localhost; required before cloud deploy — ISSUE-011
+- Dead code: `wake_word_found` variable in voice_local.py after Cycle 5 fix — ISSUE-012
+- React Native app has BEARER_TOKEN=null — first-run setup wizard needed — ISSUE-013
+- clients/mobile/ JS tests not in CI yet — ISSUE-014
 
 ## Decisions Made
 
