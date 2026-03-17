@@ -245,9 +245,11 @@ Cycle 19 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 17.** Phase 3 in progress. Voice installer refactored (native app first, Telegram optional). 641 unit tests passing. Web E2E CI confirmed green (run 23219936377). Ruff clean.
+**Loop completed Cycle 18.** Phase 3 in progress. Web staging deploy infrastructure complete
+(netlify.toml + CI deploy workflow). 11 food ordering web E2E accessibility tests added.
+641 Python unit tests. 22 web E2E Playwright tests (CI). Ruff clean.
 
-The most important work for Cycle 18 (Phase 3: Blind User Testing):
-1. **P2: End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver. Use AVD emulator (ADB) to verify the full flow works with TalkBack enabled.
-2. **P2: Web app deployed**: Netlify/Vercel staging deploy. Once deployed, test with real NVDA+Chrome users.
-3. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
+The most important work for Cycle 19 (Phase 3: Blind User Testing):
+1. **P2: End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver.
+2. **P2: ISSUE-029**: Netlify secrets setup — document the one-time operator task in README.md.
+3. **Every 10th cycle (Cycle 20)**: documentation-steward should run (update README, CHANGELOG, docstrings).
