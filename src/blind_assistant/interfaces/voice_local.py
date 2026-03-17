@@ -150,9 +150,13 @@ class VoiceLocalInterface:
             else:
                 return
 
+        # Capture speech_rate in a local variable so nested speak_update can use it
+        # without mypy's union-attr check on self._context (which is narrowed above by assert)
+        _speech_rate = self._context.speech_rate
+
         # Send to orchestrator with a speak callback
         async def speak_update(message: str) -> None:
-            await speak_locally(message, speed=self._context.speech_rate)
+            await speak_locally(message, speed=_speech_rate)
 
         try:
             response = await self.orchestrator.handle_message(
