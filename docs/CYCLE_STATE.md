@@ -182,11 +182,13 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **ISSUE-004: type annotations** — ResponseCallback alias + 9 method signatures annotated (Cycle 11)
 - [x] **P1: Live food ordering validation (ISSUE-021)** — 11 real Playwright integration tests in tests/integration/test_browser_tool_real.py; auto-skip when system deps unavailable; CI job 'integration-browser' added to ci.yml (Cycle 12)
 - [x] **P3: ISSUE-020** — Platform hint "Double-tap to activate" removed from MainScreen.tsx; Platform import + platformHint style removed; 24 JS tests pass (Cycle 12)
+- [x] **P0: CI repair (ISSUE-022)** — 56 mypy type errors resolved across 9 files; openai-whisper setuptools build failure fixed in test/integration-browser CI jobs; ruff clean; 465 Python tests passing (Cycle 13)
 - [ ] **P2: End-to-end food ordering on real device** — Android TalkBack + iOS VoiceOver
-- [ ] **P2: Voice installer** — voice-guided setup from fresh install
-- [ ] **P2: Web app** — WCAG 2.1 AA at blind-assistant.org
+- [ ] **P2: Voice installer** — voice-guided setup from fresh install; update Telegram refs to native app
+- [ ] **P2: Web app** — WCAG 2.1 AA at blind-assistant.org; fix Expo web export Metro config
 - [ ] **P3: Android TalkBack device test** — expo build + AVD
 - [ ] **P3: iOS VoiceOver device test** — expo build:ios + xcrun simctl
+- [ ] **P3: Close stale GitHub CI-failure issues** — 20+ historical issues from before CI was fixed
 
 ## Blockers
 
