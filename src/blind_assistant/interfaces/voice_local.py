@@ -68,6 +68,8 @@ class VoiceLocalInterface:
             user_id="local_user",
             session_id="local",
         )
+        # Narrow type for mypy — load_user_context always returns UserContext (not None)
+        assert self._context is not None
 
         self._running = True
 
