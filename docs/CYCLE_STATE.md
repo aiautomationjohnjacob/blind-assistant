@@ -201,19 +201,20 @@ credential key added to credentials.py.
 | 2026-03-17 | All user data is server-side | Founder directive | Second brain, calendar, profile shared across all 5 clients; backend is single source of truth |
 | 2026-03-17 | Backend runs on localhost during dev | Founder directive | No cloud accounts yet; all emulators connect to localhost; cloud migration is a later phase |
 | 2026-03-17 | Python NOT used for mobile clients | Founder + tech analysis | Android/iOS require native or cross-platform (React Native/Flutter); Python stays for backend only |
+| 2026-03-17 | React Native + Expo for all client apps | tech-lead (Cycle 4) | Native rendering = native accessibility tree; Flutter custom renderer has screen reader gaps; Expo web shares components with mobile |
+| 2026-03-17 | FastAPI for REST API server | tech-lead (Cycle 4) | Async, pydantic validation, OpenAPI docs, uvicorn ASGI server; runs on localhost:8000 for dev |
 
 ## Loop Status for Next Run
 
-**Loop was manually stopped after Cycle 3.** Loop is clean and ready for Cycle 4.
+**Loop was manually stopped after Cycle 4.** Loop is clean and ready for Cycle 5.
 No mid-cycle state artifacts. All changes committed and pushed.
-Cycle 4 should begin by reading this file's scope expansion notice at the top,
-then reading PRIORITY_STACK.md (which now has 3 P1 items), then LESSONS.md.
 
-The most important work for Cycle 4:
-0. **MANDATORY FIRST**: Full codebase audit — run `code-reviewer` on ALL src/ files to
-   check alignment with current architecture (native apps primary, Telegram secondary,
-   API-first backend). Existing code may not reflect these decisions. Log all discrepancies
-   to OPEN_ISSUES.md before doing any new work. The loop SKILL.md has explicit instructions.
-1. **P1 ARCH DECISION** — tech-lead + gap-analyst decide client framework before any mobile code
-2. **P1 Backend API server** — FastAPI server exposing REST endpoints for all clients
-3. **P1 Native voice E2E demo** — wire voice in → TTS audio out via Desktop CLI (NOT Telegram)
+The most important work for Cycle 5:
+1. **P1 Native voice E2E demo** (ISSUE-007) — wire voice_local.py → Whisper STT →
+   orchestrator → TTS → speaker; write integration test; this CLOSES Phase 2.
+2. **React Native skeleton** — create clients/ directory; scaffold Expo project;
+   configure REST client pointing to localhost:8000; basic Hello World screen with
+   ARIA labels and TalkBack-accessible layout.
+3. **ISSUE-011 (new)**: Add rate limiting middleware to api_server.py before cloud deployment.
+4. **ISSUE-010** (E2E test structure): tests/e2e/platforms/ already has __init__.py stubs —
+   next cycle write actual Playwright web smoke test for the web client.
