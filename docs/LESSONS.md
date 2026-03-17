@@ -839,3 +839,50 @@ that install this package. The security audit job had this fix in Cycle 10 but t
 integration-browser jobs did not — corrected in Cycle 13.
 Long-term fix: upgrade to a newer whisper package (openai-whisper is unmaintained;
 consider `faster-whisper` or `whisper-timestamped`) that uses a modern pyproject.toml.
+
+---
+
+## Cycle 14 Review — 2026-03-17
+
+**PROCESS**: CI was still failing after Cycle 13's `pip install setuptools` fix. The problem had
+multiple layers — always check ALL failing jobs before declaring a fix complete.
+
+**TECHNICAL LESSON (pip-audit installed-env mode)**:
+When `pip-audit -r requirements.txt` fails because it creates an isolated venv to build wheels
+(and openai-whisper's wheel can't build in that env), the fix is to:
+1. Install all packages into the current env first: `pip install setuptools && pip install -r requirements.txt --no-build-isolation`
+2. Run pip-audit against the installed env: `pip-audit --desc` (no `-r` flag)
+pip-audit reads installed package metadata rather than rebuilding from source. The `--no-build-isolation`
+flag on the requirements install prevents pip from creating isolated build environments that lack
+pkg_resources. This is the permanent fix pattern — simpler than per-package workarounds.
+
+**TECHNICAL LESSON (package version pinning and CVE hygiene)**:
+When upgrading dependencies for CVE fixes, verify the version compatibility explicitly. Fastapi's
+starlette requirement is `starlette>=0.40.0,<0.47.0` for 0.115.x but `starlette>=0.46.0` (no upper
+bound) for 0.135.x. Always: (1) check `pip download package==X --no-deps` and read the METADATA
+Requires-Dist field; (2) test that pinned transitive deps don't conflict with direct deps; (3) don't
+add explicit pins for transitive packages without checking the parent's version constraint first.
+
+**TECHNICAL LESSON (library type stub drift)**:
+When upgrading libraries, their bundled type stubs can introduce NEW mypy errors for code that was
+previously passing. In this cycle, upgrading anthropic and elevenlabs caused 5 new errors:
+- `AsyncAnthropic` return type became explicit — `_client = None` must be typed `AsyncAnthropic | None`
+- `elevenlabs.generate()` return type changed from `AsyncIterator[bytes]` to `bytes | AsyncIterator[bytes]`
+- `elevenlabs.voice_settings` now requires `VoiceSettings` object, not `dict[str, float]`
+- `python-telegram-bot run_polling()` return annotated as `None` — `await self._app.run_polling()` is wrong
+  (run_polling is synchronous in python-telegram-bot v20+ — it manages its own event loop)
+Fix pattern: when CI fails on mypy after a dependency upgrade, check the error messages against the
+library's changelog. The errors are usually correct type violations that pre-existing tests missed.
+
+**TECHNICAL LESSON (Ubuntu 24.04 virtual packages in CI)**:
+Playwright 1.41.0 (released before Ubuntu 24.04) lists `libasound2` in its deps. On Ubuntu Noble,
+`libasound2` is a virtual package (multiple providers). apt exits with code 100 when asked to install
+a virtual package directly. Fix: `playwright install-deps chromium || true` — Chromium's actual
+deps still install, and the integration tests pass. The real fix is to upgrade playwright.
+
+**Cycle 14 self-assessment**:
+- Completed: P0 CI fully green (all 7 jobs) after 4 separate fixes across 2 cycles.
+- Completed: 11 CVEs patched in requirements.txt.
+- Pending: 20+ stale GitHub CI-failure issues still open (noise in tracker).
+- Pending: Expo web export still broken (Metro AppEntry.js vs app/index.tsx).
+- Next cycle (15): project-inspector must run (every 5th cycle rule).
