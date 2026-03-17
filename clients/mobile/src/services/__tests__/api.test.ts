@@ -188,6 +188,94 @@ describe("BlindAssistantAPIClient", () => {
     });
   });
 
+  // ──────── transcribe ────────
+
+  describe("transcribe()", () => {
+    it("sends POST /transcribe with audio_base64", async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({ text: "Hello World", language: "en", session_id: "default" })
+      );
+
+      await client.transcribe({ audio_base64: "SGVsbG8gV29ybGQ=" });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${BASE_URL}/transcribe`,
+        expect.objectContaining({ method: "POST" })
+      );
+
+      const call = fetchMock.mock.calls[0]!;
+      const body = JSON.parse(call[1].body as string) as Record<string, unknown>;
+      expect(body.audio_base64).toBe("SGVsbG8gV29ybGQ=");
+    });
+
+    it("includes Authorization Bearer header", async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({ text: "Hello", language: "en", session_id: "default" })
+      );
+
+      await client.transcribe({ audio_base64: "SGVsbG8=" });
+
+      const call = fetchMock.mock.calls[0]!;
+      const headers = call[1].headers as Record<string, string>;
+      expect(headers["Authorization"]).toBe(`Bearer ${TOKEN}`);
+    });
+
+    it("returns transcribed text from server", async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({ text: "Order a pizza please", language: "en", session_id: "s1" })
+      );
+
+      const result = await client.transcribe({ audio_base64: "AAAA", session_id: "s1" });
+      expect(result.text).toBe("Order a pizza please");
+      expect(result.language).toBe("en");
+      expect(result.session_id).toBe("s1");
+    });
+
+    it("sends optional language hint when provided", async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({ text: "Hola", language: "es", session_id: "default" })
+      );
+
+      await client.transcribe({ audio_base64: "SGVsbG8=", language: "es" });
+
+      const call = fetchMock.mock.calls[0]!;
+      const body = JSON.parse(call[1].body as string) as Record<string, unknown>;
+      expect(body.language).toBe("es");
+    });
+
+    it("throws BlindAssistantAPIError on 401 response", async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({ detail: "Invalid API token." }, 401, false)
+      );
+
+      await expect(
+        client.transcribe({ audio_base64: "SGVsbG8=" })
+      ).rejects.toThrow(BlindAssistantAPIError);
+    });
+
+    it("throws BlindAssistantAPIError on 400 invalid base64", async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({ detail: "Invalid audio_base64." }, 400, false)
+      );
+
+      await expect(
+        client.transcribe({ audio_base64: "!!! invalid !!!" })
+      ).rejects.toMatchObject({ statusCode: 400 });
+    });
+
+    it("applies default session_id 'default' when not specified", async () => {
+      fetchMock.mockResolvedValue(
+        mockFetchResponse({ text: "", language: null, session_id: "default" })
+      );
+
+      await client.transcribe({ audio_base64: "SGVsbG8=" });
+
+      const call = fetchMock.mock.calls[0]!;
+      const body = JSON.parse(call[1].body as string) as Record<string, unknown>;
+      expect(body.session_id).toBe("default");
+    });
+  });
+
   // ──────── remember ────────
 
   describe("remember()", () => {
