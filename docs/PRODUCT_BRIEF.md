@@ -222,10 +222,17 @@ platforms before it is considered shipped. Platform experts audit each platform 
 - **Accessible installer** — the install process itself is voice-guided and screen-reader
   compatible from the first second
 - **Security-audited releases** — every release includes a security audit agent review
-- **API-first backend** — the Python backend exposes a REST/WebSocket API so all client
-  apps (Android, iOS, Desktop, Web) can connect to it. Client apps are NOT Python — they
-  use platform-appropriate languages (Swift, Kotlin, JavaScript/TypeScript). Backend and
-  clients are separate deployment units that communicate over the API.
+- **Phone talks to user's own machine** — the phone/tablet app is a voice terminal only;
+  all AI reasoning, browser control, and data storage runs on the user's desktop or home
+  server. This keeps sensitive data local and requires no cloud deal with any service.
+  Cloud hosting is an optional upgrade for always-on access, not the default.
+- **Browser as universal adapter** — Claude uses Playwright to navigate any website the
+  same way a human does. No DoorDash API, no Expedia wrapper — just a browser and
+  reasoning. If a service has a website, the app can use it. Service-specific integrations
+  are only built when a browser genuinely can't do the job (payment tokenization, OAuth
+  background refresh).
+- **API-first backend** — REST API (FastAPI) lets all client apps connect. Clients are
+  NOT Python — they use platform-appropriate languages and call the backend over HTTP.
 - **Server-side user data** — the second brain vault, user calendar, preferences, and profile
   all live on the backend server (not per-device). All clients share the same user data.
   During development: backend runs on localhost. Later: migrates to cloud (AWS/GCP/Railway).

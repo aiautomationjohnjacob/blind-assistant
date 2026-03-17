@@ -128,18 +128,13 @@ without keeping their computer on, but the default and preferred deployment is l
 └───┬───────────┬───────────┬───────────┬───────────┬─────────────┘
     │           │           │           │           │
     ▼           ▼           ▼           ▼           ▼
-┌──────┐  ┌────────┐  ┌────────┐  ┌────────┐  ┌──────────────┐
-│Screen│  │Second  │  │Browser │  │Desktop │  │ Task Agents  │
-│Obs.  │  │Brain   │  │Control │  │Control │  │ (food, travel│
-│      │  │(Vault) │  │(Play-  │  │(Desktop│  │  shopping,   │
-│Claude│  │        │  │wright) │  │Cmdr    │  │  calendar)   │
-│Vision│  │Local   │  │        │  │MCP)    │  │              │
-└──────┘  └────────┘  └────────┘  └────────┘  └──────────────┘
-                                                      │
-                                          ┌───────────┴───────────┐
-                                          │   Tool Registry        │
-                                          │   (curated plugins)    │
-                                          └───────────────────────┘
+┌──────┐  ┌────────┐  ┌──────────────────────────┐  ┌──────────┐
+│Screen│  │Second  │  │   Browser (Playwright)   │  │ Desktop  │
+│Obs.  │  │Brain   │  │  navigates ANY website   │  │ Control  │
+│Claude│  │(Vault) │  │  food/travel/banking/etc │  │(Desktop  │
+│Vision│  │Local   │  │  — no service-specific   │  │ Cmdr MCP)│
+│      │  │Encrypt │  │    code required         │  │          │
+└──────┘  └────────┘  └──────────────────────────┘  └──────────┘
     │           │           │           │           │
     ▼           ▼           ▼           ▼           ▼
 ┌─────────────────────────────────────────────────────────────────┐
