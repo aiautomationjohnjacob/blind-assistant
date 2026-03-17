@@ -83,20 +83,30 @@ class SimctlClient:
 
     def enable_voiceover(self) -> None:
         """Enable VoiceOver on the booted simulator."""
-        self._run([
-            "spawn", self._udid,
-            "notifyutil", "-p",
-            "com.apple.accessibility.voiceover.notification.start",
-        ], timeout=10)
+        self._run(
+            [
+                "spawn",
+                self._udid,
+                "notifyutil",
+                "-p",
+                "com.apple.accessibility.voiceover.notification.start",
+            ],
+            timeout=10,
+        )
         time.sleep(1)
 
     def disable_voiceover(self) -> None:
         """Disable VoiceOver on the booted simulator."""
-        self._run([
-            "spawn", self._udid,
-            "notifyutil", "-p",
-            "com.apple.accessibility.voiceover.notification.stop",
-        ], timeout=10)
+        self._run(
+            [
+                "spawn",
+                self._udid,
+                "notifyutil",
+                "-p",
+                "com.apple.accessibility.voiceover.notification.stop",
+            ],
+            timeout=10,
+        )
 
     def screenshot(self, output_path: str | None = None) -> str:
         """Capture a simulator screenshot and save it to the given path."""

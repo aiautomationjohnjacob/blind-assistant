@@ -124,9 +124,7 @@ class TestVoiceOverLaunch:
             # Verify the app is still running by capturing a screenshot.
             # A crash would produce a blank or error screen.
             screenshot_path = simctl.screenshot()  # type: ignore[attr-defined]
-            assert os.path.exists(screenshot_path), (
-                "Screenshot could not be captured -- simulator may have crashed."
-            )
+            assert os.path.exists(screenshot_path), "Screenshot could not be captured -- simulator may have crashed."
         finally:
             simctl.disable_voiceover()  # type: ignore[attr-defined]
             simctl.terminate_app(APP_BUNDLE_ID)  # type: ignore[attr-defined]
@@ -264,10 +262,7 @@ class TestFoodOrderingVoiceOverFlow:
         3. Not using aria-hidden or accessibilityViewIsModal that would hide it
         """
         if not _backend_reachable():
-            pytest.skip(
-                f"Backend not reachable at {BACKEND_URL}. "
-                "Start with: python -m blind_assistant.main --api"
-            )
+            pytest.skip(f"Backend not reachable at {BACKEND_URL}. Start with: python -m blind_assistant.main --api")
 
         simctl.enable_voiceover()  # type: ignore[attr-defined]
         try:

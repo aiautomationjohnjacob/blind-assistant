@@ -133,9 +133,7 @@ def adb_available() -> bool:
     )
     # "List of devices attached" is always the first line; count subsequent lines
     lines = [
-        line.strip()
-        for line in result.stdout.strip().splitlines()
-        if line.strip() and "List of devices" not in line
+        line.strip() for line in result.stdout.strip().splitlines() if line.strip() and "List of devices" not in line
     ]
     return len(lines) > 0
 

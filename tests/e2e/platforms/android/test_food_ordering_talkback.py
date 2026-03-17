@@ -131,8 +131,7 @@ class TestTalkBackLaunch:
 
             # The main button MUST have a content description
             assert any(
-                "speak" in d.lower() or "assistant" in d.lower() or "record" in d.lower()
-                for d in descriptions
+                "speak" in d.lower() or "assistant" in d.lower() or "record" in d.lower() for d in descriptions
             ), (
                 "No element with 'speak', 'assistant', or 'record' in content-desc found. "
                 f"Actual descriptions: {descriptions[:10]}"
@@ -168,10 +167,7 @@ class TestTalkBackLaunch:
             descriptions = _parse_content_descriptions(xml)
 
             # Screen must identify the app
-            assert any(
-                "blind assistant" in d.lower()
-                for d in descriptions
-            ), (
+            assert any("blind assistant" in d.lower() for d in descriptions), (
                 "No element containing 'Blind Assistant' in content-desc. "
                 "TalkBack users cannot identify which app they're in. "
                 f"Actual descriptions: {descriptions[:10]}"
@@ -207,10 +203,7 @@ class TestTouchTargets:
         min_px = 44 * 2.75  # ~121px (2.75 is typical density factor for Pixel 6)
 
         # At least one button must meet the minimum
-        large_enough = [
-            b for b in all_bounds
-            if (b[2] - b[0]) >= min_px and (b[3] - b[1]) >= min_px
-        ]
+        large_enough = [b for b in all_bounds if (b[2] - b[0]) >= min_px and (b[3] - b[1]) >= min_px]
         assert len(large_enough) > 0, (
             f"No interactive element meets the 44dp minimum touch target. "
             f"All bounds (in px): {all_bounds[:5]}. "
@@ -260,20 +253,13 @@ class TestFoodOrderingTalkBackFlow:
 
             # At least one focusable node must be the speak button
             speak_nodes = [
-                n for n in focusable_nodes
-                if "speak" in n.lower() or "record" in n.lower() or "assistant" in n.lower()
+                n for n in focusable_nodes if "speak" in n.lower() or "record" in n.lower() or "assistant" in n.lower()
             ]
             # Extract content descriptions for the error message (no backslash in f-string)
             cd_pattern = re.compile(r'content-desc="([^"]+)"')
-            focusable_descs = [
-                m.group(1)
-                for n in focusable_nodes
-                for m in [cd_pattern.search(n)]
-                if m
-            ]
+            focusable_descs = [m.group(1) for n in focusable_nodes for m in [cd_pattern.search(n)] if m]
             assert len(speak_nodes) > 0, (
-                "The press-to-talk button is not focusable by TalkBack. "
-                f"All focusable content-descs: {focusable_descs}"
+                f"The press-to-talk button is not focusable by TalkBack. All focusable content-descs: {focusable_descs}"
             )
         finally:
             adb.disable_talkback()  # type: ignore[attr-defined]
@@ -291,10 +277,7 @@ class TestFoodOrderingTalkBackFlow:
         The backend E2E tests in tests/e2e/core/ verify the disclosure text content.
         """
         if not _backend_reachable():
-            pytest.skip(
-                f"Backend not reachable at {BACKEND_URL}. "
-                "Start with: python -m blind_assistant.main --api"
-            )
+            pytest.skip(f"Backend not reachable at {BACKEND_URL}. Start with: python -m blind_assistant.main --api")
 
         # Launch app and trigger food ordering
         adb.enable_talkback()  # type: ignore[attr-defined]
@@ -350,9 +333,7 @@ class TestFoodOrderingTalkBackFlow:
             )
             # If confirmation UI is showing, buttons must be focusable
             for node in yes_no_nodes:
-                assert 'focusable="true"' in node, (
-                    f"Confirmation button is not focusable by TalkBack: {node[:200]}"
-                )
+                assert 'focusable="true"' in node, f"Confirmation button is not focusable by TalkBack: {node[:200]}"
         # If no confirmation UI is showing, the test passes trivially
         # (the confirmation flow is only triggered after a food ordering API call)
 
