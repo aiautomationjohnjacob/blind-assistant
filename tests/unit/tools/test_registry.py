@@ -357,7 +357,13 @@ async def test_install_tool_appends_to_existing_audit_log(
     audit_log = tmp_path / "install_log.json"
     # Pre-populate with one existing entry
     existing = [
-        {"tool_name": "old_tool", "user_confirmed": True, "timestamp": "2026-01-01T00:00:00Z", "package": "old", "reason": ""}
+        {
+            "tool_name": "old_tool",
+            "user_confirmed": True,
+            "timestamp": "2026-01-01T00:00:00Z",
+            "package": "old",
+            "reason": "",
+        }
     ]
     audit_log.write_text(json.dumps(existing))
 
