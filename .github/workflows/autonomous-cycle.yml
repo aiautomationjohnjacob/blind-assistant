@@ -1,9 +1,9 @@
 name: Autonomous Development Cycle
 
 on:
-  # Run every 4 hours automatically
+  # Run every 2 hours automatically
   schedule:
-    - cron: '0 */4 * * *'
+    - cron: '0 */2 * * *'
   # Also allow manual trigger with optional phase override
   workflow_dispatch:
     inputs:
