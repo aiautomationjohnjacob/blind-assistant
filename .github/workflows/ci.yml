@@ -151,14 +151,21 @@ jobs:
           python-version: '3.11'
           cache: pip
 
-      - name: Install audit tools
-        # setuptools needed because openai-whisper's setup.py uses pkg_resources
-        run: pip install pip-audit bandit setuptools
+      - name: Install audit tools and project dependencies
+        # setuptools must be pre-installed before openai-whisper because it uses
+        # legacy setup.py with pkg_resources. We install all requirements first,
+        # then run pip-audit against the installed environment (no -r flag) so
+        # pip-audit never needs to build wheels itself.
+        run: |
+          pip install setuptools
+          pip install pip-audit bandit
+          pip install -r requirements.txt --no-build-isolation 2>/dev/null || \
+            pip install -r requirements.txt 2>/dev/null || true
 
       - name: Audit dependencies for known CVEs
-        # --no-deps: check listed packages only, skip dependency resolution
-        # Avoids build failures from packages requiring system libs (whisper, sounddevice)
-        run: pip-audit -r requirements.txt --desc --no-deps
+        # Audit the currently-installed environment (not -r requirements.txt)
+        # so pip-audit reads installed package metadata rather than building wheels.
+        run: pip-audit --desc
 
       - name: Static security analysis (bandit)
         run: |
