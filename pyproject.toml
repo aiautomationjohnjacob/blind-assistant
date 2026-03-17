@@ -1,0 +1,116 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "blind-assistant"
+version = "0.1.0"
+description = "AI life companion for blind and visually impaired people"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# ─────────────────────────────────────────────
+# PYTEST — test runner
+# ─────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = [
+    "--tb=short",
+    "-v",
+    "--strict-markers",
+    "--strict-config",
+    "-ra",  # show summary of all non-passing tests
+]
+markers = [
+    "unit: pure unit tests with no I/O or external dependencies",
+    "integration: tests that touch real file system, OS keychain, or external APIs",
+    "security: security-critical paths — must pass at 100% coverage, no exceptions",
+    "slow: tests taking more than 1 second",
+    "accessibility: voice output and accessibility behaviour tests",
+]
+
+# ─────────────────────────────────────────────
+# COVERAGE — 80% floor; 100% on security modules
+# ─────────────────────────────────────────────
+[tool.coverage.run]
+source = ["src/blind_assistant"]
+omit = ["tests/*", "installer/*"]
+branch = true  # measure branch coverage, not just line coverage
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_covered = false
+precision = 1
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.paths]
+source = ["src/", "*/site-packages/"]
+
+# ─────────────────────────────────────────────
+# RUFF — linting + formatting
+# ─────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # isort
+    "UP",  # pyupgrade
+    "S",   # bandit (security)
+    "B",   # bugbear
+    "A",   # flake8-builtins
+    "C4",  # flake8-comprehensions
+    "PIE", # flake8-pie
+    "T20", # flake8-print (no stray print statements)
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+]
+ignore = [
+    "S101",  # assert statements (allowed in tests)
+    "S603",  # subprocess calls (needed for system interactions)
+    "S105",  # hardcoded password (false positives in tests)
+    "S106",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "S106", "S105", "T20"]
+"installer/**/*.py" = ["T20"]  # installer uses print() intentionally
+
+# ─────────────────────────────────────────────
+# MYPY — static type checking
+# ─────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
