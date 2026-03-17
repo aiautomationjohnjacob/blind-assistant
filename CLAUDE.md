@@ -72,6 +72,8 @@ to work in parallel, review each other's work, and commit progress continuously.
 ### Ethics & Safety Agents
 - **privacy-guardian** — Protects sensitive screen content (passwords, banking, health data)
 - **ethics-advisor** — Ensures AI enhances autonomy, not dependency; informed consent
+- **security-specialist** — Implementation security audit: encryption, credential storage,
+  Telegram security, plain-text sensitive data, prompt injection, dependency CVEs
 
 ### Nonprofit Operations Agents
 - **grant-writer** — Frames impact in grant language; identifies fundable milestones
@@ -81,21 +83,29 @@ to work in parallel, review each other's work, and commit progress continuously.
 - `/review-pr [#]` — Multi-persona PR review posted to GitHub
 - `/fix-wcag` — Batch-fix WCAG violations from latest audit
 
-## Technology Approach
+## Technology Approach (Synthesis Strategy)
+The goal is to integrate existing tools, not reinvent them:
 - **Screen observation**: Claude vision + Playwright screenshots
 - **Computer control**: Playwright MCP (browser), Desktop Commander MCP (native apps)
-- **Voice I/O**: TBD — likely Web Speech API + TTS provider
+- **Voice I/O**: Whisper (STT) + ElevenLabs/Kokoro (TTS) — better than screen reader voices
+- **Personal knowledge (Second Brain)**: Obsidian-compatible markdown vault, voice-queried
+- **Multi-device access**: Telegram bot as primary 24/7 interface (phone + laptop)
 - **Memory**: MCP memory server (cross-session knowledge graph)
-- **Stack**: TBD by tech-lead agent
+- **Automation**: n8n or similar for background task workflows
+- **Physical-world tasks**: Shopping/ordering APIs (with explicit user confirmation always)
+- **Stack**: TBD by tech-lead agent in Phase 1 — must support voice-only setup
 
 ## Non-Negotiable Rules
 - Every interactive element MUST have an accessible name
 - Every PR MUST pass accessibility audit before merge
 - No `outline: none` without a visible focus replacement
 - Color must NEVER be the sole conveyor of information
-- Screen content containing passwords/PII must NEVER be logged or stored
+- Sensitive data (passwords, banking, health) NEVER stored in plain text
+- Screen content containing PII must NEVER be sent to external APIs without redaction
 - All user-facing strings support i18n
 - Every feature is tested with at least one blind user persona agent before shipping
+- Security specialist must review any feature that handles credentials or personal data
+- Every action that costs money or sends a communication requires explicit user confirmation
 
 ## Git Workflow
 - Feature branches: `feature/description`

@@ -37,26 +37,42 @@ Based on what you read, state clearly:
 Spawn these agents in parallel:
 
 **Task A** — Use the `gap-analyst` agent:
-"Analyze the current blind assistive technology landscape. Identify the 5 most important
-gaps our app can fill. Focus on computer navigation tasks blind users cannot complete
-today without sighted assistance. Output: `docs/GAP_ANALYSIS.md`"
+"Read docs/PRODUCT_BRIEF.md carefully — pay special attention to the Synthesis Vision section.
+Analyze: (1) every existing AI tool mentioned and assess its accessibility gaps; (2) what a
+blind person actually cannot do today that they should be able to; (3) which tools we should
+integrate vs build. Research Obsidian/Second Brain, Open Interpreter, Telegram bots, Whisper,
+ElevenLabs, Seeing AI, Be My Eyes, n8n, Home Assistant specifically.
+Output: docs/GAP_ANALYSIS.md and docs/INTEGRATION_MAP.md"
 
 **Task B** — Use the `ethics-advisor` agent:
-"Review our product concept in docs/PRODUCT_BRIEF.md. Identify ethical risks in an AI
-that controls a blind user's computer. What safeguards must be built-in from day one?
-Output: `docs/ETHICS_REQUIREMENTS.md`"
+"Read docs/PRODUCT_BRIEF.md. Identify ethical risks in an AI life assistant that: controls
+a blind user's computer, stores their personal knowledge base, has Telegram access 24/7,
+and can make purchases on their behalf. What safeguards are non-negotiable from day one?
+Output: docs/ETHICS_REQUIREMENTS.md"
 
-After both complete, use the `tech-lead` agent:
-"You have: docs/PRODUCT_BRIEF.md, docs/GAP_ANALYSIS.md, docs/ETHICS_REQUIREMENTS.md.
-Choose the technology stack for Blind Assistant. Consider: Python vs Node vs Electron,
-speech I/O library, screen capture approach, LLM integration (Claude API), packaging for
-blind users (must be installable without visual setup). Document your decision with full
-reasoning. Output: `docs/ARCHITECTURE.md`"
+**Task C** — Use the `security-specialist` agent:
+"Read docs/PRODUCT_BRIEF.md — specifically the sections on Second Brain/Obsidian integration,
+Telegram bot access, and physical-world ordering. Design the security model for this system.
+Key questions: How do we store the user's personal knowledge base securely? How do we handle
+Telegram bot authentication so only the user can command it? How do we handle any credentials
+for third-party services? What is our policy on screen content and external AI API calls?
+Output: docs/SECURITY_MODEL.md"
+
+After all three complete, use the `tech-lead` agent:
+"You have: docs/PRODUCT_BRIEF.md, docs/GAP_ANALYSIS.md, docs/INTEGRATION_MAP.md,
+docs/ETHICS_REQUIREMENTS.md, docs/SECURITY_MODEL.md.
+Choose the technology stack for Blind Assistant. Key constraints: (1) voice-only setup —
+a blind person must be able to install this without seeing anything; (2) Telegram bot as
+primary 24/7 interface; (3) security model from docs/SECURITY_MODEL.md must be implementable
+in your chosen stack; (4) we integrate existing tools rather than rebuild them.
+Document your full decision with reasoning, integration plan, and first implementation steps.
+Output: docs/ARCHITECTURE.md"
 
 Then use the `nonprofit-ceo` agent:
-"Review docs/GAP_ANALYSIS.md and docs/ARCHITECTURE.md. Validate or challenge the
-direction. Are we solving the right problems first? Output: your assessment appended to
-`docs/PRODUCT_BRIEF.md` under a 'CEO Review' section."
+"Review docs/GAP_ANALYSIS.md, docs/INTEGRATION_MAP.md, and docs/ARCHITECTURE.md.
+Validate or challenge the direction. Are we solving the right problems first?
+Are we building something that genuinely changes a blind person's life or just another tool?
+Output: your assessment appended to docs/PRODUCT_BRIEF.md under a 'CEO Review — [date]' section."
 
 Finally: generate `docs/USER_STORIES.md` by asking EACH of these 5 agents for their
 top 3 user stories (use them in parallel):

@@ -26,14 +26,18 @@ Phase 5: Polish & Community Ready  → Pending
 ## What Happens in Each Phase
 
 ### Phase 1: Discovery & Architecture
-**Goal**: Define exactly what we're building and how.
-**Agents**: gap-analyst, nonprofit-ceo, tech-lead, ethics-advisor
+**Goal**: Define exactly what we're building and how, grounded in existing tools and real gaps.
+**Agents**: gap-analyst, nonprofit-ceo, tech-lead, ethics-advisor, security-specialist
 **Deliverables**:
-- [ ] `docs/ARCHITECTURE.md` — Tech stack decision with reasoning
+- [ ] `docs/GAP_ANALYSIS.md` — Landscape of existing AI tools; what to integrate vs build
+- [ ] `docs/INTEGRATION_MAP.md` — Which tools (Obsidian, Telegram, Open Interpreter, etc.)
+      we integrate and how; accessibility gaps in each; our integration strategy
+- [ ] `docs/ARCHITECTURE.md` — Full tech stack with security architecture
 - [ ] `docs/USER_STORIES.md` — 10+ user stories from all blind personas
 - [ ] `docs/FEATURE_PRIORITY.md` — Prioritized feature list with mission justification
+- [ ] `docs/SECURITY_MODEL.md` — How sensitive data is handled end-to-end (from security-specialist)
 - [ ] `src/` — Initial project scaffold (chosen stack)
-- [ ] Phase 1 complete when: tech stack chosen, scaffold created, user stories written
+- [ ] Phase 1 complete when: integration strategy decided, security model defined, scaffold created
 
 ### Phase 2: Core Build Sprint
 **Goal**: Build the minimum product a blind user can actually try.

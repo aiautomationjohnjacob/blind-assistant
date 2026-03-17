@@ -1,50 +1,169 @@
 # Blind Assistant — Product Brief (Living Document)
 
 > This document is maintained by the AI agents. Humans may edit it to redirect priorities.
-> Last updated by: [agent will fill in]
+> Last updated by: human founder, 2026-03-17
 
-## The Product
+---
 
-**Name**: Blind Assistant
-**Type**: Open-source desktop AI assistant
-**Mission**: Give blind and visually impaired users an AI that can see, navigate, and
-control their computer on their behalf — making tasks possible that screen readers alone cannot.
+## The Vision
 
-## The Core Problem We Solve
+Blind Assistant is an **AI life companion for blind and visually impaired people** — not
+just a screen reader, not just a computer tool, but a persistent intelligent assistant
+that helps someone live a full, independent life through conversation.
 
-Screen readers (NVDA, JAWS, VoiceOver) require apps to be correctly coded to be accessible.
-When they're not — which is most of the time — blind users are simply stuck. They either
-need sighted help or give up entirely.
+The best analogy is: imagine taking Claude Code's ability to read screens, browse the web,
+read documents, install tools, and execute tasks — and wrapping it in an interface that a
+blind person who has never used a computer before can set up and use entirely by voice,
+from day one, with zero sighted assistance required.
 
-Blind Assistant uses AI to bridge that gap. It can:
-- Look at what's on screen and describe it intelligently
-- Navigate to the right place even in unlabeled, inaccessible interfaces
-- Explain what's happening in plain language
-- Execute multi-step tasks on the user's behalf
-- Learn the user's specific environment, preferences, and workflows
+The key insight driving this project: **most of what blind people need already exists as
+AI tools — they just can't use them.** The setup requires vision. The interfaces require
+vision. The documentation assumes vision. Our job is to synthesize these existing tools
+into a single accessible layer that works for someone who cannot see at all.
+
+---
+
+## The Synthesis Vision
+
+### What Already Exists (and needs to be made accessible)
+
+**Personal Knowledge & Memory**
+- **Obsidian + Second Brain** — A blind person could keep track of their entire life:
+  appointments, medications, relationships, finances, ideas, goals — all in a personal
+  knowledge base. But Obsidian's graph view and visual navigation are inaccessible. Our
+  role: provide a voice-first interface to a personal Second Brain that stores the user's
+  life in structured, queryable notes they can ask questions about conversationally.
+- **Mem.ai, Notion AI, Rewind AI** — AI-powered memory and life logging tools, none
+  designed for blind users.
+
+**Computer & Task Automation**
+- **Open Interpreter** — AI that can control a computer, execute code, browse the web,
+  and complete tasks. Not designed for blind users; setup requires vision.
+- **Claude Code** — Can read screens, websites, Google Docs, PDFs, install missing tools,
+  write and run code, and automate workflows. Extraordinarily powerful — but the interface
+  is a terminal, not accessible to most blind users.
+- **n8n, Zapier, IFTTT** — Workflow automation. Could automate dozens of daily tasks
+  (bill reminders, email organization, calendar management) — but require visual setup.
+- **AutoGPT / AgentGPT** — Autonomous AI agents that can browse and act. Not accessible.
+
+**Communication & Multiplatform Access**
+- **Telegram bot integration** — A blind user can talk to their assistant 24/7 from any
+  device: laptop, phone, even a feature phone with internet. No visual interface required.
+  This is a critical access channel — the assistant is available everywhere, always.
+- **WhatsApp / SMS integration** — Further extends reach; important for users in
+  developing countries where smartphone accessibility varies.
+
+**Vision & World Interpretation**
+- **Be My Eyes / Be My AI** — Ask a human or AI to describe a photo. Slow. Manual.
+  Our approach: proactive, continuous, integrated — not a one-off photo description app.
+- **Seeing AI** (Microsoft) — Reads text, describes scenes, recognizes faces and products.
+  A component to integrate, not reinvent.
+- **GPT-4o / Claude vision** — Read any document, image, chart, webpage and describe it.
+  Already exists; needs accessible delivery wrapper.
+
+**Voice & Audio**
+- **Whisper (OpenAI)** — State-of-the-art speech recognition. Free and open-source.
+  The speech-to-text engine for our voice interface.
+- **ElevenLabs / Azure TTS / Kokoro** — High-quality, natural text-to-speech.
+  Much better than built-in screen readers' robotic voices.
+
+**Home & Physical World**
+- **Home Assistant** — Controls smart home devices by voice. Could integrate so the blind
+  user can ask the assistant to turn on lights, lock doors, set alarms.
+- **Online ordering APIs** (Amazon, Instacart, grocery delivery) — With user permission,
+  the assistant can order items online. A blind person who needs something urgently can
+  say "order me more of my blood pressure medication" and have it handled.
+
+### The Synthesis Principle
+
+We are not building most of these tools from scratch. We are:
+1. **Connecting them** — building the integration layer that makes them work together
+2. **Wrapping them accessibly** — every setup step, every interaction, works by voice
+3. **Curating them** — choosing the best tool for each job and abstracting the complexity
+4. **Personalizing them** — the assistant learns the user's specific life, preferences,
+   and needs, so responses are always contextually relevant
+
+**The user talks. The assistant figures out which tools to use. The user never sees the
+complexity underneath.**
+
+---
+
+## The Core Promise
+
+A blind user can:
+1. **Set up everything entirely by voice** — install, configure, and start using without
+   ever needing to see a screen or ask a sighted person for help
+2. **Access their AI assistant 24/7 from any device** — laptop, phone, tablet, via
+   Telegram or SMS — wherever they are
+3. **Get help with any computer task** — "read me this document," "fill out this form,"
+   "find and book a flight," "what's on my screen right now"
+4. **Navigate inaccessible apps** — the AI sees the screen and acts as their eyes even
+   when the app has zero accessibility support
+5. **Manage their personal life** — notes, appointments, finances, shopping, research,
+   relationships — all through conversation
+6. **Take action in the world** — order things online, send emails, schedule appointments,
+   with user permission before any action that spends money or sends communications
+7. **Stay safe** — all sensitive data encrypted; no plain-text passwords or financial
+   details; security audit built into every release
+
+---
 
 ## Target Users (in priority order)
 
-1. **Newly blind users** — People adapting to vision loss who need maximum support
-2. **Elderly blind users** — Lower tech confidence; need patience and plain language
-3. **Working-age experienced blind users** — Need efficiency and professional-grade tools
-4. **DeafBlind users** — Braille-display primary; most demanding accessibility requirements
+1. **Newly blind users** — Adapting to vision loss, overwhelmed; need maximum support
+   and extremely gentle onboarding
+2. **Elderly blind users** — Long-time blind, lower tech confidence; need patience and
+   plain language; enormous population
+3. **Working-age experienced blind users** — Need professional-grade efficiency; often
+   already use NVDA/JAWS; will adopt if we're demonstrably better for certain tasks
+4. **DeafBlind users** — Braille-display primary; sets our accessibility floor
+5. **Low vision users** — Some functional vision; need high contrast, zoom, large text
+   alongside AI assistance
+
+---
 
 ## What We Are NOT Building
 
-- Another screen reader (NVDA/JAWS already do this well)
-- A general-purpose AI assistant (plenty of those exist)
-- A paid product (we are a nonprofit)
-- Something that requires sighted setup to use
+- Another screen reader (NVDA/JAWS already handle this; we integrate with them)
+- A product that requires sighted setup at any point
+- A paid product (nonprofit; core features free forever)
+- A tool that requires technical knowledge to use or maintain
+- Something that stores sensitive data in plain text (a hard security non-negotiable)
+- An app that makes decisions for users without permission
 
-## Success Looks Like
+---
 
-A blind user can:
-1. Install and configure Blind Assistant entirely without sighted help
-2. Open any app on their computer and get meaningful audio description of what they see
-3. Ask the AI to complete a task ("fill out this form", "read this document to me", "find
-   the download button") and have it succeed — even in inaccessible apps
-4. Do this faster than they could with NVDA alone
+## Research Phase Mandate
+
+**The gap-analyst and tech-lead agents must answer during Phase 1:**
+
+1. Which existing tools (from the synthesis list above) should we integrate vs rebuild?
+2. What does the most accessible "installer" look like for a blind user?
+3. How does Telegram bot integration work as the primary multi-device interface?
+4. What is the minimum viable "life assistant" — the first 5 things a newly blind user
+   would want to be able to do that they currently can't?
+5. What does a Second Brain look like for a blind person — what structure, what queries,
+   what daily interactions would make it genuinely valuable?
+6. What security architecture handles sensitive personal data (passwords, banking, medical)
+   without ever storing it in plain text?
+7. Can we build on top of Open Interpreter, Claude Code, or similar foundations rather
+   than starting from scratch?
+
+---
+
+## Technical Principles
+
+- **Voice-first, vision-optional** — every single interaction works by voice
+- **Privacy by default** — encryption at rest, zero plain-text sensitive data, local-first
+  where possible
+- **Offline-capable core** — basic functions work without internet; cloud AI for heavy tasks
+- **Modular integrations** — each tool (Obsidian, Telegram, Home Assistant) is a plugin;
+  users can enable only what they need
+- **Accessible installer** — the install process itself is voice-guided and screen-reader
+  compatible from the first second
+- **Security-audited releases** — every release includes a security audit agent review
+
+---
 
 ## Current Build Phase
 
@@ -60,3 +179,4 @@ See `docs/ARCHITECTURE.md` once the tech-lead agent creates it.
 - Privacy-first: screen content never logged without explicit opt-in
 - Open-source forever: no paywalls for blind users
 - Partnerships: NFB, ACB, local lighthouse organizations for user testing
+- "Nothing about us without us" — real blind users in every testing cycle
