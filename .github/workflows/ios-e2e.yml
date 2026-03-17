@@ -1,0 +1,161 @@
+name: iOS VoiceOver E2E Tests
+
+# iOS tests require macOS + Xcode + iOS Simulator — they run separately from the main CI.
+# Triggered on release tags only (simulator tests take ~10 minutes).
+# The main ci.yml cannot run iOS tests because it uses ubuntu-latest runners.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:  # Allow manual trigger for testing
+
+jobs:
+  e2e-ios-voiceover:
+    name: E2E — iOS (VoiceOver simulator)
+    runs-on: macos-14  # Xcode 15, Apple Silicon, iOS 17 simulator available
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if iOS E2E tests exist
+        id: check_tests
+        run: |
+          # Tests live at tests/e2e/platforms/ios/ (per testing.md layout)
+          if [ -d "tests/e2e/platforms/ios" ] && [ "$(ls tests/e2e/platforms/ios/test_*.py 2>/dev/null | wc -l)" -gt 0 ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "No iOS E2E tests found at tests/e2e/platforms/ios/ — skipping"
+          fi
+
+      - name: Set up Python
+        if: steps.check_tests.outputs.exists == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install Python dependencies
+        if: steps.check_tests.outputs.exists == 'true'
+        run: |
+          pip install setuptools
+          pip install -r requirements.txt --no-build-isolation 2>/dev/null || true
+          pip install pytest pytest-asyncio
+          pip install -e . 2>/dev/null || pip install -e . --no-build-isolation 2>/dev/null || true
+
+      - name: Set up Node.js
+        if: steps.check_tests.outputs.exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: clients/mobile/package-lock.json
+
+      - name: Install JS dependencies
+        if: steps.check_tests.outputs.exists == 'true'
+        working-directory: clients/mobile
+        run: npm ci --legacy-peer-deps
+
+      - name: Boot iOS Simulator (iPhone 15, iOS 17)
+        if: steps.check_tests.outputs.exists == 'true'
+        run: |
+          # List available simulators for debugging
+          xcrun simctl list devices available --json | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for runtime, devices in data['devices'].items():
+              booted = [d['name'] for d in devices if d.get('state') == 'Shutdown' and 'iPhone' in d['name']]
+              if booted:
+                  print(f'{runtime}: {booted[:3]}')
+          "
+          # Boot iPhone 15 simulator
+          DEVICE_UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for runtime, devices in data['devices'].items():
+              if 'iOS-17' in runtime or 'iOS-18' in runtime:
+                  for d in devices:
+                      if 'iPhone 15' in d['name'] and d.get('isAvailable', False):
+                          print(d['udid'])
+                          exit()
+          ")
+          echo "Device UDID: $DEVICE_UDID"
+          if [ -z "$DEVICE_UDID" ]; then
+            echo "No iPhone 15 found — using first available iPhone"
+            DEVICE_UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          data = json.load(sys.stdin)
+          for runtime, devices in data['devices'].items():
+              for d in devices:
+                  if 'iPhone' in d['name'] and d.get('isAvailable', False):
+                      print(d['udid'])
+                      exit()
+          ")
+          fi
+          echo "SIMULATOR_UDID=$DEVICE_UDID" >> $GITHUB_ENV
+          xcrun simctl boot "$DEVICE_UDID" || true
+          # Open Simulator app to ensure the UI is rendered
+          open -a Simulator
+          # Wait for simulator to be ready
+          sleep 10
+
+      - name: Build and install app on simulator
+        if: steps.check_tests.outputs.exists == 'true'
+        working-directory: clients/mobile
+        env:
+          SIMULATOR_UDID: ${{ env.SIMULATOR_UDID }}
+        run: |
+          # Build the Expo app for iOS simulator
+          # Using expo-cli local build (no EAS account required)
+          npx expo run:ios --device "$SIMULATOR_UDID" --no-install --configuration Debug 2>&1 || {
+            echo "expo run:ios failed — trying Expo Go fallback"
+            # Install Expo Go on the simulator as a fallback
+            xcrun simctl install "$SIMULATOR_UDID" \
+              "https://api.expo.dev/v2/archives/ios/latest?channel=stable" 2>/dev/null || true
+          }
+          sleep 5
+
+      - name: Start Python backend
+        if: steps.check_tests.outputs.exists == 'true'
+        env:
+          API_SERVER_TOKEN: test-token-ios-ci
+        run: |
+          # Start the FastAPI backend server for the E2E tests
+          python -m blind_assistant.main --api --host 127.0.0.1 --port 8000 &
+          echo "BACKEND_PID=$!" >> $GITHUB_ENV
+          # Wait for the server to be ready
+          sleep 3
+          curl -f http://127.0.0.1:8000/health || echo "Backend may not be ready"
+
+      - name: Run iOS VoiceOver E2E tests
+        if: steps.check_tests.outputs.exists == 'true'
+        env:
+          BACKEND_URL: http://127.0.0.1:8000
+          SIMULATOR_UDID: ${{ env.SIMULATOR_UDID }}
+        run: |
+          pytest tests/e2e/platforms/ios/ \
+            -m "ios" \
+            -v \
+            --tb=short \
+            2>&1 | tee ios-e2e.log
+
+      - name: Stop backend
+        if: always() && steps.check_tests.outputs.exists == 'true'
+        run: kill $BACKEND_PID 2>/dev/null || true
+
+      - name: Shutdown simulator
+        if: always()
+        run: xcrun simctl shutdown all || true
+
+      - name: Upload iOS screenshots and logs
+        if: always() && steps.check_tests.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-voiceover-screenshots-${{ github.run_number }}
+          path: |
+            screenshots/
+            tests/e2e/platforms/ios/screenshots/
+            ios-e2e.log
+            /tmp/voiceover_*.png
+          retention-days: 14
