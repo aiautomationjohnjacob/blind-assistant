@@ -143,6 +143,36 @@ Mark all E2E tests with:
 
 CI runs E2E tests separately: `pytest tests/e2e/ -m integration`
 
+## Per-Platform E2E Tests
+
+Each Blind Assistant client platform has its own E2E test suite:
+
+```
+tests/e2e/
+  core/                          ← backend flows (these files above)
+    test_voice_conversation.py
+    test_telegram_flow.py
+    test_second_brain_flow.py
+    test_payment_flow.py
+    test_screen_description.py
+    test_self_expanding.py
+  platforms/
+    web/
+      test_web_chrome.py         ← Playwright Chrome keyboard navigation
+      test_web_safari.py         ← Playwright WebKit (VoiceOver+Safari simulation)
+      test_education_site.py     ← learn.blind-assistant.org NVDA+Chrome simulation
+    android/
+      test_android_app.py        ← Android emulator (AVD) full app flow
+    ios/
+      test_ios_app.py            ← iOS simulator full app flow
+    desktop/
+      test_windows_app.py        ← Windows native app smoke test
+      test_macos_app.py          ← macOS native app smoke test
+```
+
+For platform tests, use `device-simulator` agent to run actual emulators/simulators.
+Each platform test must capture screenshots for human review.
+
 ## Persona Scenarios
 
 Each critical E2E test should have a variant for at least two personas:

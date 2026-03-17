@@ -116,7 +116,10 @@ ElevenLabs/pyttsx3 fallback, singleton model loading, transcribe_microphone). To
 - `transcribe_microphone` uses fixed duration — needs Voice Activity Detection (VAD)
 - Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — Phase 2 work
 - `src/blind_assistant/memory/mcp_memory.py` not yet implemented — Phase 2 work
-- No tests exist yet — Phase 2 must add tests per testing.md requirements
+- Session context has no clear_sensitive() method — vault passphrase cached but not zeroed
+- response_callback params in orchestrator lack Optional[Callable] type annotations
+- Passphrase prompt timeout is hardcoded at 120s (should be config.yaml setting)
+- Telegram end-to-end demo not yet tested on real hardware — #1 Phase 2 remaining gap
 
 ## Decisions Made
 
