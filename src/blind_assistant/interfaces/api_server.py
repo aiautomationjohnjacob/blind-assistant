@@ -260,6 +260,7 @@ class APIServer:
         # Register routes
         app.get("/health", response_model=HealthResponse)(self._health)
         app.post("/query", response_model=QueryResponse)(self._query)
+        app.post("/transcribe", response_model=TranscribeResponse)(self._transcribe)
         app.post("/remember", response_model=RememberResponse)(self._remember)
         app.post("/describe", response_model=DescribeResponse)(self._describe)
         app.post("/task", response_model=TaskResponse)(self._task)
