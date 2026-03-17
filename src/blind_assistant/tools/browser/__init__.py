@@ -156,6 +156,7 @@ class BrowserTool:
         Returns: Updated page state after click
         """
         self._require_initialized()
+        assert self._page is not None  # guaranteed by _require_initialized; narrows type for mypy
         try:
             if text:
                 # Click by visible text (more resilient to layout changes)
