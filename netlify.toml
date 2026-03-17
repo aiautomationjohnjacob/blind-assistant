@@ -51,9 +51,9 @@
     # Content Security Policy:
     # - default-src self: only load resources from our own domain
     # - script-src self + unsafe-inline: React needs inline scripts for hydration
-    # - connect-src: allow API calls to the backend server
-    # - Note: tighten this in Phase 4 (security hardening) to remove unsafe-inline
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.blind-assistant.org http://localhost:8000; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:;"
+    # - connect-src: allow API calls to the production backend only (no localhost in prod)
+    # - Note: tighten in Phase 4 (remove unsafe-inline; use nonces instead)
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.blind-assistant.org https://api-staging.blind-assistant.org; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:;"
     # Strict Transport Security (HTTPS only in production)
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
 
