@@ -119,3 +119,5 @@
 | ISSUE-022: 56 mypy type errors fixed across 7 src/ files (from __future__ annotations + assert narrowing + bytes casts) | 2026-03-17 | 13 |
 | CI: openai-whisper setuptools build fix applied to test + integration-browser jobs (was already in security-audit) | 2026-03-17 | 13 |
 | Total test count Cycle 13: 482 Python (unchanged); 117 JS (unchanged); mypy reports 0 errors in 32 source files | 2026-03-17 | 13 |
+| CI fully green (Cycle 14): 11 CVEs patched (cryptography→46, Pillow→12.1.1, starlette→0.49.1, fastapi→0.135.1); pip-audit switched to installed-env mode; 5 new mypy errors from updated stubs fixed; Playwright libasound2 workaround | 2026-03-17 | 14 |
+| Total test count Cycle 14: 482 Python (unchanged); 117 JS (unchanged); ALL 7 CI jobs green on run 23218631525 | 2026-03-17 | 14 |
