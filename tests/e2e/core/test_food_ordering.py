@@ -178,7 +178,10 @@ async def test_food_order_happy_path_disclosure_accepted(
         patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=mock_food_page_state)),
         patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=mock_food_page_state)),
         patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x Pepperoni Pizza, $18.50")),
-        patch.object(orc, "_place_order", new=AsyncMock(return_value={"success": True, "confirmation": "Order #12345"})),
+        patch.object(
+            orc, "_place_order",
+            new=AsyncMock(return_value={"success": True, "confirmation": "Order #12345"}),
+        ),
     ):
 
         async def update_cb(msg: str) -> None:
