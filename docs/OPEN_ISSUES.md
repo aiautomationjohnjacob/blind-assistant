@@ -250,13 +250,11 @@ JS test count now 77 (was 31).
 `message: "Hello, what can you do for me?"` instead of recording the user's actual
 voice. The press-to-talk button is accessible and connected to the backend, but a
 blind user tapping it receives a canned response to a question they didn't ask.
-**Impact**: The native mobile app is not usable as a voice assistant — the core
-interaction (press button, speak, hear response) does not work.
-**Proposed fix**: Integrate expo-av AudioRecorder. On button press: start recording;
-on second press (or after silence): stop, encode audio, send to backend /query as
-base64 audio or send to a /transcribe endpoint first. Alternatively, implement a
-JavaScript Whisper client or use the device's native speech recognition API.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 7 — `useAudioRecorder` hook created (expo-av, 20 unit tests);
+MainScreen rewritten with 2-press flow (press to start recording, press to stop);
+backend POST /transcribe endpoint added (base64 audio → Whisper → text, 7 tests);
+JS API client extended with `transcribe()` method (7 tests). Hardcoded message removed.
 
 ### ISSUE-016: SetupWizardScreen TextInput missing importantForAccessibility="yes"
 **Severity**: LOW
@@ -266,9 +264,9 @@ JavaScript Whisper client or use the device's native speech recognition API.
 **Description**: The token entry TextInput in SetupWizardScreen.tsx does not have
 `importantForAccessibility="yes"` set. TalkBack may not automatically focus the
 input when the token step appears.
-**Impact**: TalkBack users may need extra swipes to locate the input field.
-**Proposed fix**: Add `importantForAccessibility="yes"` to the TextInput.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 7 — `importantForAccessibility="yes"` added to TextInput in
+SetupWizardScreen.tsx. Existing JS tests continue to pass.
 
 ### ISSUE-017: saveApiBaseUrl does not validate URL scheme
 **Severity**: LOW
@@ -278,9 +276,24 @@ input when the token step appears.
 **Description**: `saveApiBaseUrl()` in useSecureStorage.ts stores the URL as-is
 without validating that it starts with http:// or https://. A file:, data:, or
 javascript: URL would be invalid and could cause unexpected behavior.
-**Impact**: Minimal on localhost during development; relevant before cloud deployment.
-**Proposed fix**: Validate URL starts with http:// or https:// before calling
-SecureStore.setItemAsync. Throw an error with a user-readable message if invalid.
+**Status**: RESOLVED
+**Resolved in**: Cycle 7 — `saveApiBaseUrl()` now throws if URL does not start with
+http:// or https://. 7 new validation tests added to useSecureStorage.test.ts covering
+valid schemes, file:, javascript:, data:, bare hostnames, and SecureStore not-called guard.
+
+### ISSUE-018: /transcribe endpoint has no body size limit
+**Severity**: MEDIUM
+**Category**: security, architecture
+**Detected by**: security-specialist (Cycle 7 review)
+**Detected**: 2026-03-17
+**Description**: `POST /transcribe` accepts any-size base64 payload. A client could
+POST a very large audio file, consuming server memory and CPU. FastAPI's default body
+size is not configured for audio workloads.
+**Impact**: Could degrade backend performance if abused; relevant once server is
+cloud-deployed.
+**Proposed fix**: Add a ContentLength check in the route handler or configure
+FastAPI's `max_request_size`. Document the maximum supported audio length (e.g. 5 min
+at 16kHz mono = ~2MB WAV = ~2.7MB base64).
 **Status**: OPEN
 
 ---

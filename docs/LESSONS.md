@@ -507,3 +507,34 @@ accessibility tree queries (getByText, getByLabelText) in @testing-library/react
 This is correct behavior — the element is intentionally decorative. Do not try to query these
 elements via accessibility APIs; instead, test that the accessible counterpart (the spoken
 announcement, or an accessible header on the same screen) is present.
+
+---
+
+## Cycle 7 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: Cycle 7 is the most important delivery since the project started. The mobile app now actually records voice and delivers an AI response — this is the first time a blind user could pick up the phone, press a button, speak, and hear an intelligent reply. ISSUE-015 was the "app actually works" gate and it is now closed. The 2-press interaction model (press to start, press again to stop) is more accessible than hold-to-talk for users with motor impairments. Next most important: run a real device test and begin the tool registry + food ordering task flow to complete the Phase 2 milestone.
+
+**Code quality (code-reviewer)**: (1) Test count: Python 356→363, JS 77→114 — no regressions, healthy growth. (2) `readFileAsBase64()` in useAudioRecorder.ts uses `fetch(uri)` with a file:// URI — works in Expo Go, may need `expo-file-system` in standalone builds (documented in code comment). (3) The 2-press state machine in handleButtonPress is correct — state transitions are properly captured in useCallback deps. (4) No test file regressions. (5) All new tests exercise real code paths — no hollow coverage.
+
+**Security (security-specialist)**: /transcribe authenticates before processing audio; base64 errors return 400 with a safe message. Audio processed locally via Whisper — no third-party receives speech. Gap: no maximum body size limit on /transcribe — a malicious client could POST very large audio payloads. FastAPI's default may be too small for audio files. ISSUE-018 logged.
+
+**Accessibility (accessibility-reviewer)**: 2-press voice flow has correct spoken announcements at each state change. Button label changes to "Stop recording. Tap to send." during listening — correct for TalkBack/VoiceOver. Transcript card has accessibilityLiveRegion="polite" — correct. importantForAccessibility="yes" fix on TextInput is a meaningful TalkBack improvement (ISSUE-016 resolved). URL validation fix (ISSUE-017) is security-correct with no accessibility impact.
+
+**User perspective (blind-user-tester)**: The 2-press model works well with TalkBack double-tap. The "You said: [transcript]" card is valuable for verifying STT accuracy. One improvement for next cycle: add a short vibration or distinct audio cue when recording actually starts (not just the TTS announcement), to confirm the microphone is active. Users with variable response times need certainty that recording has begun before speaking.
+
+**Ethics (ethics-advisor)**: Audio processed server-side on the user's own machine. User informed of all state transitions via spoken announcements. No consent or autonomy concerns.
+
+**Goal adherence (goal-adherence-reviewer)**: ISSUE-015 (P1), ISSUE-016 (LOW), ISSUE-017 (LOW) all resolved. Phase 2 goals "basic voice I/O" and "screen observer" are complete. Remaining Phase 2 gates: tool registry + installer (self-expanding pattern), and the food-ordering end-to-end flow. Voice interaction foundation is now solid.
+
+**Consensus recommendation for next cycle**: (1) Implement tool registry + installer (self-expanding pattern) — the last major Phase 2 technical gate before the food-ordering E2E demo. (2) Add recordingStarted haptic/audio cue to MainScreen for TalkBack confirmation. (3) Add body size limit to /transcribe endpoint (ISSUE-018).
+
+**Orchestrator self-assessment**:
+- Accomplished: ISSUE-015 resolved — real voice recording in MainScreen (useAudioRecorder hook, 2-press flow, /transcribe endpoint, JS + Python tests); ISSUE-016 (importantForAccessibility on TextInput); ISSUE-017 (URL scheme validation in saveApiBaseUrl). Python: 363 passed (was 356), JS: 114 passed (was 77). All tests green.
+- Attempted but failed: none — all planned work completed
+- Confusion/loops: The wip auto-commit hooks captured all changes before I could check status — git showed 'clean' immediately after editing. Pattern: use `git log --oneline -5` to track what's been saved, not `git status`. This is a known behavior documented in Cycle 1 LESSONS.
+- New gaps: (1) /transcribe has no body size limit (ISSUE-018); (2) expo-av file:// URI fetch may need expo-file-system in standalone builds — works in Expo Go now but should be tracked; (3) recording confirmation feedback (haptic or sound) would improve TalkBack UX
+- Next cycle recommendation: (1) Build tool registry + installer (self-expanding pattern with user confirmation) — last major Phase 2 technical gate; (2) Add body size cap to /transcribe (ISSUE-018, easy fix)
+
+**TECHNICAL LESSON (expo-av base64 export)**: To get audio bytes out of expo-av for sending to a backend: record → get URI → `fetch(uri)` to get a Blob → `FileReader.readAsDataURL()` → split on comma to strip the MIME prefix → send the base64 data. This is the correct sequence in Expo's managed workflow. In standalone builds, `expo-file-system`'s `readAsStringAsync(uri, { encoding: 'base64' })` may be more reliable than the Blob/FileReader approach.
+
+**TECHNICAL LESSON (2-press state machine)**: The most common React Native voice UI pattern is "press to start recording, press again to stop." This maps directly to TalkBack's double-tap gesture. The key implementation detail: the button's `accessibilityLabel` must change to "Stop recording" during the listening state so TalkBack users know their second tap will stop recording, not start a new one. Without this label change, the UX is ambiguous.
