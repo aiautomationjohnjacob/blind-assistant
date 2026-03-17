@@ -176,7 +176,45 @@ jobs:
           retention-days: 14
 
   # ──────────────────────────────────────────────────────────
-  # JOB 5: Web E2E tests (Playwright — all browsers)
+  # JOB 5: React Native / JavaScript tests (Jest)
+  # Covers: clients/mobile/ — API client + MainScreen accessibility
+  # Runs on every push. Requires npm install first.
+  # Coverage gate: 75% lines/statements, 70% branches/functions (package.json)
+  # ──────────────────────────────────────────────────────────
+  test-js:
+    name: JS tests & coverage (clients/mobile/)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: clients/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: clients/mobile/package-lock.json
+
+      - name: Install dependencies
+        # --legacy-peer-deps: expo ecosystem has some peer-dep version conflicts
+        # that don't affect runtime behavior
+        run: npm ci --legacy-peer-deps
+
+      - name: Run Jest tests with coverage
+        run: npm test -- --watchAll=false --ci
+        # Jest exits non-zero if coverage thresholds (in package.json) are not met
+
+      - name: Upload JS coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: js-coverage-report-${{ github.run_number }}
+          path: clients/mobile/coverage/
+          retention-days: 14
+
+  # ──────────────────────────────────────────────────────────
+  # JOB 6: Web E2E tests (Playwright — all browsers)
   # Runs on every push; no device hardware needed.
   # Skipped if tests/e2e/web/ doesn't exist yet.
   # ──────────────────────────────────────────────────────────
