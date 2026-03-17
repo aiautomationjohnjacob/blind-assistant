@@ -20,7 +20,7 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P1 | **Verify CI is green after ISSUE-022 fix**: 56 mypy type errors + openai-whisper setuptools build failure were fixed in Cycle 13 (commit 687e58b). Confirm the next CI run passes all jobs (test, integration-browser, security-audit, lint-typecheck, test-js) before starting new features. | Cycle 13 self-assessment | 2026-03-17 |
+| P1 | **project-inspector gap scan (every 5th cycle — CYCLE 15)**: Run project-inspector agent to scan for holistic gaps: missing tests, missing CI, missing E2E, agent roster gaps, doc gaps, dependency hygiene. Write findings directly to OPEN_ISSUES.md and PRIORITY_STACK.md. | Cycle 5n rule | 2026-03-17 |
 | P2 | **Close stale GitHub CI-failure issues**: 20+ P0 GitHub issues opened by CI failure bot (Cycles 10-12) are now stale after ISSUE-022 fix. Batch-close with `gh issue close` and a note that the root cause is resolved. | Cycle 13 gap scan | 2026-03-17 |
 | P2 | **Fix Expo web export + web E2E tests**: `npx expo export --platform web` fails with "Unable to resolve module ../../App" — Metro AppEntry.js looks for App.tsx but project uses Expo Router (app/index.tsx). Fix: add App.tsx shim or update "main" in app.json. Then run Playwright axe-core + keyboard nav tests. | Cycle 13 attempt blocked | 2026-03-17 |
 | P2 | End-to-end food ordering demo on real device: blind user on Android (TalkBack) + iOS (VoiceOver) can say "order me food" and complete the full flow by voice. | Phase 3 sprint | 2026-03-17 |
