@@ -146,7 +146,8 @@ class EncryptedVault:
                 scores[rel_path] = score
 
         # Get top results
-        top_paths = sorted(scores, key=scores.get, reverse=True)[:limit]
+        # Use explicit lambda to avoid mypy's overloaded-function ambiguity on scores.get
+        top_paths = sorted(scores, key=lambda k: scores.get(k, 0), reverse=True)[:limit]
 
         results = []
         for rel_path in top_paths:
