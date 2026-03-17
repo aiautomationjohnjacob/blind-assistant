@@ -36,8 +36,9 @@ jobs:
   deploy-web-staging:
     name: Build and deploy to Netlify staging
     runs-on: ubuntu-latest
-    # Skip if Netlify secrets are not configured (e.g., forks without secrets)
-    if: ${{ vars.NETLIFY_AUTH_TOKEN != '' || secrets.NETLIFY_AUTH_TOKEN != '' }}
+    # Netlify secrets must be configured for this job to succeed.
+    # If NETLIFY_AUTH_TOKEN is not set, the netlify deploy step will fail gracefully
+    # with a clear auth error — this is acceptable behaviour for forks without secrets.
     environment:
       name: staging
       url: ${{ steps.deploy.outputs.deploy_url }}

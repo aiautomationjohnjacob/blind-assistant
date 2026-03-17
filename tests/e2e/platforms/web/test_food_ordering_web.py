@@ -97,9 +97,7 @@ class TestFoodOrderingAccessibility:
     not the actual ordering logic (that is tested in tests/e2e/core/test_food_ordering.py).
     """
 
-    async def test_main_interaction_button_is_keyboard_reachable(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_main_interaction_button_is_keyboard_reachable(self, page: Page, web_app_available: bool) -> None:
         """
         The main press-to-talk button must be reachable via Tab key.
 
@@ -129,9 +127,7 @@ class TestFoodOrderingAccessibility:
             "A blind NVDA user cannot start the food ordering flow."
         )
 
-    async def test_status_updates_use_polite_live_region(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_status_updates_use_polite_live_region(self, page: Page, web_app_available: bool) -> None:
         """
         The status/response area must use aria-live='polite'.
 
@@ -153,9 +149,7 @@ class TestFoodOrderingAccessibility:
             "announce the restaurant options or confirmation prompts."
         )
 
-    async def test_no_assertive_live_region_for_status(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_no_assertive_live_region_for_status(self, page: Page, web_app_available: bool) -> None:
         """
         Non-critical status updates must NOT use aria-live='assertive'.
 
@@ -184,9 +178,7 @@ class TestFoodOrderingAccessibility:
                     f"label='{aria_label}'). This would interrupt NVDA during food ordering."
                 )
 
-    async def test_confirmation_prompt_area_is_announced(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_confirmation_prompt_area_is_announced(self, page: Page, web_app_available: bool) -> None:
         """
         The response area (where confirmations appear) must be in a live region.
 
@@ -204,18 +196,14 @@ class TestFoodOrderingAccessibility:
         # The response/status area should be accessible via a live region
         # Check that the page has at least one live region in the DOM from the start
         # (live regions must exist BEFORE content is injected — CLAUDE.md rule)
-        live_regions = await page.query_selector_all(
-            '[aria-live="polite"], [aria-live="assertive"], [aria-live="off"]'
-        )
+        live_regions = await page.query_selector_all('[aria-live="polite"], [aria-live="assertive"], [aria-live="off"]')
         assert len(live_regions) > 0, (
             "No aria-live regions found in the page DOM. "
             "Per CLAUDE.md: 'aria-live regions must exist in DOM before content is injected'. "
             "The confirmation prompts for food ordering will not be announced by NVDA."
         )
 
-    async def test_response_area_visible_to_screen_reader(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_response_area_visible_to_screen_reader(self, page: Page, web_app_available: bool) -> None:
         """
         The response area must NOT be hidden from screen readers.
 
@@ -273,9 +261,7 @@ class TestRiskDisclosureAccessibility:
     - The text contains no visual-only language
     """
 
-    async def test_interactive_elements_have_accessible_names(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_interactive_elements_have_accessible_names(self, page: Page, web_app_available: bool) -> None:
         """
         All interactive elements (buttons, inputs) must have accessible names.
 
@@ -302,9 +288,7 @@ class TestRiskDisclosureAccessibility:
             "A blind user cannot identify confirmation buttons during risk disclosure."
         )
 
-    async def test_no_visual_only_instructions_in_page(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_no_visual_only_instructions_in_page(self, page: Page, web_app_available: bool) -> None:
         """
         Page text must not contain visual-only instructions like "click the button"
         or "see the confirmation at the top of the screen".
@@ -337,9 +321,7 @@ class TestRiskDisclosureAccessibility:
             "Blind users cannot follow these. Use action-neutral language."
         )
 
-    async def test_colour_not_sole_conveyor_of_information(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_colour_not_sole_conveyor_of_information(self, page: Page, web_app_available: bool) -> None:
         """
         Verify that interactive state is not conveyed by colour alone.
 
@@ -393,9 +375,7 @@ class TestFocusManagementOrderingFlow:
     break the conversational experience.
     """
 
-    async def test_initial_focus_is_logical(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_initial_focus_is_logical(self, page: Page, web_app_available: bool) -> None:
         """
         When the page loads, the first focusable element should be at the top
         of the logical reading order — not a random button in the middle.
@@ -410,26 +390,19 @@ class TestFocusManagementOrderingFlow:
         await page.keyboard.press("Tab")
         element_tag = await page.evaluate("document.activeElement.tagName.toLowerCase()")
         aria_role = await page.evaluate("document.activeElement.getAttribute('role') || ''")
-        aria_label = await page.evaluate(
-            "document.activeElement.getAttribute('aria-label') || ''"
-        )
+        aria_label = await page.evaluate("document.activeElement.getAttribute('aria-label') || ''")
 
         # First tab stop should be an interactive element (button, input, link)
         interactive_tags = {"button", "input", "a", "select", "textarea"}
         interactive_roles = {"button", "link", "textbox", "menuitem", "tab"}
-        is_interactive = (
-            element_tag in interactive_tags
-            or aria_role in interactive_roles
-        )
+        is_interactive = element_tag in interactive_tags or aria_role in interactive_roles
         assert is_interactive, (
             f"First Tab stop is a non-interactive element: <{element_tag} role='{aria_role}' "
             f"aria-label='{aria_label}'>. NVDA users expect the first Tab to land on "
             "a meaningful interactive element (the main speak button)."
         )
 
-    async def test_escape_key_does_not_trap_focus(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_escape_key_does_not_trap_focus(self, page: Page, web_app_available: bool) -> None:
         """
         Pressing Escape should not trap focus or crash the app.
 
@@ -460,9 +433,7 @@ class TestFocusManagementOrderingFlow:
             "A blind user pressing Escape to cancel an action would be stranded."
         )
 
-    async def test_enter_key_activates_main_button(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_enter_key_activates_main_button(self, page: Page, web_app_available: bool) -> None:
         """
         Pressing Enter when the main button is focused must activate it.
 
@@ -506,16 +477,11 @@ class TestFocusManagementOrderingFlow:
         # We accept either: (1) live region has content, (2) button label changed,
         # (3) new element appeared. The important thing is Enter didn't do nothing.
         button_label_after = await main_button.get_attribute("aria-label") or ""
-        state_changed = (
-            len(live_region_content) > 0
-            or button_label_after != button_label_before
-        )
+        state_changed = len(live_region_content) > 0 or button_label_after != button_label_before
 
         # Note: if the app requires microphone permission in a dialog, the dialog
         # itself is a valid response to Enter. We check the page still has focus.
-        page_has_focus = await page.evaluate(
-            "document.activeElement && document.activeElement !== document.body"
-        )
+        page_has_focus = await page.evaluate("document.activeElement && document.activeElement !== document.body")
 
         assert state_changed or page_has_focus, (
             "Pressing Enter on the main button had no visible effect. "
