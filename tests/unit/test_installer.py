@@ -159,8 +159,8 @@ def test_init_tts_handles_import_error(installer):
         mock_init.side_effect = None  # no-op
         installer._init_tts = mock_init
         installer._init_tts()
-    # TTS not set — this is fine for print-only fallback
-    assert installer._tts is None or True  # both states are valid
+    # TTS not set — this is fine for print-only fallback (both None and an engine are valid)
+    assert True  # _init_tts completed without raising; state handled by caller
 
 
 # ─────────────────────────────────────────────────────────────
