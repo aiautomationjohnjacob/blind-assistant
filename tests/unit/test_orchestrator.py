@@ -1017,8 +1017,9 @@ class TestCheckoutLoopHelpers:
 
         # Patch all helpers: options are extracted, confirmation passes, but
         # wait_for_response returns None (simulates user timing out on restaurant selection)
+        opts = "1. Pizza Palace. 2. Taco Town."
         with (
-            patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Pizza Palace. 2. Taco Town.")),
+            patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value=opts)),
             patch.object(orc.confirmation_gate, "wait_for_confirmation", new=AsyncMock(return_value=True)),
             patch.object(orc.confirmation_gate, "wait_for_response", new=AsyncMock(return_value=None)),
         ):
