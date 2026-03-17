@@ -11,6 +11,13 @@ import asyncio
 import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from blind_assistant.core.confirmation import ConfirmationGate
+    from blind_assistant.core.context import ContextManager
+    from blind_assistant.core.planner import Planner
+    from blind_assistant.tools.registry import ToolRegistry
 
 logger = logging.getLogger(__name__)
 
