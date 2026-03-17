@@ -127,3 +127,6 @@
 | ISSUE-027: e2e + web pytest markers registered in pyproject.toml | 2026-03-17 | 15 |
 | 11 web E2E accessibility tests written (WCAG 2.1 AA: keyboard nav, ARIA, lang, title, focus) | 2026-03-17 | 15 |
 | Total test count Cycle 15: 482 Python (unchanged); 117 JS (unchanged); 11 web E2E tests (skip locally, run in CI) | 2026-03-17 | 15 |
+| ISSUE-028: 118 new unit tests — test_telegram_bot.py (24), test_query.py (49), test_redaction.py (27), test_screen_observer.py (18) | 2026-03-17 | 16 |
+| Ruff format CI blocker fixed (Cycle 15 web E2E files: conftest.py + test_main_screen_chromium.py) | 2026-03-17 | 16 |
+| Total test count Cycle 16: 583 Python unit tests (was 465 Python + was counting separately); ruff lint+format clean | 2026-03-17 | 16 |
