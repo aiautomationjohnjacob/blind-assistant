@@ -1,0 +1,46 @@
+# Blind Assistant — Core Dependencies
+# All versions pinned for reproducibility and security.
+# Run pip-audit after any version change.
+
+# AI / Language Models
+anthropic==0.25.0               # Claude API (intent, vision, planning)
+openai-whisper==20231117        # Local speech-to-text (runs offline)
+
+# Telegram Bot Interface
+python-telegram-bot==21.1.1    # Telegram bot framework
+
+# Text-to-Speech
+elevenlabs==1.0.3               # Cloud TTS (high quality)
+pyttsx3==2.90                   # Local TTS fallback (no internet required)
+
+# Audio I/O (for local voice interface)
+sounddevice==0.4.6              # Microphone recording
+scipy==1.12.0                   # Audio file handling
+numpy==1.26.4                   # Audio data processing
+
+# Browser Control
+playwright==1.41.0              # Web browser automation
+
+# Security & Encryption
+cryptography==42.0.5            # AES-256-GCM vault encryption
+keyring==24.3.0                 # OS keychain credential storage
+
+# Image Processing
+Pillow==10.2.0                  # Screenshot manipulation and redaction
+pytesseract==0.3.10             # Local OCR (sensitive screen fallback)
+
+# HTTP Client
+httpx==0.27.0                   # Async HTTP (all external API calls)
+
+# Configuration & Data
+PyYAML==6.0.1                   # YAML configuration files
+python-dotenv==1.0.1            # .env loading (for non-secret config only)
+
+# Payment Processing (installed on-demand via tool registry)
+# stripe==7.3.0                 # NOT installed by default; user consent required
+
+# Home Automation (installed on-demand)
+# aiohttp==3.9.3                # For Home Assistant API
+
+# Utilities
+python-dateutil==2.8.2          # Date parsing for Second Brain notes

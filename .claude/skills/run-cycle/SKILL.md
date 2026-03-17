@@ -114,19 +114,30 @@ After creative exploration: add findings to OPEN_ISSUES.md and PRIORITY_STACK.md
 
 ## STEP 4: PRIORITIZE THIS CYCLE'S WORK
 
-Based on PRIORITY_STACK.md, OPEN_ISSUES.md, and the gap scan, pick the 1-3 highest-priority
-items to work on. Apply this decision tree:
+**Phase-aware mindset — read this before picking work:**
+
+- **Phase 1 (cycles 1-N until all Phase 1 deliverables exist)**: This is architecture and
+  strategy work. The output is documents — ARCHITECTURE.md, USER_STORIES.md — and a working
+  src/ scaffold. Do NOT write feature implementation code in Phase 1. When in doubt, go
+  broader (more research, more design) not deeper (implementation).
+
+- **Phase 2+ (after Phase 1 deliverables all exist)**: Implementation mode. Pick user stories
+  from USER_STORIES.md priority ranking and build them. Architecture decisions are largely
+  settled; now execute.
+
+Apply this decision tree:
 
 ```
 Is there a P0 BLOCKING issue? → Work on that ONLY, nothing else.
 Is there a P1 SHOWSTOPPER? → Work on that before anything else.
-Is there a P2 PHASE GATE item NOT yet done? → Work on the next incomplete phase deliverable.
+Are we in Phase 1 AND Phase 1 deliverables are incomplete? → Work on the next incomplete Phase 1 deliverable.
+Is there a P2 PHASE GATE item NOT yet done? → Work on it.
 Are there P3 KNOWN GAPSs? → Pick the highest-impact one.
 Otherwise → Pick the top P4/P5 item.
 ```
 
 State your decision: "This cycle I will work on: [item 1], [item 2 if any]."
-State your reasoning: "Because: [reason based on priority]."
+State your reasoning: "Because: [reason based on priority and current phase]."
 State which agents you'll use: "Agents: [list]."
 
 ---
