@@ -29,15 +29,16 @@ Phase 5: Polish & Community Ready  → Pending
 **Goal**: Define exactly what we're building and how, grounded in existing tools and real gaps.
 **Agents**: gap-analyst, nonprofit-ceo, tech-lead, ethics-advisor, security-specialist
 **Deliverables**:
-- [ ] `docs/GAP_ANALYSIS.md` — Landscape of existing AI tools; what to integrate vs build
-- [ ] `docs/INTEGRATION_MAP.md` — Which tools (Obsidian, Telegram, Open Interpreter, etc.)
+- [x] `docs/GAP_ANALYSIS.md` — Landscape of existing AI tools; what to integrate vs build
+- [x] `docs/INTEGRATION_MAP.md` — Which tools (Obsidian, Telegram, Open Interpreter, etc.)
       we integrate and how; accessibility gaps in each; our integration strategy
-- [ ] `docs/ARCHITECTURE.md` — Full tech stack with security architecture
-- [ ] `docs/USER_STORIES.md` — 10+ user stories from all blind personas
-- [ ] `docs/FEATURE_PRIORITY.md` — Prioritized feature list with mission justification
-- [ ] `docs/SECURITY_MODEL.md` — How sensitive data is handled end-to-end (from security-specialist)
-- [ ] `src/` — Initial project scaffold (chosen stack)
-- [ ] Phase 1 complete when: integration strategy decided, security model defined, scaffold created
+- [x] `docs/ARCHITECTURE.md` — Full tech stack with security architecture
+- [x] `docs/USER_STORIES.md` — 10+ user stories from all blind personas
+- [x] `docs/FEATURE_PRIORITY.md` — Prioritized feature list with mission justification
+- [x] `docs/SECURITY_MODEL.md` — How sensitive data is handled end-to-end (from security-specialist)
+- [x] `docs/ETHICS_REQUIREMENTS.md` — Full ethics requirements (bonus: added this cycle)
+- [x] `src/` — Initial project scaffold (Python, async, all packages created)
+- [x] Phase 1 complete: integration strategy decided, security model defined, scaffold created
 
 ### Phase 2: Core Build Sprint
 **Goal**: Build the minimum product a blind user can actually try end-to-end.
