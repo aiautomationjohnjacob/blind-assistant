@@ -105,7 +105,7 @@ class Orchestrator:
         self,
         text: str,
         context: UserContext,
-        response_callback=None,
+        response_callback: ResponseCallback = None,
     ) -> Response:
         """
         Handle a user message end-to-end.
