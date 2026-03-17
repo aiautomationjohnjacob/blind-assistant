@@ -240,17 +240,20 @@ Telegram is particularly well-suited:
 - No visual UI required for basic conversation
 
 ### Blind Assistant's differentiated opportunity:
-Telegram as the primary interface — the user always has their assistant in their pocket,
-on any device. This also means the assistant is available for "ambient" tasks: "remind
-me to take my medication at 7pm", "check if my package has arrived", "what's the weather".
+Native standalone apps that work entirely by voice — the user always has their assistant
+accessible, on any device, without needing to set up external accounts. This also means
+the assistant is available for "ambient" tasks: "remind me to take my medication at 7pm",
+"check if my package has arrived", "what's the weather".
 
 ### Impact estimate:
-High for all users. Particularly critical for mobile-first users and users in developing
-countries where smartphone accessibility varies but Telegram is ubiquitous.
+High for all users. Native apps remove the Telegram account requirement entirely.
 
-### Recommendation: BUILD (Telegram bot as primary interface, not secondary)
-Telegram should be designed as the primary interface, not an afterthought.
-The system should be fully usable through Telegram alone.
+### Recommendation: BUILD (native apps as primary; Telegram as optional super-user channel)
+**Update (2026-03-17 founder directive)**: The original recommendation was Telegram as
+primary. This has been revised. Telegram requires visual setup that blind users cannot
+complete independently. Native apps (Android, iOS, Desktop, Web) are the primary interfaces.
+Telegram is available optionally for power users who can set it up. The system must be
+fully usable WITHOUT Telegram ever being configured.
 
 ---
 

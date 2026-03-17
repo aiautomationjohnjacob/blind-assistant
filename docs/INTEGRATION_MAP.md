@@ -327,7 +327,7 @@ complex date pickers, multi-step checkout flows.
 
 ### 4.1 WhatsApp / SMS Bot (Alternative Interface)
 **Purpose**: Reach users who don't use Telegram.
-**Priority**: TIER 4 — Telegram covers the primary use case first
+**Priority**: TIER 4 — native apps cover all primary use cases; Telegram is optional super-user only
 
 ### 4.2 Amazon / eBay APIs (Shopping)
 **Purpose**: Order physical goods by voice.

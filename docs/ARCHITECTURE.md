@@ -29,10 +29,25 @@
 Voice I/O, Telegram events, API calls, and screen observation all need to happen
 concurrently without blocking. The entire application is async from the start.
 
-### Primary Interface: Telegram Bot
+### Primary Interfaces: Native Apps
 
-The Telegram bot is not an add-on — it is the primary interface. All core
-functionality is reachable through the bot. The local CLI is a development/admin tool.
+**Update (2026-03-17 founder directive)**: The original architecture placed Telegram as
+the primary interface. This has been revised. Telegram requires visual setup (QR scanning,
+phone verification, account creation on Telegram's website) that blind users cannot complete
+independently — making it incompatible with the project's core requirement of zero-visual-setup.
+
+The primary interfaces are **native standalone apps** built specifically for blind users:
+- Android app (TalkBack) — setupable entirely by voice from first launch
+- iOS app (VoiceOver) — setupable entirely by voice from first launch
+- Desktop app, Windows + macOS (NVDA / VoiceOver) — voice-guided installer
+- Web app (NVDA+Chrome, VoiceOver+Safari) — no download required
+
+All clients connect to the **Python backend via REST API** (FastAPI, localhost for dev).
+
+Telegram remains available as an **optional super-user channel** for power users who want
+remote access and are able to set it up. It is never required, never default, never the
+primary demo target. The voice_local.py CLI and the Desktop app are the Phase 2 demo
+targets.
 
 ---
 
@@ -129,7 +144,7 @@ blind-assistant/
 │       │
 │       ├── interfaces/
 │       │   ├── __init__.py
-│       │   ├── telegram_bot.py  # Telegram bot interface (primary)
+│       │   ├── telegram_bot.py  # Telegram bot interface (secondary/super-user only)
 │       │   ├── voice_local.py   # Local microphone/speaker interface
 │       │   └── braille.py       # Braille-safe text formatting utilities
 │       │

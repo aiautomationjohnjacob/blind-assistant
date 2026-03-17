@@ -282,7 +282,7 @@ Personas:
 - [ ] Text responses are structured with braille-friendly formatting (40-char lines)
 - [ ] "Thinking" / loading states communicated as text: "[Working...]" not a spinner
 - [ ] All features accessible with no audio output configured
-- [ ] Telegram text interface is the primary channel for Jordan's workflow
+- [ ] Text interface (via Desktop app, Web, or optionally Telegram) is available for Jordan's workflow; Jordan is NOT required to use Telegram — the braille display must work with native app interfaces
 
 ### Story 8.4 — Alex (Newly Blind)
 > As Alex, I want the assistant to tell me what it's doing while it's working so that

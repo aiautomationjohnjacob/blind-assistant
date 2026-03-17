@@ -102,16 +102,20 @@ path to essential goods).
 
 ---
 
-### #5: 24/7 Multi-Device Access via Telegram (implicit in most stories)
+### #5: 24/7 Multi-Device Access via Native Apps
 
 **Why this matters**:
 Independence is only valuable if it's reliable. A blind person who can order food from
 their laptop at home but not from their phone when they're out isn't truly independent.
 
-The Telegram bot as primary interface means the assistant is available on every device,
-24/7, without visual setup. It also means the assistant is reachable in emergencies —
-a blind user who needs help navigating an unfamiliar situation can reach their AI from
-anywhere.
+Native apps on Android, iOS, Desktop, and Web mean the assistant is available on every
+device, 24/7, with zero-visual-setup. Each app is built from the ground up for blind users —
+not wrapped around a third-party platform that requires sighted configuration.
+
+**Note (2026-03-17 founder update)**: Telegram was originally planned as the primary
+interface. This has been revised — Telegram requires visual setup (QR codes, phone
+verification) that blind users cannot complete independently. Native apps are primary.
+Telegram is an optional super-user channel for power users.
 
 **Mission impact**: High. Turns episodic assistance into persistent independence.
 
@@ -130,7 +134,7 @@ digital and physical-world dependency on sighted assistance."
 | Screen description ("what's on my screen?") | 2.1, 2.3 | Very high — daily use case |
 | Second Brain: add and retrieve notes by voice | 4.1, 4.2 | High — life management |
 | Food ordering by voice with security flow | 5.1 | High — basic independence |
-| Telegram bot as primary interface | All | High — 24/7 access |
+| Native apps as primary interface (Android, iOS, Desktop, Web) | All | High — 24/7 access |
 | Braille-safe text output mode (Jordan) | 2.3, 8.3 | Sets accessibility floor |
 | Speech rate and verbosity control | 8.1, 8.2 | Required for Dorothy and Marcus |
 | Progress updates during long operations | 8.4 | Required for trust |

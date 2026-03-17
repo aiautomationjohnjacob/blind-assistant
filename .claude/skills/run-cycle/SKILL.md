@@ -51,6 +51,33 @@ After reading, state explicitly in your thinking:
 - What are the top 3 items in PRIORITY_STACK.md?
 - Are there any CRITICAL items in OPEN_ISSUES.md?
 - What does LESSONS.md say to avoid this cycle?
+- Are there any ⚠ scope expansion or architecture change notices in CYCLE_STATE.md?
+
+### ⚠ FULL CODEBASE AUDIT (required when CYCLE_STATE.md has unreviewed scope changes)
+
+If CYCLE_STATE.md or LESSONS.md contains scope expansion notices or architecture changes
+that the existing `src/` code may not reflect, do a full audit BEFORE picking any work:
+
+```bash
+# List all existing src/ files
+find src/ -name "*.py" | sort
+
+# Check what each main file actually does vs what it should do
+# (read the key files: orchestrator, interfaces, voice, second_brain)
+```
+
+Then call `code-reviewer` with this prompt:
+"Read ALL files in src/blind_assistant/. For each file, check: (1) does the implementation
+match the current architecture in docs/ARCHITECTURE.md and docs/PRODUCT_BRIEF.md? (2) are
+there any references to Telegram as the primary interface (should be secondary/super-user only)?
+(3) is there any code that contradicts the API-first backend architecture? (4) are there
+security anti-patterns? Report all findings. Do NOT fix anything — output a prioritized
+findings list. For each finding, note: file, line number, severity, and what it contradicts."
+
+Add any HIGH or CRITICAL findings from this audit to OPEN_ISSUES.md before proceeding.
+
+**This full audit is mandatory on Cycle 4** (first cycle after the 2026-03-17 scope expansion).
+On subsequent cycles, only run it if CYCLE_STATE.md has new unreviewed ⚠ notices.
 
 ---
 
@@ -250,9 +277,12 @@ After A, B, C complete → use `tech-lead` agent:
 "Read docs/PRODUCT_BRIEF.md, and the Gap Analysis / Security Model / Ethics sections
 just added to docs/LESSONS.md. Design the complete technical architecture.
 Key requirements: (1) voice-only installation — blind user sets up entirely without seeing
-anything; (2) Telegram bot as primary 24/7 interface; (3) security model must be implemented
-as described; (4) integrate existing tools, don't rebuild them; (5) Python preferred for AI
-integrations but justify your choice.
+anything; (2) native standalone apps (Android, iOS, Desktop, Web) are the primary interfaces
+— each must be setupable by voice with zero visual interaction; Telegram is a secondary
+super-user channel only and must NEVER be the primary interface (see LESSONS.md); (3) security
+model must be implemented as described; (4) integrate existing tools, don't rebuild them;
+(5) Python preferred for AI integrations but justify your choice; (6) API-first backend —
+all clients connect via REST API.
 Write docs/ARCHITECTURE.md with: stack decision, integration plan, directory structure,
 security implementation, and the first 5 implementation tasks."
 
@@ -299,20 +329,37 @@ For each task, pick the right implementer:
 - Telegram, Obsidian, Whisper, ElevenLabs, ordering APIs → `integration-engineer`
 - Packaging, installer, CI/CD, pyproject.toml → `devops-engineer`
 
-**MANDATORY: After every backend-developer or integration-engineer task, call `test-engineer`:**
+**MANDATORY sequence after every backend-developer or integration-engineer task:**
 
-Prompt: "The following src/ files were just created or modified: [list files].
+**Step A — Pre-test code review** (catches bugs before tests run):
+Call `code-reviewer`:
+"Read these recently modified files: [list files]. Review for correctness, security,
+and quality issues. Do NOT run tests — just read the code. Report: (1) any logic errors
+or bugs, (2) any security issues (especially for credential or API code), (3) any code
+that contradicts the architecture or LESSONS.md guidance, (4) missing error handling.
+Do NOT fix anything — output a findings list only."
+
+Apply any CRITICAL or HIGH findings from code-reviewer before proceeding to tests.
+
+**Step B — Test-engineer** (write and run tests):
+Call `test-engineer`:
+"The following src/ files were just created or modified: [list files].
 Read each file. Check if a corresponding test file exists in tests/unit/. If not,
 create it. If tests exist, check for coverage gaps and add missing tests.
 Run `pytest tests/ --cov=src/blind_assistant --cov-report=term-missing -q` and
 report the result. Coverage must be ≥80% overall and 100% for security modules.
 If tests fail, report which src/ file is broken — do NOT modify the tests."
 
-Do NOT mark a task as complete until test-engineer reports: "All tests passing. Coverage: X%."
+**Step C — Post-test code review** (checks that fixes from test failures are clean):
+If test-engineer reported any failures that required src/ changes, call `code-reviewer`
+again on the changed files before marking the task complete.
+
+Do NOT mark a task as complete until:
+1. code-reviewer Step A has run and CRITICAL/HIGH issues are fixed
+2. test-engineer reports: "All tests passing. Coverage: X%."
+3. If src/ was changed in Step B, code-reviewer Step C has run
 
 After implementation:
-- Use `code-reviewer` to review the code (read-only — it reports, doesn't fix)
-- Use `backend-developer` or `integration-engineer` to apply fixes from the review
 - Use `accessibility-reviewer` on any voice output or user-facing strings
 - Use `screen-reader-expert` for any feature where screen reader interaction order matters
   (tab order, announcement sequence, ARIA live region timing)

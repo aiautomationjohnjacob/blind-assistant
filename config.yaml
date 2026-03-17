@@ -10,7 +10,7 @@
 # ============================================================
 # Interface Settings
 # ============================================================
-telegram_enabled: true       # Enable Telegram bot interface (primary)
+telegram_enabled: false      # Telegram bot (secondary/super-user channel only — native apps are primary)
 voice_local_enabled: false   # Enable local microphone/speaker interface
 
 # ============================================================

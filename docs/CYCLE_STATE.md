@@ -210,6 +210,10 @@ Cycle 4 should begin by reading this file's scope expansion notice at the top,
 then reading PRIORITY_STACK.md (which now has 3 P1 items), then LESSONS.md.
 
 The most important work for Cycle 4:
+0. **MANDATORY FIRST**: Full codebase audit — run `code-reviewer` on ALL src/ files to
+   check alignment with current architecture (native apps primary, Telegram secondary,
+   API-first backend). Existing code may not reflect these decisions. Log all discrepancies
+   to OPEN_ISSUES.md before doing any new work. The loop SKILL.md has explicit instructions.
 1. **P1 ARCH DECISION** — tech-lead + gap-analyst decide client framework before any mobile code
 2. **P1 Backend API server** — FastAPI server exposing REST endpoints for all clients
 3. **P1 Native voice E2E demo** — wire voice in → TTS audio out via Desktop CLI (NOT Telegram)
