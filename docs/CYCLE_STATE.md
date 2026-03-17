@@ -199,27 +199,23 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 14 (Phase 3 — CI verification and security hardening). Verified CI after Cycle 13 fixes. Found
-CI still failing with 4 different root causes: (1) pip-audit security job using `--no-deps` flag could
-not build openai-whisper wheel even with setuptools pre-installed — fixed by switching to installed-env
-mode (`pip-audit --desc` without `-r`) using `--no-build-isolation` for the requirements install; (2)
-pip-audit found 11 real CVEs in 4 packages — upgraded cryptography 42→46.0.5, Pillow 10.2→12.1.1,
-fastapi 0.111→0.135.1, starlette 0.37→0.49.1, pydantic 2.7→2.12.5; 4 torch CVEs ignored (local-only,
-disputed); (3) 5 new mypy errors from updated type stubs — VoiceSettings object for elevenlabs,
-AsyncAnthropic TYPE_CHECKING for anthropic, run_polling() sync fix for python-telegram-bot v20+;
-(4) playwright install-deps exits 100 on Ubuntu 24.04 for virtual libasound2 package — added `|| true`.
-Result: ALL 7 CI jobs green on run 23218631525.
-
 Cycle 15 (Phase 3 — web platform unblocked + project-inspector gap scan). Fixed Expo web export
 (App.tsx shim). Rebuilt CI e2e-web job to build Expo bundle + serve + run Playwright tests.
 Wrote 11 web E2E accessibility tests (keyboard nav, ARIA, lang, title, focus). Fixed broken
 food ordering E2E test (context_manager mock). Registered `e2e` + `web` pytest markers.
 Project-inspector identified 4 src/ files without unit tests (ISSUE-028).
 
-Cycle 16 priority:
-1. **Write missing unit tests (ISSUE-028)**: telegram_bot.py, query.py, redaction.py, screen_observer.py
-2. **Verify web E2E CI results**: Check if the 11 Playwright tests pass on first CI run; fix ARIA assertions if needed
-3. **Voice installer**: complete voice-guided setup from fresh Python install
+Cycle 16 (Phase 3 — missing unit tests resolved). Wrote 118 new unit tests across 4 files:
+test_telegram_bot.py (24 tests — whitelist, message routing, TTS fallback, start lifecycle),
+test_query.py (49 tests — VaultQuery answer/add, braille mode, date formatting, _infer_category),
+test_redaction.py (27 tests — password/financial detection, regex patterns, apply_redaction),
+test_screen_observer.py (18 tests — privacy protection flows, lazy Claude client, OCR fallback).
+Also fixed ruff format CI blocker from Cycle 15 (2 web E2E files). Total: 583 unit tests.
+
+Cycle 17 priority:
+1. **Verify web E2E CI results**: Check if the 11 Playwright tests pass now that ruff format is fixed
+2. **Voice installer**: complete voice-guided setup from fresh Python install (P2 phase gate item)
+3. **End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver
 
 ## Known Issues / Technical Debt
 
