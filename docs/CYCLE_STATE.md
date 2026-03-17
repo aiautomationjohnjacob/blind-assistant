@@ -169,12 +169,12 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 5 (Phase 2 Core Build Sprint) delivered: ISSUE-007 resolved (voice pipeline E2E
-proven with 9 tests — STT→orchestrator→TTS, accessibility assertion, API round-trip);
-wake-word-only bug fixed in voice_local.py; 25 unit tests for VoiceLocalInterface;
-React Native Expo skeleton in clients/mobile/ (MainScreen.tsx, API client, 32 JS tests);
-multi-platform E2E test stubs (Web/Android/iOS/Desktop — properly skipped pending
-Phase 3 build pipelines). Python test count: 348 passed, 21 skipped (was 314).
+Cycle 6 (Phase 2 Core Build Sprint) delivered: ISSUE-014 (JS CI job 'test-js' added to
+ci.yml; 77 JS tests now run on every push); ISSUE-013 (SetupWizardScreen voice-guided
+first-run wizard — useSecureStorage hook, 5-step flow, 63 new JS tests); ISSUE-012
+(dead code wake_word_found removed from voice_local.py); ISSUE-011 (RateLimitMiddleware
+added to api_server.py with sliding-window per-IP limiting, 8 new Python tests, configurable
+via config.yaml). Python tests: 356 total (347 unit + 9 E2E), 21 skipped. JS tests: 77.
 
 ## Known Issues / Technical Debt
 
@@ -182,10 +182,9 @@ Phase 3 build pipelines). Python test count: 348 passed, 21 skipped (was 314).
 - Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — Phase 2 work
 - `src/blind_assistant/memory/mcp_memory.py` not yet implemented — Phase 2 work
 - response_callback params in orchestrator lack Optional[Callable] type annotations — ISSUE-004
-- API server has no rate limiting middleware — acceptable on localhost; required before cloud deploy — ISSUE-011
-- Dead code: `wake_word_found` variable in voice_local.py after Cycle 5 fix — ISSUE-012
-- React Native app has BEARER_TOKEN=null — first-run setup wizard needed — ISSUE-013
-- clients/mobile/ JS tests not in CI yet — ISSUE-014
+- MainScreen.tsx sends hardcoded "Hello, what can you do?" — no real voice recording yet — ISSUE-015
+- SetupWizardScreen TextInput missing importantForAccessibility="yes" — ISSUE-016
+- saveApiBaseUrl should validate URL scheme before storing — ISSUE-017
 
 ## Decisions Made
 
