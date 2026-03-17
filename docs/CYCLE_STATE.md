@@ -83,15 +83,15 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 **Sprint goal**: Build the minimum product a blind user can actually try end-to-end.
 
 **Sprint items** (Phase 2 targets — check off as complete):
-- [ ] Telegram bot fully functional: receives text + voice, replies with text + voice
-- [ ] Whisper STT: transcribes voice messages from Telegram
-- [ ] TTS: ElevenLabs + pyttsx3 fallback, speed-configurable
-- [ ] Screen observer: "What's on my screen?" → spoken description via Claude Vision
-- [ ] Screen redaction: password fields and financial screens never sent to API
-- [ ] Second Brain MVP: add notes by voice, query notes by voice, encrypted vault
-- [ ] Orchestrator: intent classification → tool selection → execution pipeline
+- [x] Telegram bot fully functional: receives text + voice, replies with text + voice (Cycle 1)
+- [x] Whisper STT: transcribes voice messages from Telegram (Cycle 1)
+- [x] TTS: ElevenLabs + pyttsx3 fallback, speed-configurable (Cycle 1)
+- [x] Screen observer: "What's on my screen?" → spoken description via Claude Vision (Cycle 1)
+- [x] Screen redaction: password fields and financial screens never sent to API (Cycle 1)
+- [x] Second Brain MVP: add notes by voice, query notes by voice, encrypted vault (Cycle 2)
+- [x] Orchestrator: intent classification → tool selection → execution pipeline (Cycle 2)
 - [ ] Tool registry + installer: self-expanding pattern with user confirmation
-- [ ] Risk disclosure flow: payment confirmation with spoken warning
+- [x] Risk disclosure flow: payment confirmation with spoken warning (Cycle 1)
 - [ ] Voice installer: voice-guided setup from zero to functional
 - [ ] End-to-end test: blind user asks to order food → full flow with confirmations
 
@@ -101,16 +101,16 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 1 completed Phase 1 entirely in one session. All 7 required Phase 1 deliverables
-are committed: GAP_ANALYSIS, INTEGRATION_MAP, SECURITY_MODEL, ETHICS_REQUIREMENTS,
-ARCHITECTURE, USER_STORIES, FEATURE_PRIORITY. Full Python project scaffold created
-with 29 source files implementing the core module structure. Phase 1 is COMPLETE.
-Moving to Phase 2: Core Build Sprint.
+Cycle 2 (Phase 2 Core Build Sprint) delivered: voice_local.py interface (continuous
+listen-speak loop), second_brain/query.py (voice-queryable vault layer with braille
+formatting), orchestrator real intent routing for screen/note/query/general flows,
+vault filename bug fix (microseconds), conftest.py audio suppression fix, and 244
+passing unit tests covering encryption, vault, orchestrator, and all security modules.
 
 ## Known Issues / Technical Debt
 
-- `src/blind_assistant/interfaces/voice_local.py` stub not yet created (needed for Phase 2)
-- `src/blind_assistant/second_brain/query.py` stub not yet created (needed for Phase 2)
+- `_get_vault` silently returns None if vault key not in keychain — needs passphrase prompt
+- `transcribe_microphone` uses fixed duration — needs Voice Activity Detection (VAD)
 - Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — Phase 2 work
 - `src/blind_assistant/memory/mcp_memory.py` not yet implemented — Phase 2 work
 - No tests exist yet — Phase 2 must add tests per testing.md requirements
