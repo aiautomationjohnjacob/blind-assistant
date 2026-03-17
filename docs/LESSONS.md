@@ -1082,3 +1082,48 @@ path) will fire. The correct suppression is a file-level comment at the top of t
 ```
 This is better than per-line noqa because it's explicit about WHY the rule is suppressed
 for the whole file, and the reason is documented clearly for future contributors.
+
+---
+
+## Cycle 20 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: Cycle 20 documentation audit is mission-critical housework. CHANGELOG.md was 9 cycles out of date — any grant funder reading it would see Phase 2 with 482 tests, not Phase 3 with 713 tests and Android/iOS/Web E2E infrastructure. The 72 device-free helper tests mean we can claim "accessibility guards are tested independently of hardware" — a fundable claim. CONTRIBUTING.md's broken `.env.example` step was a silent contributor onboarding failure that would have turned away developers. Next cycle: create ROADMAP.md (CONTRIBUTING.md now references it).
+
+**Code quality (code-reviewer)**: Test count: 641 → 713 (+72). No tests deleted or weakened. The importlib-based dynamic import of E2E helper functions avoids duplicating pure functions into a shared module — clean pattern. TYPE_CHECKING guard for types import is correct. Naming is consistent with testing.md standard. The touch target test (test_touch_target_too_small_detected) is particularly valuable — it verifies 44dp enforcement without ADB.
+
+**Security (security-specialist)**: No security-sensitive changes. Docstring additions are documentation only. CONTRIBUTING.md OS keychain instructions are accurate and secure. CHANGELOG does not expose exploitable information. No concerns.
+
+**Accessibility (accessibility-reviewer)**: The _has_visual_only_language and _has_double_tap_hint test suites directly verify WCAG 1.3.3 (sensory characteristics) and the Cycle 11 VoiceOver regression guard. All 10 banned phrases parametrized individually — correct pattern per testing.md. CHANGELOG now accurately documents Cycle 11 VoiceOver hint fixes, creating accountability for that compliance claim.
+
+**User perspective (blind-user-tester)**: The touch target unit test (test_touch_target_too_small_detected) is the most important addition. Before: a developer who broke the bounds parser would silently break 44dp enforcement. Now: it breaks a unit test immediately. The CHANGELOG now gives an honest project history — when I look at what's been built, I can understand the journey to Phase 3.
+
+**Ethics (ethics-advisor)**: CONTRIBUTING.md correction is ethically positive — the previous .env.example instruction contradicted the project's security model. Now aligned. No new autonomy concerns.
+
+**Goal adherence (goal-adherence-reviewer)**: Cycle 20 directly addresses the Phase 3 PRIORITY_STACK item for ADB/simctl helper unit tests. Documentation-steward trigger at every 10th cycle is correct per CLAUDE.md. CONTRIBUTING.md now links to docs/FEATURE_PRIORITY.md (exists) instead of ROADMAP.md (doesn't) — eliminates a broken link that would confuse first-time contributors.
+
+**Consensus recommendation for next cycle**: (1) Create ROADMAP.md with Phase 3-5 milestones — CONTRIBUTING.md now links to it. (2) Trigger Android AVD release tag to verify 8 TalkBack tests pass on a real emulator. (3) Consider voice-guided onboarding walkthrough (newly-blind-user Dorothy persona test).
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) 72 new unit tests for ADB/simctl helper functions (device-free, 0.08s); (2) CHANGELOG.md updated through Cycle 19 (was frozen at Cycle 10); (3) CONTRIBUTING.md setup steps corrected (no .env.example; OS keychain instructions; ROADMAP.md → FEATURE_PRIORITY.md link); (4) 8 missing public docstrings added across main.py, encryption.py, orchestrator.py, voice_local.py, api_server.py, telegram_bot.py; (5) ruff clean on all 79 files; (6) 713 unit tests passing
+- Attempted but failed: none — all planned items completed
+- Confusion/loops: wip() hook had already staged most file changes before the meaningful commit, so git diff showed only the ruff formatting delta (3 lines). This is expected behavior — the wip hooks capture intermediate state. The push confirmed all 9 changed files were captured.
+- New gaps: ROADMAP.md does not exist but CONTRIBUTING.md now references it (add to PRIORITY_STACK); docstring coverage check found 8 issues — 0 remain, good hygiene
+- Next cycle recommendation: (1) Create ROADMAP.md with Phase 3-5 milestones; (2) Android AVD emulator test via release tag
+
+**TECHNICAL LESSON (testing E2E helper functions without a device)**:
+When E2E test modules contain pure helper functions (regex parsers, string checkers),
+those helpers can be unit-tested independently using importlib.util.spec_from_file_location():
+
+```python
+import importlib.util, sys
+spec = importlib.util.spec_from_file_location("name", path_to_module)
+mod = importlib.util.module_from_spec(spec)
+sys.modules["name"] = mod          # register before exec (handles relative imports)
+spec.loader.exec_module(mod)       # loads without triggering session fixtures
+helper_fn = mod._parse_content_descriptions
+```
+
+This pattern avoids: (1) duplicating code into a shared module, (2) triggering ADB/xcrun
+session fixtures at import time, (3) adding a skip marker to the unit test file.
+Wrap the entire import block in a try/except and use pytest.skip(allow_module_level=True)
+so CI handles missing optional deps gracefully.

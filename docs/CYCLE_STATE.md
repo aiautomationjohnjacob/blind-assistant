@@ -192,8 +192,10 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P2: End-to-end food ordering on real device** — Android TalkBack + iOS VoiceOver E2E test files written (Cycle 19); ADBClient + SimctlClient wrappers; 8 TalkBack tests + 9 VoiceOver tests; CI path bug fixed; ios-e2e.yml macOS workflow; tests skip gracefully when AVD/simulator unavailable; actual AVD run deferred to release CI
 - [x] **P2: Web app deployed** — netlify.toml + deploy-staging.yml created (Cycle 18); ISSUE-029: requires manual secret setup (NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID); 11 food ordering web E2E accessibility tests added
 - [x] **P2: ISSUE-029 README docs** — Netlify operator setup instructions added to README.md (Cycle 19)
+- [x] **Cycle 20: documentation-steward** — CHANGELOG.md updated through Cycle 19; CONTRIBUTING.md setup steps corrected; 8 missing docstrings added; 72 unit tests for ADB/simctl helpers; 713 Python unit tests total
 - [ ] **P3: Android TalkBack device test** — AVD emulator run (requires CI release tag trigger)
 - [ ] **P3: iOS VoiceOver device test** — iOS Simulator run (requires macOS CI runner, release tag)
+- [ ] **P3: ROADMAP.md** — CONTRIBUTING.md now references it; needs Phase 3-5 milestone plan
 
 ## Blockers
 
