@@ -32,7 +32,7 @@ Full vision: `docs/PRODUCT_BRIEF.md`
 4. Read `docs/LESSONS.md` — tells you what past cycles learned (avoid repeating mistakes)
 5. Run `/run-cycle` — executes one full autonomous development iteration
 
-## Agent Roster (20 agents available)
+## Agent Roster (24 agents available)
 
 All agent definitions in `.claude/agents/`. Key agents by function:
 
@@ -40,8 +40,12 @@ All agent definitions in `.claude/agents/`. Key agents by function:
 |------|-------|
 | Strategic direction | `nonprofit-ceo` |
 | Architecture & standards | `tech-lead` |
+| **Writes Python code** | `backend-developer` |
+| **Builds integrations** | `integration-engineer` |
+| **Packaging & CI/CD** | `devops-engineer` |
 | Code quality (read-only) | `code-reviewer` |
 | Security audit | `security-specialist` |
+| Open source & community | `open-source-steward` |
 | WCAG compliance | `accessibility-reviewer` |
 | Screen reader expert | `screen-reader-expert` |
 | Voice UX design | `voice-interface-designer` |
