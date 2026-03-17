@@ -533,8 +533,9 @@ class TestAPIServerVoicePipeline:
         # Disable auth for test
         config["api_auth_disabled"] = True
         server = APIServer(orch, config)
+        app = server._build_app()
 
-        with TestClient(server.app) as client:
+        with TestClient(app) as client:
             resp = client.post(
                 "/query",
                 json={"message": "What is the capital of France?", "session_id": "test"},
@@ -569,8 +570,9 @@ class TestAPIServerVoicePipeline:
         )
 
         server = APIServer(orch, config)
+        app = server._build_app()
 
-        with TestClient(server.app) as client:
+        with TestClient(app) as client:
             resp = client.get("/health")
 
         assert resp.status_code == 200
