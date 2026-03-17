@@ -44,7 +44,7 @@ class TelegramBot:
     def __init__(self, orchestrator, config: dict) -> None:
         self.orchestrator = orchestrator
         self.config = config
-        self._app: "Application | None" = None
+        self._app: Application | None = None
         self._allowed_user_ids: set[int] = set()
 
     async def _load_allowed_users(self) -> None:
