@@ -129,6 +129,18 @@ to work in parallel, review each other's work, and commit progress continuously.
 - `/review-pr [#]` — Multi-persona PR review posted to GitHub
 - `/fix-wcag` — Batch-fix WCAG violations from latest audit
 
+## Client Platforms (Four Apps + Website)
+
+The product ships as five clients sharing one Python backend:
+1. **Android app** — TalkBack; tech stack TBD (React Native / Flutter / native Kotlin)
+2. **iOS app** — VoiceOver; tech stack TBD (React Native / Flutter / native Swift)
+3. **Desktop** — Windows (NVDA/JAWS) + macOS (VoiceOver); Python CLI now, native app later
+4. **Web app** — blind-assistant.org; WCAG 2.1 AA; NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome
+5. **Education site** — learn.blind-assistant.org; audio-primary; NVDA+Chrome with zero mouse
+
+**ARCH DECISION REQUIRED** (P1 item): tech-lead must choose client framework BEFORE
+any mobile/web implementation. Python stays for backend only — not for Android/iOS clients.
+
 ## Technology Approach (Synthesis Strategy)
 The goal is to integrate existing tools, not reinvent them:
 - **Screen observation**: Claude vision + Playwright screenshots
@@ -139,7 +151,8 @@ The goal is to integrate existing tools, not reinvent them:
 - **Memory**: MCP memory server (cross-session knowledge graph)
 - **Automation**: n8n or similar for background task workflows
 - **Physical-world tasks**: Shopping/ordering APIs (with explicit user confirmation always)
-- **Stack**: TBD by tech-lead agent in Phase 1 — must support voice-only setup
+- **Python backend**: AI orchestration, second brain, TTS/STT, security, Telegram — stays Python
+- **Client apps**: Android, iOS, web — separate tech decision; communicate with backend via API
 
 ## Non-Negotiable Rules
 - Every interactive element MUST have an accessible name
@@ -165,6 +178,16 @@ The goal is to integrate existing tools, not reinvent them:
   make CI green. A failing test is information — it means the code is wrong.
 - **Every `src/` file must have tests in the same commit**: `test-engineer` runs after
   every `backend-developer` or `integration-engineer` task. No code ships untested.
+- **All code must be annotated**: every public function has a one-line docstring explaining
+  what it does (not just restating the name); non-obvious logic blocks have an inline comment;
+  comments must be informative enough that a future Claude session with no memory can
+  understand the intent without reading the full codebase.
+- **No concurrent file editing**: if the autonomous loop is running, do not manually edit
+  the same files it is editing. The PostToolUse hook uses `git pull --rebase` to handle
+  divergence, but simultaneous writes to the same file will cause conflicts.
+- **Multi-platform by default**: every user-facing feature must work across all 5 clients
+  (Android, iOS, Desktop Windows/macOS, Web). No feature ships to only one platform without
+  a documented plan for the others. Platform accessibility agents audit each platform.
 
 ## Git Workflow
 

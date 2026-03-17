@@ -36,6 +36,18 @@ New wiring in run-cycle:
 - After major features: call `e2e-tester` + `device-simulator`
 - For any voice/UI feature: call the relevant platform accessibility agent
 
+**Backend server architecture** (founder directive 2026-03-17):
+- All user data (second brain vault, calendar, preferences, user profile) lives on the
+  **backend server** — not per-device. All clients connect to this shared backend.
+- **For now**: backend runs on localhost for development/testing. The Android emulator,
+  iOS simulator, and Playwright tests all connect to http://localhost:[port].
+- **Later**: migrate backend to cloud (AWS/GCP/Railway/Fly.io) — the loop should NOT
+  configure live cloud accounts yet. Infrastructure-as-code documents the future state.
+- **Background processes on the server**: second brain vault, calendar integration, user
+  profile, session context, TTS/STT pipelines — all server-side, all shared across devices.
+- The server should expose endpoints for: /query, /remember, /describe, /task — one API
+  that all clients call with the user's message and get a voice-ready response.
+
 ---
 
 ## Current Phase
@@ -88,22 +100,31 @@ Phase 5: Polish & Community Ready  → Pending
 **Phase 2 complete when**: A blind user can ask the AI to do a real-world task (e.g. order
 food or book something) entirely by voice, including the app self-installing what it needs
 
-### Phase 3: Blind User Testing
-**Goal**: All 5 blind user personas can complete core life-assistant tasks.
-**Agents**: All 5 blind user personas, screen-observer, computer-use-tester, impact-researcher
+### Phase 3: Blind User Testing (Multi-Platform)
+**Goal**: All 5 blind user personas can complete core life-assistant tasks on at least 3 of 5 client platforms.
+**Agents**: All 5 blind user personas, screen-observer, computer-use-tester, impact-researcher,
+  ios-accessibility-expert, android-accessibility-expert, windows-accessibility-expert,
+  macos-accessibility-expert, web-accessibility-expert, device-simulator
 **Test scenarios must include**:
 - Ask the AI what's on their screen and navigate an inaccessible app
 - Order food or a household item entirely by voice (including risk-disclosure flow)
 - Ask the AI to research something and take action on the result (compound task)
 - Add and retrieve a note from their Second Brain by voice
 - Complete setup/onboarding with zero sighted assistance
+- Complete the above on at least: Android (TalkBack), iOS (VoiceOver), and Web (NVDA+Chrome)
+- Device simulation: Android emulator + iOS simulator screenshots verify accessibility
 **Phase 3 complete when**: No SHOWSTOPPER issues from any persona across all scenarios
+  AND device-simulator captures passing screenshots for Android, iOS, and Web
 
-### Phase 4: Accessibility Hardening
-**Goal**: WCAG 2.1 AA compliance, security audit, privacy audit, ethics review.
-**Agents**: accessibility-reviewer, privacy-guardian, ethics-advisor, security-specialist, deafblind-user
-**Phase 4 complete when**: /audit-a11y returns zero CRITICAL findings AND security-specialist
-signs off on financial data handling AND ethics-advisor approves transaction confirmation flow
+### Phase 4: Accessibility Hardening (All Platforms)
+**Goal**: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
+**Agents**: accessibility-reviewer, privacy-guardian, ethics-advisor, security-specialist, deafblind-user,
+  ios-accessibility-expert, android-accessibility-expert, windows-accessibility-expert,
+  macos-accessibility-expert, web-accessibility-expert
+**Phase 4 complete when**: /audit-a11y returns zero CRITICAL findings on web AND
+  each platform accessibility agent signs off on their platform AND
+  security-specialist signs off on financial data handling AND
+  ethics-advisor approves transaction confirmation flow
 
 ### Phase 5: Polish & Community Ready
 **Goal**: Onboarding works for non-technical newly blind user; grant pitch ready; community launch.

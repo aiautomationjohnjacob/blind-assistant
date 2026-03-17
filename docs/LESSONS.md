@@ -50,6 +50,27 @@ and PRIORITY_STACK.md carefully at the start of Cycle 4 — things have changed.
 item is resolved. Building native Android (Python-incompatible) before deciding on
 React Native vs Flutter would create throwaway work.
 
+**TECHNICAL**: Backend-first architecture (added 2026-03-17):
+- All user data lives server-side: second brain vault, calendar, preferences, user profile
+- All 5 clients connect to the backend via REST API (not direct file access)
+- Backend runs on localhost during development; E2E tests connect emulators to localhost
+- The Python backend should become a FastAPI or Flask server ASAP (P1 in PRIORITY_STACK.md)
+- Key API endpoints the backend must expose:
+  - `POST /query` — user sends text/voice → AI response
+  - `POST /remember` — add note to second brain
+  - `POST /describe` — screen description request
+  - `POST /task` — execute a real-world task (order food, etc.)
+  - `GET /profile` — retrieve user profile/preferences
+  - `GET /calendar` — access user calendar events
+- Calendar integration, background processes, and user profile are all backend concerns
+- Cloud deployment (AWS/GCP) is a later phase — focus on localhost for now
+
+**PROCESS**: Platform-specific agents (`ios-accessibility-expert`, `android-accessibility-expert`,
+`windows-accessibility-expert`, `macos-accessibility-expert`, `web-accessibility-expert`,
+`device-simulator`) are Phase 2+ agents. They activate once client app implementation begins.
+During Phase 1 and early Phase 2 (backend-only work), skip calling these agents unless
+reviewing voice output strings or Telegram bot message formatting.
+
 ---
 
 ## Cycle 1 — 2026-03-17

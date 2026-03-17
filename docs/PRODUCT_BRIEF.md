@@ -212,6 +212,19 @@ platforms before it is considered shipped. Platform experts audit each platform 
 - **Accessible installer** — the install process itself is voice-guided and screen-reader
   compatible from the first second
 - **Security-audited releases** — every release includes a security audit agent review
+- **API-first backend** — the Python backend exposes a REST/WebSocket API so all client
+  apps (Android, iOS, Desktop, Web) can connect to it. Client apps are NOT Python — they
+  use platform-appropriate languages (Swift, Kotlin, JavaScript/TypeScript). Backend and
+  clients are separate deployment units that communicate over the API.
+- **Server-side user data** — the second brain vault, user calendar, preferences, and profile
+  all live on the backend server (not per-device). All clients share the same user data.
+  During development: backend runs on localhost. Later: migrates to cloud (AWS/GCP/Railway).
+- **Background processes on server** — TTS/STT pipelines, calendar integration, vault
+  encryption/decryption, session context — all run server-side. Clients send text/audio
+  and receive text/audio responses; they do not run AI locally.
+- **Multi-platform by default** — every user-facing feature must work across all 5 clients.
+  No feature ships to only one platform without a documented plan for the others. Platform
+  accessibility agents audit each platform before any release.
 
 ---
 

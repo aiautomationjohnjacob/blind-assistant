@@ -78,8 +78,12 @@ git log --oneline -10
 gh issue list --state open --limit 20 2>/dev/null || echo "gh not available"
 
 # Check if key docs exist yet
-for f in docs/ARCHITECTURE.md docs/GAP_ANALYSIS.md docs/INTEGRATION_MAP.md docs/SECURITY_MODEL.md docs/USER_STORIES.md docs/FEATURE_PRIORITY.md; do
+for f in docs/ARCHITECTURE.md docs/GAP_ANALYSIS.md docs/INTEGRATION_MAP.md docs/SECURITY_MODEL.md docs/USER_STORIES.md docs/FEATURE_PRIORITY.md docs/ETHICS_REQUIREMENTS.md; do
   [ -f "$f" ] && echo "EXISTS: $f" || echo "MISSING: $f"
+done
+# Check if multi-platform test structure exists
+for d in tests/e2e/core tests/e2e/platforms/web tests/e2e/platforms/android tests/e2e/platforms/ios tests/e2e/platforms/desktop; do
+  [ -d "$d" ] && echo "EXISTS: $d" || echo "MISSING: $d"
 done
 ```
 
@@ -288,9 +292,10 @@ After implementation:
 
 **For any feature that touches user-facing output or UI on a specific platform:**
 - Voice output / Telegram messages → call `windows-accessibility-expert` (NVDA),
-  `ios-accessibility-expert` (VoiceOver), `android-accessibility-expert` (TalkBack)
-- Web UI changes → call `web-accessibility-expert` (NVDA+Chrome, VoiceOver+Safari)
-- macOS desktop changes → call `macos-accessibility-expert`
+  `ios-accessibility-expert` (VoiceOver), `android-accessibility-expert` (TalkBack),
+  `macos-accessibility-expert` (VoiceOver on macOS)
+- Web UI changes → call `web-accessibility-expert` (NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome)
+- macOS-specific changes → call `macos-accessibility-expert`
 
 **After completing a major feature or user story (not every task — judge significance):**
 
@@ -470,6 +475,11 @@ similar) and the current state of `docs/CYCLE_STATE.md`.
   dependency risks introduced? Anything that shifts power away from the blind user?
   1-3 sentences only."
 
+- **`goal-adherence-reviewer`**: "Review what was built or planned this cycle against
+  docs/PRODUCT_BRIEF.md and docs/USER_STORIES.md. Are we building the right thing?
+  Does it match actual user stories? Are any requirements being silently dropped?
+  Max 3 concerns. Flag any drift from the stated user needs."
+
 **Aggregate all review outputs into a single dated entry in `docs/LESSONS.md`:**
 
 ```markdown
@@ -481,6 +491,7 @@ similar) and the current state of `docs/CYCLE_STATE.md`.
 **Accessibility (accessibility-reviewer)**: [output]
 **User perspective (blind-user-tester)**: [output]
 **Ethics (ethics-advisor)**: [output]
+**Goal adherence (goal-adherence-reviewer)**: [output]
 
 **Consensus recommendation for next cycle**: [synthesize the top 1-2 actions from the panel]
 ```

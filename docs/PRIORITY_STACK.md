@@ -19,6 +19,7 @@
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
 | P1 | Telegram end-to-end demo: voice message in → STT → orchestrator → TTS audio reply | ISSUE-007, Phase 2 gate | 2026-03-17 |
+| P1 | **LOCAL BACKEND SERVER**: expose Python backend as a local HTTP server (FastAPI/Flask) so all 5 clients + emulators can connect to it for E2E testing. User data (second brain, calendar, profile) is server-side, shared across all devices. Endpoints: /query, /remember, /describe, /task | Founder directive 2026-03-17 | 2026-03-17 |
 | P1 | **ARCH DECISION**: unified (React Native/Flutter) vs native per platform for Android+iOS+Desktop+Web — use tech-lead + gap-analyst before any mobile/web implementation | Founder scope expansion | 2026-03-17 |
 | P2 | Add `context.clear_sensitive()` to zero vault passphrase on session end | ISSUE-005 | 2026-03-17 |
 | P2 | Make passphrase prompt timeout configurable in config.yaml | ISSUE-006 | 2026-03-17 |

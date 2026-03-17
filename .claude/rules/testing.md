@@ -56,7 +56,28 @@ tests/
       test_registry.py
   integration/          ← real file I/O; no real external APIs
   accessibility/        ← voice output correctness
+  e2e/                  ← full user flow tests (backend pipeline; only external APIs mocked)
+    core/               ← backend flows: voice round-trip, Telegram, Second Brain, payment
+    platforms/
+      web/              ← Playwright tests (Chromium/Firefox/WebKit — NVDA+Chrome, VoiceOver+Safari)
+      android/          ← Android emulator tests via ADB (TalkBack accessibility)
+      ios/              ← iOS Simulator tests via xcrun simctl (VoiceOver accessibility)
+      desktop/          ← Desktop app smoke tests (NVDA on Windows, VoiceOver on macOS)
 ```
+
+### E2E test naming convention
+```
+tests/e2e/core/test_[flow_name].py           (e.g., test_voice_conversation.py)
+tests/e2e/platforms/web/test_[feature]_[browser].py  (e.g., test_login_chromium.py)
+tests/e2e/platforms/android/test_[feature]_talkback.py
+tests/e2e/platforms/ios/test_[feature]_voiceover.py
+tests/e2e/platforms/desktop/test_[feature]_nvda.py
+```
+
+### Coverage thresholds for multi-platform
+Python backend thresholds (80% overall, 100% security) apply to `src/` only.
+Client app coverage (Android/iOS/Web/Desktop) will have platform-specific requirements
+defined by the relevant accessibility expert agent when implementation begins.
 
 ### Naming: test_[what]_[condition]_[result]
 ```python
