@@ -66,10 +66,13 @@ class VaultQuery:
         results = await self.vault.search(query, limit=3)
 
         if not results:
-            return (
+            no_results_msg = (
                 f"I searched your notes for '{query}' but didn't find anything. "
                 "Would you like to add a note about this?"
             )
+            if context.braille_mode:
+                return _format_for_braille(no_results_msg)
+            return no_results_msg
 
         # Format results based on count
         if len(results) == 1:
