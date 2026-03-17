@@ -90,3 +90,9 @@
 | ISSUE-012: Dead code wake_word_found removed from voice_local.py | 2026-03-17 | 6 |
 | ISSUE-011: RateLimitMiddleware added to api_server.py; 8 new Python tests; configurable | 2026-03-17 | 6 |
 | Total test count: 356 Python (347 unit + 9 E2E, 21 skipped); 77 JS tests in CI | 2026-03-17 | 6 |
+| ISSUE-015: Real voice recording in MainScreen — useAudioRecorder hook + 2-press flow | 2026-03-17 | 7 |
+| Backend POST /transcribe endpoint (base64 audio → Whisper STT); 7 Python tests | 2026-03-17 | 7 |
+| JS API client: transcribe() method + TranscribeRequest/Response types; 7 tests | 2026-03-17 | 7 |
+| ISSUE-016: importantForAccessibility="yes" added to SetupWizardScreen TextInput | 2026-03-17 | 7 |
+| ISSUE-017: URL scheme validation in saveApiBaseUrl() with error message; 7 tests | 2026-03-17 | 7 |
+| Total test count: 363 Python (354 unit + 9 E2E, 21 skipped); 114 JS tests | 2026-03-17 | 7 |
