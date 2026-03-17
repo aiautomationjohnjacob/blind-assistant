@@ -254,7 +254,7 @@ async def test_setup_native_app_shows_server_address_when_ready(installer):
     with (
         patch.object(installer, "_wait_for_input", side_effect=inputs),
         patch.object(installer, "_speak", side_effect=capture_speak),
-        patch("installer.install.socket.socket", return_value=mock_sock),
+        patch("socket.socket", return_value=mock_sock),
     ):
         await installer._setup_native_app()
 
