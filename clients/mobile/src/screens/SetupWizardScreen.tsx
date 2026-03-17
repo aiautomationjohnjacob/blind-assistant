@@ -354,7 +354,7 @@ export function SetupWizardScreen({
           onPress={handleSaveToken}
           accessibilityRole="button"
           accessibilityLabel="Save token and complete setup"
-          accessibilityHint="Double-tap to save your token and start using Blind Assistant."
+          accessibilityHint="Saves your token and connects to your server."
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text style={styles.buttonText}>Confirm</Text>
