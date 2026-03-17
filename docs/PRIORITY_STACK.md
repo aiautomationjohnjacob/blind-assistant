@@ -51,3 +51,11 @@
 | tools/registry.yaml (curated tool registry) | 2026-03-17 | 1 |
 | installer/install.py (voice-guided installer skeleton) | 2026-03-17 | 1 |
 | Phase 1: Discovery & Architecture — COMPLETE | 2026-03-17 | 1 |
+| voice_local.py (local voice interface) | 2026-03-17 | 2 |
+| second_brain/query.py (voice query layer over vault) | 2026-03-17 | 2 |
+| Orchestrator real intent routing (screen/note/query/general) | 2026-03-17 | 2 |
+| Vault microsecond filename uniqueness fix | 2026-03-17 | 2 |
+| 244 unit tests (encryption, vault, orchestrator, security) | 2026-03-17 | 2 |
+| conftest.py suppress_audio ImportError fix | 2026-03-17 | 2 |
+| Voice local interface stub (microphone + speaker) | 2026-03-17 | 2 |
+| Unit tests: security/credentials, disclosure, encryption, vault | 2026-03-17 | 2 |
