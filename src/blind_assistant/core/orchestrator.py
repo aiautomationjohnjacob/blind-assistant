@@ -373,6 +373,8 @@ class Orchestrator:
                 )
             }
 
+        # Cast from object to BrowserTool — get_installed_tool returns object | None
+        browser_tool: BrowserTool = _raw_browser_tool  # type: ignore[assignment]
         await update("Opening the food ordering site now...")
 
         try:
