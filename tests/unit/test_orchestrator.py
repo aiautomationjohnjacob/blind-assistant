@@ -637,26 +637,34 @@ class TestHandleOrderFood:
 
         orc = _make_order_food_orchestrator(minimal_config)
 
-        mock_browser = AsyncMock()
         mock_page_state = PageState(
             url="https://www.doordash.com",
             title="DoorDash",
             text_content="Results",
         )
+        mock_browser = AsyncMock()
         mock_browser.navigate = AsyncMock(return_value=mock_page_state)
         orc.tool_registry.get_installed_tool.return_value = mock_browser
 
-        updates = []
+        # Patch all Claude helpers to avoid needing the anthropic package installed
+        with (
+            patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Option A.")),
+            patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=mock_page_state)),
+            patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=mock_page_state)),
+            patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="burger and fries")),
+            patch.object(orc, "_place_order", new=AsyncMock(return_value={"success": True})),
+        ):
+            updates = []
 
-        async def update_cb(msg: str) -> None:
-            updates.append(msg)
-            orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
+            async def update_cb(msg: str) -> None:
+                updates.append(msg)
+                orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
 
-        orc.confirmation_gate.register_session(standard_context.session_id)
-        # No params — description is the only food hint
-        intent = _make_order_intent("order me a burger and fries", params={})
+            orc.confirmation_gate.register_session(standard_context.session_id)
+            # No params — description is the only food hint
+            intent = _make_order_intent("order me a burger and fries", params={})
 
-        result = await orc._handle_order_food(intent, standard_context, update_cb)
+            result = await orc._handle_order_food(intent, standard_context, update_cb)
 
         # Should not crash — result should be valid
         assert "text" in result
