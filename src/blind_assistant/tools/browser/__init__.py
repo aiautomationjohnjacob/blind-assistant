@@ -223,6 +223,8 @@ class BrowserTool:
 
     async def wait_for_text(self, text: str, timeout: float = 30.0) -> bool:
         """Wait for text to appear on the page. Returns True if found, False if timeout."""
+        if self._page is None:
+            return False  # Not initialized — can't wait
         try:
             await self._page.wait_for_function(
                 f"() => document.body.innerText.includes({text!r})",
