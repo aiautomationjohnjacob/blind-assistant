@@ -106,3 +106,9 @@
 | Documentation: README.md updated (Telegram demoted), CHANGELOG.md created | 2026-03-17 | 10 |
 | **PHASE 2 COMPLETE** — food ordering by voice end-to-end milestone reached | 2026-03-17 | 10 |
 | Total test count Cycle 10: 482 Python (465 unit + 17 E2E, 21 skipped); 114 JS tests | 2026-03-17 | 10 |
+| a11y: VoiceOver hint fix (7 "Double-tap" → outcome-first accessibilityHints) | 2026-03-17 | 11 |
+| a11y: haptic recording cue (Medium on start, Light on stop) + 3 new tests | 2026-03-17 | 11 |
+| a11y: importantForAccessibility="no-hide-descendants" → "yes" on SetupWizardScreen progress Text | 2026-03-17 | 11 |
+| ISSUE-004: ResponseCallback type alias + 9 annotated method signatures in orchestrator.py | 2026-03-17 | 11 |
+| Cross-platform accessibility audit (code-level): VoiceOver/TalkBack issues found + fixed | 2026-03-17 | 11 |
+| Total test count Cycle 11: 465 Python (unchanged); 117 JS tests (was 114, +3 haptic tests) | 2026-03-17 | 11 |
