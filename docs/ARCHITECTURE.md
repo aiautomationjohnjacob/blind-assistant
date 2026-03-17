@@ -51,16 +51,60 @@ targets.
 
 ---
 
+## Execution Model: Phone Talks to User's Own Machine
+
+This is the core architectural pattern — and it's what makes the tool powerful:
+
+```
+[User's phone/tablet]          [User's desktop/home server]
+   Android app          ──▶   Python backend (FastAPI)
+   iOS app              ──▶     │
+   (voice in/out only)          ├── Playwright browser (navigates any website)
+                                ├── Desktop Commander (controls native apps)
+                                ├── Claude Vision (sees the screen)
+                                └── Second Brain vault (user's data, local)
+```
+
+The phone is just a voice terminal. All the intelligence — AI reasoning, browser
+control, screen observation, data storage — runs on the user's own machine. This means:
+
+- **No cloud dependency for sensitive data**: Second Brain vault never leaves the user's machine
+- **No service-specific code**: Playwright navigates DoorDash, Expedia, any bank website the
+  same way a human would — Claude reasons about the page, fills in forms, clicks buttons
+- **Any task is possible**: If a service has a website, the app can use it. No API deal required.
+- **User's computer does the work**: The phone app says "order me pad thai", the desktop
+  opens a browser, finds a delivery service, places the order, confirms with the user
+
+Cloud hosting (Railway/Fly.io) is a future option for users who want always-on access
+without keeping their computer on, but the default and preferred deployment is local.
+
+**When to build specific integrations instead of using the browser:**
+- Payment tokenization (Stripe SDK — never handle raw card numbers in a browser)
+- Services requiring OAuth that need background refresh (Google Calendar, Gmail)
+- Local hardware protocols that aren't web-accessible (Home Assistant REST API)
+- Anything where browser automation would be brittle due to heavy JavaScript rendering
+
+---
+
 ## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      INTERFACES                                   │
-│  ┌──────────────────┐  ┌──────────────────────────────────────┐ │
-│  │   Telegram Bot    │  │    Local Voice Interface              │ │
-│  │  (primary 24/7)  │  │  (microphone + speaker; dev/setup)   │ │
-│  └─────────┬────────┘  └──────────────────┬───────────────────┘ │
-└────────────┼─────────────────────────────┼───────────────────────┘
+│                CLIENT APPS (voice terminals)                      │
+│  ┌────────────┐  ┌────────────┐  ┌──────────┐  ┌────────────┐  │
+│  │ Android app │  │  iOS app   │  │ Desktop  │  │  Web app   │  │
+│  │ (TalkBack) │  │(VoiceOver) │  │(NVDA/VO) │  │(NVDA+Chr.) │  │
+│  └──────┬─────┘  └──────┬─────┘  └────┬─────┘  └──────┬─────┘  │
+└─────────┼───────────────┼─────────────┼────────────────┼────────┘
+          └───────────────┴──────REST API┴────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              PYTHON BACKEND (runs on user's own machine)          │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │   Local Voice Interface (microphone + speaker; desktop)   │   │
+│  └──────────────────────────┬───────────────────────────────┘   │
+└─────────────────────────────┼───────────────────────────────────┘
              │                             │
              ▼                             ▼
 ┌─────────────────────────────────────────────────────────────────┐

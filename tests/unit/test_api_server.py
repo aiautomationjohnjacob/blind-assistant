@@ -60,47 +60,24 @@ def _make_orchestrator(response_text: str = "Here is your answer.") -> MagicMock
     return orc
 
 
-class _PatchedClient:
-    """
-    Helper that keeps the keyring patch active for the lifetime of all requests.
-
-    The API server imports get_credential lazily inside _authenticate(), so we must
-    patch at the credentials module level and keep the patch alive during requests.
-    """
-
-    def __init__(self, app, token_in_keychain: str | None) -> None:
-        self._token = token_in_keychain
-        self._patcher = patch(
-            "blind_assistant.security.credentials.get_credential",
-            return_value=token_in_keychain,
-        )
-        self._patcher.start()
-        self._client = TestClient(app, raise_server_exceptions=False)
-
-    def __del__(self) -> None:
-        try:
-            self._patcher.stop()
-        except RuntimeError:
-            pass  # Already stopped
-
-    # Proxy HTTP verbs to the inner TestClient
-    def get(self, *args, **kwargs):
-        return self._client.get(*args, **kwargs)
-
-    def post(self, *args, **kwargs):
-        return self._client.post(*args, **kwargs)
-
-
 def _make_server(
     orchestrator=None,
     token_in_keychain: str | None = "test-token-123",
     auth_disabled: bool = False,
-) -> tuple[APIServer, _PatchedClient]:
+):
     """
-    Build an APIServer and return a patched TestClient for it.
+    Context manager that builds an APIServer + TestClient with keyring mocked.
 
-    The keyring mock stays active for all requests made through the returned client.
+    Usage::
+
+        with _make_server() as (server, client):
+            resp = client.get("/health")
+
+    The keyring patch is active for the duration of the `with` block only,
+    so it cannot leak into other tests.
     """
+    from contextlib import contextmanager
+
     if orchestrator is None:
         orchestrator = _make_orchestrator()
 
@@ -108,7 +85,15 @@ def _make_server(
     server = APIServer(orchestrator, config)
     app = server._build_app()
 
-    return server, _PatchedClient(app, token_in_keychain)
+    @contextmanager
+    def _ctx():
+        with patch(
+            "blind_assistant.security.credentials.get_credential",
+            return_value=token_in_keychain,
+        ):
+            yield server, TestClient(app, raise_server_exceptions=False)
+
+    return _ctx()
 
 
 # ─────────────────────────────────────────────────────────────
