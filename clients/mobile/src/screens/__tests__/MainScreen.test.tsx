@@ -387,6 +387,13 @@ describe("MainScreen — voice recording flow", () => {
 // Per blind-user-tester review (Cycle 7, 9, 10): "I need to know recording actually started."
 
 describe("MainScreen — haptic recording cues", () => {
+  // Access the mocked expo-haptics module via jest.requireMock to avoid hoisting issues.
+  // jest.mock() is hoisted before variable declarations, so top-level const mockFn =
+  // jest.fn() references don't work as mock factories. jest.requireMock() is the correct
+  // pattern for accessing auto-mocked or factory-mocked modules in tests.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getHapticsMock = () => jest.requireMock("expo-haptics") as any;
+
   it("fires a medium haptic when recording starts (first button press)", async () => {
     render(<MainScreen />);
     const button = screen.getByRole("button");
@@ -397,8 +404,8 @@ describe("MainScreen — haptic recording cues", () => {
       expect(mockStartRecording).toHaveBeenCalledTimes(1);
     });
 
-    // Medium impact fires after state transitions to "listening"
-    expect(mockImpactAsync).toHaveBeenCalledWith("medium");
+    // Medium impact fires after state transitions to "listening" — confirms recording started
+    expect(getHapticsMock().impactAsync).toHaveBeenCalledWith("medium");
   });
 
   it("fires a light haptic when recording stops (second button press)", async () => {
@@ -413,17 +420,17 @@ describe("MainScreen — haptic recording cues", () => {
     fireEvent.press(button);
     await waitFor(() => {
       // Two haptics should have fired: medium on start, light on stop
-      expect(mockImpactAsync).toHaveBeenCalledTimes(2);
-      const calls = mockImpactAsync.mock.calls.map((c) => c[0]);
-      expect(calls[0]).toBe("medium"); // start
-      expect(calls[1]).toBe("light");  // stop
+      expect(getHapticsMock().impactAsync).toHaveBeenCalledTimes(2);
+      const calls = getHapticsMock().impactAsync.mock.calls.map((c: string[]) => c[0]);
+      expect(calls[0]).toBe("medium"); // start — confirms recording active
+      expect(calls[1]).toBe("light");  // stop — confirms input captured
     });
   });
 
   it("haptic failure does not crash the recording flow", async () => {
     // expo-haptics may not be available on all devices (e.g. older Android, iPad
     // without Taptic Engine). The implementation silently ignores haptic errors.
-    mockImpactAsync.mockRejectedValueOnce(new Error("Haptics unavailable"));
+    getHapticsMock().impactAsync.mockRejectedValueOnce(new Error("Haptics unavailable"));
 
     render(<MainScreen />);
     const button = screen.getByRole("button");
