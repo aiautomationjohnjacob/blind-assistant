@@ -16,7 +16,7 @@ Requirements for running the installer:
 - Python 3.11+
 - pyttsx3 (pip install pyttsx3) — for voice output before setup is complete
 - A microphone
-- Internet connection (for downloading Whisper model and setting up Telegram)
+- Internet connection (for downloading Whisper model and connecting to Claude AI)
 
 The installer will speak these requirements to you if they are not met.
 """
