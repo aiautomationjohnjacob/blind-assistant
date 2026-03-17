@@ -197,7 +197,9 @@ class Orchestrator:
             return False
         return False
 
-    async def _execute_intent(self, intent, context: UserContext, update) -> dict:
+    async def _execute_intent(
+        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
+    ) -> dict:
         """
         Execute a classified intent using the appropriate tools.
 
