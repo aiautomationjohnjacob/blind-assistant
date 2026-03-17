@@ -4,8 +4,14 @@ Intent Planner
 Uses Claude API to classify user intent and determine which tools are needed.
 """
 
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from anthropic import AsyncAnthropic
 
 logger = logging.getLogger(__name__)
 
