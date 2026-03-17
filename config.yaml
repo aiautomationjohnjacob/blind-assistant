@@ -1,0 +1,103 @@
+# Blind Assistant — Configuration File
+#
+# IMPORTANT: This file contains NO secrets.
+# API keys, bot tokens, and passwords are stored in the OS keychain.
+# See docs/SECURITY_MODEL.md for the security architecture.
+#
+# Run the setup wizard to configure secrets:
+#   python installer/install.py --setup
+
+# ============================================================
+# Interface Settings
+# ============================================================
+telegram_enabled: true       # Enable Telegram bot interface (primary)
+voice_local_enabled: false   # Enable local microphone/speaker interface
+
+# ============================================================
+# Voice Settings
+# ============================================================
+voice:
+  # TTS provider: "elevenlabs" (cloud, best quality) or "local" (offline, pyttsx3)
+  tts_provider: elevenlabs
+
+  # Speech rate: 0.5 (slow) to 2.0 (fast). 1.0 = normal.
+  # Default lower for accessibility. Dorothy recommends 0.75-0.85.
+  speech_rate: 0.9
+
+  # Verbosity level: "brief" | "standard" | "detailed"
+  # Marcus prefers "brief". Dorothy prefers "detailed".
+  verbosity: standard
+
+  # ElevenLabs voice ID (only used if tts_provider = elevenlabs)
+  # Leave as "default" to use the project default voice.
+  elevenlabs_voice_id: default
+
+  # Whisper model for speech-to-text:
+  # "tiny" (fastest), "base" (balanced), "small", "medium", "large-v3" (best)
+  whisper_model: base
+
+# ============================================================
+# Output Settings
+# ============================================================
+output:
+  # Send voice replies in Telegram? If false: text only.
+  # Jordan (DeafBlind user) should set this to false.
+  telegram_voice_replies: true
+
+  # Format text for braille display?
+  # Breaks responses at sentence boundaries; removes emoji.
+  braille_mode: false
+
+# ============================================================
+# Second Brain (Personal Knowledge Base)
+# ============================================================
+second_brain:
+  # Where to store the encrypted vault. Defaults to user home directory.
+  # This path is NOT a secret — the files are encrypted.
+  vault_path: ~/blind-assistant-vault
+
+  # Encrypt vault? Should always be true.
+  encryption_enabled: true
+
+  # Store vault key in OS keychain? If false: ask for passphrase each session.
+  use_keychain: true
+
+# ============================================================
+# Screen Observation
+# ============================================================
+screen_observation:
+  # Use local OCR (pytesseract) for financial/sensitive screens?
+  # Requires pytesseract to be installed.
+  local_ocr_for_sensitive: true
+
+  # Privacy mode: never send screenshots to external API.
+  # Uses local OCR only. Less accurate but maximum privacy.
+  privacy_mode: false
+
+# ============================================================
+# Security Settings
+# ============================================================
+security:
+  # Show financial risk disclosure: "always" | "first_time"
+  # Per SECURITY_MODEL.md: always is non-negotiable.
+  risk_disclosure_frequency: always
+
+  # Require confirmation for actions? Should always be true.
+  require_action_confirmation: true
+
+  # Log all actions to audit file? Recommended.
+  audit_logging: true
+
+# ============================================================
+# AI Model Settings
+# ============================================================
+ai:
+  # Model for intent classification and quick responses
+  # Options: claude-haiku-3-5 (fast/cheap), claude-sonnet-4-5 (balanced)
+  fast_model: claude-sonnet-4-5
+
+  # Model for complex planning (travel research, multi-step tasks)
+  planning_model: claude-opus-4-5
+
+  # Maximum tokens for responses
+  max_response_tokens: 500
