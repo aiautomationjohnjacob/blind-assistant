@@ -1,8 +1,16 @@
 """
-Telegram Bot Interface — Primary 24/7 Interface
+Telegram Bot Interface — Secondary / Super-User Channel
 
-This is the primary user interface for Blind Assistant.
-Every feature must be accessible through this interface.
+Telegram is an OPTIONAL interface for power users who want remote access to the assistant
+from another device (e.g. phone while away from desktop). It is NOT the primary interface.
+
+Primary interfaces are the native standalone apps (Android, iOS, Desktop, Web) which
+are voice-guided from first launch and require zero visual setup. Telegram requires
+visual setup (QR scanning, phone verification) that blind users cannot complete
+independently — so it is never the default, never required, and never the demo target.
+
+This interface is disabled by default. Enable it by setting `telegram_enabled: true`
+in config.yaml after manually completing Telegram setup.
 
 Security: Only whitelisted Telegram user IDs can interact with the bot.
 All others are silently ignored (do not acknowledge the bot's existence to strangers).
