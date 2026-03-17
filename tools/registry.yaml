@@ -1,0 +1,93 @@
+# Blind Assistant — Approved Tool Registry
+#
+# Only tools in this file can be installed by the self-expanding capability.
+# Adding a tool here requires:
+# 1. CVE scan via pip-audit
+# 2. Minimum download threshold check (>10k/month on PyPI)
+# 3. Active maintenance verification (last release < 2 years)
+# 4. Manual review for data collection practices
+#
+# Format:
+#   name: short identifier used in code
+#   package: PyPI package name
+#   version: pinned version string
+#   description: plain English description for user consent prompt
+#   task_description: why would we install this (for user prompt)
+#   class: optional Python class to instantiate after install
+#   allowed_endpoints: list of domains this tool is allowed to contact
+
+tools:
+  - name: ordering
+    package: playwright
+    version: "1.40.0"
+    description: "a web browser controller that lets me navigate ordering websites"
+    task_description: "place food or grocery orders on your behalf"
+    class: blind_assistant.tools.ordering.doordash.DoorDashTool
+    allowed_endpoints:
+      - "doordash.com"
+      - "instacart.com"
+      - "ubereats.com"
+
+  - name: travel
+    package: playwright
+    version: "1.40.0"
+    description: "a web browser controller that lets me navigate travel booking sites"
+    task_description: "research and book travel on your behalf"
+    class: blind_assistant.tools.travel.booking.TravelBookingTool
+    allowed_endpoints:
+      - "expedia.com"
+      - "booking.com"
+      - "kayak.com"
+      - "aa.com"
+      - "delta.com"
+      - "united.com"
+
+  - name: home_assistant
+    package: aiohttp
+    version: "3.9.3"
+    description: "a connector to your Home Assistant smart home hub"
+    task_description: "control your smart home devices"
+    class: blind_assistant.tools.home.home_assistant.HomeAssistantTool
+    allowed_endpoints:
+      - "homeassistant.local"
+
+  - name: grocery
+    package: playwright
+    version: "1.40.0"
+    description: "a web browser controller for grocery delivery services"
+    task_description: "order groceries for delivery"
+    class: blind_assistant.tools.ordering.instacart.InstacartTool
+    allowed_endpoints:
+      - "instacart.com"
+      - "amazon.com"
+      - "walmart.com"
+
+  - name: calendar
+    package: google-api-python-client
+    version: "2.114.0"
+    description: "a connector to your Google Calendar"
+    task_description: "manage your calendar and appointments"
+    class: null
+    allowed_endpoints:
+      - "googleapis.com"
+      - "accounts.google.com"
+
+  - name: email_gmail
+    package: google-api-python-client
+    version: "2.114.0"
+    description: "a connector to your Gmail account"
+    task_description: "read and send emails on your behalf"
+    class: null
+    allowed_endpoints:
+      - "googleapis.com"
+      - "accounts.google.com"
+
+  - name: stripe_payments
+    package: stripe
+    version: "7.3.0"
+    description: "a payment processor that tokenizes your card so we never store the number"
+    task_description: "process payments securely without storing your card number"
+    class: null
+    allowed_endpoints:
+      - "api.stripe.com"
+      - "js.stripe.com"
