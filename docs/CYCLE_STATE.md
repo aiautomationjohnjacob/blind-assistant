@@ -190,7 +190,7 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P2: Voice installer** — Telegram demoted to optional Step 5; _setup_native_app() added as Step 1 (TalkBack/VoiceOver); server address discovery (socket IP); STEP_APP_INTRO mentions both TalkBack + VoiceOver; STEP_COMPLETE updated; _run_self_test reclassified Telegram as optional; 58 new tests; 641 unit tests passing (Cycle 17)
 - [x] **P2: Verify web E2E CI** — CI run 23219936377: ALL 7 jobs green including e2e-web (Playwright Chromium + Firefox accessibility tests) (Cycle 17)
 - [ ] **P2: End-to-end food ordering on real device** — Android TalkBack + iOS VoiceOver
-- [ ] **P2: Web app deployed** — WCAG 2.1 AA verification requires real deployment (Netlify/Vercel staging); web E2E CI tests now exist
+- [x] **P2: Web app deployed** — netlify.toml + deploy-staging.yml created (Cycle 18); ISSUE-029: requires manual secret setup (NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID); 11 food ordering web E2E accessibility tests added
 - [ ] **P3: Android TalkBack device test** — expo build + AVD
 - [ ] **P3: iOS VoiceOver device test** — expo build:ios + xcrun simctl
 
