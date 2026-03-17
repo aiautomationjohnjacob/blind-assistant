@@ -157,9 +157,35 @@ Is there a P0 BLOCKING issue? → Work on that ONLY, nothing else.
 Is there a P1 SHOWSTOPPER? → Work on that before anything else.
 Are we in Phase 1 AND Phase 1 deliverables are incomplete? → Work on the next incomplete Phase 1 deliverable.
 Is there a P2 PHASE GATE item NOT yet done? → Work on it.
-Are there P3 KNOWN GAPSs? → Pick the highest-impact one.
+Are there P3 KNOWN GAPS? → Pick the highest-impact one.
 Otherwise → Pick the top P4/P5 item.
 ```
+
+**Handling the current P1 items (Cycle 4+):**
+
+If top P1 is **ARCH DECISION** (ISSUE-009):
+→ Use `tech-lead` and `gap-analyst` in parallel:
+  - `tech-lead`: "Read docs/PRODUCT_BRIEF.md Client Platforms section, docs/ARCHITECTURE.md,
+    and docs/LESSONS.md scope expansion. We need to build 5 clients: Android app, iOS app,
+    Desktop (Windows+macOS), Web app, Education website. The Python backend stays. Evaluate:
+    React Native (JS/TS) vs Flutter (Dart) vs native (Swift/Kotlin) for the mobile apps.
+    Consider: (1) TalkBack/VoiceOver accessibility quality per framework, (2) how clients
+    call the Python REST backend, (3) developer velocity for a small team, (4) web app
+    sharing code with mobile. Output your recommendation with reasoning to docs/ARCHITECTURE.md
+    under '## Client App Framework Decision' and to CYCLE_STATE.md Decisions Made table."
+  - `gap-analyst`: "Research current state of React Native vs Flutter TalkBack/VoiceOver
+    support. Which has better screen reader accessibility? Any known bugs or gaps? Output
+    findings to docs/LESSONS.md under '## Client Framework Research — [date]'."
+
+If top P1 is **LOCAL BACKEND SERVER** (ISSUE-008):
+→ Use `backend-developer`:
+  "Create `src/blind_assistant/interfaces/api_server.py`. Build a FastAPI server that
+  exposes: POST /query (user message → orchestrator → text response), POST /remember
+  (voice note → second brain), POST /describe (trigger screen description), POST /task
+  (execute real-world task), GET /profile (return user config), GET /health (ping).
+  Each endpoint must authenticate the request (simple Bearer token for now — store in
+  OS keychain). Server must run on localhost:8000. Add startup script. Write unit tests."
+  Then call `test-engineer`. Then add `uvicorn` or `fastapi` to requirements.txt.
 
 State your decision: "This cycle I will work on: [item 1], [item 2 if any]."
 State your reasoning: "Because: [reason based on priority and current phase]."
@@ -287,8 +313,13 @@ After implementation:
 - Use `code-reviewer` to review the code (read-only — it reports, doesn't fix)
 - Use `backend-developer` or `integration-engineer` to apply fixes from the review
 - Use `accessibility-reviewer` on any voice output or user-facing strings
+- Use `screen-reader-expert` for any feature where screen reader interaction order matters
+  (tab order, announcement sequence, ARIA live region timing)
+- Use `voice-interface-designer` for any new voice prompt or conversational UX pattern
 - Use the most relevant blind persona agent to verify the feature from their perspective
 - Use `security-specialist` on any feature touching credentials or personal data
+- Use `qa-lead` every 3rd cycle to audit overall test quality (not just coverage — checks
+  for test rot, mocking-what-you-test, assertion roulette, orphaned test files)
 
 **For any feature that touches user-facing output or UI on a specific platform:**
 - Voice output / Telegram messages → call `windows-accessibility-expert` (NVDA),

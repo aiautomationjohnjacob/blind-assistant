@@ -169,7 +169,7 @@ run without manual PYTHONPATH), P1 ISSUE-001 fix (_get_vault now prompts for pas
 via voice/Telegram when keychain is empty, never fails silently), 10 new tests for
 passphrase prompt flow, 25 new TTS/STT unit tests (synthesize_speech dispatch,
 ElevenLabs/pyttsx3 fallback, singleton model loading, transcribe_microphone). Total:
-279 passing tests, no regressions.
+212 test functions across 8 test files, no regressions.
 
 ## Known Issues / Technical Debt
 
