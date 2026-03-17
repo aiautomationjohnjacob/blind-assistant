@@ -644,20 +644,21 @@ def test_transcribe_empty_audio_base64_returns_empty_text():
 def test_transcribe_passes_language_hint_to_stt():
     """POST /transcribe passes the language hint to transcribe_audio."""
     b64_audio = "SGVsbG8="
+    mock_stt = AsyncMock(return_value="Hola")
     with _make_server() as (_, client):
         with patch(
             "blind_assistant.voice.stt.transcribe_audio",
-            new=AsyncMock(return_value="Hola") as mock_stt,
+            new=mock_stt,
         ):
             client.post(
                 "/transcribe",
                 json={"audio_base64": b64_audio, "language": "es"},
                 headers=VALID_HEADERS,
             )
-            # Verify language was passed through
-            mock_stt.assert_called_once()
-            _, call_kwargs = mock_stt.call_args
-            assert call_kwargs.get("language") == "es"
+    # Verify language was passed through
+    mock_stt.assert_called_once()
+    _, call_kwargs = mock_stt.call_args
+    assert call_kwargs.get("language") == "es"
 
 
 def test_transcribe_echoes_session_id():
