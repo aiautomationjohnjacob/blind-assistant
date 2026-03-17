@@ -16,6 +16,8 @@ Per USER_STORIES.md:
 import asyncio
 import logging
 
+from blind_assistant.core.orchestrator import UserContext
+
 logger = logging.getLogger(__name__)
 
 # Wake word for activating the assistant
