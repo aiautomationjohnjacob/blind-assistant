@@ -241,6 +241,48 @@ fixes: @expo-google-fonts/roboto pinned to ~0.4.3 (latest available), babel-plug
 module-resolver added as devDependency, MainScreen test mock fixed (spyOn not requireActual).
 JS test count now 77 (was 31).
 
+### ISSUE-015: MainScreen sends hardcoded message — no real microphone capture
+**Severity**: HIGH
+**Category**: accessibility, ux
+**Detected by**: Cycle 6 review panel (code-reviewer, blind-user-tester)
+**Detected**: 2026-03-17
+**Description**: `MainScreen.tsx` handleButtonPress always sends
+`message: "Hello, what can you do for me?"` instead of recording the user's actual
+voice. The press-to-talk button is accessible and connected to the backend, but a
+blind user tapping it receives a canned response to a question they didn't ask.
+**Impact**: The native mobile app is not usable as a voice assistant — the core
+interaction (press button, speak, hear response) does not work.
+**Proposed fix**: Integrate expo-av AudioRecorder. On button press: start recording;
+on second press (or after silence): stop, encode audio, send to backend /query as
+base64 audio or send to a /transcribe endpoint first. Alternatively, implement a
+JavaScript Whisper client or use the device's native speech recognition API.
+**Status**: OPEN
+
+### ISSUE-016: SetupWizardScreen TextInput missing importantForAccessibility="yes"
+**Severity**: LOW
+**Category**: accessibility
+**Detected by**: accessibility-reviewer (Cycle 6 review)
+**Detected**: 2026-03-17
+**Description**: The token entry TextInput in SetupWizardScreen.tsx does not have
+`importantForAccessibility="yes"` set. TalkBack may not automatically focus the
+input when the token step appears.
+**Impact**: TalkBack users may need extra swipes to locate the input field.
+**Proposed fix**: Add `importantForAccessibility="yes"` to the TextInput.
+**Status**: OPEN
+
+### ISSUE-017: saveApiBaseUrl does not validate URL scheme
+**Severity**: LOW
+**Category**: security
+**Detected by**: security-specialist (Cycle 6 review)
+**Detected**: 2026-03-17
+**Description**: `saveApiBaseUrl()` in useSecureStorage.ts stores the URL as-is
+without validating that it starts with http:// or https://. A file:, data:, or
+javascript: URL would be invalid and could cause unexpected behavior.
+**Impact**: Minimal on localhost during development; relevant before cloud deployment.
+**Proposed fix**: Validate URL starts with http:// or https:// before calling
+SecureStore.setItemAsync. Throw an error with a user-readable message if invalid.
+**Status**: OPEN
+
 ---
 
 ## Resolved Issues
