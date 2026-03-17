@@ -200,10 +200,18 @@ def suppress_audio() -> Generator[None, None, None]:
     """
     Auto-used: prevents any real microphone or speaker access during tests.
     Applied to ALL tests automatically — no test should produce sound.
+
+    sounddevice may not be installed in CI; the patch is skipped if unavailable.
     """
-    with patch("sounddevice.rec", return_value=MagicMock()), \
-         patch("sounddevice.play"), \
-         patch("sounddevice.wait"):
+    try:
+        import sounddevice  # noqa: F401 — just checking if installed
+        with patch("sounddevice.rec", return_value=MagicMock()), \
+             patch("sounddevice.play"), \
+             patch("sounddevice.wait"):
+            yield
+    except ImportError:
+        # sounddevice not installed — audio suppression is a no-op
+        # Tests that require actual microphone access should be skipped separately
         yield
 
 
