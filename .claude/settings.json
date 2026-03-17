@@ -71,7 +71,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'cd \"$CLAUDE_PROJECT_DIR\" && git add -A && if git status --short | grep -q .; then git commit -m \"auto: session end — state saved $(date +%H:%M)\" 2>/dev/null; fi && git push 2>/dev/null || git pull --rebase && git push 2>/dev/null; echo \"✓ All changes pushed to GitHub.\"; true'"
+            "command": "bash -c 'cd \"$CLAUDE_PROJECT_DIR\" && git add -A && if git status --short | grep -q .; then CHANGED=$(git diff --cached --name-only | head -5 | tr \"\\n\" \", \" | sed \"s/, $//\"); git commit -m \"chore: session end — unsaved changes pushed$([ -n \"$CHANGED\" ] && echo \" ($CHANGED)\" || echo \"\")\" 2>/dev/null; fi && git push 2>/dev/null || git pull --rebase && git push 2>/dev/null; echo \"✓ All changes pushed to GitHub.\"; true'"
           }
         ]
       }
