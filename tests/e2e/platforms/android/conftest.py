@@ -70,7 +70,7 @@ class ADBClient:
         # Capture on device
         self.shell("screencap -p /sdcard/screenshot.png")
         # Pull to local
-        subprocess.run(  # noqa: S607
+        subprocess.run(
             ["adb", *self._serial_flag, "pull", "/sdcard/screenshot.png", output_path],
             capture_output=True,
             timeout=30,
