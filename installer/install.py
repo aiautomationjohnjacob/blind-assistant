@@ -270,23 +270,61 @@ class VoiceInstaller:
         self._speak(STEP_COMPLETE)
         return True
 
-    async def _setup_telegram(self) -> bool:
-        """Guide user through Telegram bot setup."""
+    async def _setup_native_app(self) -> None:
+        """
+        Guide user through connecting the native Blind Assistant app.
+
+        The native app (Android TalkBack / iPhone VoiceOver) is the PRIMARY interface.
+        This step tells the user their server address so they can enter it in the app.
+        """
+        import socket
+
+        self._speak(STEP_APP_INTRO)
+        response = self._wait_for_input()
+
+        if self._check_skip(response):
+            self._speak(
+                "No problem. You can connect the app later. "
+                "Run setup again to get your server address."
+            )
+            return
+
+        # Determine the local IP so the phone can connect
+        try:
+            # Connect to an external address (does not send data) to find local IP
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.connect(("8.8.8.8", 80))
+            local_ip = sock.getsockname()[0]
+            sock.close()
+        except OSError:
+            local_ip = "127.0.0.1"
+
+        server_address = local_ip
+        self._speak(STEP_API_SERVER_INFO.format(server_address=server_address))
+        self._wait_for_input()
+        self._speak("Great. You can now enter that address in the Blind Assistant app.")
+
+    async def _setup_telegram_optional(self) -> None:
+        """
+        Optional: guide power users through Telegram bot setup.
+
+        Telegram is a secondary/super-user channel only.
+        The native app is primary. This step is clearly marked as optional
+        and warns blind users that Telegram setup requires sighted assistance
+        for some visual configuration steps.
+        """
         from blind_assistant.security.credentials import (
             store_credential,
             TELEGRAM_BOT_TOKEN,
             TELEGRAM_ALLOWED_USER_IDS,
         )
 
-        self._speak(STEP_TELEGRAM_INTRO)
+        self._speak(STEP_TELEGRAM_OPTIONAL_INTRO)
         response = self._wait_for_input()
 
-        if not self._check_ready(response):
-            self._speak(
-                "No problem. Please install Telegram from telegram.org "
-                "and then run setup again."
-            )
-            return False
+        if self._check_skip(response):
+            self._speak("Okay, skipping Telegram setup. The native app is your primary interface.")
+            return
 
         self._speak(STEP_TELEGRAM_BOT_CREATION)
         response = self._wait_for_input()
@@ -323,14 +361,15 @@ class VoiceInstaller:
 
         if user_id.isdigit():
             store_credential(TELEGRAM_ALLOWED_USER_IDS, user_id)
-            self._speak(f"Your user ID {user_id} has been saved. Only you can control this assistant.")
+            self._speak(
+                f"Your user ID {user_id} has been saved. "
+                "Only you can control this assistant via Telegram."
+            )
         else:
             self._speak(
                 "I didn't catch a number. I'll save this step for later. "
-                "You can add your user ID after setup."
+                "You can add your user ID by running setup again."
             )
-
-        return True
 
     async def _setup_claude(self) -> bool:
         """Guide user through Claude API key setup."""
