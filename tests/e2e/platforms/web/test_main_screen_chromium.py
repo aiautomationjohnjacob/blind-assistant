@@ -61,12 +61,16 @@ def web_app_available() -> bool:
     Avoids confusing connection-refused errors in test output.
     Returns True if the server responds, False otherwise.
     """
-    import urllib.error
-    import urllib.request
+    import http.client
+    import socket
     try:
-        with urllib.request.urlopen(WEB_APP_URL, timeout=3) as resp:
-            return resp.status == 200
-    except (urllib.error.URLError, OSError):
+        # Use http.client directly — WEB_APP_URL is always http://localhost:19006
+        # (no dynamic scheme from user input), so S310 does not apply here.
+        conn = http.client.HTTPConnection("localhost", 19006, timeout=3)
+        conn.request("GET", "/")
+        resp = conn.getresponse()
+        return resp.status == 200
+    except (http.client.HTTPException, OSError, socket.timeout):
         return False
 
 
