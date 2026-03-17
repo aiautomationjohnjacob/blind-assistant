@@ -34,6 +34,22 @@ export interface QueryResponse {
   session_id: string;
 }
 
+export interface TranscribeRequest {
+  /** Base64-encoded audio bytes (WAV, M4A, OGG — any format Whisper supports). */
+  audio_base64: string;
+  /** Optional BCP-47 language tag (e.g. "en", "es"). Auto-detected if omitted. */
+  language?: string;
+  session_id?: string;
+}
+
+export interface TranscribeResponse {
+  /** Transcribed text — empty string if no speech detected. */
+  text: string;
+  /** Language Whisper detected (e.g. "en"). Null if detection failed. */
+  language: string | null;
+  session_id: string;
+}
+
 export interface RememberRequest {
   content: string;
   session_id?: string;
