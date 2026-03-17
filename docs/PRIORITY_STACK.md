@@ -20,21 +20,17 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P1 | **Live food ordering validation**: run `_handle_order_food` on a real Playwright browser (DoorDash or accessible test site) to validate the full 11-step checkout loop works against an actual web page. Use computer-use-tester + device-simulator. | Phase 3 start | 2026-03-17 |
-| P2 | **Cross-platform accessibility audit**: call 5 platform agents (Android, iOS, Web, Windows, macOS) to audit current code for WCAG/accessibility issues before user testing starts. | Phase 3 gate | 2026-03-17 |
+| P1 | **Live food ordering validation (ISSUE-021)**: run `_handle_order_food` on a real Playwright browser (DoorDash or accessible test site) to validate the full 11-step checkout loop works against an actual web page. Use computer-use-tester + device-simulator. | Phase 3 start | 2026-03-17 |
 | P2 | End-to-end food ordering demo on real device: blind user on Android (TalkBack) + iOS (VoiceOver) can say "order me food" and complete the full flow by voice. | Phase 3 sprint | 2026-03-17 |
 | P2 | Voice installer: complete voice-guided setup from fresh Python install | ARCHITECTURE.md Task 5 | 2026-03-17 |
 | P2 | Web app: accessible web interface at blind-assistant.org (WCAG 2.1 AA; NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome) | Founder scope expansion | 2026-03-17 |
-| P2 | Cross-platform accessibility audit: run all 5 platform agents on current codebase | Founder scope expansion | 2026-03-17 |
-| P3 | Add body size limit to /transcribe endpoint (ISSUE-018) | security-specialist | 2026-03-17 |
-| P3 | Add recording-started haptic/audio cue to MainScreen for TalkBack confirmation | blind-user-tester | 2026-03-17 |
+| P3 | **ISSUE-020**: Remove or replace platform hint text in MainScreen that says "Double-tap to activate" — visual-only, contradicts accessibility copy guidelines | accessibility-reviewer | 2026-03-17 |
 | P3 | Android app: run npm install + expo build:android + TalkBack test on AVD | Founder scope expansion | 2026-03-17 |
 | P3 | iOS app: run npm install + expo build:ios --simulator + VoiceOver test on xcrun simctl | Founder scope expansion | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Education website (learn.blind-assistant.org): audio-primary; NVDA+Chrome; zero mouse | education-website-designer | 2026-03-17 |
 | P3 | Voice Activity Detection (VAD) for voice_local.py (replaces fixed recording duration) | ISSUE-002 | 2026-03-17 |
 | P3 | PIL ImageGrab Playwright fallback for headless/server environments | ISSUE-003 | 2026-03-17 |
-| P3 | Add Optional[Callable] type annotations to response_callback params in orchestrator | ISSUE-004 | 2026-03-17 |
 | P3 | MCP memory server integration (cross-session user preferences) | INTEGRATION_MAP.md | 2026-03-17 |
 | P3 | Populate ROADMAP.md with Phase 3-5 milestones | open source | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
