@@ -67,7 +67,7 @@ def empty_registry_yaml(tmp_path: Path) -> Path:
 def registry_with_no_class(tmp_path: Path) -> Path:
     """Registry with a tool that has no class field (package-only install)."""
     content = """
-tools:
+capabilities:
   - name: http_client
     package: aiohttp
     version: "3.9.3"
