@@ -194,7 +194,11 @@ home and no scaffolding.
 **Impact**: Cannot verify any client app works end-to-end. CI web E2E job skips (no tests).
 **Proposed fix**: Create `tests/e2e/platforms/{web,android,ios,desktop}/` directories with
 placeholder files. Add Playwright dependency. Wire the first web smoke test.
-**Status**: OPEN
+**Status**: IN PROGRESS
+**Progress (Cycle 5)**: Directories created with placeholder files. Cycle 15: Web E2E tests
+fully rewritten with 11 real Playwright accessibility tests (keyboard nav, ARIA, lang, title,
+focus). CI job updated to build Expo bundle + serve + run tests. Web portion DONE.
+Android, iOS, Desktop stubs exist but need real device/emulator — Phase 3 P2/P3 items.
 
 ### ISSUE-011: API server has no rate limiting
 **Severity**: MEDIUM
