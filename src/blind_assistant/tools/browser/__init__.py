@@ -12,7 +12,6 @@ Per SECURITY_MODEL.md §2.4: screenshot content is screened before any API call;
 financial pages are protected and never sent externally.
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass, field
 
