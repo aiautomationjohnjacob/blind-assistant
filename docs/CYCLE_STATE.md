@@ -242,17 +242,15 @@ Cycle 15 priority (this is the 5th cycle in Phase 3, so project-inspector should
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 13.** Phase 3 in progress. ISSUE-022 CI repair done (56 mypy errors fixed,
-setuptools added to CI). Push triggered; CI run pending verification.
+**Loop completed Cycle 14.** Phase 3 in progress. CI is fully green (run 23218631525, all 7 jobs pass).
+11 security CVEs patched. 5 new mypy errors from updated type stubs fixed.
 
-The most important work for Cycle 14 (Phase 3: Blind User Testing):
-1. **Verify CI is green**: `gh run list --limit 3` — the fix was pushed as commit 687e58b. If any
-   job still fails, diagnose immediately before starting new features.
-2. **Close stale GitHub issues**: 20+ historical P0 CI-failure issues from before Cycle 13 fix.
-   Use `gh issue close` to clean up the tracker. These are noise, not real open issues.
+The most important work for Cycle 15 (Phase 3: Blind User Testing):
+1. **EVERY 5TH CYCLE**: project-inspector must run STEP 3 gap scan across the full codebase.
+2. **Close stale GitHub issues**: 20+ historical P0 CI-failure issues from before Cycle 14 fix.
+   Use `gh issue close` in bulk. These are noise — the underlying CI is now fixed.
 3. **Fix Expo web export**: Add `"main": "app/index.tsx"` to app.json (or add App.tsx shim) so
    `npx expo export --platform web` resolves the Metro AppEntry.js path correctly.
 4. **P2: Web platform accessibility tests**: Once Expo web export works, serve with `serve dist/`
    and run Playwright axe-core accessibility audit + keyboard navigation tests.
-5. **Every 5th cycle (Cycle 15)**: project-inspector should run.
-6. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
+5. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
