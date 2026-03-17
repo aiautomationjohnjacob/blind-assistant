@@ -13,10 +13,14 @@ Per USER_STORIES.md:
 - Dorothy: Slow response, low technical confidence — confirm every step aloud
 """
 
+from __future__ import annotations
+
 import asyncio
 import logging
+from typing import TYPE_CHECKING
 
-from blind_assistant.core.orchestrator import UserContext
+if TYPE_CHECKING:
+    from blind_assistant.core.orchestrator import UserContext
 
 logger = logging.getLogger(__name__)
 
