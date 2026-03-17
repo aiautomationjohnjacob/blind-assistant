@@ -31,6 +31,13 @@
 | P3 | Populate ROADMAP.md with Phase 3-5 milestones | open source | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
+## Completed Items (Cycle 20 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Unit tests for ADB/simctl helpers: 72 new tests covering _parse_content_descriptions, _parse_bounds, _has_visual_only_language, _has_double_tap_hint — device-free, 0.08s | 2026-03-17 | 20 |
+| Documentation-steward run: CHANGELOG.md updated through Cycle 19; CONTRIBUTING.md setup steps corrected; 8 missing docstrings added | 2026-03-17 | 20 |
+
 ## Completed Items (Cycle 19 additions)
 
 | Item | Completed | Cycle # |
