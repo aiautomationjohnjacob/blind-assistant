@@ -212,7 +212,9 @@ class Orchestrator:
         # Unknown intent — try to answer as a general question
         return await self._handle_general_question(intent, context, update)
 
-    async def _handle_screen_description(self, intent, context: UserContext, update) -> dict:
+    async def _handle_screen_description(
+        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
+    ) -> dict:
         """Capture and describe the current screen."""
         await update("Taking a look at your screen...")
         from blind_assistant.vision.screen_observer import ScreenObserver
