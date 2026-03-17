@@ -19,19 +19,19 @@ import pytest
 # ─────────────────────────────────────────────────────────────────────────────
 
 try:
-    # If pytest-playwright is installed, its plugin registers the `page` fixture
-    # automatically. We do NOT override it here — just check it's available.
-    import playwright  # noqa: F401
-    PLAYWRIGHT_AVAILABLE = True
+    # pytest-playwright registers the `page` fixture as a plugin.
+    # Importing it here confirms it is installed and its fixtures are active.
+    import pytest_playwright  # noqa: F401
+    PYTEST_PLAYWRIGHT_AVAILABLE = True
 except ImportError:
-    PLAYWRIGHT_AVAILABLE = False
+    PYTEST_PLAYWRIGHT_AVAILABLE = False
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Stub `page` fixture — only active when pytest-playwright is NOT installed
 # ─────────────────────────────────────────────────────────────────────────────
 
-if not PLAYWRIGHT_AVAILABLE:
+if not PYTEST_PLAYWRIGHT_AVAILABLE:
     @pytest.fixture
     def page() -> None:
         """
