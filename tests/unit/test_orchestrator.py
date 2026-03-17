@@ -569,12 +569,15 @@ class TestHandleOrderFood:
         orc.tool_registry.get_installed_tool.return_value = mock_browser
 
         # Patch all Claude-powered helper methods so test doesn't need anthropic installed
+        options_text = "1. Pizza Palace. 2. Taco Town."
+        order_summary = "1x Pepperoni Pizza, total $18.50"
+        order_result = {"success": True, "confirmation": "Order #12345 placed!"}
         with (
-            patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Pizza Palace. 2. Taco Town.")),
+            patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value=options_text)),
             patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=restaurant_page)),
             patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=cart_page)),
-            patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x Pepperoni Pizza, total $18.50")),
-            patch.object(orc, "_place_order", new=AsyncMock(return_value={"success": True, "confirmation": "Order #12345 placed!"})),
+            patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value=order_summary)),
+            patch.object(orc, "_place_order", new=AsyncMock(return_value=order_result)),
         ):
             updates = []
             response_count = [0]
