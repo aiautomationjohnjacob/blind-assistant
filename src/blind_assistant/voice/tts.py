@@ -67,6 +67,7 @@ async def _elevenlabs_tts(
         if not api_key:
             return None  # Fall through to local
 
+        from elevenlabs import VoiceSettings
         from elevenlabs.client import AsyncElevenLabs
 
         client = AsyncElevenLabs(api_key=api_key)
@@ -76,23 +77,29 @@ async def _elevenlabs_tts(
         # speed 0.5 → stability 0.8; speed 1.0 → stability 0.5; speed 2.0 → stability 0.2
         stability = max(0.1, min(0.9, 1.0 - (speed - 0.5) * 0.4))
 
+        # client.generate() returns bytes | AsyncIterator[bytes] depending on the SDK version.
+        # We handle both: if already bytes, use directly; otherwise collect async chunks.
         audio_generator = await client.generate(
             text=text,
             voice=vid,
             model="eleven_turbo_v2",
-            voice_settings={
-                "stability": stability,
-                "similarity_boost": 0.75,
-            },
+            voice_settings=VoiceSettings(
+                stability=stability,
+                similarity_boost=0.75,
+            ),
         )
 
         # Collect all chunks — gather into a list first (async for is not directly
-        # usable by bytes.join() since join requires a synchronous iterable)
-        chunks: list[bytes] = []
-        async for chunk in audio_generator:
-            if isinstance(chunk, bytes):
-                chunks.append(chunk)
-        audio_bytes = b"".join(chunks)
+        # usable by bytes.join() since join requires a synchronous iterable).
+        # Guard against SDK returning raw bytes instead of an async iterable.
+        if isinstance(audio_generator, bytes):
+            audio_bytes = audio_generator
+        else:
+            chunks: list[bytes] = []
+            async for chunk in audio_generator:
+                if isinstance(chunk, bytes):
+                    chunks.append(chunk)
+            audio_bytes = b"".join(chunks)
         return audio_bytes if audio_bytes else None
 
     except Exception as e:
