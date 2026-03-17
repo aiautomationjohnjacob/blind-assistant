@@ -125,6 +125,48 @@ hardware/infrastructure.
 Write integration test. Test with real Telegram credentials in a staging environment.
 **Status**: OPEN
 
+### ISSUE-008: No REST API server — all clients have no connection point
+**Severity**: HIGH
+**Category**: architecture, integration
+**Detected by**: Founder directive (scope expansion 2026-03-17)
+**Detected**: 2026-03-17
+**Description**: The Python backend runs as a CLI/Telegram bot but has no HTTP server.
+All 5 client apps (Android, iOS, Desktop, Web) need to connect to the backend via REST API.
+Without this, no client app can function.
+**Impact**: All multi-platform work is blocked until this exists.
+**Proposed fix**: Add FastAPI or Flask server to `src/blind_assistant/interfaces/api_server.py`.
+Expose: `POST /query`, `POST /remember`, `POST /describe`, `POST /task`, `GET /profile`.
+Run on localhost:8000 for development; behind auth for production.
+**Status**: OPEN
+
+### ISSUE-009: No architecture decision on client-app framework
+**Severity**: HIGH
+**Category**: architecture
+**Detected by**: Founder directive (scope expansion 2026-03-17)
+**Detected**: 2026-03-17
+**Description**: Android and iOS apps are required but no decision has been made on whether
+to use React Native, Flutter, or native (Swift/Kotlin). Building the wrong stack wastes
+significant effort. Python is NOT appropriate for Android/iOS clients.
+**Impact**: All Android/iOS implementation is blocked until this is decided.
+**Proposed fix**: Use tech-lead + gap-analyst to evaluate React Native vs Flutter vs native
+specifically on: (1) TalkBack/VoiceOver accessibility quality, (2) development speed,
+(3) ability to call the Python REST backend. Document decision in ARCHITECTURE.md and
+CYCLE_STATE.md Decisions Made table.
+**Status**: OPEN
+
+### ISSUE-010: No multi-platform E2E test infrastructure
+**Severity**: MEDIUM
+**Category**: testing, architecture
+**Detected by**: Founder directive (scope expansion 2026-03-17)
+**Detected**: 2026-03-17
+**Description**: `tests/e2e/platforms/` directory structure doesn't exist. Web E2E tests
+(Playwright), Android emulator tests (ADB), iOS simulator tests (xcrun simctl) have no
+home and no scaffolding.
+**Impact**: Cannot verify any client app works end-to-end. CI web E2E job skips (no tests).
+**Proposed fix**: Create `tests/e2e/platforms/{web,android,ios,desktop}/` directories with
+placeholder files. Add Playwright dependency. Wire the first web smoke test.
+**Status**: OPEN
+
 ---
 
 ## Resolved Issues

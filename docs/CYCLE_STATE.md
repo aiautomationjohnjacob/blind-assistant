@@ -62,11 +62,11 @@ New wiring in run-cycle:
 
 ```
 Phase 0: Foundation Setup         ✅ COMPLETE (agent network, GitHub, MCPs)
-Phase 1: Discovery & Architecture  → Current
-Phase 2: Core Build Sprint         → Pending
-Phase 3: Blind User Testing        → Pending
-Phase 4: Accessibility Hardening   → Pending
-Phase 5: Polish & Community Ready  → Pending
+Phase 1: Discovery & Architecture  ✅ COMPLETE (all deliverables done, Cycle 1)
+Phase 2: Core Build Sprint         🔄 IN PROGRESS (Cycles 2-N)
+Phase 3: Blind User Testing        ⏳ Pending
+Phase 4: Accessibility Hardening   ⏳ Pending
+Phase 5: Polish & Community Ready  ⏳ Pending
 ```
 
 ## What Happens in Each Phase
@@ -147,11 +147,16 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] Orchestrator: intent classification → tool selection → execution pipeline (Cycle 2)
 - [x] Vault passphrase prompt recovery: user can self-unlock Second Brain by voice (Cycle 3)
 - [x] TTS + STT unit tests: 25 new tests covering voice pipeline (Cycle 3)
-- [ ] Tool registry + installer: self-expanding pattern with user confirmation
 - [x] Risk disclosure flow: payment confirmation with spoken warning (Cycle 1)
-- [ ] Telegram end-to-end demo: voice message in → TTS audio reply out (P1 for Cycle 4)
+- [ ] **P1: Backend API server** — expose Python backend as FastAPI HTTP server; all clients
+      connect via REST; endpoints: /query, /remember, /describe, /task, /profile
+- [ ] **P1: Telegram end-to-end demo** — voice message in → TTS audio reply out (real hardware test)
+- [ ] **P1: ARCH DECISION** — tech-lead decides unified (React Native/Flutter) vs native for clients
+- [ ] Tool registry + installer: self-expanding pattern with user confirmation
 - [ ] Voice installer: voice-guided setup from zero to functional
 - [ ] End-to-end test: blind user asks to order food → full flow with confirmations
+- [ ] context.clear_sensitive(): zero vault passphrase on session end
+- [ ] Make passphrase prompt timeout configurable in config.yaml
 
 ## Blockers
 
@@ -187,3 +192,18 @@ ElevenLabs/pyttsx3 fallback, singleton model loading, transcribe_microphone). To
 | 2026-03-17 | OS keychain for all credentials | security-specialist | No .env files, cross-platform, secure |
 | 2026-03-17 | Risk disclosure fires every transaction | ethics-advisor + security-specialist | Never assume prior awareness |
 | 2026-03-17 | Per-transaction payment confirmation | ethics-advisor | User cannot visually verify; repetition is safer |
+| 2026-03-17 | All user data is server-side | Founder directive | Second brain, calendar, profile shared across all 5 clients; backend is single source of truth |
+| 2026-03-17 | Backend runs on localhost during dev | Founder directive | No cloud accounts yet; all emulators connect to localhost; cloud migration is a later phase |
+| 2026-03-17 | Python NOT used for mobile clients | Founder + tech analysis | Android/iOS require native or cross-platform (React Native/Flutter); Python stays for backend only |
+
+## Loop Status for Next Run
+
+**Loop was manually stopped after Cycle 3.** Loop is clean and ready for Cycle 4.
+No mid-cycle state artifacts. All changes committed and pushed.
+Cycle 4 should begin by reading this file's scope expansion notice at the top,
+then reading PRIORITY_STACK.md (which now has 3 P1 items), then LESSONS.md.
+
+The most important work for Cycle 4:
+1. **P1 ARCH DECISION** — tech-lead + gap-analyst decide client framework before any mobile code
+2. **P1 Backend API server** — FastAPI server exposing REST endpoints for all clients
+3. **P1 Telegram E2E demo** — wire voice in → TTS audio out on real infrastructure
