@@ -265,7 +265,7 @@ def food_site_server():
 # BrowserTool integration tests — real Playwright browser
 # ─────────────────────────────────────────────────────────────
 
-from blind_assistant.tools.browser import BrowserSession, BrowserTool, PageState
+from blind_assistant.tools.browser import BrowserSession, PageState  # noqa: E402
 
 
 async def test_browser_tool_navigate_returns_real_page_state(
