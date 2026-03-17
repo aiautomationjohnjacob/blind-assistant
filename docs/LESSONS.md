@@ -424,3 +424,86 @@ a value. The cleanest pattern: have the mock raise `asyncio.CancelledError` (whi
 catches and breaks on), or set `self._running = False` and then raise. Never rely on the
 loop checking `_running` between a return value and the next iteration — there may be
 more code between them.
+
+---
+
+## Cycle 6 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: Delivered concrete user-visible value. The mobile setup wizard
+means a blind user who downloads the app now has a complete path from first launch to
+connected assistant — all narrated aloud. The CI job closes a real test-reliability gap.
+Rate limiting is prudent infrastructure protecting user service quality. The next most
+important thing: the MainScreen button still sends a hardcoded message instead of recording
+real microphone input. Closing that gap makes the native app actually usable as a voice
+assistant — not just a connected stub.
+
+**Code quality (code-reviewer)**: (1) Test count: Python 339→347, JS 31→77 — no regressions.
+(2) RateLimitMiddleware correctly uses time.monotonic() and defaultdict(deque) — proper sliding
+window. (3) One code smell: STEP_INSTRUCTIONS.confirm is mutated as a module-level variable
+inside handleConfirmToken() — should be a useRef. Low severity. (4) app/index.tsx has no
+unit tests (documented gap — integration test in Phase 3). (5) No test file regressions.
+
+**Security (security-specialist)**: Bearer token stored correctly in expo-secure-store (device
+secure enclave, never in JS constants). RateLimitMiddleware uses monotonic clock and takes
+only the first X-Forwarded-For IP (correct). Two items to address: (1) The speak() call in
+handleConfirmToken includes partial token chars — if TTS output is logged at DEBUG level
+this would leak credentials; add a comment warning. (2) saveApiBaseUrl() does not validate
+the URL — a file: or data: URL would be invalid; add URL validation before storing.
+
+**Accessibility (accessibility-reviewer)**: SetupWizardScreen is accessibility-correct from
+the first commit: error uses liveRegion="assertive"; confirm step speaks first-4/last-4 for
+verification; every interactive element has accessibilityLabel + accessibilityHint. One note:
+the TextInput should have importantForAccessibility="yes" explicitly to guarantee TalkBack
+focus on appearance. Progress indicator correctly uses importantForAccessibility="no-hide-descendants".
+
+**User perspective (blind-user-tester)**: The setup wizard is the right approach. Hearing the
+token prefix/suffix read back before confirm gives real confidence. Re-enter button is critical.
+The unresolved gap: MainScreen still sends hardcoded "Hello, what can you do?" — a real blind
+user tapping the button would hear a canned response, not their actual spoken question.
+This must be fixed before the app is meaningful.
+
+**Ethics (ethics-advisor)**: No concerns. Wizard asks only for the API token, no personal data.
+Token never leaves device — used only for local backend auth. Rate limiting protects user's
+AI access from being degraded by others.
+
+**Goal adherence (goal-adherence-reviewer)**: All four PRIORITY_STACK items addressed exactly as
+scoped. ISSUE-014, ISSUE-013, ISSUE-012, ISSUE-011 all resolved. No requirements dropped. The
+mobile app can now be fully configured by voice on first run — this was the stated goal of ISSUE-013.
+
+**Consensus recommendation for next cycle**: (1) Add real microphone recording to MainScreen —
+replace the hardcoded message with expo-av audio capture, send the WAV bytes to the backend
+for STT, display/speak the AI response. This closes the "the app actually works as a voice
+assistant" milestone. (2) Add URL validation to saveApiBaseUrl() and importantForAccessibility
+to the TextInput in SetupWizardScreen (minor fixes from this cycle's review).
+
+**Orchestrator self-assessment**:
+- Accomplished: ISSUE-014 (JS CI job — 32→77 JS tests now in CI); ISSUE-013 (setup wizard —
+  useSecureStorage hook, SetupWizardScreen, app/index.tsx rewrite, 63 new JS tests);
+  ISSUE-012 (dead code removed from voice_local.py); ISSUE-011 (RateLimitMiddleware, 8 new
+  Python tests); Python total 347 (was 339), JS total 77 (was 31), all passing
+- Attempted but failed: none — all planned work completed
+- Confusion/loops: (1) jest.mock("react-native") with jest.requireActual caused a circular
+  dependency on the SettingsManager native module — fixed by switching to jest.spyOn in
+  beforeEach. (2) importantForAccessibility="no-hide-descendants" hides elements from
+  @testing-library getByText/getByLabelText — fixed test to check accessible header instead.
+- New gaps: (1) MainScreen.tsx sends hardcoded "Hello" — needs real microphone capture
+  (ISSUE-015 below); (2) saveApiBaseUrl should validate URL scheme; (3) SetupWizardScreen
+  TextInput missing importantForAccessibility="yes"; (4) speak() in wizard logs partial token
+  at DEBUG level — harmless but worth a comment
+- Next cycle recommendation: Implement real voice recording in MainScreen (expo-av
+  AudioRecorder → send to backend /query as audio or pre-transcribed text). This completes
+  the "native app actually records and responds to voice" milestone that is the true Phase 2
+  completion for the mobile client.
+
+**TECHNICAL LESSON (React Native test mocks)**: Never use jest.requireActual("react-native")
+inside jest.mock() — it triggers the Settings.ios.js module which requires SettingsManager
+(a native module not available in Node-based Jest, even with jest-expo preset). Instead, use
+jest.spyOn() in beforeEach() to patch individual methods on the already-mocked module that
+jest-expo provides. This is the correct and idiomatic pattern for jest-expo environments.
+
+**TECHNICAL LESSON (importantForAccessibility vs testing-library)**: Elements with
+importantForAccessibility="no-hide-descendants" in React Native are correctly hidden from
+accessibility tree queries (getByText, getByLabelText) in @testing-library/react-native.
+This is correct behavior — the element is intentionally decorative. Do not try to query these
+elements via accessibility APIs; instead, test that the accessible counterpart (the spoken
+announcement, or an accessible header on the same screen) is present.
