@@ -62,7 +62,6 @@ def web_app_available() -> bool:
     Returns True if the server responds, False otherwise.
     """
     import http.client
-    import socket
     try:
         # Use http.client directly — WEB_APP_URL is always http://localhost:19006
         # (no dynamic scheme from user input), so S310 does not apply here.
@@ -70,7 +69,7 @@ def web_app_available() -> bool:
         conn.request("GET", "/")
         resp = conn.getresponse()
         return resp.status == 200
-    except (http.client.HTTPException, OSError, socket.timeout):
+    except (TimeoutError, http.client.HTTPException, OSError):
         return False
 
 

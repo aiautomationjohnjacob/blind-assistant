@@ -412,4 +412,81 @@ Playwright install-deps libasound2 virtual package workaround added. CI fully gr
 generated 20+ P0 issues that are now stale since CI is fixed. They clutter the issue tracker
 and make it hard to see real open issues. All can be closed with a note that the root cause
 (mypy errors + CVEs + pip-audit mode) was fixed in Cycle 14.
-**Status**: OPEN (pending batch close in Cycle 15)
+**Status**: RESOLVED
+**Resolved in**: Cycle 14 (commit d593482) — batch-closed 79 stale CI-failure GitHub issues.
+
+### ISSUE-024: Expo web export fails — App.tsx shim missing
+**Severity**: MEDIUM
+**Category**: architecture, web
+**Detected by**: project-inspector (Cycle 15 gap scan)
+**Detected**: 2026-03-17
+**Description**: `npx expo export --platform web` failed with "Unable to resolve module ../../App"
+because package.json uses `"main": "node_modules/expo/AppEntry.js"` (expects App.tsx in project
+root) but the app entry logic is in `app/index.tsx`. Metro could not find the entry point.
+**Impact**: Web platform could not be built at all — all web E2E tests were permanently skipped.
+**Proposed fix**: Create `App.tsx` shim in project root that re-exports `app/index.tsx`.
+**Status**: RESOLVED
+**Resolved in**: Cycle 15 — `clients/mobile/App.tsx` shim created. Web bundle builds successfully
+(`npx expo export --platform web` produces `dist/` with 438 kB JS bundle + index.html).
+
+### ISSUE-025: Web E2E CI job pointed to wrong test directory
+**Severity**: MEDIUM
+**Category**: ci, testing
+**Detected by**: project-inspector (Cycle 15 gap scan)
+**Detected**: 2026-03-17
+**Description**: The `e2e-web` CI job checked for `tests/e2e/web/` which does not exist.
+Web E2E tests live at `tests/e2e/platforms/web/`. The job was permanently skipping because the
+path check always returned `exists=false`. Also: the job never built the Expo web bundle or
+started a web server before running the tests.
+**Impact**: Web E2E accessibility tests never ran in CI — WCAG compliance was unverified.
+**Proposed fix**: Fix the CI job to (1) build the Expo bundle, (2) start Python HTTP server,
+(3) run `pytest tests/e2e/platforms/web/ --browser chromium`. Rewrite tests to skip gracefully
+when pytest-playwright is not installed (unit test environment).
+**Status**: RESOLVED
+**Resolved in**: Cycle 15 — `e2e-web` CI job rebuilt to build Expo bundle → serve dist/ → run
+Playwright tests. Added `conftest.py` stub fixture so tests skip in unit test environments.
+11 web E2E accessibility tests now ready to run in CI.
+
+### ISSUE-026: test_food_ordering.py E2E test broken — context_manager not mocked
+**Severity**: HIGH
+**Category**: testing
+**Detected by**: project-inspector (Cycle 15 test run)
+**Detected**: 2026-03-17
+**Description**: `test_handle_message_routes_order_food_through_pipeline` was failing with
+"AssertionError: ContextManager not initialized". The `_make_orchestrator_with_mock_browser`
+helper set `orc._initialized = True` but did not set `orc.context_manager`. When
+`context_manager` was added to `handle_message` (with an assert guard), this test was
+not updated to mock the new dependency.
+**Impact**: One of 8 food ordering E2E tests was always failing silently (not visible in CI
+because the test job runs with `-m "not integration and not slow"` which excluded the e2e mark).
+**Proposed fix**: Add `orc.context_manager = MagicMock()` to the test helper.
+**Status**: RESOLVED
+**Resolved in**: Cycle 15 — `orc.context_manager = MagicMock()` added to helper with comment
+explaining why. All 8 food ordering E2E tests pass.
+
+### ISSUE-027: pytest `e2e` and `web` marks not registered — PytestUnknownMarkWarning
+**Severity**: LOW
+**Category**: testing
+**Detected by**: project-inspector (Cycle 15 test run)
+**Detected**: 2026-03-17
+**Description**: `pyproject.toml` markers list did not include `e2e` or `web`, causing
+PytestUnknownMarkWarning for `@pytest.mark.e2e` in test_food_ordering.py and
+`@pytest.mark.web` in the web E2E tests.
+**Status**: RESOLVED
+**Resolved in**: Cycle 15 — `e2e` and `web` markers added to `pyproject.toml` [tool.pytest.ini_options] markers list.
+
+### ISSUE-028: Missing unit tests for telegram_bot.py, query.py, redaction.py, screen_observer.py
+**Severity**: MEDIUM
+**Category**: testing
+**Detected by**: project-inspector (Cycle 15 gap scan)
+**Detected**: 2026-03-17
+**Description**: Four source files have no dedicated unit test file:
+- `src/blind_assistant/interfaces/telegram_bot.py` → no test_telegram_bot.py
+- `src/blind_assistant/second_brain/query.py` → no test_query.py
+- `src/blind_assistant/vision/redaction.py` → no test_redaction.py
+- `src/blind_assistant/vision/screen_observer.py` → no test_screen_observer.py
+Per CLAUDE.md: "Every `src/` file must have tests in the same commit."
+These files were created in Phase 1/2 before the strict rule was enforced.
+**Impact**: CI coverage threshold is at risk; bugs in these modules go undetected.
+**Proposed fix**: Add unit test files in `tests/unit/` for each missing module.
+**Status**: OPEN
