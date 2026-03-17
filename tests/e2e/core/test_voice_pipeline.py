@@ -539,6 +539,7 @@ class TestAPIServerVoicePipeline:
             resp = client.post(
                 "/query",
                 json={"message": "What is the capital of France?", "session_id": "test"},
+                headers={"Authorization": "Bearer e2e-test-token"},
             )
 
         assert resp.status_code == 200
