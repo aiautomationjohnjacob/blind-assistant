@@ -1039,6 +1039,5 @@ class TestCheckoutLoopHelpers:
         assert "text" in result
         response_lower = result["text"].lower()
         assert any(
-            phrase in response_lower
-            for phrase in ("didn't hear", "not hear", "ready", "try again", "order food")
+            phrase in response_lower for phrase in ("didn't hear", "not hear", "ready", "try again", "order food")
         ), f"Expected helpful timeout message, got: {result['text']}"

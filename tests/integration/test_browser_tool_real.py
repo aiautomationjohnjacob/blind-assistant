@@ -40,6 +40,7 @@ PLAYWRIGHT_AVAILABLE = os.environ.get("PLAYWRIGHT_AVAILABLE", "0") == "1"
 # We try a minimal browser launch and catch the dependency error.
 _playwright_launch_ok = False
 
+
 def _check_playwright() -> bool:
     """Return True if Playwright can actually launch Chromium (system deps present)."""
     try:

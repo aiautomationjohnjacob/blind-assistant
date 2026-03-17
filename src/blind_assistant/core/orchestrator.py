@@ -218,9 +218,7 @@ class Orchestrator:
             return False
         return False
 
-    async def _execute_intent(
-        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
-    ) -> dict:
+    async def _execute_intent(self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]) -> dict:
         """
         Execute a classified intent using the appropriate tools.
 
@@ -244,9 +242,7 @@ class Orchestrator:
         description = await observer.describe_screen()
         return {"text": description}
 
-    async def _handle_add_note(
-        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
-    ) -> dict:
+    async def _handle_add_note(self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]) -> dict:
         """Add a note to the Second Brain vault."""
         await update("Saving that to your notes...")
         vault = await self._get_vault(context, response_callback=update)
@@ -265,9 +261,7 @@ class Orchestrator:
         response_text = await q.add_note_from_voice(content=content, context=context)
         return {"text": response_text}
 
-    async def _handle_query_note(
-        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
-    ) -> dict:
+    async def _handle_query_note(self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]) -> dict:
         """Query the Second Brain vault for matching notes."""
         await update("Searching your notes...")
         vault = await self._get_vault(context, response_callback=update)
@@ -315,9 +309,7 @@ class Orchestrator:
             logger.error(f"General question failed: {e}", exc_info=True)
             return {"text": (f"I wasn't able to answer that right now. Error: {str(e)}")}
 
-    async def _handle_order_food(
-        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
-    ) -> dict:
+    async def _handle_order_food(self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]) -> dict:
         """
         Handle a food ordering request end-to-end via conversational checkout loop.
 
@@ -403,8 +395,7 @@ class Orchestrator:
             if not user_choice:
                 return {
                     "text": (
-                        "I didn't hear which restaurant you'd like. "
-                        "Say 'order food' again when you're ready to try."
+                        "I didn't hear which restaurant you'd like. Say 'order food' again when you're ready to try."
                     ),
                     "ordering_in_progress": False,
                 }
@@ -447,8 +438,7 @@ class Orchestrator:
             if not item_choice:
                 return {
                     "text": (
-                        "I didn't hear what you'd like to order. "
-                        "Say 'order food' again when you're ready to try."
+                        "I didn't hear what you'd like to order. Say 'order food' again when you're ready to try."
                     ),
                     "ordering_in_progress": False,
                 }
@@ -479,10 +469,7 @@ class Orchestrator:
 
             if not order_confirmed:
                 return {
-                    "text": (
-                        "Order cancelled. No payment has been made. "
-                        "You can start a new order any time."
-                    ),
+                    "text": ("Order cancelled. No payment has been made. You can start a new order any time."),
                     "ordering_in_progress": False,
                 }
 
@@ -808,9 +795,7 @@ class Orchestrator:
             )
         }
 
-    async def _get_vault(
-        self, context: UserContext, response_callback: ResponseCallback = None
-    ):
+    async def _get_vault(self, context: UserContext, response_callback: ResponseCallback = None):
         """
         Get or initialize the vault for this user.
 
