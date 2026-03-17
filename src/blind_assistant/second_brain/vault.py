@@ -175,10 +175,15 @@ class EncryptedVault:
                 metadata = yaml.safe_load(parts[1]) or {}
                 body = parts[2].strip()
 
+            # Ensure date is always an ISO string (YAML may parse it as datetime)
+            raw_date = metadata.get("date", "")
+            if hasattr(raw_date, "isoformat"):
+                raw_date = raw_date.isoformat()
+
             return {
                 "title": metadata.get("title", note_path.stem),
                 "content": body,
-                "date": metadata.get("date", ""),
+                "date": str(raw_date),
                 "category": metadata.get("category", "general"),
             }
         except Exception as e:
