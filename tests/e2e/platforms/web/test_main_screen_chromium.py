@@ -31,6 +31,7 @@ SKIP BEHAVIOUR:
 
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 import pytest
@@ -48,8 +49,10 @@ try:
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
 
-# The URL where the Expo web bundle is served during CI and local testing
-WEB_APP_URL = "http://localhost:19006"
+# The URL where the Expo web bundle is served.
+# Overridable via WEB_APP_URL env var — used by deploy-staging.yml to test
+# against the real Netlify staging deploy instead of localhost.
+WEB_APP_URL = os.environ.get("WEB_APP_URL", "http://localhost:19006")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Fixtures
