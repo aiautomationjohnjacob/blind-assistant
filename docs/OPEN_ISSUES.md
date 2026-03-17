@@ -134,7 +134,12 @@ and requires zero external accounts to test.
 **Proposed fix**: Wire Desktop CLI → microphone → Whisper STT → orchestrator → TTS →
 speaker output. Test on real hardware. Telegram integration can follow later as an
 optional super-user feature.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 5 — 9 E2E tests in tests/e2e/core/test_voice_pipeline.py verify
+the full pipeline: voice input → STT → orchestrator → TTS → speaker. Accessibility
+assertion added (no visual-only language in responses). API server HTTP round-trip tested.
+Bug fix: wake-word-only utterances ("assistant" alone) now correctly prompt "Yes? How can
+I help?" instead of routing empty text to the AI (commits 9fa8bf8 + dc9a5d5).
 
 ### ISSUE-008: No REST API server — all clients have no connection point
 **Severity**: HIGH
