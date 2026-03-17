@@ -78,11 +78,22 @@ signs off on financial data handling AND ethics-advisor approves transaction con
 Second Brain — all without sighted help and without ever asking "what do I do next?"
 **Phase 5 complete when**: Dorothy passes the above test AND grant-writer produces GRANT_NARRATIVE.md
 
-## Current Sprint
+## Current Sprint (Phase 2 — Core Build Sprint)
 
-**Sprint goal**: —
-**Sprint items** (check off as complete):
-- (Sprint items will be populated at Phase 1 start)
+**Sprint goal**: Build the minimum product a blind user can actually try end-to-end.
+
+**Sprint items** (Phase 2 targets — check off as complete):
+- [ ] Telegram bot fully functional: receives text + voice, replies with text + voice
+- [ ] Whisper STT: transcribes voice messages from Telegram
+- [ ] TTS: ElevenLabs + pyttsx3 fallback, speed-configurable
+- [ ] Screen observer: "What's on my screen?" → spoken description via Claude Vision
+- [ ] Screen redaction: password fields and financial screens never sent to API
+- [ ] Second Brain MVP: add notes by voice, query notes by voice, encrypted vault
+- [ ] Orchestrator: intent classification → tool selection → execution pipeline
+- [ ] Tool registry + installer: self-expanding pattern with user confirmation
+- [ ] Risk disclosure flow: payment confirmation with spoken warning
+- [ ] Voice installer: voice-guided setup from zero to functional
+- [ ] End-to-end test: blind user asks to order food → full flow with confirmations
 
 ## Blockers
 
