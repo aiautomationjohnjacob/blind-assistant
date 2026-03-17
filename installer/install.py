@@ -153,7 +153,8 @@ I can help you navigate apps that do not work with screen readers.
 I can remember notes and information for you.
 I can help you order food and manage daily tasks.
 
-To talk to me, open Telegram and send me a message, or speak to me on this computer.
+To talk to me: open the Blind Assistant app on your phone and speak your request.
+You can also speak directly to this computer.
 
 Try saying: what is on my screen right now.
 
