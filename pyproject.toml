@@ -39,6 +39,8 @@ markers = [
     "security: security-critical paths — must pass at 100% coverage, no exceptions",
     "slow: tests taking more than 1 second",
     "accessibility: voice output and accessibility behaviour tests",
+    "e2e: end-to-end tests covering full user flows (only external APIs mocked)",
+    "web: web platform E2E tests via Playwright (requires web server running)",
 ]
 
 # ─────────────────────────────────────────────
