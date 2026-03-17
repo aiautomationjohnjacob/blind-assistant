@@ -206,15 +206,13 @@ Phase 3 build pipelines). Python test count: 348 passed, 21 skipped (was 314).
 
 ## Loop Status for Next Run
 
-**Loop was manually stopped after Cycle 4.** Loop is clean and ready for Cycle 5.
+**Loop completed Cycle 5.** Loop is clean and ready for Cycle 6.
 No mid-cycle state artifacts. All changes committed and pushed.
 
-The most important work for Cycle 5:
-1. **P1 Native voice E2E demo** (ISSUE-007) — wire voice_local.py → Whisper STT →
-   orchestrator → TTS → speaker; write integration test; this CLOSES Phase 2.
-2. **React Native skeleton** — create clients/ directory; scaffold Expo project;
-   configure REST client pointing to localhost:8000; basic Hello World screen with
-   ARIA labels and TalkBack-accessible layout.
-3. **ISSUE-011 (new)**: Add rate limiting middleware to api_server.py before cloud deployment.
-4. **ISSUE-010** (E2E test structure): tests/e2e/platforms/ already has __init__.py stubs —
-   next cycle write actual Playwright web smoke test for the web client.
+The most important work for Cycle 6:
+1. **P1: clients/mobile/ JS CI job** (ISSUE-014) — add `npm ci && npm test` step to
+   GitHub Actions so the 32 Jest tests run in CI. Without this, JS regressions are invisible.
+2. **P1: Mobile first-run setup wizard** (ISSUE-013) — voice-guided flow to configure
+   bearer token via expo-secure-store; the React Native app cannot authenticate until this exists.
+3. **P3: Remove dead code** (ISSUE-012) — `wake_word_found` in voice_local.py.
+4. **P3: Rate limiting** (ISSUE-011) — add slowapi middleware to api_server.py.
