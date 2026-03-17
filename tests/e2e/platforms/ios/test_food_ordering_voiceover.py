@@ -22,7 +22,7 @@ What these tests verify:
 
 Per testing.md: iOS E2E tests use xcrun simctl.
 Per CLAUDE.md: VoiceOver tests are required for iOS; every a11y hint must be outcome-first.
-Per ARCHITECTURE.md: React Native + Expo → native UIKit views → native UIAccessibility.
+Per ARCHITECTURE.md: React Native + Expo -> native UIKit views -> native UIAccessibility.
 
 NOTE: These tests require:
   1. macOS with Xcode installed (iOS Simulator only available on macOS)
@@ -34,13 +34,14 @@ NOTE: These tests require:
   4. Python backend running on localhost:8000:
        python -m blind_assistant.main --api
 
-In CI: a macOS GitHub Actions runner is needed for iOS tests.
-See .github/workflows/ci.yml NOTE about iOS E2E workflow (ios-e2e.yml — future).
+In CI: a macOS GitHub Actions runner handles iOS tests.
+See .github/workflows/ios-e2e.yml
 """
 
 from __future__ import annotations
 
 import os
+import shutil
 import time
 
 import pytest
@@ -89,6 +90,17 @@ def _has_double_tap_hint(text: str) -> bool:
     return "double-tap to" in text.lower() or "double tap to" in text.lower()
 
 
+def _backend_reachable() -> bool:
+    """Return True if the Python backend is running and healthy."""
+    try:
+        import httpx
+
+        resp = httpx.get(f"{BACKEND_URL}/health", timeout=5)
+        return resp.status_code == 200
+    except Exception:  # noqa: BLE001
+        return False
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Test class: VoiceOver launch and basic navigation
 # ─────────────────────────────────────────────────────────────────────────────
@@ -109,14 +121,11 @@ class TestVoiceOverLaunch:
             simctl.launch_app(APP_BUNDLE_ID)  # type: ignore[attr-defined]
             time.sleep(3)
 
-            # Verify the app process is still running (not crashed)
-            # xcrun simctl list apps shows installed apps; crash would show in device log
-            result_output = simctl.shell(f"list apps {simctl._udid} --json")  # type: ignore[attr-defined]
-            # A crash would cause the app not to appear in running state
-            # For now we verify via screenshot (blank = crash, has content = running)
+            # Verify the app is still running by capturing a screenshot.
+            # A crash would produce a blank or error screen.
             screenshot_path = simctl.screenshot()  # type: ignore[attr-defined]
             assert os.path.exists(screenshot_path), (
-                "Screenshot could not be captured — simulator may have crashed."
+                "Screenshot could not be captured -- simulator may have crashed."
             )
         finally:
             simctl.disable_voiceover()  # type: ignore[attr-defined]
@@ -128,7 +137,7 @@ class TestVoiceOverLaunch:
 
         VoiceOver reads the label to tell the user what the element is.
         "unlabelled button" is a WCAG 4.1.2 (Name, Role, Value) failure.
-        React Native maps accessibilityLabel → UIAccessibilityElement.accessibilityLabel.
+        React Native maps accessibilityLabel -> UIAccessibilityElement.accessibilityLabel.
         """
         simctl.enable_voiceover()  # type: ignore[attr-defined]
         try:
@@ -139,13 +148,13 @@ class TestVoiceOverLaunch:
             tree = simctl.get_accessibility_tree(APP_BUNDLE_ID)  # type: ignore[attr-defined]
 
             if tree:
-                # Tree dump contains the elements — verify no element is "unlabelled"
+                # Tree dump contains the elements -- verify no element is "unlabelled"
                 assert "unlabelled" not in tree.lower(), (
                     "simctl accessibility audit found unlabelled elements. "
                     "Every interactive element needs an accessibilityLabel. "
                     f"Audit output snippet: {tree[:500]}"
                 )
-            # If tree is empty, the audit tool is not available — test passes (best effort)
+            # If tree is empty, the audit tool is not available -- best-effort skip
         finally:
             simctl.disable_voiceover()  # type: ignore[attr-defined]
             simctl.terminate_app(APP_BUNDLE_ID)  # type: ignore[attr-defined]
@@ -187,7 +196,7 @@ class TestFoodOrderingVoiceOverFlow:
     """
     End-to-end food ordering flow with VoiceOver enabled.
 
-    Phase 3 scenario: blind user says "order me food" → risk disclosure → confirmation.
+    Phase 3 scenario: blind user says "order me food" -> risk disclosure -> confirmation.
     """
 
     def test_speak_button_has_outcome_first_hint(self, simctl: object) -> None:
@@ -208,15 +217,10 @@ class TestFoodOrderingVoiceOverFlow:
             tree = simctl.get_accessibility_tree(APP_BUNDLE_ID)  # type: ignore[attr-defined]
 
             if tree:
-                # The hint must NOT start with "Double-tap"
                 assert not _has_double_tap_hint(tree), (
-                    "Speak button hint uses 'Double-tap to...' language — regression from Cycle 11. "
+                    "Speak button hint uses 'Double-tap to...' language -- regression from Cycle 11. "
                     "Fix: use outcome-first hint like 'Starts recording your voice'."
                 )
-
-                # The hint should communicate a positive outcome
-                # ("Starts", "Records", "Sends", "Activates", "Begins" etc.)
-                # This is a soft check — different wording is acceptable
         finally:
             simctl.terminate_app(APP_BUNDLE_ID)  # type: ignore[attr-defined]
 
@@ -258,20 +262,8 @@ class TestFoodOrderingVoiceOverFlow:
         2. In a live region (accessibilityLiveRegion = "polite") so VoiceOver
            automatically reads it when it appears
         3. Not using aria-hidden or accessibilityViewIsModal that would hide it
-
-        This test verifies via the accessibility tree that the disclosure
-        element is present and accessible when triggered.
         """
-        import urllib.request
-
-        try:
-            req = urllib.request.Request(
-                f"{BACKEND_URL}/health",
-                method="GET",
-            )
-            with urllib.request.urlopen(req, timeout=5) as resp:
-                assert resp.status == 200
-        except OSError:
+        if not _backend_reachable():
             pytest.skip(
                 f"Backend not reachable at {BACKEND_URL}. "
                 "Start with: python -m blind_assistant.main --api"
@@ -282,34 +274,27 @@ class TestFoodOrderingVoiceOverFlow:
             simctl.launch_app(APP_BUNDLE_ID)  # type: ignore[attr-defined]
             time.sleep(2)
 
-            # Trigger the food ordering flow via the backend directly
-            import json
+            # Trigger the food ordering flow via the backend
+            import httpx
 
-            data = json.dumps({
-                "message": "order me food",
-                "session_id": "voiceover_e2e_test",
-            }).encode()
-            req = urllib.request.Request(
-                f"{BACKEND_URL}/query",
-                data=data,
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
             try:
-                with urllib.request.urlopen(req, timeout=10):
-                    pass
-            except OSError:
-                pytest.skip("Backend /query not responding — cannot test disclosure flow")
+                httpx.post(
+                    f"{BACKEND_URL}/query",
+                    json={"message": "order me food", "session_id": "voiceover_e2e_test"},
+                    timeout=10,
+                )
+            except Exception:  # noqa: BLE001
+                pytest.skip("Backend /query not responding -- cannot test disclosure flow")
 
-            time.sleep(3)  # Wait for response to render
+            time.sleep(3)  # Wait for response to render in the UI
 
-            # Capture accessibility tree after response
-            tree = simctl.get_accessibility_tree(APP_BUNDLE_ID)  # type: ignore[attr-defined]
-
-            # The app must still be running (not crashed by the response)
-            screenshot = simctl.screenshot("/tmp/voiceover_risk_disclosure.png")  # type: ignore[attr-defined]
+            # Verify the app is still running (not crashed by the response)
+            screenshot = simctl.screenshot()  # type: ignore[attr-defined]
             assert os.path.exists(screenshot), "App crashed after receiving food order response"
 
+            # Save for CI artifact review by ios-accessibility-expert
+            os.makedirs("screenshots", exist_ok=True)
+            shutil.copy(screenshot, "screenshots/ios_voiceover_risk_disclosure.png")
         finally:
             simctl.disable_voiceover()  # type: ignore[attr-defined]
             simctl.terminate_app(APP_BUNDLE_ID)  # type: ignore[attr-defined]
@@ -319,59 +304,44 @@ class TestFoodOrderingVoiceOverFlow:
         API responses must appear in a live region so VoiceOver reads them automatically.
 
         Without a live region, VoiceOver does NOT announce new text that appears on screen.
-        A blind user would have to manually navigate to find the response — requiring them
+        A blind user would have to manually navigate to find the response -- requiring them
         to know it appeared. A live region fires an automatic announcement.
 
-        React Native maps accessibilityLiveRegion="polite" → UIAccessibilityPostNotification(.layoutChanged).
+        React Native maps accessibilityLiveRegion="polite" to
+        UIAccessibilityPostNotification(.layoutChanged) on iOS.
 
-        This test captures a screenshot before and after triggering a response, verifying
-        the UI updated (evidence the live region is working).
+        This test captures before/after screenshots to verify the UI updated.
         """
-        import urllib.request
-
-        try:
-            req = urllib.request.Request(f"{BACKEND_URL}/health", method="GET")
-            with urllib.request.urlopen(req, timeout=5) as resp:
-                assert resp.status == 200
-        except OSError:
+        if not _backend_reachable():
             pytest.skip(f"Backend not reachable at {BACKEND_URL}")
 
         simctl.launch_app(APP_BUNDLE_ID)  # type: ignore[attr-defined]
         try:
             time.sleep(2)
-            before_shot = simctl.screenshot("/tmp/voiceover_before_response.png")  # type: ignore[attr-defined]
+            before_shot = simctl.screenshot()  # type: ignore[attr-defined]
 
-            # Send a simple query
-            import json
+            # Send a simple query to trigger a response in the live region
+            import httpx
 
-            data = json.dumps({
-                "message": "hello",
-                "session_id": "voiceover_live_region_test",
-            }).encode()
-            req = urllib.request.Request(
-                f"{BACKEND_URL}/query",
-                data=data,
-                headers={"Content-Type": "application/json"},
-                method="POST",
-            )
             try:
-                with urllib.request.urlopen(req, timeout=10):
-                    pass
-            except OSError:
+                httpx.post(
+                    f"{BACKEND_URL}/query",
+                    json={"message": "hello", "session_id": "voiceover_live_region_test"},
+                    timeout=10,
+                )
+            except Exception:  # noqa: BLE001
                 pytest.skip("Backend /query not responding")
 
             time.sleep(3)
-            after_shot = simctl.screenshot("/tmp/voiceover_after_response.png")  # type: ignore[attr-defined]
+            after_shot = simctl.screenshot()  # type: ignore[attr-defined]
 
-            # Both screenshots should exist — we can't compare pixels in CI
-            # but uploading them as artifacts lets the ios-accessibility-expert review them
+            # Both screenshots must exist -- we cannot compare pixels in this test
+            # but both files are uploaded as CI artifacts for ios-accessibility-expert review
             assert os.path.exists(before_shot), "Before-response screenshot missing"
             assert os.path.exists(after_shot), "After-response screenshot missing"
 
-            # Save to standard screenshots/ dir for CI artifact upload
+            # Save to screenshots/ for CI artifact upload
             os.makedirs("screenshots", exist_ok=True)
-            import shutil
-
             shutil.copy(after_shot, "screenshots/ios_voiceover_after_response.png")
         finally:
             simctl.terminate_app(APP_BUNDLE_ID)  # type: ignore[attr-defined]
@@ -402,8 +372,8 @@ class TestVoiceOverSnapshot:
             path = simctl.screenshot("screenshots/ios_voiceover_main_screen.png")  # type: ignore[attr-defined]
 
             assert path is not None, "Screenshot capture returned None"
-            # The file will exist if xcrun simctl io screenshot succeeded
-            # If the simulator is not available, the test was skipped by the fixture
+            # The file will exist if xcrun simctl io screenshot succeeded.
+            # If the simulator is not available, this test was skipped by the fixture.
         finally:
             simctl.disable_voiceover()  # type: ignore[attr-defined]
             simctl.terminate_app(APP_BUNDLE_ID)  # type: ignore[attr-defined]
