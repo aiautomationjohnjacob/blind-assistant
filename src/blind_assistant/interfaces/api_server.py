@@ -359,6 +359,42 @@ class APIServer:
             session_id=body.session_id,
         )
 
+    async def _transcribe(self, body: TranscribeRequest, request: Request) -> TranscribeResponse:
+        """
+        Transcribe base64-encoded audio using local Whisper STT.
+
+        Clients record microphone audio (WAV/M4A/OGG), base64-encode it, and POST here.
+        The server decodes the bytes, runs Whisper locally (never sent to external APIs),
+        and returns the transcribed text. The client then passes the text to /query.
+
+        Privacy: Whisper runs on the local machine. Speech never leaves the backend server.
+        Max audio size is ~10 MB (enforced by FastAPI body size limit in production).
+        """
+        await self._authenticate(request)
+
+        try:
+            # Decode base64 audio bytes — invalid base64 raises ValueError
+            audio_bytes = base64.b64decode(body.audio_base64)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid audio_base64: could not decode base64 data. {exc}",
+            ) from exc
+
+        if not audio_bytes:
+            # Empty audio — return empty transcript without calling Whisper
+            return TranscribeResponse(text="", language=None, session_id=body.session_id)
+
+        from blind_assistant.voice.stt import transcribe_audio
+
+        transcript = await transcribe_audio(audio_bytes, language=body.language)
+
+        return TranscribeResponse(
+            text=transcript or "",
+            language=body.language,  # Whisper language detection not yet exposed; use hint
+            session_id=body.session_id,
+        )
+
     async def _remember(self, body: RememberRequest, request: Request) -> RememberResponse:
         """
         Add a note to the user's Second Brain vault.
