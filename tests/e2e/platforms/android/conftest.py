@@ -125,7 +125,7 @@ def adb_available() -> bool:
     """Return True if ADB is available and a device is connected."""
     if shutil.which("adb") is None:
         return False
-    result = subprocess.run(  # noqa: S607
+    result = subprocess.run(
         ["adb", "devices"],
         capture_output=True,
         text=True,
