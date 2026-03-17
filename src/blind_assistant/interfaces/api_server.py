@@ -218,6 +218,17 @@ class APIServer:
             redoc_url=None,
         )
 
+        # Rate limiting — configurable per config.yaml api_server.rate_limit_per_minute
+        # Default: 60 req/min for authenticated endpoints, 120 for /health
+        rate_cfg = self.config.get("api_server", {})
+        auth_limit = int(rate_cfg.get("rate_limit_per_minute", 60))
+        health_limit = int(rate_cfg.get("health_rate_limit_per_minute", auth_limit * 2))
+        app.add_middleware(
+            RateLimitMiddleware,
+            auth_limit=auth_limit,
+            health_limit=health_limit,
+        )
+
         # CORS: allow all origins during development; restrict in production
         app.add_middleware(
             CORSMiddleware,
