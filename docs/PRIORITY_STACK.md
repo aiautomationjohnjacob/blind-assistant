@@ -20,12 +20,11 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P1 | **project-inspector gap scan (every 5th cycle — CYCLE 15)**: Run project-inspector agent to scan for holistic gaps: missing tests, missing CI, missing E2E, agent roster gaps, doc gaps, dependency hygiene. Write findings directly to OPEN_ISSUES.md and PRIORITY_STACK.md. | Cycle 5n rule | 2026-03-17 |
-| P2 | **Close stale GitHub CI-failure issues**: 20+ P0 GitHub issues opened by CI failure bot (Cycles 10-12) are now stale after ISSUE-022 fix. Batch-close with `gh issue close` and a note that the root cause is resolved. | Cycle 13 gap scan | 2026-03-17 |
-| P2 | **Fix Expo web export + web E2E tests**: `npx expo export --platform web` fails with "Unable to resolve module ../../App" — Metro AppEntry.js looks for App.tsx but project uses Expo Router (app/index.tsx). Fix: add App.tsx shim or update "main" in app.json. Then run Playwright axe-core + keyboard nav tests. | Cycle 13 attempt blocked | 2026-03-17 |
+| P2 | **Missing unit tests (ISSUE-028)**: Write test_telegram_bot.py, tests/unit/second_brain/test_query.py, tests/unit/vision/test_redaction.py, tests/unit/vision/test_screen_observer.py. Four src/ files have no unit test coverage — highest technical debt risk. | project-inspector (Cycle 15) | 2026-03-17 |
+| P2 | **Verify web E2E CI results**: After Cycle 15 push, check GitHub Actions e2e-web job results. If Playwright tests fail on first run, fix ARIA assertions to match actual React Native Web DOM output. | Cycle 15 review | 2026-03-17 |
 | P2 | End-to-end food ordering demo on real device: blind user on Android (TalkBack) + iOS (VoiceOver) can say "order me food" and complete the full flow by voice. | Phase 3 sprint | 2026-03-17 |
 | P2 | Voice installer: complete voice-guided setup from fresh Python install; update STEP_TELEGRAM_INTRO to reflect native apps as primary interface | ARCHITECTURE.md Task 5 | 2026-03-17 |
-| P2 | Web app: accessible web interface at blind-assistant.org (WCAG 2.1 AA; NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome) | Founder scope expansion | 2026-03-17 |
+| P2 | Web app deployed to staging: Netlify/Vercel deploy of Expo web build for real NVDA+Chrome testing. Web E2E tests exist and CI builds the bundle — next step is deploy so real users can test. | Cycle 15 review | 2026-03-17 |
 | P3 | Android app: run npm install + expo build:android + TalkBack test on AVD | Founder scope expansion | 2026-03-17 |
 | P3 | iOS app: run npm install + expo build:ios --simulator + VoiceOver test on xcrun simctl | Founder scope expansion | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
