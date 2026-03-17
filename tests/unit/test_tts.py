@@ -33,18 +33,18 @@ pytestmark = pytest.mark.unit
 
 
 def inject_mock_pyttsx3():
-    """Inject a MagicMock for pyttsx3 into sys.modules."""
+    """Inject a fresh MagicMock for pyttsx3 into sys.modules, replacing any existing."""
     mock_pyttsx3 = MagicMock()
-    sys.modules.setdefault("pyttsx3", mock_pyttsx3)
+    sys.modules["pyttsx3"] = mock_pyttsx3
     return mock_pyttsx3
 
 
 def inject_mock_elevenlabs():
-    """Inject MagicMock modules for the elevenlabs package into sys.modules."""
+    """Inject fresh MagicMock modules for the elevenlabs package into sys.modules."""
     mock_el = MagicMock()
     mock_el_client = MagicMock()
-    sys.modules.setdefault("elevenlabs", mock_el)
-    sys.modules.setdefault("elevenlabs.client", mock_el_client)
+    sys.modules["elevenlabs"] = mock_el
+    sys.modules["elevenlabs.client"] = mock_el_client
     return mock_el, mock_el_client
 
 
