@@ -148,7 +148,12 @@ Without this, no client app can function.
 **Proposed fix**: Add FastAPI or Flask server to `src/blind_assistant/interfaces/api_server.py`.
 Expose: `POST /query`, `POST /remember`, `POST /describe`, `POST /task`, `GET /profile`.
 Run on localhost:8000 for development; behind auth for production.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 4 — `src/blind_assistant/interfaces/api_server.py` created with
+FastAPI. Endpoints: GET /health (no auth), POST /query, POST /remember, POST /describe,
+POST /task, GET /profile. Bearer token auth via OS keychain. Global safe error handler.
+CORS middleware. Per-request preference overrides. 28 unit tests, all passing.
+Added to main.py behind --api flag. Credentials: API_SERVER_TOKEN added to credentials.py.
 
 ### ISSUE-009: No architecture decision on client-app framework
 **Severity**: HIGH
