@@ -18,8 +18,7 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P1 | **JS CI job for clients/mobile/**: `npm ci && npm test` must run in GitHub Actions; 32 Jest tests exist but not in CI — ISSUE-014 | ISSUE-014, Cycle 5 | 2026-03-17 |
-| P1 | **Mobile first-run setup wizard**: voice-guided flow to configure bearer token via expo-secure-store; without this the React Native app cannot authenticate — ISSUE-013 | ISSUE-013, Cycle 5 | 2026-03-17 |
+| P1 | **Real voice recording in MainScreen**: replace hardcoded "Hello" with expo-av AudioRecorder → send to backend → speak response; without this the mobile app is not a voice assistant — ISSUE-015 | ISSUE-015, Cycle 6 review | 2026-03-17 |
 | P2 | Voice installer: complete voice-guided setup from fresh Python install | ARCHITECTURE.md Task 5 | 2026-03-17 |
 | P2 | Web app: accessible web interface at blind-assistant.org (WCAG 2.1 AA; NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome) | Founder scope expansion | 2026-03-17 |
 | P2 | Cross-platform accessibility audit: run all 5 platform agents on current codebase | Founder scope expansion | 2026-03-17 |
