@@ -472,7 +472,7 @@ export function SetupWizardScreen({
           accessibilityRole="text"
           accessibilityLiveRegion="polite"
           accessibilityLabel={`Setup step: ${step}`}
-          importantForAccessibility="no-hide-descendants"
+          importantForAccessibility="yes"
         >
           {step === "welcome" && "Step 1 of 3: Welcome"}
           {step === "token" && "Step 2 of 3: Enter Token"}
