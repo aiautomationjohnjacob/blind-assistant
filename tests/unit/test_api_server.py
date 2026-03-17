@@ -675,3 +675,71 @@ def test_transcribe_echoes_session_id():
                 headers=VALID_HEADERS,
             )
     assert resp.json()["session_id"] == "my-session-xyz"
+
+
+# ─────────────────────────────────────────────────────────────
+# /transcribe — body size limit (ISSUE-018)
+# ─────────────────────────────────────────────────────────────
+
+
+def test_transcribe_rejects_oversized_payload():
+    """POST /transcribe returns 413 when audio_base64 exceeds 14 MB chars (ISSUE-018)."""
+    # 14_000_001 chars — one over the limit
+    oversized = "A" * 14_000_001
+    with _make_server() as (_, client):
+        resp = client.post(
+            "/transcribe",
+            json={"audio_base64": oversized},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 413
+    detail = resp.json()["detail"].lower()
+    assert "too large" in detail or "maximum" in detail
+
+
+def test_transcribe_accepts_payload_at_exact_limit():
+    """POST /transcribe accepts exactly 14_000_000 chars (at the limit boundary)."""
+    # 14_000_000 chars is exactly the limit — should decode to valid bytes and be accepted
+    at_limit = "A" * 14_000_000  # 'A' is valid base64 padding char; produces valid bytes
+    mock_stt = AsyncMock(return_value="")
+    with _make_server() as (_, client):
+        with patch("blind_assistant.voice.stt.transcribe_audio", new=mock_stt):
+            resp = client.post(
+                "/transcribe",
+                json={"audio_base64": at_limit},
+                headers=VALID_HEADERS,
+            )
+    # Should not return 413 — limit is inclusive
+    assert resp.status_code != 413
+
+
+def test_transcribe_413_message_mentions_limit():
+    """The 413 error message tells the user the maximum and a suggested fix."""
+    oversized = "A" * 14_000_001
+    with _make_server() as (_, client):
+        resp = client.post(
+            "/transcribe",
+            json={"audio_base64": oversized},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 413
+    detail = resp.json()["detail"]
+    # Message must mention the size limit in MB so the user knows what to expect
+    assert "MB" in detail or "mb" in detail.lower()
+
+
+def test_transcribe_small_payload_is_not_rejected():
+    """POST /transcribe accepts a small (realistic) audio payload without 413."""
+    import base64 as b64
+    # 1 second of 16kHz mono audio ≈ 32 kB WAV ≈ 44 kB base64 — well within limit
+    small_audio = b"RIFF" + b"\x00" * 1000  # fake WAV header + silence
+    small_b64 = b64.b64encode(small_audio).decode()
+    mock_stt = AsyncMock(return_value="")
+    with _make_server() as (_, client):
+        with patch("blind_assistant.voice.stt.transcribe_audio", new=mock_stt):
+            resp = client.post(
+                "/transcribe",
+                json={"audio_base64": small_b64},
+                headers=VALID_HEADERS,
+            )
+    assert resp.status_code == 200
