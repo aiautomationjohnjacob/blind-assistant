@@ -947,3 +947,33 @@ CI run results to find and fix any ARIA/accessibility failures the tests discove
 - Next cycle recommendation: Write missing unit tests (ISSUE-028) + verify web E2E CI results.
   If web E2E tests fail on first run, fix the ARIA assertions to match actual DOM output from
   React Native Web rendering.
+
+---
+
+## Cycle 16 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: Resolved ISSUE-028 — four src/ files (telegram_bot.py, query.py, redaction.py, screen_observer.py) now have proper unit test coverage. The redaction module is especially mission-critical: if it fails silently, sensitive financial or password data could leak to external APIs. The ruff format fix that was blocking CI is also important — we can't detect accessibility regressions if CI is broken. Next cycle should focus on the voice installer and verifying the web E2E tests pass in CI now that formatting is fixed.
+
+**Code quality (code-reviewer)**: All four new test files are well-structured with proper helpers, clear names following test_[what]_[condition]_[result] convention, and parametrized tests for all keyword categories. sys.modules mock technique for unavailable packages (telegram, anthropic) is correct and maintainable. Test count: 465 → 583 (+118). No test files deleted or weakened. Ruff format fix also resolved the Cycle 15 CI blocker. Coverage module unavailable locally — CI will report exact %.
+
+**Security (security-specialist)**: The redaction tests explicitly verify: (1) password keyword detection stops ALL further processing and never reaches Claude, (2) financial domains trigger local OCR only, (3) CARD_NUMBER_PATTERN and SSN_PATTERN regex are correct. The screen_observer tests verify _describe_with_claude is NOT called when password fields are present. These tests directly enforce SECURITY_MODEL.md §1.4 guarantees. Security coverage on the redaction module is now solid.
+
+**Accessibility (accessibility-reviewer)**: No user-facing output changed this cycle. The VaultQuery braille mode tests verify that 40-char line wrapping works correctly for Jordan's braille display. The screen_observer privacy message text is tested for correctness. No WCAG concerns.
+
+**User perspective (blind-user-tester)**: These tests protect the features that matter: Second Brain queries return correctly formatted voice/braille responses, screen descriptions protect password screens, and Telegram works correctly. The vault query tests cover braille mode specifically for Jordan. The redaction tests are the safety net for trust — good cycle.
+
+**Ethics (ethics-advisor)**: Password field protection is now tested as a hard guarantee. Blind users cannot visually verify what's on screen — they rely entirely on the assistant not leaking sensitive content. These tests enforce that trust contractually. No new ethics concerns.
+
+**Goal adherence (goal-adherence-reviewer)**: ISSUE-028 fully resolved. All four src/ files now have corresponding unit test files. Ruff format fix removes the CI blocker from Cycle 15. Phase 3 testing can proceed with CI as the health signal. Remaining Phase 3 blockers: web E2E CI verification, voice installer, Android/iOS device tests.
+
+**Consensus recommendation for next cycle**: (1) Verify the web E2E CI results from this push — ruff format is now fixed, so the e2e-web job should actually complete. Fix any ARIA assertion failures the Playwright tests surface. (2) Voice installer: voice-guided setup from fresh Python install — the highest remaining Phase 3 deliverable.
+
+**Orchestrator self-assessment**:
+- Accomplished: 118 new unit tests across 4 test files; ISSUE-028 resolved; ruff format CI blocker (Cycle 15 carry-over) fixed; all 583 unit tests passing; ruff lint+format clean
+- Attempted but failed: none — all planned items completed
+- Confusion/loops: sys.modules mock technique needed for packages unavailable locally (telegram, anthropic) — worked cleanly
+- New gaps: web E2E tests from Cycle 15 still need CI verification to confirm ARIA assertions work against actual React Native Web DOM; ruff format failure in CI was from Cycle 15 files (now fixed)
+- Next cycle recommendation: (1) verify web E2E CI results post-fix; (2) voice installer implementation (P2 phase gate item)
+
+**TECHNICAL LESSON (mocking unavailable packages in unit tests)**:
+When a src/ module uses lazy imports (imports inside function bodies), patch the source module path (e.g., `blind_assistant.vision.redaction.analyze_sensitivity`) rather than the calling module's namespace (which doesn't exist until runtime). For packages not installed in the local environment (e.g., `telegram`, `anthropic`), use `patch.dict(sys.modules, {...})` to inject a MagicMock module — `patch("telegram.ext.ApplicationBuilder")` fails with ModuleNotFoundError if the package isn't installed.

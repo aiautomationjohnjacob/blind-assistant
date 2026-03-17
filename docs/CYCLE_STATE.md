@@ -186,7 +186,7 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P0: CI fully green (Cycle 14)** — 11 CVEs patched (cryptography, Pillow, starlette, fastapi upgraded); pip-audit switched to installed-env mode with --no-build-isolation; 5 new mypy errors from updated type stubs fixed (VoiceSettings, AsyncAnthropic, run_polling); Playwright libasound2 virtual package workaround; ALL 7 CI jobs green on run 23218631525
 - [x] **P2: Close stale GitHub CI-failure issues** — batch-closed 79 stale issues in Cycle 14 (commit d593482)
 - [x] **P2: Fix Expo web export** — App.tsx shim added (Cycle 15); `npx expo export --platform web` builds successfully; 11 web E2E accessibility tests added; CI e2e-web job rebuilt to actually run tests (Cycle 15)
-- [ ] **P2: Missing unit tests (ISSUE-028)** — telegram_bot.py, query.py, redaction.py, screen_observer.py have no unit tests; Phase 1/2 technical debt
+- [x] **P2: Missing unit tests (ISSUE-028)** — 118 new tests: test_telegram_bot.py (24), test_query.py (49), test_redaction.py (27), test_screen_observer.py (18); ruff format CI blocker from Cycle 15 also fixed (Cycle 16)
 - [ ] **P2: End-to-end food ordering on real device** — Android TalkBack + iOS VoiceOver
 - [ ] **P2: Voice installer** — voice-guided setup from fresh install; update Telegram refs to native app
 - [ ] **P2: Web app deployed** — WCAG 2.1 AA verification requires real deployment (Netlify/Vercel staging); web E2E CI tests now exist
