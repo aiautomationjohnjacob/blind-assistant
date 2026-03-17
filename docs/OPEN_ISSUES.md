@@ -493,4 +493,8 @@ Per CLAUDE.md: "Every `src/` file must have tests in the same commit."
 These files were created in Phase 1/2 before the strict rule was enforced.
 **Impact**: CI coverage threshold is at risk; bugs in these modules go undetected.
 **Proposed fix**: Add unit test files in `tests/unit/` for each missing module.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 16 (commit d691cf4) — 118 new tests across 4 files:
+tests/unit/test_telegram_bot.py (24), tests/unit/second_brain/test_query.py (49),
+tests/unit/vision/test_redaction.py (27), tests/unit/vision/test_screen_observer.py (18).
+Total unit test count: 583. Ruff format CI blocker from Cycle 15 also fixed.
