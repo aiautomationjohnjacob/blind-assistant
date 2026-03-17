@@ -6,11 +6,11 @@ Tests verify: initialization, navigation, click, type, page state, close,
 error handling, and the BrowserSession context manager.
 """
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
 
-from blind_assistant.tools.browser import BrowserTool, BrowserSession, PageState
-
+from blind_assistant.tools.browser import BrowserSession, BrowserTool, PageState
 
 # ─────────────────────────────────────────────────────────────
 # Fixtures
@@ -97,9 +97,8 @@ async def test_initialize_raises_on_import_error() -> None:
     """initialize() raises ImportError when async_playwright is None (not installed)."""
     tool = BrowserTool()
     # Simulate playwright not being installed — async_playwright module-level var is None
-    with patch("blind_assistant.tools.browser.async_playwright", None):
-        with pytest.raises(ImportError):
-            await tool.initialize()
+    with patch("blind_assistant.tools.browser.async_playwright", None), pytest.raises(ImportError):
+        await tool.initialize()
 
 
 async def test_initialize_raises_on_launch_error(mock_playwright_instance: AsyncMock) -> None:

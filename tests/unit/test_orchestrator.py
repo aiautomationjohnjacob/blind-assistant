@@ -407,7 +407,7 @@ class TestConfigurablePassphraseTimeout:
 
     async def test_passphrase_timeout_defaults_to_120_when_not_configured(self, minimal_config):
         """_collect_vault_passphrase defaults to 120s if config has no voice section."""
-        import asyncio
+
         from blind_assistant.core.confirmation import ConfirmationGate
 
         orc = Orchestrator(minimal_config)
@@ -691,7 +691,6 @@ class TestHandleOrderFood:
         """
         from blind_assistant.security.disclosure import (
             FINANCIAL_RISK_DISCLOSURE,
-            FINANCIAL_RISK_DISCLOSURE_BRIEF,
         )
 
         orc = _make_order_food_orchestrator(minimal_config)

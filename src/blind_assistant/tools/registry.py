@@ -196,7 +196,7 @@ class ToolRegistry:
 
         # Append new entry
         log_entries.append({
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
             "tool_name": tool_name,
             "package": package,
             "reason": tool_info.get("task_description", ""),

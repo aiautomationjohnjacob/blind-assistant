@@ -126,11 +126,8 @@ class VoiceLocalInterface:
         wake_idx = transcript.lower().find(self._wake_word)
         if wake_idx != -1:
             after_wake = transcript[wake_idx + len(self._wake_word):].strip()
-            if after_wake:
-                clean_transcript = after_wake
-            else:
-                # User said only the wake word ("assistant") with nothing after it
-                clean_transcript = ""
+            # User said only the wake word ("assistant") with nothing after it if after_wake is empty
+            clean_transcript = after_wake or ""
 
         if not clean_transcript:
             await speak_locally(

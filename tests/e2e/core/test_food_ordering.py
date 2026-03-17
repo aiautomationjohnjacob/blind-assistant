@@ -16,9 +16,7 @@ Per ARCHITECTURE.md: "browser as universal adapter" — Claude navigates any foo
 ordering site. No DoorDash-specific code. Tests verify the flow, not the site.
 """
 
-import asyncio
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

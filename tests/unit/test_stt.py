@@ -212,7 +212,6 @@ class TestTranscribeMicrophone:
 
     async def test_calls_transcribe_audio_with_recorded_bytes(self):
         """transcribe_microphone passes audio bytes to transcribe_audio."""
-        import io
 
         # Build mock scipy.io.wavfile that writes a minimal WAV header
         mock_wav = MagicMock()

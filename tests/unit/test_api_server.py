@@ -23,12 +23,10 @@ from __future__ import annotations
 from contextlib import contextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 from fastapi.testclient import TestClient
 
 from blind_assistant.core.orchestrator import Response, UserContext
 from blind_assistant.interfaces.api_server import APIServer, RateLimitMiddleware
-
 
 # ─────────────────────────────────────────────────────────────
 # Helpers / fixtures
@@ -582,16 +580,15 @@ def test_transcribe_requires_auth():
 def test_transcribe_returns_transcribed_text():
     """POST /transcribe returns the text from Whisper STT."""
     b64_audio = "SGVsbG8gV29ybGQ="  # base64("Hello World") — valid base64
-    with _make_server() as (_, client):
-        with patch(
-            "blind_assistant.voice.stt.transcribe_audio",
-            new=AsyncMock(return_value="Hello World"),
-        ):
-            resp = client.post(
-                "/transcribe",
-                json={"audio_base64": b64_audio},
-                headers=VALID_HEADERS,
-            )
+    with _make_server() as (_, client), patch(
+        "blind_assistant.voice.stt.transcribe_audio",
+        new=AsyncMock(return_value="Hello World"),
+    ):
+        resp = client.post(
+            "/transcribe",
+            json={"audio_base64": b64_audio},
+            headers=VALID_HEADERS,
+        )
     assert resp.status_code == 200
     assert resp.json()["text"] == "Hello World"
 
@@ -599,16 +596,15 @@ def test_transcribe_returns_transcribed_text():
 def test_transcribe_returns_empty_string_on_silence():
     """POST /transcribe returns empty string when Whisper detects no speech."""
     b64_audio = "AAAA"  # valid base64 that decodes to non-empty bytes
-    with _make_server() as (_, client):
-        with patch(
-            "blind_assistant.voice.stt.transcribe_audio",
-            new=AsyncMock(return_value=None),
-        ):
-            resp = client.post(
-                "/transcribe",
-                json={"audio_base64": b64_audio},
-                headers=VALID_HEADERS,
-            )
+    with _make_server() as (_, client), patch(
+        "blind_assistant.voice.stt.transcribe_audio",
+        new=AsyncMock(return_value=None),
+    ):
+        resp = client.post(
+            "/transcribe",
+            json={"audio_base64": b64_audio},
+            headers=VALID_HEADERS,
+        )
     assert resp.status_code == 200
     assert resp.json()["text"] == ""
 
@@ -645,16 +641,15 @@ def test_transcribe_passes_language_hint_to_stt():
     """POST /transcribe passes the language hint to transcribe_audio."""
     b64_audio = "SGVsbG8="
     mock_stt = AsyncMock(return_value="Hola")
-    with _make_server() as (_, client):
-        with patch(
-            "blind_assistant.voice.stt.transcribe_audio",
-            new=mock_stt,
-        ):
-            client.post(
-                "/transcribe",
-                json={"audio_base64": b64_audio, "language": "es"},
-                headers=VALID_HEADERS,
-            )
+    with _make_server() as (_, client), patch(
+        "blind_assistant.voice.stt.transcribe_audio",
+        new=mock_stt,
+    ):
+        client.post(
+            "/transcribe",
+            json={"audio_base64": b64_audio, "language": "es"},
+            headers=VALID_HEADERS,
+        )
     # Verify language was passed through
     mock_stt.assert_called_once()
     _, call_kwargs = mock_stt.call_args
@@ -664,16 +659,15 @@ def test_transcribe_passes_language_hint_to_stt():
 def test_transcribe_echoes_session_id():
     """POST /transcribe echoes the session_id from the request."""
     b64_audio = "SGVsbG8="
-    with _make_server() as (_, client):
-        with patch(
-            "blind_assistant.voice.stt.transcribe_audio",
-            new=AsyncMock(return_value="test"),
-        ):
-            resp = client.post(
-                "/transcribe",
-                json={"audio_base64": b64_audio, "session_id": "my-session-xyz"},
-                headers=VALID_HEADERS,
-            )
+    with _make_server() as (_, client), patch(
+        "blind_assistant.voice.stt.transcribe_audio",
+        new=AsyncMock(return_value="test"),
+    ):
+        resp = client.post(
+            "/transcribe",
+            json={"audio_base64": b64_audio, "session_id": "my-session-xyz"},
+            headers=VALID_HEADERS,
+        )
     assert resp.json()["session_id"] == "my-session-xyz"
 
 
@@ -702,13 +696,12 @@ def test_transcribe_accepts_payload_at_exact_limit():
     # 14_000_000 chars is exactly the limit — should decode to valid bytes and be accepted
     at_limit = "A" * 14_000_000  # 'A' is valid base64 padding char; produces valid bytes
     mock_stt = AsyncMock(return_value="")
-    with _make_server() as (_, client):
-        with patch("blind_assistant.voice.stt.transcribe_audio", new=mock_stt):
-            resp = client.post(
-                "/transcribe",
-                json={"audio_base64": at_limit},
-                headers=VALID_HEADERS,
-            )
+    with _make_server() as (_, client), patch("blind_assistant.voice.stt.transcribe_audio", new=mock_stt):
+        resp = client.post(
+            "/transcribe",
+            json={"audio_base64": at_limit},
+            headers=VALID_HEADERS,
+        )
     # Should not return 413 — limit is inclusive
     assert resp.status_code != 413
 
@@ -735,11 +728,10 @@ def test_transcribe_small_payload_is_not_rejected():
     small_audio = b"RIFF" + b"\x00" * 1000  # fake WAV header + silence
     small_b64 = b64.b64encode(small_audio).decode()
     mock_stt = AsyncMock(return_value="")
-    with _make_server() as (_, client):
-        with patch("blind_assistant.voice.stt.transcribe_audio", new=mock_stt):
-            resp = client.post(
-                "/transcribe",
-                json={"audio_base64": small_b64},
-                headers=VALID_HEADERS,
-            )
+    with _make_server() as (_, client), patch("blind_assistant.voice.stt.transcribe_audio", new=mock_stt):
+        resp = client.post(
+            "/transcribe",
+            json={"audio_base64": small_b64},
+            headers=VALID_HEADERS,
+        )
     assert resp.status_code == 200

@@ -38,21 +38,18 @@ class TestVoiceOverNavigation:
         App must launch cleanly with VoiceOver enabled.
         VoiceOver is enabled via: xcrun simctl spawn <device> accessibility voiceover enable
         """
-        pass
 
     def test_main_button_accessible_label(self, simctl):
         """
         The press-to-talk button must have an accessibilityLabel.
         VoiceOver reads this as: "[label], button. [hint]."
         """
-        pass
 
     def test_swipe_right_moves_focus_to_button(self, simctl):
         """
         Swiping right from the title should move focus to the status text,
         then to the main button.
         """
-        pass
 
 
 class TestVoiceOverAnnouncements:
@@ -63,11 +60,9 @@ class TestVoiceOverAnnouncements:
         When the app launches, VoiceOver should announce 'Blind Assistant is ready'.
         This uses UIAccessibilityPostNotification(.announcement) on iOS.
         """
-        pass
 
     def test_response_announced_when_ready(self, simctl):
         """
         After an API response arrives, VoiceOver should announce the response text.
         Uses accessibilityLiveRegion = "polite" mapped to iOS accessibility notifications.
         """
-        pass

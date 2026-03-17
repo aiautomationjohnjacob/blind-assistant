@@ -16,14 +16,14 @@ All file I/O uses temp_dir fixture; no real ~/.blind-assistant writes.
 
 from __future__ import annotations
 
-import json
 import asyncio
+import json
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 
-from blind_assistant.tools.registry import ToolRegistry, REGISTRY_PATH, AUDIT_LOG_PATH
-
+from blind_assistant.tools.registry import ToolRegistry
 
 # ─────────────────────────────────────────────────────────────
 # Fixtures

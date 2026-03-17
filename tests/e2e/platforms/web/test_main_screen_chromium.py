@@ -117,8 +117,8 @@ class TestMainScreenContrast:
         """
         # This is a visual test — verified manually during design
         # Automated contrast checking requires axe-core or similar
-        pass  # TODO: integrate axe-core via playwright-axe in Phase 4
+        # TODO: integrate axe-core via playwright-axe in Phase 4
 
     async def test_button_text_has_sufficient_contrast(self, page):
         """Button text (#ffffff on #4f8ef7) should have ≥4.5:1 contrast."""
-        pass  # TODO: Phase 4 with axe-core
+        # TODO: Phase 4 with axe-core

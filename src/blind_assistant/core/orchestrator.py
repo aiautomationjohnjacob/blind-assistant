@@ -549,7 +549,7 @@ class Orchestrator:
         try:
             response = await asyncio.wait_for(queue.get(), timeout=timeout_seconds)
             return response.strip() if response and response.strip() else None
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.info(f"Vault passphrase prompt timed out after {timeout_seconds}s")
             return None
 

@@ -69,7 +69,6 @@ class TestTalkBackNavigation:
         """
         # Simulate TalkBack swipe-right navigation
         # ADB accessibility event injection would go here
-        pass
 
 
 class TestAccessibilitySnapshot:
@@ -81,4 +80,3 @@ class TestAccessibilitySnapshot:
         Used for visual regression testing by the android-accessibility-expert agent.
         """
         # adb.screenshot() — captured and stored in tests/e2e/platforms/android/screenshots/
-        pass
