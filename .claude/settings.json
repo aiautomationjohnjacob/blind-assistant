@@ -37,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'cd \"$CLAUDE_PROJECT_DIR\" && git add -A && if git status --short | grep -q .; then git commit -m \"auto: $(date +%H:%M) — agent changes\" 2>/dev/null && git push 2>/dev/null || git pull --rebase && git push 2>/dev/null; fi; true'"
+            "command": "bash -c 'FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json,os; d=json.load(sys.stdin); p=d.get(\\\"file_path\\\",\\\"\\\"); b=os.path.basename(p); t=\\\"test\\\" if (\\\"/tests/\\\" in p or b.startswith(\\\"test_\\\")) else \\\"src\\\" if \\\"/src/\\\" in p else \\\"docs\\\" if \\\"/docs/\\\" in p else \\\"ci\\\" if \\\"/.github/\\\" in p else \\\"agent\\\" if \\\"/.claude/\\\" in p else \\\"cfg\\\"; print(t+\\\": \\\"+b if b else \\\"files\\\")\" 2>/dev/null || echo \"files\"); cd \"$CLAUDE_PROJECT_DIR\" && git add -A && if git status --short | grep -q .; then git commit -m \"wip($FILE) $(date +%H:%M)\" 2>/dev/null && git push 2>/dev/null || git pull --rebase && git push 2>/dev/null; fi; true'"
           },
           {
             "type": "command",
