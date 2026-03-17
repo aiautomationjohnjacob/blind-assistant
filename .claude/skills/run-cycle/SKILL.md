@@ -247,6 +247,17 @@ For each task, pick the right implementer:
 - Telegram, Obsidian, Whisper, ElevenLabs, ordering APIs → `integration-engineer`
 - Packaging, installer, CI/CD, pyproject.toml → `devops-engineer`
 
+**MANDATORY: After every backend-developer or integration-engineer task, call `test-engineer`:**
+
+Prompt: "The following src/ files were just created or modified: [list files].
+Read each file. Check if a corresponding test file exists in tests/unit/. If not,
+create it. If tests exist, check for coverage gaps and add missing tests.
+Run `pytest tests/ --cov=src/blind_assistant --cov-report=term-missing -q` and
+report the result. Coverage must be ≥80% overall and 100% for security modules.
+If tests fail, report which src/ file is broken — do NOT modify the tests."
+
+Do NOT mark a task as complete until test-engineer reports: "All tests passing. Coverage: X%."
+
 After implementation:
 - Use `code-reviewer` to review the code (read-only — it reports, doesn't fix)
 - Use `backend-developer` or `integration-engineer` to apply fixes from the review
@@ -293,6 +304,20 @@ If push fails (upstream changed), pull and retry:
 git pull --rebase && git push
 ```
 
+**After committing, run the no-progress check:**
+```bash
+# Count non-meta files changed this cycle
+git diff --name-only HEAD~3..HEAD 2>/dev/null \
+  | grep -vE "^docs/CYCLE_STATE|^docs/LESSONS|^docs/PRIORITY_STACK|^docs/OPEN_ISSUES" \
+  | wc -l
+```
+
+If this count is 0 (only meta-docs changed):
+- This is a **no-progress cycle**
+- Add to OPEN_ISSUES.md: `ISSUE-N: No product output in cycle N — investigate blockers`
+- Add as P2 to PRIORITY_STACK.md: "Unblock loop — no product output in N consecutive cycles"
+- Still proceed to STEP 7 (review panel will diagnose)
+
 ---
 
 ## STEP 7: END-OF-CYCLE REVIEW PANEL
@@ -310,7 +335,9 @@ similar) and the current state of `docs/CYCLE_STATE.md`.
 
 - **`code-reviewer`**: "Review the code and documents written this cycle (read recent
   git commits). What is technically wrong, incomplete, or fragile? What would a senior
-  engineer flag in a PR review? If no code was written this cycle, evaluate document
+  engineer flag in a PR review? IMPORTANT: explicitly check (1) did test count decrease?
+  (2) are there new src/ files with no corresponding test file? (3) did any test
+  have its assertions weakened? If no code was written this cycle, evaluate document
   quality and accuracy instead. Max 5 issues."
 
 - **`security-specialist`**: "Review what was built or decided this cycle. Are there any
@@ -424,12 +451,29 @@ git push
    building for blind users or have we drifted? Pull us back."
 → Add a mission-drift entry to LESSONS.md.
 
+**NEVER delete, skip, or weaken tests:**
+→ If a test is failing, fix the `src/` implementation — not the test.
+→ Never `rm` or `git rm` any file under `tests/`
+→ Never add `@pytest.mark.skip` or `@pytest.mark.xfail` to silence failures
+→ Never remove assertions to make tests pass
+→ Never lower the coverage threshold
+→ A test failure is information. The code is wrong. Fix the code.
+
+**The review panel (STEP 7) MUST check:**
+```bash
+# Verify test count did not decrease
+git diff HEAD~5..HEAD --stat | grep "test_"
+# If any test_ file shows deletions without additions, flag it as a regression risk
+```
+
 **Never commit:**
 → Credentials, API keys, .env files with real values
 → Broken code that causes import errors or crashes on startup
 → Changes that make any previously-passing test fail
+→ A `src/` file without a corresponding test file
 
 **Before stopping:**
 → Ensure all changes are committed AND pushed
 → Ensure CYCLE_STATE.md reflects current reality
 → Ensure PRIORITY_STACK.md top item is what the next session should work on
+→ Run `pytest tests/ -q` — if failing, add a P0 to PRIORITY_STACK.md

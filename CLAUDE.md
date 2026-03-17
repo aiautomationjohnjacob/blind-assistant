@@ -136,6 +136,11 @@ The goal is to integrate existing tools, not reinvent them:
   and why, and get confirmation before doing so
 - **Conversational task completion**: the app resolves tasks through conversation, asking
   follow-up questions as needed rather than failing silently or requiring upfront specification
+- **NEVER delete or weaken tests**: if a test is failing, fix the `src/` implementation.
+  Never delete test files, remove assertions, add `skip`, or lower coverage thresholds to
+  make CI green. A failing test is information — it means the code is wrong.
+- **Every `src/` file must have tests in the same commit**: `test-engineer` runs after
+  every `backend-developer` or `integration-engineer` task. No code ships untested.
 
 ## Git Workflow
 - Feature branches: `feature/description`
