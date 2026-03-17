@@ -43,8 +43,9 @@ _playwright_launch_ok = False
 def _check_playwright() -> bool:
     """Return True if Playwright can actually launch Chromium (system deps present)."""
     try:
-        import asyncio as _asyncio  # noqa: E402,PLC0415
-        from playwright.async_api import async_playwright as _apw  # noqa: E402,PLC0415
+        # fmt: skip
+        import asyncio as _asyncio  # noqa: E402,I001,PLC0415
+        from playwright.async_api import async_playwright as _apw  # noqa: E402,I001,PLC0415
 
         async def _probe() -> bool:
             try:
