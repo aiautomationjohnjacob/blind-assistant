@@ -1,93 +1,70 @@
-# Blind Assistant — Approved Tool Registry
+# Blind Assistant — Approved Package Registry
 #
-# Only tools in this file can be installed by the self-expanding capability.
-# Adding a tool here requires:
-# 1. CVE scan via pip-audit
-# 2. Minimum download threshold check (>10k/month on PyPI)
-# 3. Active maintenance verification (last release < 2 years)
-# 4. Manual review for data collection practices
+# This file lists Python packages the self-expanding capability may install.
+# It is NOT a list of pre-built service integrations.
 #
-# Format:
-#   name: short identifier used in code
-#   package: PyPI package name
-#   version: pinned version string
-#   description: plain English description for user consent prompt
-#   task_description: why would we install this (for user prompt)
-#   class: optional Python class to instantiate after install
-#   allowed_endpoints: list of domains this tool is allowed to contact
+# Claude handles ordering, travel, home control etc. autonomously using the
+# browser and desktop tools — navigating websites the same way a human would.
+# No DoorDash-specific code, no Expedia wrapper, no Instacart class.
+# This means zero maintenance when sites change, and works for any service.
+#
+# Pre-built integrations are only warranted for:
+#   - Services requiring OAuth/API keys that can't be done via browser
+#   - Payment tokenization (never store raw card numbers)
+#   - Local hardware protocols (Home Assistant REST API, etc.)
+#
+# Vetting requirements before adding a package:
+#   1. pip-audit CVE scan
+#   2. >10k downloads/month on PyPI
+#   3. Last release < 2 years ago
+#   4. No known data exfiltration behavior
 
-tools:
-  - name: ordering
+capabilities:
+  - name: browser
     package: playwright
     version: "1.40.0"
-    description: "a web browser controller that lets me navigate ordering websites"
-    task_description: "place food or grocery orders on your behalf"
-    class: blind_assistant.tools.ordering.doordash.DoorDashTool
-    allowed_endpoints:
-      - "doordash.com"
-      - "instacart.com"
-      - "ubereats.com"
+    description: "a web browser I can control to navigate any website on your behalf"
+    task_description: "navigate websites to complete tasks (ordering, booking, research, etc.)"
+    # Claude reasons about ANY site — no service-specific wrappers needed
 
-  - name: travel
-    package: playwright
-    version: "1.40.0"
-    description: "a web browser controller that lets me navigate travel booking sites"
-    task_description: "research and book travel on your behalf"
-    class: blind_assistant.tools.travel.booking.TravelBookingTool
-    allowed_endpoints:
-      - "expedia.com"
-      - "booking.com"
-      - "kayak.com"
-      - "aa.com"
-      - "delta.com"
-      - "united.com"
+  - name: desktop_control
+    package: pyautogui
+    version: "0.9.54"
+    description: "a tool to control desktop apps by simulating keyboard and mouse"
+    task_description: "control native desktop applications on your behalf"
 
-  - name: home_assistant
+  - name: http_client
     package: aiohttp
     version: "3.9.3"
-    description: "a connector to your Home Assistant smart home hub"
-    task_description: "control your smart home devices"
-    class: blind_assistant.tools.home.home_assistant.HomeAssistantTool
-    allowed_endpoints:
-      - "homeassistant.local"
+    description: "an async HTTP client for calling REST APIs"
+    task_description: "connect to web services and APIs"
 
-  - name: grocery
-    package: playwright
-    version: "1.40.0"
-    description: "a web browser controller for grocery delivery services"
-    task_description: "order groceries for delivery"
-    class: blind_assistant.tools.ordering.instacart.InstacartTool
+integrations:
+  # Only services that CANNOT be handled by browser automation
+  - name: stripe_payments
+    package: stripe
+    version: "7.3.0"
+    description: "a payment processor that tokenizes your card — we never store the number"
+    task_description: "process payments securely without storing your card number"
     allowed_endpoints:
-      - "instacart.com"
-      - "amazon.com"
-      - "walmart.com"
+      - "api.stripe.com"
+    rationale: "Payment tokenization requires the Stripe SDK; browser-only cannot safely handle card data"
 
-  - name: calendar
+  - name: google_calendar
     package: google-api-python-client
     version: "2.114.0"
     description: "a connector to your Google Calendar"
     task_description: "manage your calendar and appointments"
-    class: null
     allowed_endpoints:
       - "googleapis.com"
       - "accounts.google.com"
+    rationale: "Calendar API provides push notifications and offline sync not available via browser"
 
-  - name: email_gmail
+  - name: google_gmail
     package: google-api-python-client
     version: "2.114.0"
     description: "a connector to your Gmail account"
     task_description: "read and send emails on your behalf"
-    class: null
     allowed_endpoints:
       - "googleapis.com"
-      - "accounts.google.com"
-
-  - name: stripe_payments
-    package: stripe
-    version: "7.3.0"
-    description: "a payment processor that tokenizes your card so we never store the number"
-    task_description: "process payments securely without storing your card number"
-    class: null
-    allowed_endpoints:
-      - "api.stripe.com"
-      - "js.stripe.com"
+    rationale: "Gmail API allows background processing; browser automation would require active session"

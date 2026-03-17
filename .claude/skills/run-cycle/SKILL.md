@@ -24,25 +24,19 @@ commit everything to GitHub, and leave clear state for the next session.**
 
 ## STEP 1: FULL ORIENTATION (never skip this)
 
-Read ALL of these before doing anything else:
+Read these — in order of importance. Stop reading a doc once you have what you need.
 
 ```bash
-cat docs/CYCLE_STATE.md
-cat docs/PRIORITY_STACK.md
-cat docs/OPEN_ISSUES.md
-cat docs/LESSONS.md
-cat docs/PRODUCT_BRIEF.md
-cat CLAUDE.md
-git log --oneline -20
+cat docs/CYCLE_STATE.md          # phase, cycle#, sprint items, ⚠ notices
+cat docs/PRIORITY_STACK.md       # ordered work queue — top 5 items are what matter
+cat docs/OPEN_ISSUES.md          # blockers and known gaps
+tail -80 docs/LESSONS.md         # recent lessons only — not the full history
+git log --oneline -10
 git status
 ```
 
-Also check what files exist:
-```bash
-ls docs/
-ls src/ 2>/dev/null || echo "src/ not yet created"
-ls .claude/agents/
-```
+Read CLAUDE.md and docs/PRODUCT_BRIEF.md **only if** you are confused about scope or
+need to check a non-negotiable rule. They rarely change — don't load them every cycle.
 
 After reading, state explicitly in your thinking:
 - What phase are we in?
