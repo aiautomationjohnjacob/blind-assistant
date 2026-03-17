@@ -375,52 +375,65 @@ async def test_send_response_no_voice_when_tts_returns_none():
 # ─────────────────────────────────────────────────────────────
 
 
-@pytest.mark.asyncio
-async def test_start_loads_users_before_polling(mock_keyring):
-    """start() must load allowed users from keychain before beginning to poll."""
-    bot = _make_bot()
+def _make_fake_telegram_modules() -> tuple[MagicMock, MagicMock]:
+    """
+    Build a fake `telegram` + `telegram.ext` module tree so tests can run
+    even when python-telegram-bot is not installed in the local environment.
+    Returns (mock_app, mock_ext_module).
+    """
+    import sys
 
-    # Build a self-contained mock for the full Telegram Application lifecycle
     mock_app = MagicMock()
     mock_app.run_polling = MagicMock()
     mock_app.add_handler = MagicMock()
+
     mock_builder = MagicMock()
     mock_builder.token.return_value = mock_builder
     mock_builder.build.return_value = mock_app
 
+    mock_app_builder_cls = MagicMock(return_value=mock_builder)
+
+    mock_ext = MagicMock()
+    mock_ext.Application = MagicMock()
+    mock_ext.ApplicationBuilder = mock_app_builder_cls
+    mock_ext.MessageHandler = MagicMock()
+    mock_ext.filters = MagicMock()
+
+    mock_telegram = MagicMock()
+    mock_telegram.ext = mock_ext
+
+    return mock_app, mock_telegram
+
+
+@pytest.mark.asyncio
+async def test_start_loads_users_before_polling(mock_keyring):
+    """start() must load allowed users from keychain before beginning to poll."""
+    import sys
+    bot = _make_bot()
+    mock_app, mock_telegram = _make_fake_telegram_modules()
+
     with (
         patch("blind_assistant.security.credentials.get_credential", return_value="12345"),
         patch("blind_assistant.security.credentials.require_credential", return_value="fake_token"),
-        patch("telegram.ext.Application") as mock_app_cls,
-        patch("telegram.ext.ApplicationBuilder", return_value=mock_builder),
-        patch("telegram.ext.MessageHandler"),
-        patch("telegram.ext.filters"),
+        patch.dict(sys.modules, {"telegram": mock_telegram, "telegram.ext": mock_telegram.ext}),
     ):
         await bot.start()
 
-    # allowed users should be populated
+    # allowed users should be populated from the keychain value "12345"
     assert 12345 in bot._allowed_user_ids
 
 
 @pytest.mark.asyncio
 async def test_start_calls_run_polling(mock_keyring):
     """start() calls run_polling() on the Application."""
+    import sys
     bot = _make_bot()
-
-    mock_app = MagicMock()
-    mock_app.run_polling = MagicMock()
-    mock_app.add_handler = MagicMock()
-    mock_builder = MagicMock()
-    mock_builder.token.return_value = mock_builder
-    mock_builder.build.return_value = mock_app
+    mock_app, mock_telegram = _make_fake_telegram_modules()
 
     with (
         patch("blind_assistant.security.credentials.get_credential", return_value="111"),
         patch("blind_assistant.security.credentials.require_credential", return_value="fake_token"),
-        patch("telegram.ext.Application"),
-        patch("telegram.ext.ApplicationBuilder", return_value=mock_builder),
-        patch("telegram.ext.MessageHandler"),
-        patch("telegram.ext.filters"),
+        patch.dict(sys.modules, {"telegram": mock_telegram, "telegram.ext": mock_telegram.ext}),
     ):
         await bot.start()
 
