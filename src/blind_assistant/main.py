@@ -110,6 +110,11 @@ def main() -> None:
         help="Enable local voice interface (microphone + speaker)",
     )
     parser.add_argument(
+        "--api",
+        action="store_true",
+        help="Start the REST API server on localhost:8000 (for client apps)",
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         help="Enable debug logging",
@@ -128,6 +133,9 @@ def main() -> None:
 
     if args.voice:
         config["voice_local_enabled"] = True
+
+    if args.api:
+        config["api_server_enabled"] = True
 
     asyncio.run(start_services(config))
 
