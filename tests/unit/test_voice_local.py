@@ -213,7 +213,7 @@ class TestWakeWordDetection:
 
         call_count = 0
 
-        async def two_transcriptions():
+        async def two_transcriptions(duration_seconds=5.0):  # noqa: ARG001
             nonlocal call_count
             call_count += 1
             if call_count == 1:
