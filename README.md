@@ -55,18 +55,14 @@ The setup wizard will tell you how to get each of these.
 
 ## Using the Assistant After Setup
 
-### Through Telegram (Recommended)
+### Through the App (Primary Interface)
 
-Open Telegram on your phone or computer.
-Find the bot you created during setup.
-Send it a message or a voice message.
+The native app runs on Android, iOS, Windows, and macOS. It uses your device's built-in
+screen reader (TalkBack on Android, VoiceOver on iOS and macOS, NVDA or JAWS on Windows)
+and adds a conversational AI layer on top.
 
-Examples of things you can say:
-- "What is on my screen right now?"
-- "Remember that I have a doctor appointment on Friday at 2pm."
-- "What do I have scheduled this week?"
-- "Order me a pizza."
-- "I want to take a vacation — help me plan one."
+The app is in active development. Until the native app is released, use the
+computer interface below or the Telegram bot (for power users).
 
 ### Through the Computer Directly
 
@@ -75,6 +71,24 @@ Type this command and press Enter:
     python -m blind_assistant.main --voice
 
 The assistant will listen through your microphone and speak through your speakers.
+
+Examples of things you can say:
+- "What is on my screen right now?"
+- "Remember that I have a doctor appointment on Friday at 2pm."
+- "What do I have scheduled this week?"
+- "Order me a pizza."
+- "I want to take a vacation — help me plan one."
+
+### Through Telegram (Power User / Remote Access)
+
+Telegram provides remote access for power users who want to send commands while away
+from their main computer. Note: Telegram requires visual setup that some blind users
+may need sighted assistance to complete. For independent first-time setup, use the
+computer interface above.
+
+Open Telegram on your phone or computer.
+Find the bot you created during setup.
+Send it a message or a voice message.
 
 ---
 
