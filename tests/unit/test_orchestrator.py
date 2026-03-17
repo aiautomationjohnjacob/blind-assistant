@@ -693,10 +693,12 @@ class TestHandleOrderFood:
         mock_browser.navigate = mock_navigate
         orc.tool_registry.get_installed_tool.return_value = mock_browser
 
+        restaurant_ps = PageState(url="x", title="Pizza Palace", text_content="")
+        cart_ps = PageState(url="x", title="Cart", text_content="")
         with (
             patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Pizza Palace.")),
-            patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=PageState(url="x", title="Pizza Palace", text_content=""))),
-            patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=PageState(url="x", title="Cart", text_content=""))),
+            patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=restaurant_ps)),
+            patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=cart_ps)),
             patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="pizza")),
             patch.object(orc, "_place_order", new=AsyncMock(return_value={"success": True})),
         ):
