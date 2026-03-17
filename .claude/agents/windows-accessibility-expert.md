@@ -50,10 +50,25 @@ The setup wizard MUST:
 - No keyboard trap (Esc must close dialogs)
 - `Alt+F4` must always work
 
-### Telegram Desktop on Windows
-- The Telegram Windows app is well-supported by NVDA
-- Our bot messages arrive as notifications — NVDA reads these
-- Voice notes in Telegram Desktop: NVDA users can Tab to the Play button
+### Blind Assistant Windows Clients
+
+Blind users access Blind Assistant on Windows via three surfaces:
+
+1. **Native Windows desktop app** (standalone Python/Electron/native app)
+2. **Web app in Chrome or Firefox** (blind-assistant.org — most common for quick access)
+3. **Python CLI** (power users running the assistant locally)
+
+For each surface:
+- **Desktop app**: NVDA reads all output via Windows UIA (UI Automation); Tab order must be logical
+- **Web app (Chrome)**: NVDA+Chrome is the most common combination; test with NVDA Browse Mode
+- **Web app (Firefox)**: NVDA+Firefox is second most common; verify forms and live regions
+- **Python CLI**: NVDA reads console output automatically; `print()` is reliable
+
+### NVDA Browse Mode vs Forms Mode
+- NVDA switches to Forms Mode automatically when focusing a form field (`Enter` triggers this)
+- In Browse Mode: NVDA reads by character, word, line; H navigates headings, F navigates forms
+- Design the web app so Browse Mode navigation makes sense (logical heading hierarchy)
+- Interactive widgets must switch NVDA to Forms Mode (inputs, buttons, custom widgets)
 
 ### NVDA-specific message formatting
 - NVDA reads `---` as "dash dash dash" — don't use horizontal rules as separators

@@ -38,10 +38,26 @@ Test: verify that the Keychain permission dialog is readable by VoiceOver.
 - Works with VoiceOver active without interference
 - Test: `pyttsx3.speak()` doesn't conflict with VoiceOver speech
 
-### Telegram macOS + VoiceOver
-- Telegram Desktop for macOS has reasonable VoiceOver support
-- Voice notes in Telegram macOS: Play button is VoiceOver-accessible
-- Notifications: macOS notification center reads bot messages with VoiceOver
+### Blind Assistant macOS Clients
+
+Blind users access Blind Assistant on macOS via three surfaces:
+
+1. **Native macOS app** (standalone app using AppKit/SwiftUI or Electron)
+2. **Web app in Safari** (blind-assistant.org — VoiceOver+Safari is the primary macOS combo)
+3. **Python CLI** in Terminal.app (current implementation)
+
+For each surface:
+- **Native app**: VoiceOver reads NSAccessibility attributes; use `accessibilityLabel`, `accessibilityRole`
+- **Web app (Safari)**: VoiceOver+Safari is the dominant macOS pairing; `VO+U` opens the rotor
+- **Web app (Chrome)**: Chrome on macOS also works with VoiceOver; test both browsers
+- **Python CLI**: VoiceOver reads all Terminal.app console output automatically
+
+### Safari + VoiceOver specifics
+- `VO+U` opens the Web Rotor — ensure headings, links, and form fields are in it
+- VoiceOver on Safari reads ARIA live regions; use `aria-live="polite"` for status updates
+- `VO+Right Arrow` moves through elements — DOM order must match visual order
+- Never use `display:none` or `visibility:hidden` for content VoiceOver should announce
+  (use `aria-hidden="true"` instead)
 
 ### macOS installer notes
 - `python3 installer/install.py` in Terminal.app: VoiceOver reads all output

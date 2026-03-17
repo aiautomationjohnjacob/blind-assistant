@@ -18,12 +18,14 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P1 | Fix `_get_vault` silent failure: prompt for passphrase via voice when keychain has no key | Cycle 2 review | 2026-03-17 |
-| P2 | End-to-end Telegram demo: send text/voice → get real spoken response back | Phase 2 gate | 2026-03-17 |
-| P2 | Voice installer: complete voice-guided setup from fresh Python install | ARCHITECTURE.md Task 5 | 2026-03-17 |
+| P1 | Telegram end-to-end demo: voice message in → STT → orchestrator → TTS audio reply | ISSUE-007, Phase 2 gate | 2026-03-17 |
+| P2 | Add `context.clear_sensitive()` to zero vault passphrase on session end | ISSUE-005 | 2026-03-17 |
+| P2 | Make passphrase prompt timeout configurable in config.yaml | ISSUE-006 | 2026-03-17 |
 | P2 | Integration test: Telegram message → Whisper STT → orchestrator → TTS → reply | Phase 2 gate | 2026-03-17 |
-| P3 | Voice Activity Detection (VAD) for voice_local.py (replaces fixed recording duration) | Cycle 2 review | 2026-03-17 |
-| P3 | PIL ImageGrab Playwright fallback for headless/server environments | Cycle 2 review | 2026-03-17 |
+| P2 | Voice installer: complete voice-guided setup from fresh Python install | ARCHITECTURE.md Task 5 | 2026-03-17 |
+| P3 | Voice Activity Detection (VAD) for voice_local.py (replaces fixed recording duration) | ISSUE-002 | 2026-03-17 |
+| P3 | PIL ImageGrab Playwright fallback for headless/server environments | ISSUE-003 | 2026-03-17 |
+| P3 | Add Optional[Callable] type annotations to response_callback params in orchestrator | ISSUE-004 | 2026-03-17 |
 | P3 | MCP memory server integration (cross-session user preferences) | INTEGRATION_MAP.md | 2026-03-17 |
 | P3 | Set up CHANGELOG.md and populate ROADMAP.md | open source | 2026-03-17 |
 | P3 | Cloud hosting: document Telegram webhook on Railway/Fly.io | cloud-architect | 2026-03-17 |

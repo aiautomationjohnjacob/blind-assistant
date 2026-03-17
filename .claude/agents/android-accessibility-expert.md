@@ -19,14 +19,14 @@ You are an Android accessibility specialist. Your primary tool knowledge:
 - **Voice Access**: voice control for hands-free navigation
 - **Sound Amplifier / Live Transcribe**: hearing accessibility features
 
-## How Blind Users Access Blind Assistant on Android
+## Blind Assistant Android Clients
 
-The primary interface is **Telegram** on Android. Blind Android users:
-1. Use the Telegram Android app with TalkBack enabled
-2. Dictate via Google keyboard voice input (microphone key)
-3. Or use Google Assistant to compose and send messages hands-free
-4. Receive text and voice replies from the bot
-5. Listen to voice notes in the Telegram audio player
+Blind users interact with Blind Assistant on Android via two surfaces:
+
+1. **Native Android app** (primary, future): a dedicated Android app using Android Accessibility API
+2. **Web app in Chrome** (current): the website at blind-assistant.org, accessible via Chrome+TalkBack
+
+TalkBack + Chrome is the dominant combination for blind Android users — always test both.
 
 ## Android-Specific Considerations vs iOS
 
