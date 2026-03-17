@@ -576,8 +576,7 @@ class Orchestrator:
 
             # Try clicking by text content — Playwright finds elements containing this text
             await browser_tool.click(f"text={click_target}")
-            new_page_state = await browser_tool.get_page_state()
-            return new_page_state
+            return await browser_tool.get_page_state()
 
         except Exception as e:
             logger.warning(f"Navigation to user choice '{user_choice}' failed: {e}")
