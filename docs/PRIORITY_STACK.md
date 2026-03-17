@@ -18,8 +18,8 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P1 | **Tool registry + installer**: self-expanding pattern with user confirmation (user asks for food order → AI discovers needed tools → asks permission to install → installs → executes); last major Phase 2 technical gate | Phase 2 sprint | 2026-03-17 |
-| P2 | End-to-end food ordering demo: blind user asks to order food → full flow with confirmations and risk disclosure | Phase 2 sprint | 2026-03-17 |
+| P1 | **Food ordering checkout loop**: after BrowserTool navigates to search page, Claude reasons about page_state.text_content → reads options to user by voice → user picks by speaking → browser.click() through item selection → checkout → risk disclosure → order confirm → placed. Completes Phase 2. | Phase 2 completion | 2026-03-17 |
+| P2 | End-to-end food ordering demo: blind user asks to order food → full flow including item selection, checkout, and order placement (not just navigation) | Phase 2 sprint | 2026-03-17 |
 | P2 | Voice installer: complete voice-guided setup from fresh Python install | ARCHITECTURE.md Task 5 | 2026-03-17 |
 | P2 | Web app: accessible web interface at blind-assistant.org (WCAG 2.1 AA; NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome) | Founder scope expansion | 2026-03-17 |
 | P2 | Cross-platform accessibility audit: run all 5 platform agents on current codebase | Founder scope expansion | 2026-03-17 |
