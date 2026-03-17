@@ -42,9 +42,11 @@ jest.mock("expo-speech", () => ({
 // Mock expo-haptics — impactAsync is the recording start/stop confirmation cue.
 // This mock prevents native Taptic Engine calls in the test environment while
 // allowing assertions that haptic feedback was requested at the right times.
-const mockImpactAsync = jest.fn().mockResolvedValue(undefined);
+// Note: jest.mock() is hoisted before variable declarations, so the mock factory
+// must not reference variables defined outside it. We use jest.fn() directly here
+// and retrieve the mock reference via jest.requireMock() in beforeEach.
 jest.mock("expo-haptics", () => ({
-  impactAsync: mockImpactAsync,
+  impactAsync: jest.fn().mockResolvedValue(undefined),
   ImpactFeedbackStyle: {
     Light: "light",
     Medium: "medium",
