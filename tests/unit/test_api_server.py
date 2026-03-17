@@ -27,7 +27,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from blind_assistant.core.orchestrator import Response, UserContext
-from blind_assistant.interfaces.api_server import APIServer
+from blind_assistant.interfaces.api_server import APIServer, RateLimitMiddleware
 
 
 # ─────────────────────────────────────────────────────────────
