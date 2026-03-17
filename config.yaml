@@ -89,6 +89,17 @@ security:
   audit_logging: true
 
 # ============================================================
+# REST API Server Settings
+# ============================================================
+api_server:
+  # Rate limiting — requests per IP per 60-second window.
+  # Protects Claude API budget and prevents service degradation for the blind user.
+  # On localhost during development, only the local user can hit this server,
+  # so the defaults are generous. Tighten before cloud deployment.
+  rate_limit_per_minute: 60        # Authenticated endpoints (/query, /remember, /task, etc.)
+  health_rate_limit_per_minute: 120  # /health endpoint (client connectivity checks)
+
+# ============================================================
 # AI Model Settings
 # ============================================================
 ai:
