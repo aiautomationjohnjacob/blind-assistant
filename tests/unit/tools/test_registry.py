@@ -144,14 +144,28 @@ async def test_load_sets_loaded_flag(minimal_registry_yaml: Path) -> None:
 
 
 async def test_load_handles_null_tools_key(tmp_path: Path) -> None:
-    """load() with tools: null does not raise — results in empty _available."""
+    """load() with all sections null does not raise — results in empty _available."""
     yaml_file = tmp_path / "registry.yaml"
-    yaml_file.write_text("tools:\n")
+    # All three recognized keys are present but null
+    yaml_file.write_text("capabilities:\nintegrations:\ntools:\n")
     registry = ToolRegistry()
     with patch("blind_assistant.tools.registry.REGISTRY_PATH", yaml_file):
         await registry.load()
 
     assert registry._available == {}
+
+
+async def test_load_supports_legacy_tools_key(tmp_path: Path) -> None:
+    """load() correctly reads tools from a legacy registry using only the 'tools:' key."""
+    yaml_file = tmp_path / "registry.yaml"
+    yaml_file.write_text(
+        "tools:\n  - name: legacy_tool\n    package: oldpkg\n    description: old\n"
+    )
+    registry = ToolRegistry()
+    with patch("blind_assistant.tools.registry.REGISTRY_PATH", yaml_file):
+        await registry.load()
+
+    assert "legacy_tool" in registry._available
 
 
 # ─────────────────────────────────────────────────────────────
