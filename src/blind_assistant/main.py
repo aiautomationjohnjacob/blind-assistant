@@ -83,6 +83,7 @@ def load_config() -> dict:
 
 
 def configure_logging(debug: bool = False) -> None:
+    """Set up root logging with a consistent format; reduce noise from third-party libs."""
     level = logging.DEBUG if debug else logging.INFO
     logging.basicConfig(
         level=level,
