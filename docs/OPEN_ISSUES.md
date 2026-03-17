@@ -370,4 +370,11 @@ until this is validated. A working integration may be broken in practice.
 **Proposed fix**: Use computer-use-tester or device-simulator to run `_handle_order_food`
 against a real Playwright browser session (DoorDash, Instacart, or a test food ordering site).
 Observe page_state returns, adjust Claude helper prompts if needed.
-**Status**: OPEN (P1)
+**Status**: IN PROGRESS — Cycle 12 delivered 11 real Playwright integration tests in
+tests/integration/test_browser_tool_real.py that validate BrowserTool against local HTML
+fixtures (no external network). Tests are wired to CI via 'integration-browser' job. They
+auto-skip when system deps unavailable (WSL2) but run in GitHub Actions. Full validation
+against a live food ordering site (DoorDash) still pending — requires Claude API key in CI
+and a test account, which is Phase 4 scope. BrowserTool code paths are validated.
+**Remaining**: Verify CI integration-browser job passes on next push; validate against
+real food site when Claude API test credentials are available.
