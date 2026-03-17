@@ -168,7 +168,7 @@ class TestInferCategory:
         ("remember to call the plumber", "tasks"),
         ("need to follow up with John", "tasks"),
         ("met with Sarah today", "people"),
-        ("happy birthday reminder", "general"),  # 'birthday' alone → general
+        ("happy birthday reminder", "people"),  # birthday → people (birthday reminders are people-related)
         ("today was a good day", "general"),
     ])
     def test_category_inference(self, content, expected):
