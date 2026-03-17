@@ -750,7 +750,7 @@ class Orchestrator:
         order_summary: str,
         total_amount: str,
         context: UserContext,
-        update,
+        update: Callable[[str], Awaitable[None]],
     ) -> bool:
         """
         Run the full financial confirmation flow for a food order.
