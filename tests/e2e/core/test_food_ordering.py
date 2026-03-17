@@ -103,6 +103,10 @@ def _make_orchestrator_with_mock_browser(
     orc = Orchestrator(config)
     orc.confirmation_gate = gate
     orc._initialized = True
+    # ContextManager is asserted non-None in handle_message after initialize().
+    # We mock it here to satisfy the guard without running the real MCP-backed
+    # context manager, which requires external services not needed for food ordering tests.
+    orc.context_manager = MagicMock()
 
     # Mock planner to classify any message as "order_food"
     mock_planner = MagicMock()
