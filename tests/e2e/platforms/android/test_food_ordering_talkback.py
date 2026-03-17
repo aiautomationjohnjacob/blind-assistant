@@ -267,9 +267,12 @@ class TestFoodOrderingTalkBackFlow:
                 n for n in focusable_nodes
                 if "speak" in n.lower() or "record" in n.lower() or "assistant" in n.lower()
             ]
+            # Extract content descriptions from focusable nodes for the error message
+            cd_pattern = re.compile(r'content-desc="([^"]+)"')
+            focusable_descs = [m.group(1) for n in focusable_nodes for m in [cd_pattern.search(n)] if m]
             assert len(speak_nodes) > 0, (
                 "The press-to-talk button is not focusable by TalkBack. "
-                f"All focusable content-descs: {[re.search(r'content-desc=\"([^\"]+)\"', n) for n in focusable_nodes]}"
+                f"All focusable content-descs: {focusable_descs}"
             )
         finally:
             adb.disable_talkback()  # type: ignore[attr-defined]
