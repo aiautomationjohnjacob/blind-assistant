@@ -326,30 +326,36 @@ async def test_food_order_responses_contain_no_visual_only_language(
     to a blind user — "look at the screen", "you can see", etc. are meaningless.
 
     This is the accessibility assertion required for all E2E tests.
+    Claude-powered helpers are patched so test does not require anthropic.
     """
     orc, mock_browser, gate = _make_orchestrator_with_mock_browser(config, mock_food_page_state, installed=True)
     gate.register_session(user_context.session_id)
 
     updates: list[str] = []
-    response_count = [0]
 
-    async def update_cb(msg: str) -> None:
-        updates.append(msg)
-        response_count[0] += 1
-        if response_count[0] == 2:
+    with (
+        patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Pizza Palace. 2. Taco Town.")),
+        patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=mock_food_page_state)),
+        patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=mock_food_page_state)),
+        patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x pizza")),
+        patch.object(orc, "_place_order", new=AsyncMock(return_value={"success": True})),
+    ):
+
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
             gate.submit_response(user_context.session_id, "yes")
 
-    await orc._handle_order_food(
-        MagicMock(
-            type="order_food",
-            description="order me food",
-            parameters={"food": "pizza"},
-            is_high_stakes=True,
-            required_tools=["browser"],
-        ),
-        user_context,
-        update_cb,
-    )
+        await orc._handle_order_food(
+            MagicMock(
+                type="order_food",
+                description="order me food",
+                parameters={"food": "pizza"},
+                is_high_stakes=True,
+                required_tools=["browser"],
+            ),
+            user_context,
+            update_cb,
+        )
 
     # Check ALL messages sent to user for visual-only language
     visual_only_phrases = [
