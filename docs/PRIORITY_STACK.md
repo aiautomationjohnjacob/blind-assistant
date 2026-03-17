@@ -31,6 +31,17 @@
 | P3 | Populate ROADMAP.md with Phase 3-5 milestones | open source | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
+## Completed Items (Cycle 19 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Android TalkBack E2E test infrastructure: ADBClient wrapper + 8 tests (conftest.py + test_food_ordering_talkback.py) | 2026-03-17 | 19 |
+| iOS VoiceOver E2E test infrastructure: SimctlClient wrapper + 9 tests (conftest.py + test_food_ordering_voiceover.py) | 2026-03-17 | 19 |
+| CI path bug fixed: e2e-android job now uses tests/e2e/platforms/android/ (was tests/e2e/android/) | 2026-03-17 | 19 |
+| ios-e2e.yml: macOS GitHub Actions workflow for iOS VoiceOver tests on release tags | 2026-03-17 | 19 |
+| pyproject.toml: android + ios pytest marks registered | 2026-03-17 | 19 |
+| ISSUE-029: Netlify operator setup docs added to README.md | 2026-03-17 | 19 |
+
 ## Completed Items (Cycle 18 additions)
 
 | Item | Completed | Cycle # |
