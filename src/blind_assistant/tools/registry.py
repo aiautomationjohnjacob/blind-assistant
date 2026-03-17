@@ -159,10 +159,20 @@ class ToolRegistry:
         # Remove from installed registry
         del self._installed[tool_name]
 
-        # Remove stored credentials for this tool
+        # Remove stored credentials for this tool.
+        # If the tool was never configured (no credentials stored), deletion is a no-op —
+        # PasswordDeleteError is silenced since missing credentials are not an error condition.
         cred_key = f"tool_{tool_name}_credentials"
         from blind_assistant.security.credentials import delete_credential
-        delete_credential(cred_key)
+        try:
+            delete_credential(cred_key)
+        except Exception:
+            # Credential not stored — that's fine; tool may have been installed but never
+            # configured with API credentials. Log at DEBUG to avoid noisy warnings.
+            logger.debug(
+                f"No stored credentials to remove for tool {tool_name!r} "
+                "(may not have been configured)"
+            )
 
         logger.info(f"Tool uninstalled: {tool_name}")
         return True
