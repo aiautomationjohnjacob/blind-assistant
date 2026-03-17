@@ -168,7 +168,7 @@ class Orchestrator:
         tool_name: str,
         tool_info: dict,
         context: UserContext,
-        update,
+        update: Callable[[str], Awaitable[None]],
     ) -> bool:
         """
         Offer to install a missing tool. Returns True if installed, False if declined.
