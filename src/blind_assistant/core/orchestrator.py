@@ -10,7 +10,6 @@ This is the central coordinator for all user interactions.
 import asyncio
 import logging
 from dataclasses import dataclass, field
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -323,7 +322,7 @@ class Orchestrator:
             return None
 
         # Check if passphrase was collected earlier in this session
-        session_passphrase: Optional[str] = getattr(context, "_vault_passphrase", None)
+        session_passphrase: str | None = getattr(context, "_vault_passphrase", None)
 
         if session_passphrase is None:
             await response_callback(
@@ -379,7 +378,7 @@ class Orchestrator:
         )
         return vault
 
-    async def _collect_vault_passphrase(self, context: UserContext) -> Optional[str]:
+    async def _collect_vault_passphrase(self, context: UserContext) -> str | None:
         """
         Wait for the user to provide their vault passphrase.
 
@@ -392,7 +391,7 @@ class Orchestrator:
         try:
             response = await asyncio.wait_for(queue.get(), timeout=120)
             return response.strip() if response and response.strip() else None
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.info("Vault passphrase prompt timed out after 120 seconds")
             return None
 

@@ -111,7 +111,6 @@ async def transcribe_microphone(
         Transcribed text, or None
     """
     try:
-        import numpy as np
         import scipy.io.wavfile as wav
         import sounddevice as sd
 

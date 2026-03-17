@@ -50,14 +50,14 @@ class TestStoreCredential:
         assert ("blind-assistant", "my_key") in mock_keyring.store
 
     def test_raises_runtime_error_when_keychain_unavailable(self):
-        with patch("keyring.set_password", side_effect=keyring.errors.KeyringError("no keychain")):
-            with pytest.raises(RuntimeError, match="OS keychain may not be available"):
-                store_credential("key", "value")
+        with patch("keyring.set_password", side_effect=keyring.errors.KeyringError("no keychain")), \
+             pytest.raises(RuntimeError, match="OS keychain may not be available"):
+            store_credential("key", "value")
 
     def test_runtime_error_message_includes_key_name(self):
-        with patch("keyring.set_password", side_effect=keyring.errors.KeyringError("err")):
-            with pytest.raises(RuntimeError, match="my_important_key"):
-                store_credential("my_important_key", "value")
+        with patch("keyring.set_password", side_effect=keyring.errors.KeyringError("err")), \
+             pytest.raises(RuntimeError, match="my_important_key"):
+            store_credential("my_important_key", "value")
 
     def test_overwrites_existing_value(self, mock_keyring):
         store_credential("token", "old_value")

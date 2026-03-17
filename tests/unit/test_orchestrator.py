@@ -32,7 +32,7 @@ def minimal_config():
     return {
         "telegram_enabled": False,
         "voice_local_enabled": False,
-        "vault_path": "/tmp/test_vault",
+        "vault_path": "/tmp/test_vault",  # noqa: S108
     }
 
 

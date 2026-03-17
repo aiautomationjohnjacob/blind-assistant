@@ -160,7 +160,7 @@ class TestEncryptDecrypt:
     def test_truncated_ciphertext_raises(self):
         key = os.urandom(32)
         ciphertext = encrypt(b"data", key)
-        with pytest.raises(Exception):
+        with pytest.raises((InvalidTag, Exception)):  # cryptography raises InvalidTag or ValueError
             decrypt(ciphertext[:5], key)  # too short — missing tag
 
     def test_encrypt_returns_bytes(self):
