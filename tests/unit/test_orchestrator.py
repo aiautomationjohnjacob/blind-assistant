@@ -603,7 +603,10 @@ class TestHandleOrderFood:
             result = await orc._handle_order_food(intent, standard_context, update_cb)
 
         # Order should have been placed
-        assert result.get("order_placed") is True or "placed" in result["text"].lower() or "confirmed" in result["text"].lower()
+        placed = result.get("order_placed") is True
+        placed = placed or "placed" in result["text"].lower()
+        placed = placed or "confirmed" in result["text"].lower()
+        assert placed
         # No ordering in progress — flow completed
         assert result.get("ordering_in_progress") is not True
 
