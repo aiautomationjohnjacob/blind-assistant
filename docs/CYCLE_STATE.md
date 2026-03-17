@@ -194,10 +194,10 @@ JS tests: 117 (was 114). Python: 465 unit (unchanged). 2 new open issues: ISSUE-
 ## Known Issues / Technical Debt
 
 - `transcribe_microphone` uses fixed duration — needs Voice Activity Detection (VAD) — ISSUE-002
-- Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — Phase 2 work
-- `src/blind_assistant/memory/mcp_memory.py` not yet implemented — Phase 2 work
-- response_callback params in orchestrator lack Optional[Callable] type annotations — ISSUE-004
-- /transcribe has no body size limit — ISSUE-018
+- Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — not needed (browser handles)
+- `src/blind_assistant/memory/mcp_memory.py` not yet implemented — P3
+- Platform hint text in MainScreen says "Double-tap to activate" (visual-only, LOW) — ISSUE-020
+- Food ordering checkout loop not validated on real Playwright browser — ISSUE-021 (P1)
 
 ## Decisions Made
 
