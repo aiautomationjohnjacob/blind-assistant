@@ -1007,18 +1007,17 @@ class TestCheckoutLoopHelpers:
         mock_browser.navigate = AsyncMock(return_value=mock_page)
         orc.tool_registry.get_installed_tool.return_value = mock_browser
 
-        # Patch all helpers: options are extracted, but wait_for_response returns None (timeout)
+        # Patch all helpers: options are extracted, confirmation passes, but
+        # wait_for_response returns None (simulates user timing out on restaurant selection)
         with (
             patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Pizza Palace. 2. Taco Town.")),
+            patch.object(orc.confirmation_gate, "wait_for_confirmation", new=AsyncMock(return_value=True)),
             patch.object(orc.confirmation_gate, "wait_for_response", new=AsyncMock(return_value=None)),
         ):
             updates: list[str] = []
 
             async def update_cb(msg: str) -> None:
                 updates.append(msg)
-                # Accept risk disclosure so we get past Step 2
-                if any(kw in msg.lower() for kw in ("risk", "payment", "financial")):
-                    orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
 
             orc.confirmation_gate.register_session(standard_context.session_id)
             result = await orc._handle_order_food(
