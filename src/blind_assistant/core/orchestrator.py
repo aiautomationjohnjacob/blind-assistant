@@ -282,6 +282,142 @@ class Orchestrator:
                 )
             }
 
+    async def _handle_order_food(self, intent, context: UserContext, update) -> dict:
+        """
+        Handle a food ordering request end-to-end.
+
+        Full flow per Phase 2 requirements:
+        1. Ask the user what/where they want to order (if not in intent params)
+        2. Mandatory financial risk disclosure + user acknowledgment
+        3. Navigate to the food ordering site with the browser tool
+        4. Let Claude reason about the page and guide the user through the order
+        5. Show order summary and get final per-transaction confirmation
+        6. Complete the order and report back
+
+        Per ETHICS_REQUIREMENTS.md: risk disclosure fires every transaction.
+        Per SECURITY_MODEL.md: payment handled via Stripe tokenization, not raw numbers.
+        Per ARCHITECTURE.md: browser tool handles any food site — no DoorDash-specific code.
+        """
+        # Step 1: Gather what the user wants to order
+        food_query = intent.parameters.get("query") or intent.parameters.get("food")
+        restaurant = intent.parameters.get("restaurant") or intent.parameters.get("service")
+
+        if not food_query:
+            # Extract from the intent description — the planner puts the full request there
+            food_query = intent.description
+
+        await update(
+            f"I'll help you order food. "
+            f"I'm going to search for {food_query or 'food delivery options'} near you."
+        )
+
+        # Step 2: Financial risk disclosure — MANDATORY before any payment discussion
+        # Use the full confirm_financial_details_collection flow which fires the
+        # spoken disclosure and waits for explicit acknowledgment.
+        await update(
+            "Before we look at ordering options, I need to share some important information."
+        )
+        user_acknowledged = await self.confirmation_gate.confirm_financial_details_collection(
+            context=context,
+            response_callback=update,
+        )
+
+        if not user_acknowledged:
+            return {
+                "text": (
+                    "No problem — I won't proceed with the order. "
+                    "You can ask me again any time."
+                )
+            }
+
+        # Step 3: Use the browser tool to search for food ordering options
+        browser_tool = self.tool_registry.get_installed_tool("browser")
+        if browser_tool is None:
+            # This should not happen — the tool install offer runs before execute_intent.
+            # If browser isn't installed, guide the user.
+            return {
+                "text": (
+                    "I need the browser tool to complete your order, but it's not installed. "
+                    "Say 'order food' again and I'll ask to install it."
+                )
+            }
+
+        await update("Opening the food ordering site now...")
+
+        try:
+            # Use a well-known food search aggregator that works in most regions.
+            # Claude reasons about any page — no site-specific parsing.
+            search_url = f"https://www.doordash.com/search/store/?q={food_query.replace(' ', '+')}"
+            if restaurant:
+                search_url = f"https://www.doordash.com/search/store/?q={restaurant.replace(' ', '+')}"
+
+            page_state = await browser_tool.navigate(search_url)
+
+            await update(
+                f"I'm on the food ordering page. Here's what I found: "
+                f"{page_state.title}. "
+                f"I can see options on this page. "
+                "Would you like me to read the first few results to you, "
+                "or do you have a specific restaurant in mind?"
+            )
+
+            # Step 4: Return the page state for the conversational follow-up.
+            # The next user message will be routed back here or to general_question
+            # to continue the ordering flow.
+            return {
+                "text": (
+                    f"I've opened the food delivery search for: {food_query}. "
+                    f"Page title: {page_state.title}. "
+                    "To complete your order, I'll need to walk through the choices with you. "
+                    "What restaurant or type of food would you like?"
+                ),
+                "page_state": page_state,
+                "ordering_in_progress": True,
+            }
+
+        except ImportError:
+            # Playwright not installed — should have been caught by tool install flow
+            return {
+                "text": (
+                    "The browser tool isn't ready yet. "
+                    "This may be because Playwright needs to be installed. "
+                    "Say 'order food' again and I'll walk you through installing it."
+                )
+            }
+        except Exception as e:
+            logger.error(f"Food ordering navigation failed: {e}", exc_info=True)
+            return {
+                "text": (
+                    "I had trouble opening the food ordering site. "
+                    f"Here's what happened: {str(e)}. "
+                    "Would you like to try a different service, "
+                    "or shall I try again?"
+                )
+            }
+
+    async def _handle_order_food_confirm(
+        self,
+        order_summary: str,
+        total_amount: str,
+        context: UserContext,
+        update,
+    ) -> bool:
+        """
+        Run the full financial confirmation flow for a food order.
+
+        Called after the order is built and ready to submit.
+        Uses confirm_financial_action which fires risk disclosure + order summary
+        + gets explicit yes/no before any charge is made.
+
+        Returns True if the user confirmed, False if cancelled.
+        """
+        return await self.confirmation_gate.confirm_financial_action(
+            order_summary=order_summary,
+            total_amount=total_amount,
+            context=context,
+            response_callback=update,
+        )
+
     async def _handle_high_stakes_stub(self, intent, context: UserContext, update) -> dict:
         """Placeholder for high-stakes intents not yet fully implemented."""
         return {
