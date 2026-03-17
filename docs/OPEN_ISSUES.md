@@ -316,7 +316,10 @@ selection and checkout is missing.
 reason about page_state.text_content and generate a voice-friendly list of restaurant
 options. Route the next user response back through the orchestrator to continue the
 ordering flow (pick restaurant → view menu → add item → checkout → confirm).
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 10 — Full 11-step checkout loop implemented in
+_handle_order_food. 5 Claude helper methods with graceful fallbacks. 12 new unit tests.
+Note: tested with mocked browser only — real Playwright validation tracked as ISSUE-021.
 
 ---
 
