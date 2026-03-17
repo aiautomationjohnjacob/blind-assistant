@@ -1,11 +1,9 @@
 {
   "mcpServers": {
     "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
-      }
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "note": "Authenticate via: claude mcp add --transport http github https://api.githubcopilot.com/mcp/"
     },
     "memory": {
       "command": "npx",
@@ -19,13 +17,10 @@
         "/home/ai/Projects/blind-assistant"
       ]
     },
-    "fetch": {
+    "playwright": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-fetch"]
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequentialthinking"]
+      "args": ["-y", "@playwright/mcp"],
+      "note": "Used for automated accessibility audits and keyboard navigation testing"
     }
   }
 }
