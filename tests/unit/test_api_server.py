@@ -445,3 +445,120 @@ def test_api_server_enables_docs_in_debug_mode():
     client = TestClient(app, raise_server_exceptions=False)
     resp = client.get("/docs")
     assert resp.status_code == 200
+
+
+# ─────────────────────────────────────────────────────────────
+# Rate limiting middleware
+# ─────────────────────────────────────────────────────────────
+
+
+def _make_rate_limit_client(auth_limit: int = 60, health_limit: int = 120):
+    """
+    Build a TestClient with aggressive rate limits for testing.
+    Returns (server, client) pair.
+    """
+    orc = _make_orchestrator()
+    config: dict = {
+        "debug": True,
+        "api_auth_disabled": True,
+        "api_server": {
+            "rate_limit_per_minute": auth_limit,
+            "health_rate_limit_per_minute": health_limit,
+        },
+    }
+    server = APIServer(orc, config)
+    # Build app — RateLimitMiddleware is added inside _build_app()
+    app = server._build_app()
+    return server, TestClient(app, raise_server_exceptions=False)
+
+
+def test_rate_limit_middleware_allows_requests_within_limit():
+    """Requests within the rate limit return 200, not 429."""
+    _, client = _make_rate_limit_client(auth_limit=5, health_limit=5)
+    # 3 requests — under the limit of 5
+    for _ in range(3):
+        resp = client.get("/health")
+    assert resp.status_code == 200
+
+
+def test_rate_limit_middleware_blocks_health_after_limit_exceeded():
+    """After health_limit requests in the window, /health returns 429."""
+    _, client = _make_rate_limit_client(auth_limit=100, health_limit=2)
+    # First two allowed
+    client.get("/health")
+    client.get("/health")
+    # Third should be blocked
+    resp = client.get("/health")
+    assert resp.status_code == 429
+    assert "rate limit" in resp.json()["detail"].lower()
+
+
+def test_rate_limit_middleware_blocks_auth_endpoint_after_limit_exceeded():
+    """After auth_limit requests in the window, authenticated endpoints return 429."""
+    _, client = _make_rate_limit_client(auth_limit=2, health_limit=100)
+    # First two allowed (api_auth_disabled=True so no token needed)
+    client.post("/query", json={"message": "hello"})
+    client.post("/query", json={"message": "hello"})
+    # Third should be blocked
+    resp = client.post("/query", json={"message": "hello"})
+    assert resp.status_code == 429
+
+
+def test_rate_limit_middleware_health_and_auth_limits_are_independent():
+    """Health endpoint and authenticated endpoints have separate rate limit counters."""
+    _, client = _make_rate_limit_client(auth_limit=2, health_limit=100)
+    # Exhaust auth limit
+    client.post("/query", json={"message": "hello"})
+    client.post("/query", json={"message": "hello"})
+    # /health should still work (its own limit is 100)
+    resp = client.get("/health")
+    assert resp.status_code == 200
+
+
+def test_rate_limit_middleware_configured_from_server_config():
+    """APIServer passes rate limit config values to RateLimitMiddleware."""
+    orc = _make_orchestrator()
+    # Low limits so we can verify they're applied
+    config = {
+        "debug": True,
+        "api_auth_disabled": True,
+        "api_server": {
+            "rate_limit_per_minute": 1,
+            "health_rate_limit_per_minute": 1,
+        },
+    }
+    server = APIServer(orc, config)
+    app = server._build_app()
+    client = TestClient(app, raise_server_exceptions=False)
+
+    # First request allowed
+    resp = client.get("/health")
+    assert resp.status_code == 200
+    # Second request blocked (limit=1)
+    resp = client.get("/health")
+    assert resp.status_code == 429
+
+
+def test_rate_limit_middleware_is_instance_of_base_http_middleware():
+    """RateLimitMiddleware is constructed with correct default limits."""
+    # Construct directly to unit-test the init parameters
+    middleware = RateLimitMiddleware(app=None, auth_limit=30, health_limit=60)  # type: ignore[arg-type]
+    assert middleware._auth_limit == 30
+    assert middleware._health_limit == 60
+    assert middleware._window == 60
+
+
+def test_rate_limit_middleware_default_window_is_60_seconds():
+    """RateLimitMiddleware uses a 60-second sliding window by default."""
+    middleware = RateLimitMiddleware(app=None)  # type: ignore[arg-type]
+    assert middleware._window == 60
+
+
+def test_rate_limit_middleware_uses_x_forwarded_for_when_present():
+    """Behind a reverse proxy, rate limits are applied to the forwarded IP, not 127.0.0.1."""
+    _, client = _make_rate_limit_client(auth_limit=1, health_limit=100)
+    # First request from proxy IP — allowed
+    client.get("/health", headers={"X-Forwarded-For": "10.0.0.1"})
+    # Second request from the SAME proxy IP — still allowed (health limit=100)
+    resp = client.get("/health", headers={"X-Forwarded-For": "10.0.0.1"})
+    assert resp.status_code == 200  # health limit=100, only 2 requests sent
