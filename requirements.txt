@@ -5,7 +5,6 @@
 # AI / Language Models
 anthropic==0.25.0               # Claude API (intent, vision, planning)
 openai-whisper==20231117        # Local speech-to-text (runs offline)
-torch==2.6.0                    # PyTorch (openai-whisper dep); pinned to fix PYSEC-2025-41 RCE
 
 # REST API Server (primary connection point for all client apps)
 fastapi==0.115.14               # Async REST API framework; 0.111 → 0.115 fixes starlette CVE-2024-47874
