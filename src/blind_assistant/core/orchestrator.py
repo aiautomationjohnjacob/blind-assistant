@@ -140,8 +140,9 @@ class Orchestrator:
         assert self.confirmation_gate is not None, "ConfirmationGate not initialized"
         assert self.context_manager is not None, "ContextManager not initialized"
 
-        # Progress callback helper
+        # Progress callback helper — forwards interim messages to the active interface.
         async def update(message: str) -> None:
+            """Forward an interim progress message to the caller's response_callback."""
             if response_callback:
                 await response_callback(message)
 
