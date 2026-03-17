@@ -294,7 +294,9 @@ class Orchestrator:
             logger.error(f"General question failed: {e}", exc_info=True)
             return {"text": (f"I wasn't able to answer that right now. Error: {str(e)}")}
 
-    async def _handle_order_food(self, intent, context: UserContext, update) -> dict:
+    async def _handle_order_food(
+        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
+    ) -> dict:
         """
         Handle a food ordering request end-to-end via conversational checkout loop.
 
