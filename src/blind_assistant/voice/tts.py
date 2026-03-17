@@ -86,8 +86,13 @@ async def _elevenlabs_tts(
             },
         )
 
-        # Collect all chunks
-        audio_bytes = b"".join(chunk async for chunk in audio_generator if isinstance(chunk, bytes))
+        # Collect all chunks — gather into a list first (async for is not directly
+        # usable by bytes.join() since join requires a synchronous iterable)
+        chunks: list[bytes] = []
+        async for chunk in audio_generator:
+            if isinstance(chunk, bytes):
+                chunks.append(chunk)
+        audio_bytes = b"".join(chunks)
         return audio_bytes if audio_bytes else None
 
     except Exception as e:
