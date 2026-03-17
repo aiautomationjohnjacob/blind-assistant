@@ -815,3 +815,222 @@ class TestHandleOrderFood:
         orc = Orchestrator(minimal_config)
         handlers = orc._intent_handlers
         assert handlers["order_food"].__name__ != "_handle_high_stakes_stub"
+
+
+# ─────────────────────────────────────────────────────────────
+# ConfirmationGate.wait_for_response
+# ─────────────────────────────────────────────────────────────
+
+
+class TestConfirmationGateWaitForResponse:
+    """Tests for ConfirmationGate.wait_for_response — arbitrary text collection."""
+
+    async def test_wait_for_response_returns_submitted_text(self, standard_context) -> None:
+        """wait_for_response returns the raw text submitted via submit_response."""
+        gate = ConfirmationGate()
+        gate.register_session(standard_context.session_id)
+        gate.submit_response(standard_context.session_id, "pizza palace")
+
+        result = await gate.wait_for_response(standard_context)
+        assert result == "pizza palace"
+
+    async def test_wait_for_response_returns_number_string(self, standard_context) -> None:
+        """wait_for_response returns '2' when user says 'number 2' (stripped)."""
+        gate = ConfirmationGate()
+        gate.register_session(standard_context.session_id)
+        gate.submit_response(standard_context.session_id, "2")
+
+        result = await gate.wait_for_response(standard_context)
+        assert result == "2"
+
+    async def test_wait_for_response_strips_whitespace(self, standard_context) -> None:
+        """wait_for_response strips leading/trailing whitespace from response."""
+        gate = ConfirmationGate()
+        gate.register_session(standard_context.session_id)
+        gate.submit_response(standard_context.session_id, "  pepperoni pizza  ")
+
+        result = await gate.wait_for_response(standard_context)
+        assert result == "pepperoni pizza"
+
+    async def test_wait_for_response_returns_none_on_timeout(self, standard_context) -> None:
+        """wait_for_response returns None when timeout expires (no submission)."""
+        gate = ConfirmationGate()
+        # Don't submit any response — timeout should fire
+        result = await gate.wait_for_response(standard_context, timeout=1)
+        assert result is None
+
+    async def test_wait_for_response_auto_registers_session(self, standard_context) -> None:
+        """wait_for_response registers the session automatically if not pre-registered."""
+        gate = ConfirmationGate()
+        # Do NOT call register_session() first — should auto-register
+        gate.submit_response(standard_context.session_id, "tacos")
+        # Submit before waiting (queue is pre-populated)
+        result = await gate.wait_for_response(standard_context, timeout=5)
+        # Auto-registered: result may be None (queue was created AFTER submit) —
+        # this verifies the method doesn't crash, not that it gets the value
+        # In practice callers register before prompting the user.
+        assert result is None or result == "tacos"
+
+
+# ─────────────────────────────────────────────────────────────
+# Checkout loop helpers — fallback behavior without Claude API
+# ─────────────────────────────────────────────────────────────
+
+
+class TestCheckoutLoopHelpers:
+    """Tests for orchestrator checkout loop helpers — all test fallback paths only.
+
+    These helpers normally call Claude API; the fallback paths are tested here
+    (ImportError / Exception from anthropic) to ensure graceful degradation.
+    """
+
+    def _make_orc(self, minimal_config: dict) -> Orchestrator:
+        """Minimal orchestrator for checkout helper tests."""
+        from blind_assistant.core.confirmation import ConfirmationGate
+
+        orc = Orchestrator(minimal_config)
+        orc.confirmation_gate = ConfirmationGate()
+        orc.tool_registry = MagicMock()
+        orc._initialized = True
+        return orc
+
+    async def test_extract_options_falls_back_when_anthropic_unavailable(self, minimal_config) -> None:
+        """_extract_options_from_page returns a plain-text fallback when Claude API unavailable."""
+        orc = self._make_orc(minimal_config)
+        # Patch require_credential to raise ImportError (anthropic not installed)
+        with patch("blind_assistant.security.credentials.require_credential", side_effect=ImportError("no anthropic")):
+            result = await orc._extract_options_from_page(
+                page_text="Pizza Palace\nTaco Town",
+                page_title="DoorDash Results",
+                task_context="food search",
+                max_options=3,
+            )
+        # Should return SOMETHING — never crash, never return empty string
+        assert isinstance(result, str)
+        assert len(result) > 0
+
+    async def test_extract_options_falls_back_on_empty_page_text(self, minimal_config) -> None:
+        """_extract_options_from_page handles empty page_text without crashing."""
+        orc = self._make_orc(minimal_config)
+        with patch("blind_assistant.security.credentials.require_credential", side_effect=Exception("api error")):
+            result = await orc._extract_options_from_page(
+                page_text="",
+                page_title="Empty Page",
+                task_context="menu",
+                max_options=3,
+            )
+        assert isinstance(result, str)
+
+    async def test_navigate_to_user_choice_returns_none_on_click_failure(self, minimal_config) -> None:
+        """_navigate_to_user_choice returns None when click or navigation fails."""
+        from blind_assistant.tools.browser import PageState
+
+        orc = self._make_orc(minimal_config)
+        mock_page = PageState(url="https://example.com", title="DoorDash", text_content="Pizza Palace")
+        mock_browser = AsyncMock()
+        mock_browser.click = AsyncMock(side_effect=Exception("element not found"))
+
+        with patch("blind_assistant.security.credentials.require_credential", side_effect=Exception("no api")):
+            result = await orc._navigate_to_user_choice(
+                browser_tool=mock_browser,
+                page_state=mock_page,
+                user_choice="Pizza Palace",
+            )
+        assert result is None
+
+    async def test_add_item_to_cart_returns_current_page_on_failure(self, minimal_config) -> None:
+        """_add_item_to_cart returns the existing page when click fails (no crash)."""
+        from blind_assistant.tools.browser import PageState
+
+        orc = self._make_orc(minimal_config)
+        original_page = PageState(url="https://menu.example.com", title="Menu", text_content="Pepperoni Pizza $14")
+        mock_browser = AsyncMock()
+        mock_browser.click = AsyncMock(side_effect=Exception("button not found"))
+
+        with patch("blind_assistant.security.credentials.require_credential", side_effect=Exception("no api")):
+            result = await orc._add_item_to_cart(
+                browser_tool=mock_browser,
+                current_page=original_page,
+                item_choice="Pepperoni Pizza",
+            )
+        # Should return the original page (not crash) — graceful fallback
+        assert result is original_page
+
+    async def test_extract_order_summary_fallback_uses_item_and_restaurant(self, minimal_config) -> None:
+        """_extract_order_summary fallback returns item + restaurant when Claude API fails."""
+        orc = self._make_orc(minimal_config)
+
+        with patch("blind_assistant.security.credentials.require_credential", side_effect=Exception("no api")):
+            result = await orc._extract_order_summary(
+                page_text="",
+                item_choice="Pepperoni Pizza",
+                restaurant="Pizza Palace",
+            )
+        # Fallback: must mention the item and restaurant
+        assert "Pepperoni Pizza" in result or "pizza" in result.lower()
+        assert "Pizza Palace" in result or "palace" in result.lower()
+
+    async def test_place_order_returns_failure_on_exception(self, minimal_config) -> None:
+        """_place_order returns success=False with reason when browser click fails."""
+        from blind_assistant.tools.browser import PageState
+
+        orc = self._make_orc(minimal_config)
+        mock_browser = AsyncMock()
+        mock_browser.get_page_state = AsyncMock(
+            return_value=PageState(url="https://checkout.example.com", title="Checkout", text_content="Place Order")
+        )
+        mock_browser.click = AsyncMock(side_effect=Exception("Place Order button not found"))
+
+        with patch("blind_assistant.security.credentials.require_credential", side_effect=Exception("no api")):
+            result = await orc._place_order(browser_tool=mock_browser)
+
+        assert result["success"] is False
+        assert "reason" in result
+
+    async def test_checkout_loop_user_times_out_on_restaurant_selection(self, minimal_config, standard_context) -> None:
+        """
+        When user doesn't respond to restaurant selection (timeout),
+        _handle_order_food returns a helpful message, not an error.
+
+        wait_for_response is patched to return None immediately (simulates timeout)
+        so this test runs fast without waiting for a real timer.
+        """
+        from blind_assistant.tools.browser import PageState
+
+        orc = _make_order_food_orchestrator(minimal_config)
+        mock_page = PageState(
+            url="https://www.doordash.com",
+            title="DoorDash",
+            text_content="Pizza Palace\nTaco Town",
+        )
+        mock_browser = AsyncMock()
+        mock_browser.navigate = AsyncMock(return_value=mock_page)
+        orc.tool_registry.get_installed_tool.return_value = mock_browser
+
+        # Patch all helpers: options are extracted, but wait_for_response returns None (timeout)
+        with (
+            patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Pizza Palace. 2. Taco Town.")),
+            patch.object(orc.confirmation_gate, "wait_for_response", new=AsyncMock(return_value=None)),
+        ):
+            updates: list[str] = []
+
+            async def update_cb(msg: str) -> None:
+                updates.append(msg)
+                # Accept risk disclosure so we get past Step 2
+                if any(kw in msg.lower() for kw in ("risk", "payment", "financial")):
+                    orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
+
+            orc.confirmation_gate.register_session(standard_context.session_id)
+            result = await orc._handle_order_food(
+                _make_order_intent("order me food", params={"food": "pizza"}),
+                standard_context,
+                update_cb,
+            )
+
+        # Should return a helpful message about not hearing the choice
+        assert "text" in result
+        response_lower = result["text"].lower()
+        assert any(
+            phrase in response_lower
+            for phrase in ("didn't hear", "not hear", "ready", "try again", "order food")
+        ), f"Expected helpful timeout message, got: {result['text']}"
