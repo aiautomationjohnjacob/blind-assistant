@@ -54,6 +54,11 @@ jest.mock("@services/api", () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Spy on AccessibilityInfo.announceForAccessibility after jest-expo preset
+  // has already loaded the react-native mock. This is the correct pattern for
+  // patching individual methods without triggering the SettingsManager native
+  // module error that happens when jest.requireActual("react-native") is called.
+  jest.spyOn(AccessibilityInfo, "announceForAccessibility").mockImplementation(() => {});
   mockQuery.mockResolvedValue({
     text: "I can help you with many tasks.",
     spoken_text: null,
