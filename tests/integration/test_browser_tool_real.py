@@ -204,7 +204,7 @@ class _SilentHandler(SimpleHTTPRequestHandler):
 
     _routes: dict[str, str] = {}
 
-    def log_message(self, format: str, *args: object) -> None:
+    def log_message(self, format: str, *args: object) -> None:  # noqa: A002
         """Suppress request logging to keep test output clean."""
 
     def do_GET(self) -> None:
