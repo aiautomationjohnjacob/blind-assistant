@@ -264,7 +264,9 @@ class Orchestrator:
         response_text = await q.answer_query(query=query_text, context=context)
         return {"text": response_text}
 
-    async def _handle_general_question(self, intent, context: UserContext, update) -> dict:
+    async def _handle_general_question(
+        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
+    ) -> dict:
         """Answer a general question using Claude."""
         await update("Let me think about that...")
         try:
