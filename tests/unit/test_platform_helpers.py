@@ -22,11 +22,13 @@ Per CLAUDE.md: every public helper must have test coverage.
 
 from __future__ import annotations
 
-import importlib
 import sys
-import types
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    import types
 
 # ---------------------------------------------------------------------------
 # Import helpers without executing device-dependent test classes.
