@@ -154,8 +154,9 @@ class VoiceLocalInterface:
         # without mypy's union-attr check on self._context (which is narrowed above by assert)
         _speech_rate = self._context.speech_rate
 
-        # Send to orchestrator with a speak callback
+        # Send to orchestrator with a speak callback so interim progress is read aloud.
         async def speak_update(message: str) -> None:
+            """Speak an interim orchestrator update aloud using the local TTS engine."""
             await speak_locally(message, speed=_speech_rate)
 
         try:
