@@ -15,7 +15,6 @@ Per USER_STORIES.md:
 
 import asyncio
 import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +45,7 @@ class VoiceLocalInterface:
         self.orchestrator = orchestrator
         self.config = config
         self._running = False
-        self._context: Optional[object] = None
+        self._context: object | None = None
 
         # Config
         self._wake_word = config.get("wake_word", DEFAULT_WAKE_WORD).lower()
@@ -55,7 +54,6 @@ class VoiceLocalInterface:
     async def start(self) -> None:
         """Start the local voice interface loop."""
         from blind_assistant.voice.tts import speak_locally
-        from blind_assistant.voice.stt import transcribe_microphone
 
         logger.info("Local voice interface starting...")
 
@@ -182,9 +180,9 @@ class VoiceLocalInterface:
         Ask a yes/no question via voice and wait for voice response.
         Used for local confirmation flows (not via Telegram).
         """
-        from blind_assistant.voice.tts import speak_locally
+        from blind_assistant.security.disclosure import is_cancellation, is_confirmation
         from blind_assistant.voice.stt import transcribe_microphone
-        from blind_assistant.security.disclosure import is_confirmation, is_cancellation
+        from blind_assistant.voice.tts import speak_locally
 
         await speak_locally(prompt, speed=self._context.speech_rate if self._context else 1.0)
 
@@ -198,7 +196,7 @@ class VoiceLocalInterface:
                     return True
                 if is_cancellation(response):
                     return False
-        except asyncio.TimeoutError:
+        except TimeoutError:
             pass
 
         return False

@@ -14,21 +14,19 @@ Tests verify:
 
 from __future__ import annotations
 
-import os
 import pytest
-from pathlib import Path
 
 from blind_assistant.second_brain.encryption import VaultKey, generate_salt
-from blind_assistant.second_brain.vault import EncryptedVault
 from blind_assistant.second_brain.query import (
+    BRAILLE_LINE_WIDTH,
     VaultQuery,
-    _infer_category,
-    _trim_for_speech,
+    _extract_topic_hint,
     _format_date_label,
     _format_for_braille,
-    _extract_topic_hint,
-    BRAILLE_LINE_WIDTH,
+    _infer_category,
+    _trim_for_speech,
 )
+from blind_assistant.second_brain.vault import EncryptedVault
 
 pytestmark = pytest.mark.unit
 

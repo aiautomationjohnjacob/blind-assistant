@@ -7,10 +7,8 @@ execute → respond.
 This is the central coordinator for all user interactions.
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass, field
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -32,10 +30,10 @@ class UserContext:
 class Response:
     """The orchestrator's response to a user message."""
     text: str                          # Always present (for braille display)
-    spoken_text: Optional[str] = None  # If different from text (e.g., shorter)
-    follow_up_prompt: Optional[str] = None  # What to ask the user next
+    spoken_text: str | None = None  # If different from text (e.g., shorter)
+    follow_up_prompt: str | None = None  # What to ask the user next
     requires_confirmation: bool = False
-    confirmation_action: Optional[str] = None
+    confirmation_action: str | None = None
 
 
 class Orchestrator:
@@ -65,10 +63,10 @@ class Orchestrator:
         logger.info("Initializing orchestrator...")
 
         # Import here to avoid circular imports
-        from blind_assistant.core.planner import Planner
-        from blind_assistant.tools.registry import ToolRegistry
         from blind_assistant.core.confirmation import ConfirmationGate
         from blind_assistant.core.context import ContextManager
+        from blind_assistant.core.planner import Planner
+        from blind_assistant.tools.registry import ToolRegistry
 
         self.planner = Planner(self.config)
         self.tool_registry = ToolRegistry()
@@ -175,12 +173,11 @@ class Orchestrator:
             if success:
                 await update(f"{tool_name} is now ready.")
                 return True
-            else:
-                await update(
-                    f"I wasn't able to install {tool_name}. "
-                    "Let me try a different approach."
-                )
-                return False
+            await update(
+                f"I wasn't able to install {tool_name}. "
+                "Let me try a different approach."
+            )
+            return False
         return False
 
     async def _execute_intent(self, intent, context: UserContext, update) -> dict:
@@ -207,13 +204,12 @@ class Orchestrator:
     async def _handle_add_note(self, intent, context: UserContext, update) -> dict:
         """Add a note to the Second Brain vault."""
         await update("Saving that to your notes...")
-        vault = await self._get_vault(context)
+        vault = await self._get_vault(context, response_callback=update)
         if vault is None:
             return {
                 "text": (
                     "I couldn't access your notes vault. "
-                    "It may need to be unlocked. "
-                    "Please say your vault passphrase to unlock it."
+                    "Say 'unlock my notes' and provide your passphrase to try again."
                 )
             }
         from blind_assistant.second_brain.query import VaultQuery
@@ -226,12 +222,12 @@ class Orchestrator:
     async def _handle_query_note(self, intent, context: UserContext, update) -> dict:
         """Query the Second Brain vault for matching notes."""
         await update("Searching your notes...")
-        vault = await self._get_vault(context)
+        vault = await self._get_vault(context, response_callback=update)
         if vault is None:
             return {
                 "text": (
                     "I couldn't access your notes vault. "
-                    "Please unlock it with your vault passphrase."
+                    "Say 'unlock my notes' and provide your passphrase to try again."
                 )
             }
         from blind_assistant.second_brain.query import VaultQuery
@@ -245,7 +241,8 @@ class Orchestrator:
         await update("Let me think about that...")
         try:
             import anthropic
-            from blind_assistant.security.credentials import require_credential, CLAUDE_API_KEY
+
+            from blind_assistant.security.credentials import CLAUDE_API_KEY, require_credential
             api_key = require_credential(CLAUDE_API_KEY)
             client = anthropic.AsyncAnthropic(api_key=api_key)
 
@@ -288,8 +285,9 @@ class Orchestrator:
         """
         import os
         from pathlib import Path
-        from blind_assistant.second_brain.vault import EncryptedVault
+
         from blind_assistant.second_brain.encryption import VaultKey
+        from blind_assistant.second_brain.vault import EncryptedVault
 
         vault_path = Path(
             self.config.get("vault_path", os.path.expanduser("~/.blind-assistant/vault"))

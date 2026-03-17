@@ -15,15 +15,13 @@ Per SECURITY_MODEL.md:
 
 import asyncio
 import logging
-from typing import Optional
 
 from blind_assistant.security.disclosure import (
+    ACTION_CONFIRMATION_TEMPLATE,
     FINANCIAL_RISK_DISCLOSURE,
     FINANCIAL_RISK_DISCLOSURE_BRIEF,
-    ACTION_CONFIRMATION_TEMPLATE,
     ORDER_CONFIRMATION_TEMPLATE,
     is_confirmation,
-    is_cancellation,
 )
 
 logger = logging.getLogger(__name__)
@@ -74,7 +72,7 @@ class ConfirmationGate:
 
         try:
             response = await asyncio.wait_for(queue.get(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.info(f"Confirmation timed out for session {context.session_id}")
             return False
 

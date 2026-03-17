@@ -12,7 +12,6 @@ import asyncio
 import json
 import logging
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -57,11 +56,11 @@ class ToolRegistry:
         """Check if a tool is installed and ready to use."""
         return tool_name in self._installed
 
-    def get_available_tool(self, tool_name: str) -> Optional[dict]:
+    def get_available_tool(self, tool_name: str) -> dict | None:
         """Get metadata for an available (but possibly not installed) tool."""
         return self._available.get(tool_name)
 
-    def get_installed_tool(self, tool_name: str) -> Optional[object]:
+    def get_installed_tool(self, tool_name: str) -> object | None:
         """Get an installed tool instance."""
         return self._installed.get(tool_name)
 
@@ -181,7 +180,7 @@ class ToolRegistry:
         with open(AUDIT_LOG_PATH, "w") as f:
             json.dump(log_entries, f, indent=2)
 
-    async def _instantiate_tool(self, class_path: str) -> Optional[object]:
+    async def _instantiate_tool(self, class_path: str) -> object | None:
         """Dynamically instantiate a tool class by its module path."""
         try:
             module_path, class_name = class_path.rsplit(".", 1)

@@ -15,8 +15,6 @@ Per USER_STORIES.md:
 
 import logging
 from datetime import datetime
-from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +78,7 @@ class VaultQuery:
         # Format results based on count
         if len(results) == 1:
             return self._format_single_result(results[0], context)
-        else:
-            return self._format_multiple_results(results, context)
+        return self._format_multiple_results(results, context)
 
     async def add_note_from_voice(
         self,
@@ -294,17 +291,16 @@ def _format_date_label(date_str: str) -> str:
 
         if delta.days == 0:
             return "Earlier today"
-        elif delta.days == 1:
+        if delta.days == 1:
             return "Yesterday"
-        elif delta.days < 7:
+        if delta.days < 7:
             return f"{delta.days} days ago"
-        elif delta.days < 30:
+        if delta.days < 30:
             weeks = delta.days // 7
             return f"About {weeks} week{'s' if weeks > 1 else ''} ago"
-        elif delta.days < 365:
+        if delta.days < 365:
             return dt.strftime("%-d %B")  # e.g., "14 March"
-        else:
-            return dt.strftime("%-d %B %Y")
+        return dt.strftime("%-d %B %Y")
 
     except (ValueError, TypeError):
         return date_str

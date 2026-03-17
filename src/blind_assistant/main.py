@@ -9,8 +9,8 @@ Usage:
   python -m blind_assistant.main --setup  # Run voice-guided setup wizard
 """
 
-import asyncio
 import argparse
+import asyncio
 import logging
 import sys
 from pathlib import Path
@@ -20,9 +20,9 @@ logger = logging.getLogger(__name__)
 
 async def start_services(config: dict) -> None:
     """Start all enabled services concurrently."""
+    from blind_assistant.core.orchestrator import Orchestrator
     from blind_assistant.interfaces.telegram_bot import TelegramBot
     from blind_assistant.interfaces.voice_local import VoiceLocalInterface
-    from blind_assistant.core.orchestrator import Orchestrator
 
     orchestrator = Orchestrator(config)
     await orchestrator.initialize()

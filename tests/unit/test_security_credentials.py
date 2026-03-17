@@ -10,26 +10,27 @@ on this module specifically.
 
 from __future__ import annotations
 
-import pytest
+from unittest.mock import patch
+
 import keyring.errors
-from unittest.mock import MagicMock, patch, call
+import pytest
 
 from blind_assistant.security.credentials import (
-    SERVICE_NAME,
     CLAUDE_API_KEY,
     ELEVENLABS_API_KEY,
+    SERVICE_NAME,
     STRIPE_PAYMENT_METHOD,
     STRIPE_SECRET_KEY,
     TELEGRAM_ALLOWED_USER_IDS,
     TELEGRAM_BOT_TOKEN,
     VAULT_PASSPHRASE_HINT,
+    _register_key,
+    _unregister_key,
     delete_credential,
     get_credential,
     list_stored_keys,
     require_credential,
     store_credential,
-    _register_key,
-    _unregister_key,
 )
 
 pytestmark = pytest.mark.security

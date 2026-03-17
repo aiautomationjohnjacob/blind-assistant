@@ -12,7 +12,6 @@ Per USER_STORIES.md (Marcus): brief mode — no preamble, concise responses.
 
 import asyncio
 import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +26,8 @@ DEFAULT_SPEECH_RATE = 1.0
 async def synthesize_speech(
     text: str,
     speed: float = DEFAULT_SPEECH_RATE,
-    voice_id: Optional[str] = None,
-) -> Optional[bytes]:
+    voice_id: str | None = None,
+) -> bytes | None:
     """
     Convert text to speech audio bytes.
 
@@ -55,13 +54,13 @@ async def synthesize_speech(
 async def _elevenlabs_tts(
     text: str,
     speed: float = DEFAULT_SPEECH_RATE,
-    voice_id: Optional[str] = None,
-) -> Optional[bytes]:
+    voice_id: str | None = None,
+) -> bytes | None:
     """ElevenLabs cloud TTS."""
     try:
         from blind_assistant.security.credentials import (
-            get_credential,
             ELEVENLABS_API_KEY,
+            get_credential,
         )
 
         api_key = get_credential(ELEVENLABS_API_KEY)
@@ -102,7 +101,7 @@ async def _elevenlabs_tts(
 async def _pyttsx3_tts(
     text: str,
     speed: float = DEFAULT_SPEECH_RATE,
-) -> Optional[bytes]:
+) -> bytes | None:
     """
     Local pyttsx3 TTS (no internet required).
     Lower quality but always available.
@@ -110,10 +109,10 @@ async def _pyttsx3_tts(
     Returns WAV bytes.
     """
     try:
-        import pyttsx3
-        import io
-        import tempfile
         import os
+        import tempfile
+
+        import pyttsx3
 
         loop = asyncio.get_event_loop()
 

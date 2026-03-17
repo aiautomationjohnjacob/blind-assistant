@@ -15,10 +15,8 @@ Accessibility requirements:
 - Responses structured for 40-char braille display in braille_mode
 """
 
-import asyncio
-import logging
 import io
-from typing import Optional
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +36,8 @@ class TelegramBot:
     async def _load_allowed_users(self) -> None:
         """Load whitelisted Telegram user IDs from OS keychain."""
         from blind_assistant.security.credentials import (
-            get_credential,
             TELEGRAM_ALLOWED_USER_IDS,
+            get_credential,
         )
 
         raw = get_credential(TELEGRAM_ALLOWED_USER_IDS)
@@ -65,9 +63,10 @@ class TelegramBot:
             MessageHandler,
             filters,
         )
+
         from blind_assistant.security.credentials import (
-            require_credential,
             TELEGRAM_BOT_TOKEN,
+            require_credential,
         )
 
         await self._load_allowed_users()

@@ -83,7 +83,8 @@ class Planner:
         """Lazy initialization of Anthropic client."""
         if self._client is None:
             import anthropic
-            from blind_assistant.security.credentials import require_credential, CLAUDE_API_KEY
+
+            from blind_assistant.security.credentials import CLAUDE_API_KEY, require_credential
             api_key = require_credential(CLAUDE_API_KEY)
             self._client = anthropic.AsyncAnthropic(api_key=api_key)
         return self._client

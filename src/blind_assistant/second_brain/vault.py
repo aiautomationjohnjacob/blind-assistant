@@ -14,14 +14,12 @@ Per USER_STORIES.md:
 - Jordan: All queries available as text for braille display
 """
 
-import asyncio
 import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
-from blind_assistant.second_brain.encryption import VaultKey, encrypt_string, decrypt_string
+from blind_assistant.second_brain.encryption import VaultKey, decrypt_string, encrypt_string
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +64,7 @@ class EncryptedVault:
         self,
         content: str,
         category: str = "general",
-        title: Optional[str] = None,
+        title: str | None = None,
     ) -> str:
         """
         Add a note to the vault.
@@ -160,7 +158,7 @@ class EncryptedVault:
 
         return results
 
-    async def _read_note(self, note_path: Path) -> Optional[dict]:
+    async def _read_note(self, note_path: Path) -> dict | None:
         """Read and decrypt a note file."""
         try:
             encrypted = note_path.read_bytes()

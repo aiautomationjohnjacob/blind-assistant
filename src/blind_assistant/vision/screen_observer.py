@@ -12,7 +12,6 @@ Key security requirements (SECURITY_MODEL.md):
 
 import asyncio
 import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -50,14 +49,15 @@ class ScreenObserver:
         """Lazy Claude client initialization."""
         if self._claude_client is None:
             import anthropic
-            from blind_assistant.security.credentials import require_credential, CLAUDE_API_KEY
+
+            from blind_assistant.security.credentials import CLAUDE_API_KEY, require_credential
             api_key = require_credential(CLAUDE_API_KEY)
             self._claude_client = anthropic.AsyncAnthropic(api_key=api_key)
         return self._claude_client
 
     async def describe_screen(
         self,
-        region: Optional[tuple] = None,
+        region: tuple | None = None,
     ) -> str:
         """
         Capture the current screen and describe it.
@@ -72,9 +72,9 @@ class ScreenObserver:
         Security: Never writes to disk. Redacts sensitive content before API call.
         """
         from blind_assistant.vision.redaction import (
+            SensitivityLevel,
             analyze_sensitivity,
             apply_redaction,
-            SensitivityLevel,
         )
 
         # 1. Capture screenshot in memory only
@@ -108,8 +108,8 @@ class ScreenObserver:
         return await self._describe_with_claude(screenshot_bytes)
 
     async def _capture_screenshot(
-        self, region: Optional[tuple] = None
-    ) -> Optional[bytes]:
+        self, region: tuple | None = None
+    ) -> bytes | None:
         """
         Capture screenshot in memory.
         Returns PNG bytes, or None on failure.
@@ -120,6 +120,7 @@ class ScreenObserver:
         try:
             # Use PIL/pillow for full-screen capture
             import io
+
             from PIL import ImageGrab
 
             loop = asyncio.get_event_loop()
@@ -189,8 +190,9 @@ class ScreenObserver:
         Used for financial screens and when user has privacy mode enabled.
         """
         try:
-            import pytesseract
             import io
+
+            import pytesseract
             from PIL import Image
 
             loop = asyncio.get_event_loop()

@@ -10,15 +10,14 @@ Covers:
 
 from __future__ import annotations
 
-import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from blind_assistant.core.confirmation import ConfirmationGate
 from blind_assistant.core.orchestrator import Orchestrator, Response, UserContext
 from blind_assistant.security.disclosure import (
     FINANCIAL_RISK_DISCLOSURE,
-    FINANCIAL_RISK_DISCLOSURE_BRIEF,
 )
 
 pytestmark = pytest.mark.unit
@@ -99,8 +98,6 @@ class TestOrchestratorInit:
              patch("blind_assistant.core.context.ContextManager", return_value=mock_ctx):
             # Override the import mechanism by patching the builtins import
             # Simpler: just patch the modules that initialize() imports
-            import sys
-            from unittest.mock import MagicMock as MM
 
             await orch.initialize()
 

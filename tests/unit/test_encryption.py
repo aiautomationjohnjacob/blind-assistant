@@ -13,17 +13,17 @@ These tests verify that:
 
 from __future__ import annotations
 
-import os
 import base64
-from unittest.mock import patch, MagicMock
+import os
+from unittest.mock import patch
 
 import pytest
 from cryptography.exceptions import InvalidTag
 
 from blind_assistant.second_brain.encryption import (
+    KEY_SIZE,
     PBKDF2_ITERATIONS,
     SALT_SIZE,
-    KEY_SIZE,
     VaultKey,
     decrypt,
     decrypt_string,
@@ -120,7 +120,7 @@ class TestEncryptDecrypt:
 
     def test_roundtrip_with_unicode_content(self):
         key = os.urandom(32)
-        plaintext = "日本語テスト — 中文 — العربية".encode("utf-8")
+        plaintext = "日本語テスト — 中文 — العربية".encode()
         assert decrypt(encrypt(plaintext, key), key) == plaintext
 
     def test_ciphertext_is_not_plaintext(self):

@@ -11,11 +11,9 @@ Per SECURITY_MODEL.md §1.1:
 - Alternatively: OS keychain stores derived key (unlocked by system login)
 """
 
+import base64
 import logging
 import os
-import base64
-from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +36,8 @@ def derive_key(passphrase: str, salt: bytes) -> bytes:
 
     Security: 600,000 iterations makes brute-force prohibitively expensive.
     """
-    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
     from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
@@ -111,7 +109,7 @@ class VaultKey:
     """
 
     def __init__(self) -> None:
-        self._key: Optional[bytes] = None
+        self._key: bytes | None = None
 
     def unlock(self, passphrase: str, salt: bytes) -> None:
         """Derive and cache the vault key for this session."""

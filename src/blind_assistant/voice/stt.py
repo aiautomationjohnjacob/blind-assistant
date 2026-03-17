@@ -8,12 +8,10 @@ This is important for users who speak sensitive information (passwords, health d
 """
 
 import asyncio
-import logging
 import io
-import tempfile
+import logging
 import os
-from pathlib import Path
-from typing import Optional
+import tempfile
 
 logger = logging.getLogger(__name__)
 
@@ -49,8 +47,8 @@ def _load_whisper_sync(model_name: str):
 
 async def transcribe_audio(
     audio_bytes: bytes,
-    language: Optional[str] = None,
-) -> Optional[str]:
+    language: str | None = None,
+) -> str | None:
     """
     Transcribe audio bytes to text using local Whisper.
 
@@ -101,7 +99,7 @@ async def transcribe_audio(
 
 async def transcribe_microphone(
     duration_seconds: float = 5.0,
-) -> Optional[str]:
+) -> str | None:
     """
     Record from the microphone and transcribe.
     Used by the local voice interface.
@@ -113,9 +111,9 @@ async def transcribe_microphone(
         Transcribed text, or None
     """
     try:
-        import sounddevice as sd
         import numpy as np
         import scipy.io.wavfile as wav
+        import sounddevice as sd
 
         sample_rate = 16000
         logger.debug(f"Recording for {duration_seconds}s...")

@@ -13,7 +13,6 @@ All via the `keyring` library for cross-platform compatibility.
 """
 
 import logging
-from typing import Optional
 
 import keyring
 import keyring.errors
@@ -44,7 +43,7 @@ def store_credential(key: str, value: str) -> None:
         ) from e
 
 
-def get_credential(key: str) -> Optional[str]:
+def get_credential(key: str) -> str | None:
     """
     Retrieve a credential from the OS keychain.
 

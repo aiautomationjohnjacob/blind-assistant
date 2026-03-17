@@ -13,7 +13,6 @@ import logging
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +120,7 @@ async def apply_redaction(
 
     try:
         import io
+
         from PIL import Image, ImageDraw
 
         img = Image.open(io.BytesIO(screenshot_bytes))
@@ -144,8 +144,9 @@ async def _extract_text(screenshot_bytes: bytes) -> str:
     try:
         import asyncio
         import io
-        from PIL import Image
+
         import pytesseract
+        from PIL import Image
 
         loop = asyncio.get_event_loop()
 
