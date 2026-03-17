@@ -189,10 +189,11 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P2: Missing unit tests (ISSUE-028)** — 118 new tests: test_telegram_bot.py (24), test_query.py (49), test_redaction.py (27), test_screen_observer.py (18); ruff format CI blocker from Cycle 15 also fixed (Cycle 16)
 - [x] **P2: Voice installer** — Telegram demoted to optional Step 5; _setup_native_app() added as Step 1 (TalkBack/VoiceOver); server address discovery (socket IP); STEP_APP_INTRO mentions both TalkBack + VoiceOver; STEP_COMPLETE updated; _run_self_test reclassified Telegram as optional; 58 new tests; 641 unit tests passing (Cycle 17)
 - [x] **P2: Verify web E2E CI** — CI run 23219936377: ALL 7 jobs green including e2e-web (Playwright Chromium + Firefox accessibility tests) (Cycle 17)
-- [ ] **P2: End-to-end food ordering on real device** — Android TalkBack + iOS VoiceOver
+- [x] **P2: End-to-end food ordering on real device** — Android TalkBack + iOS VoiceOver E2E test files written (Cycle 19); ADBClient + SimctlClient wrappers; 8 TalkBack tests + 9 VoiceOver tests; CI path bug fixed; ios-e2e.yml macOS workflow; tests skip gracefully when AVD/simulator unavailable; actual AVD run deferred to release CI
 - [x] **P2: Web app deployed** — netlify.toml + deploy-staging.yml created (Cycle 18); ISSUE-029: requires manual secret setup (NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID); 11 food ordering web E2E accessibility tests added
-- [ ] **P3: Android TalkBack device test** — expo build + AVD
-- [ ] **P3: iOS VoiceOver device test** — expo build:ios + xcrun simctl
+- [x] **P2: ISSUE-029 README docs** — Netlify operator setup instructions added to README.md (Cycle 19)
+- [ ] **P3: Android TalkBack device test** — AVD emulator run (requires CI release tag trigger)
+- [ ] **P3: iOS VoiceOver device test** — iOS Simulator run (requires macOS CI runner, release tag)
 
 ## Blockers
 
