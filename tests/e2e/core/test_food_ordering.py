@@ -214,9 +214,10 @@ async def test_food_order_happy_path_disclosure_accepted(
     assert "doordash" in call_url.lower(), f"Expected doordash URL, got: {call_url}"
 
     # Order should have completed (order_placed or order placed message)
-    assert result.get("order_placed") is True or "placed" in result["text"].lower() or "confirmed" in result["text"].lower(), (
-        f"Expected order to be placed, got: {result}"
-    )
+    placed = result.get("order_placed") is True
+    placed = placed or "placed" in result["text"].lower()
+    placed = placed or "confirmed" in result["text"].lower()
+    assert placed, f"Expected order to be placed, got: {result}"
 
 
 # ─────────────────────────────────────────────────────────────
