@@ -182,10 +182,10 @@ credential key added to credentials.py.
 - `transcribe_microphone` uses fixed duration — needs Voice Activity Detection (VAD)
 - Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — Phase 2 work
 - `src/blind_assistant/memory/mcp_memory.py` not yet implemented — Phase 2 work
-- Session context has no clear_sensitive() method — vault passphrase cached but not zeroed
 - response_callback params in orchestrator lack Optional[Callable] type annotations
-- Passphrase prompt timeout is hardcoded at 120s (should be config.yaml setting)
-- Telegram end-to-end demo not yet tested on real hardware — #1 Phase 2 remaining gap
+- API server has no rate limiting middleware — acceptable on localhost; required before cloud deploy
+- clients/ directory doesn't exist yet — React Native Expo skeleton must be created (Cycle 5)
+- Voice E2E demo not yet delivered — #1 Phase 2 gate item (ISSUE-007)
 
 ## Decisions Made
 
