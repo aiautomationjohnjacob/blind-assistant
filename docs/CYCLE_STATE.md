@@ -109,10 +109,20 @@ Moving to Phase 2: Core Build Sprint.
 
 ## Known Issues / Technical Debt
 
-None yet.
+- `src/blind_assistant/interfaces/voice_local.py` stub not yet created (needed for Phase 2)
+- `src/blind_assistant/second_brain/query.py` stub not yet created (needed for Phase 2)
+- Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — Phase 2 work
+- `src/blind_assistant/memory/mcp_memory.py` not yet implemented — Phase 2 work
+- No tests exist yet — Phase 2 must add tests per testing.md requirements
 
 ## Decisions Made
 
 | Date | Decision | Made by | Reasoning |
 |------|----------|---------|-----------|
-| (none yet) | | | |
+| 2026-03-17 | Python 3.11+ as primary language | tech-lead | Best AI ecosystem, async support, keyring library |
+| 2026-03-17 | Telegram as primary interface | tech-lead + gap-analyst | 24/7 multi-device, accessible, no visual UI needed |
+| 2026-03-17 | Obsidian vault format (file only, no app) | tech-lead | Accessible storage without inaccessible app |
+| 2026-03-17 | AES-256-GCM for vault encryption | security-specialist | Industry standard, authenticated encryption |
+| 2026-03-17 | OS keychain for all credentials | security-specialist | No .env files, cross-platform, secure |
+| 2026-03-17 | Risk disclosure fires every transaction | ethics-advisor + security-specialist | Never assume prior awareness |
+| 2026-03-17 | Per-transaction payment confirmation | ethics-advisor | User cannot visually verify; repetition is safer |
