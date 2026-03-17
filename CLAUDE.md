@@ -88,6 +88,12 @@ to work in parallel, review each other's work, and commit progress continuously.
 ### Nonprofit Operations Agents
 - **grant-writer** — Frames impact in grant language; identifies fundable milestones
 
+### Infrastructure & Education Agents
+- **cloud-architect** — Designs cloud infrastructure in planning mode (no live accounts yet);
+  recommends Railway/Fly.io for Telegram webhook, local-first for user vault; infrastructure as code
+- **education-website-designer** — Builds accessible course platform at `learn.blind-assistant.org`;
+  audio-primary design; must be fully completable by NVDA user with zero mouse use
+
 ## Custom Skills (Slash Commands)
 - `/audit-a11y [path]` — Full WCAG audit via parallel agents
 - `/review-pr [#]` — Multi-persona PR review posted to GitHub

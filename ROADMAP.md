@@ -37,6 +37,18 @@ The minimum a blind user can actually try:
 - [ ] Multi-language support
 - [ ] Mobile companion app (Android/iOS Telegram-based)
 
+## Parallel Track: Education Website (`learn.blind-assistant.org`)
+
+*Runs alongside the main app — can be contributed to independently*
+
+- [ ] Accessible course platform scaffold (Astro/Next.js/Eleventy)
+- [ ] Course 1: How to use Blind Assistant (setup → advanced)
+- [ ] Course 2: AI literacy for blind users
+- [ ] Course 3: Second Brain by voice
+- [ ] Course 4: Navigating the digital world (banking, travel, shopping)
+- [ ] Course 5: Advocating for yourself (rights, WCAG, reporting)
+- [ ] NVDA end-to-end test: any course completable with zero mouse use
+
 ---
 
 ## What We Will NOT Build

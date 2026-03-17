@@ -180,6 +180,32 @@ See `docs/CYCLE_STATE.md` for current status.
 
 See `docs/ARCHITECTURE.md` once the tech-lead agent creates it.
 
+## The Education Website
+
+A free, open-access course platform — a second product component alongside the main app —
+that teaches blind users how to use AI tools and live more independently. Lives at
+`learn.blind-assistant.org` (or `website/` in this repo).
+
+**Why it exists:** Even with a perfect app, newly blind users need to learn how to talk to AI,
+how to set up a Second Brain, how to order food by voice. These skills can't be assumed.
+The education site removes the barrier of "I don't know how to start."
+
+**Course topics:**
+1. How to use Blind Assistant (setup through advanced features)
+2. AI literacy for blind users (what AI can and can't do; how to prompt effectively)
+3. Second Brain for the blind (build a personal knowledge system by voice)
+4. Navigating the digital world (banking, travel booking, shopping — all by voice)
+5. Advocating for yourself (your rights; accessible technology at work; WCAG; reporting barriers)
+
+**The accessibility floor:** every course must be completable by someone using NVDA on Windows
+with zero mouse use. If it fails that test, it doesn't ship.
+
+**Technical approach:** static site generator (Astro, Next.js, or Eleventy); audio is the
+primary format — text is the fallback, not the other way around; semantic HTML first;
+courses authored in Markdown with YAML frontmatter; no JavaScript required for core functionality.
+
+---
+
 ## Community & Ethics
 
 - Built with the blind community, not for them

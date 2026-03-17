@@ -29,6 +29,9 @@
 | P3 | Set up CHANGELOG.md with initial entry | open source | 2026-03-17 |
 | P3 | Populate ROADMAP.md once FEATURE_PRIORITY.md exists | open source | 2026-03-17 |
 | P3 | Create good-first-issue labels and 5 starter issues once scaffold exists | open source | 2026-03-17 |
+| P3 | Education website: scaffold accessible static site (Astro/Eleventy) at website/ | education | 2026-03-17 |
+| P3 | Education website: author Course 1 — How to use Blind Assistant | education | 2026-03-17 |
+| P3 | Cloud architecture: design Telegram webhook hosting (Railway/Fly.io) and document in ARCHITECTURE.md | cloud-architect | 2026-03-17 |
 | P2 | Research+action compound task design (research options → user chooses → AI executes) | PRODUCT_BRIEF trip booking example | 2026-03-17 |
 | P2 | Telegram bot architecture as primary 24/7 multi-device interface | PRODUCT_BRIEF synthesis vision | 2026-03-17 |
 
