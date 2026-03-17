@@ -90,8 +90,11 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] Screen redaction: password fields and financial screens never sent to API (Cycle 1)
 - [x] Second Brain MVP: add notes by voice, query notes by voice, encrypted vault (Cycle 2)
 - [x] Orchestrator: intent classification → tool selection → execution pipeline (Cycle 2)
+- [x] Vault passphrase prompt recovery: user can self-unlock Second Brain by voice (Cycle 3)
+- [x] TTS + STT unit tests: 25 new tests covering voice pipeline (Cycle 3)
 - [ ] Tool registry + installer: self-expanding pattern with user confirmation
 - [x] Risk disclosure flow: payment confirmation with spoken warning (Cycle 1)
+- [ ] Telegram end-to-end demo: voice message in → TTS audio reply out (P1 for Cycle 4)
 - [ ] Voice installer: voice-guided setup from zero to functional
 - [ ] End-to-end test: blind user asks to order food → full flow with confirmations
 
