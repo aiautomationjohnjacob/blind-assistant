@@ -5,10 +5,22 @@
 
 ## What This Project Is
 
-An open-source AI life assistant for blind and visually impaired people.
-Not another screen reader — an AI that synthesizes existing tools (Obsidian, Telegram,
-Open Interpreter, Whisper, ElevenLabs, shopping APIs) into one accessible layer that
-a blind person can set up and use entirely by voice, 24/7, from any device.
+An open-source **AI life companion** for blind and visually impaired people — not a screen
+reader, but a persistent assistant that helps someone live a fully independent life through
+conversation. Think of it as the Claude Code model applied to a blind person's entire life:
+if it can't do something, it figures out how and installs what it needs (with user permission).
+
+**Concrete examples of what it does:**
+- "Order me food" → installs DoorDash if needed, collects payment securely (with risk warning), takes order by voice, submits
+- "Book me a vacation, I'm not sure where" → researches blind-accessible destinations and booking tools, asks follow-up questions, books the trip
+- "What's on my screen?" → takes screenshot, describes it intelligently, navigates inaccessible apps
+- "Add this to my Second Brain" → stores voice notes in an encrypted personal knowledge base, queryable by conversation
+- Available 24/7 via Telegram on any device — phone, laptop, anywhere
+
+**The synthesis principle**: most tools blind people need already exist. The setup, interfaces,
+and documentation just assume vision. We wrap existing tools (Obsidian, Open Interpreter,
+Telegram, Whisper, ElevenLabs, DoorDash API, etc.) in an accessible layer a blind person
+can set up entirely by voice, from day one, with zero sighted assistance.
 
 Full vision: `docs/PRODUCT_BRIEF.md`
 
@@ -20,7 +32,7 @@ Full vision: `docs/PRODUCT_BRIEF.md`
 4. Read `docs/LESSONS.md` — tells you what past cycles learned (avoid repeating mistakes)
 5. Run `/run-cycle` — executes one full autonomous development iteration
 
-## Agent Roster (21 agents available)
+## Agent Roster (20 agents available)
 
 All agent definitions in `.claude/agents/`. Key agents by function:
 
@@ -46,7 +58,7 @@ All agent definitions in `.claude/agents/`. Key agents by function:
 | Privacy protection | `privacy-guardian` |
 | Ethics review | `ethics-advisor` |
 | Grant writing | `grant-writer` |
-| Voice UX | `voice-interface-designer` |
+| Grant writing | `grant-writer` |
 
 ## Custom Skills
 
@@ -61,7 +73,10 @@ All agent definitions in `.claude/agents/`. Key agents by function:
 - Every feature must work by voice with zero vision required
 - Sensitive data (passwords, banking, health) NEVER in plain text
 - Screen content redacted before external API calls
-- Every action costing money or sending comms requires user confirmation
+- Every action costing money or sending comms requires explicit user confirmation
+- **Risk disclosure**: spoken warning required before user provides any banking/payment info
+- **Self-expanding**: app may install tools it needs, but must tell the user and get confirmation
+- **Conversational completion**: ask follow-up questions rather than failing silently
 - Commit AND push to GitHub after every meaningful change
 - Update CYCLE_STATE.md, PRIORITY_STACK.md, OPEN_ISSUES.md before stopping
 

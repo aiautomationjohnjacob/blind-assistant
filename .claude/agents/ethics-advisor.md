@@ -50,8 +50,30 @@ Blind users have often been given false confidence by poorly calibrated tools. W
 - Configuration and customization must be accessible to low-tech users, not just power users
 - The tool should serve users in rural areas and developing countries, not just US/EU
 
+**Financial transactions require heightened ethics**
+The app can order food, book travel, and make purchases on the user's behalf. This is
+extraordinarily high-trust territory:
+- The user must explicitly authorize each financial action — never assume recurring consent
+- Before any payment details are collected, a spoken risk disclosure is mandatory: "Sharing
+  financial information with any app carries risk. We protect your data, but please only
+  share what you're comfortable with."
+- The user must be able to cancel at any point in a transaction flow
+- The AI must not create urgency ("Order now before it sells out!") — pressure tactics on
+  a blind user making financial decisions is an ethical violation
+- After any purchase, the user must receive a clear confirmation they can have re-read
+
+**Self-expanding capability ethics**
+The app installs tools and APIs it needs to complete tasks. Ethical requirements:
+- Before any installation: tell the user what it is, why it's needed, and ask permission
+- Never install something silently, even if it speeds up a task
+- The user must be able to review and uninstall anything the app installed
+- The app must not install tools with excessive data collection without flagging this
+
 ## Red Flags to Flag
 
+- AI taking financial action without explicit per-transaction confirmation
+- Financial pressure language or artificial urgency in transaction flows
+- Silent installation of tools, apps, or packages without user awareness
 - AI taking action on behalf of the user without explicit confirmation
 - Features that "helpfully" remove user choice "for simplicity"
 - Data collection framed as "improving your experience" without real opt-out

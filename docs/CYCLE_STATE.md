@@ -54,19 +54,28 @@ Phase 5: Polish & Community Ready  → Pending
 food or book something) entirely by voice, including the app self-installing what it needs
 
 ### Phase 3: Blind User Testing
-**Goal**: All 5 blind user personas can complete core tasks.
+**Goal**: All 5 blind user personas can complete core life-assistant tasks.
 **Agents**: All 5 blind user personas, screen-observer, computer-use-tester, impact-researcher
-**Phase 3 complete when**: No SHOWSTOPPER issues from any persona
+**Test scenarios must include**:
+- Ask the AI what's on their screen and navigate an inaccessible app
+- Order food or a household item entirely by voice (including risk-disclosure flow)
+- Ask the AI to research something and take action on the result (compound task)
+- Add and retrieve a note from their Second Brain by voice
+- Complete setup/onboarding with zero sighted assistance
+**Phase 3 complete when**: No SHOWSTOPPER issues from any persona across all scenarios
 
 ### Phase 4: Accessibility Hardening
-**Goal**: WCAG 2.1 AA compliance, privacy audit, ethics review.
-**Agents**: accessibility-reviewer, privacy-guardian, ethics-advisor, deafblind-user
-**Phase 4 complete when**: /audit-a11y returns zero CRITICAL findings
+**Goal**: WCAG 2.1 AA compliance, security audit, privacy audit, ethics review.
+**Agents**: accessibility-reviewer, privacy-guardian, ethics-advisor, security-specialist, deafblind-user
+**Phase 4 complete when**: /audit-a11y returns zero CRITICAL findings AND security-specialist
+signs off on financial data handling AND ethics-advisor approves transaction confirmation flow
 
 ### Phase 5: Polish & Community Ready
-**Goal**: Onboarding works for newly blind user, grant pitch ready.
+**Goal**: Onboarding works for non-technical newly blind user; grant pitch ready; community launch.
 **Agents**: newly-blind-user, blind-elder-user, grant-writer, community-advocate
-**Phase 5 complete when**: Dorothy (elder persona) can complete setup without help
+**Test**: Dorothy (elder persona) can: set up the app, order food, and add a note to her
+Second Brain — all without sighted help and without ever asking "what do I do next?"
+**Phase 5 complete when**: Dorothy passes the above test AND grant-writer produces GRANT_NARRATIVE.md
 
 ## Current Sprint
 
