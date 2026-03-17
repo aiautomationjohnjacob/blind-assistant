@@ -244,15 +244,12 @@ Cycle 17 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 15.** Phase 3 in progress. Expo web export fixed. 11 web E2E accessibility
-tests written and wired to CI. Food ordering E2E test fixed. Project-inspector ran (every 5th cycle).
-5 new issues found (ISSUE-024 through ISSUE-028).
+**Loop completed Cycle 16.** Phase 3 in progress. ISSUE-028 resolved (118 new unit tests).
+Ruff format CI blocker from Cycle 15 fixed. 583 unit tests passing. Ruff lint+format clean.
 
-The most important work for Cycle 16 (Phase 3: Blind User Testing):
-1. **P2: Write missing unit tests (ISSUE-028)**: 4 src/ files with no tests —
-   telegram_bot.py, second_brain/query.py, vision/redaction.py, vision/screen_observer.py.
-   Use test-engineer agent with each file.
-2. **P2: Verify web E2E CI results**: Check GitHub Actions run after this cycle's push.
-   The e2e-web job now actually runs — look at results and fix any ARIA assertion failures.
-3. **P2: Voice installer**: voice-guided setup from fresh Python install.
+The most important work for Cycle 17 (Phase 3: Blind User Testing):
+1. **P2: Verify web E2E CI results**: Check GitHub Actions e2e-web job from this push.
+   Ruff format is now fixed — the web E2E Playwright tests should run. Fix ARIA assertions if needed.
+2. **P2: Voice installer**: voice-guided setup from fresh Python install (P2 phase gate item).
+3. **P2: End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver.
 4. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
