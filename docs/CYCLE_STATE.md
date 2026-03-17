@@ -233,16 +233,15 @@ TalkBack real device test — Phase 3 gate remains unvalidated for real device u
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 11.** Phase 3 in progress. Accessibility audit + haptic cue + type annotations done.
+**Loop completed Cycle 12.** Phase 3 in progress. ISSUE-021 browser integration tests + ISSUE-020 fix done.
 No mid-cycle state artifacts. All changes committed and pushed.
 
-The most important work for Cycle 12 (Phase 3: Blind User Testing):
-1. **P1: Live food ordering validation (ISSUE-021)** — run `_handle_order_food` on a real Playwright
-   browser against DoorDash (or a test site) to validate the full checkout loop works on
-   an actual web page, not just mocked helpers. Use computer-use-tester or device-simulator.
-   This has been deferred 2 cycles — do NOT defer again.
-2. **P3: ISSUE-020** — Remove or replace visual platform hint text in MainScreen ("Double-tap to activate")
-   — LOW severity cleanup, 15-minute fix.
+The most important work for Cycle 13 (Phase 3: Blind User Testing):
+1. **Verify CI**: The 'integration-browser' job was added to ci.yml this cycle. Confirm it passes
+   on the next GitHub Actions run. If it fails (system deps wrong, test logic error), fix immediately.
+2. **P2: Real device test** — Android TalkBack or iOS VoiceOver end-to-end food ordering. This is
+   the core Phase 3 gate that hasn't been addressed. Use device-simulator agent with AVD if hardware
+   not available. If device testing is blocked, pivot to Web app (P2) — React Native Web export.
 3. **P3: Conversational recovery** in checkout loop — handle mid-flow "show me the menu again"
    or "go back" user requests; currently the loop does not support backtracking.
 4. **Every 5th cycle (Cycle 15)**: project-inspector should run.
