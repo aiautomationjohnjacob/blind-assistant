@@ -14,6 +14,10 @@ financial pages are protected and never sent externally.
 
 import logging
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from playwright.async_api import Browser, Page, Playwright
 
 logger = logging.getLogger(__name__)
 
