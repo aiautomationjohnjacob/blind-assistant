@@ -37,7 +37,6 @@ from blind_assistant.second_brain.query import (
     _trim_for_speech,
 )
 
-
 # ─────────────────────────────────────────────────────────────
 # Helpers
 # ─────────────────────────────────────────────────────────────
@@ -216,15 +215,18 @@ async def test_add_note_from_voice_handles_vault_exception():
 # ─────────────────────────────────────────────────────────────
 
 
-@pytest.mark.parametrize("content,expected", [
-    ("saw my doctor about the diagnosis", "health"),
-    ("paid the mortgage and credit card", "finance"),
-    ("need to remember to call back tomorrow", "tasks"),
-    ("called my friend about the birthday party", "people"),
-    ("just a random thought I wanted to save", "general"),
-    ("insurance claim with the bank", "health"),  # health keyword wins first
-    ("Doctor's pharmacy prescription", "health"),
-])
+@pytest.mark.parametrize(
+    "content,expected",
+    [
+        ("saw my doctor about the diagnosis", "health"),
+        ("paid the mortgage and credit card", "finance"),
+        ("need to remember to call back tomorrow", "tasks"),
+        ("called my friend about the birthday party", "people"),
+        ("just a random thought I wanted to save", "general"),
+        ("insurance claim with the bank", "health"),  # health keyword wins first
+        ("Doctor's pharmacy prescription", "health"),
+    ],
+)
 def test_infer_category_keywords(content: str, expected: str):
     assert _infer_category(content) == expected
 
@@ -234,15 +236,18 @@ def test_infer_category_keywords(content: str, expected: str):
 # ─────────────────────────────────────────────────────────────
 
 
-@pytest.mark.parametrize("category,expected_label", [
-    ("health", "health"),
-    ("finance", "financial"),
-    ("people", "contacts and people"),
-    ("tasks", "to-do"),
-    ("daily", "daily"),
-    ("general", "general"),
-    ("unknown_category", "general"),  # fallback
-])
+@pytest.mark.parametrize(
+    "category,expected_label",
+    [
+        ("health", "health"),
+        ("finance", "financial"),
+        ("people", "contacts and people"),
+        ("tasks", "to-do"),
+        ("daily", "daily"),
+        ("general", "general"),
+        ("unknown_category", "general"),  # fallback
+    ],
+)
 def test_category_spoken_label_all_categories(category: str, expected_label: str):
     assert _category_spoken_label(category) == expected_label
 
@@ -296,7 +301,7 @@ def test_trim_for_speech_breaks_at_sentence_boundary():
     text = "First sentence. Second sentence that is much longer and takes it over the limit please."
     result = _trim_for_speech(text, 20)
     # Should end cleanly (not mid-word with ...)
-    assert result.endswith(".") or result.endswith("...") or len(result) <= 20
+    assert result.endswith((".", "...")) or len(result) <= 20
 
 
 def test_trim_for_speech_removes_markdown_hashes():

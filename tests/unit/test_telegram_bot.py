@@ -22,7 +22,6 @@ import pytest
 
 from blind_assistant.interfaces.telegram_bot import TelegramBot
 
-
 # ─────────────────────────────────────────────────────────────
 # Helpers
 # ─────────────────────────────────────────────────────────────
@@ -347,7 +346,9 @@ async def test_send_response_tts_failure_is_non_fatal():
     user_context = _make_user_context(output_mode="voice")
     response = _make_response("Still got this.")
 
-    with patch("blind_assistant.voice.tts.synthesize_speech", new_callable=AsyncMock, side_effect=RuntimeError("TTS down")):
+    with patch(
+        "blind_assistant.voice.tts.synthesize_speech", new_callable=AsyncMock, side_effect=RuntimeError("TTS down")
+    ):
         await bot._send_response(update, response, user_context)
 
     # Text was still sent
@@ -412,6 +413,7 @@ def _make_fake_telegram_modules() -> tuple[MagicMock, MagicMock]:
 async def test_start_loads_users_before_polling(mock_keyring):
     """start() must load allowed users from keychain before beginning to poll."""
     import sys
+
     bot = _make_bot()
     mock_app, mock_telegram = _make_fake_telegram_modules()
 
@@ -430,6 +432,7 @@ async def test_start_loads_users_before_polling(mock_keyring):
 async def test_start_calls_run_polling(mock_keyring):
     """start() calls run_polling() on the Application."""
     import sys
+
     bot = _make_bot()
     mock_app, mock_telegram = _make_fake_telegram_modules()
 

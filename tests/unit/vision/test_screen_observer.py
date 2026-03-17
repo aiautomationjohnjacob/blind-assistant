@@ -26,7 +26,6 @@ import pytest
 
 from blind_assistant.vision.screen_observer import SCREEN_DESCRIPTION_PROMPT, ScreenObserver
 
-
 # ─────────────────────────────────────────────────────────────
 # Helpers
 # ─────────────────────────────────────────────────────────────
@@ -38,6 +37,7 @@ def _make_observer(config: dict | None = None) -> ScreenObserver:
 
 def _make_safe_sensitivity() -> MagicMock:
     from blind_assistant.vision.redaction import SensitivityAnalysis, SensitivityLevel
+
     s = SensitivityAnalysis()
     s.level = SensitivityLevel.SAFE
     s.has_password_fields = False
@@ -48,6 +48,7 @@ def _make_safe_sensitivity() -> MagicMock:
 
 def _make_password_sensitivity() -> MagicMock:
     from blind_assistant.vision.redaction import SensitivityAnalysis, SensitivityLevel
+
     s = SensitivityAnalysis()
     s.level = SensitivityLevel.PASSWORD
     s.has_password_fields = True
@@ -58,6 +59,7 @@ def _make_password_sensitivity() -> MagicMock:
 
 def _make_financial_sensitivity() -> MagicMock:
     from blind_assistant.vision.redaction import SensitivityAnalysis, SensitivityLevel
+
     s = SensitivityAnalysis()
     s.level = SensitivityLevel.FINANCIAL
     s.has_password_fields = False
@@ -68,6 +70,7 @@ def _make_financial_sensitivity() -> MagicMock:
 
 def _make_redacted_sensitivity() -> MagicMock:
     from blind_assistant.vision.redaction import SensitivityAnalysis, SensitivityLevel
+
     s = SensitivityAnalysis()
     s.level = SensitivityLevel.REDACTED
     s.has_password_fields = False
@@ -120,8 +123,11 @@ async def test_describe_screen_password_returns_privacy_message():
     # analyze_sensitivity is imported inside describe_screen(), so patch the source module
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"fake_png"),
-        patch("blind_assistant.vision.redaction.analyze_sensitivity",
-              new_callable=AsyncMock, return_value=_make_password_sensitivity()),
+        patch(
+            "blind_assistant.vision.redaction.analyze_sensitivity",
+            new_callable=AsyncMock,
+            return_value=_make_password_sensitivity(),
+        ),
     ):
         result = await obs.describe_screen()
 
@@ -134,8 +140,11 @@ async def test_describe_screen_password_never_calls_claude_api():
     obs = _make_observer()
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"fake_png"),
-        patch("blind_assistant.vision.redaction.analyze_sensitivity",
-              new_callable=AsyncMock, return_value=_make_password_sensitivity()),
+        patch(
+            "blind_assistant.vision.redaction.analyze_sensitivity",
+            new_callable=AsyncMock,
+            return_value=_make_password_sensitivity(),
+        ),
         patch.object(obs, "_describe_with_claude", new_callable=AsyncMock) as mock_claude,
     ):
         await obs.describe_screen()
@@ -153,8 +162,11 @@ async def test_describe_screen_financial_calls_local_description():
     obs = _make_observer()
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"fake_png"),
-        patch("blind_assistant.vision.redaction.analyze_sensitivity",
-              new_callable=AsyncMock, return_value=_make_financial_sensitivity()),
+        patch(
+            "blind_assistant.vision.redaction.analyze_sensitivity",
+            new_callable=AsyncMock,
+            return_value=_make_financial_sensitivity(),
+        ),
         patch.object(obs, "_describe_locally", new_callable=AsyncMock, return_value="local description") as mock_local,
     ):
         result = await obs.describe_screen()
@@ -168,8 +180,11 @@ async def test_describe_screen_financial_never_calls_claude_api():
     obs = _make_observer()
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"fake_png"),
-        patch("blind_assistant.vision.redaction.analyze_sensitivity",
-              new_callable=AsyncMock, return_value=_make_financial_sensitivity()),
+        patch(
+            "blind_assistant.vision.redaction.analyze_sensitivity",
+            new_callable=AsyncMock,
+            return_value=_make_financial_sensitivity(),
+        ),
         patch.object(obs, "_describe_locally", new_callable=AsyncMock, return_value="local"),
         patch.object(obs, "_describe_with_claude", new_callable=AsyncMock) as mock_claude,
     ):
@@ -188,9 +203,14 @@ async def test_describe_screen_safe_calls_claude_describe():
     obs = _make_observer()
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"fake_png"),
-        patch("blind_assistant.vision.redaction.analyze_sensitivity",
-              new_callable=AsyncMock, return_value=_make_safe_sensitivity()),
-        patch.object(obs, "_describe_with_claude", new_callable=AsyncMock, return_value="Claude description") as mock_claude,
+        patch(
+            "blind_assistant.vision.redaction.analyze_sensitivity",
+            new_callable=AsyncMock,
+            return_value=_make_safe_sensitivity(),
+        ),
+        patch.object(
+            obs, "_describe_with_claude", new_callable=AsyncMock, return_value="Claude description"
+        ) as mock_claude,
     ):
         result = await obs.describe_screen()
 
@@ -206,10 +226,8 @@ async def test_describe_screen_with_regions_applies_redaction_before_claude():
 
     with (
         patch.object(obs, "_capture_screenshot", new_callable=AsyncMock, return_value=b"original_png"),
-        patch("blind_assistant.vision.redaction.analyze_sensitivity",
-              new_callable=AsyncMock, return_value=sensitivity),
-        patch("blind_assistant.vision.redaction.apply_redaction",
-              new_callable=AsyncMock, return_value=redacted_bytes),
+        patch("blind_assistant.vision.redaction.analyze_sensitivity", new_callable=AsyncMock, return_value=sensitivity),
+        patch("blind_assistant.vision.redaction.apply_redaction", new_callable=AsyncMock, return_value=redacted_bytes),
         patch.object(obs, "_describe_with_claude", new_callable=AsyncMock, return_value="description") as mock_claude,
     ):
         await obs.describe_screen()

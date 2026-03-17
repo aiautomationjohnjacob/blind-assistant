@@ -43,6 +43,7 @@ if TYPE_CHECKING:
 # Skip gracefully if pytest-playwright is not installed (e.g., unit test job)
 try:
     import pytest_playwright as _  # noqa: F401
+
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
@@ -54,6 +55,7 @@ WEB_APP_URL = "http://localhost:19006"
 # Fixtures
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture(scope="session")
 def web_app_available() -> bool:
     """
@@ -62,6 +64,7 @@ def web_app_available() -> bool:
     Returns True if the server responds, False otherwise.
     """
     import http.client
+
     try:
         # Use http.client directly — WEB_APP_URL is always http://localhost:19006
         # (no dynamic scheme from user input), so S310 does not apply here.
@@ -76,6 +79,7 @@ def web_app_available() -> bool:
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _skip_if_unavailable(web_app_available: bool) -> None:
     """Raise pytest.skip if the web app or Playwright is not available."""
@@ -93,6 +97,7 @@ def _skip_if_unavailable(web_app_available: bool) -> None:
 # Keyboard Navigation Tests (NVDA+Chrome pattern)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestMainScreenKeyboardNavigation:
     """
     Verify full keyboard-only navigation.
@@ -102,9 +107,7 @@ class TestMainScreenKeyboardNavigation:
     WCAG 2.1 SC 2.1.1 (Keyboard) and SC 2.4.3 (Focus Order).
     """
 
-    async def test_can_reach_main_button_by_tab(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_can_reach_main_button_by_tab(self, page: Page, web_app_available: bool) -> None:
         """
         Tab from the page start should reach the main press-to-talk button.
         The button's aria-label must reference 'speak' or 'assistant' so
@@ -114,21 +117,14 @@ class TestMainScreenKeyboardNavigation:
         await page.goto(WEB_APP_URL)
         await page.wait_for_load_state("networkidle")
         await page.keyboard.press("Tab")
-        focused_label = await page.evaluate(
-            "document.activeElement.getAttribute('aria-label')"
-        )
-        assert focused_label is not None, (
-            "First Tab press should focus an element with an aria-label"
-        )
+        focused_label = await page.evaluate("document.activeElement.getAttribute('aria-label')")
+        assert focused_label is not None, "First Tab press should focus an element with an aria-label"
         lower = focused_label.lower()
         assert "speak" in lower or "assistant" in lower or "record" in lower, (
-            f"Focused element aria-label should be recognisable to a screen reader: "
-            f"got '{focused_label}'"
+            f"Focused element aria-label should be recognisable to a screen reader: got '{focused_label}'"
         )
 
-    async def test_no_keyboard_trap(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_no_keyboard_trap(self, page: Page, web_app_available: bool) -> None:
         """
         Focus must not get trapped anywhere in the app.
         Tab 20 times without raising an exception = no trap detected.
@@ -142,9 +138,7 @@ class TestMainScreenKeyboardNavigation:
             await page.keyboard.press("Tab")
         # No assertion needed — if focus traps, the test will time out or error
 
-    async def test_interactive_elements_reachable_by_tab(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_interactive_elements_reachable_by_tab(self, page: Page, web_app_available: bool) -> None:
         """
         At least one focusable element must exist on the main screen.
         If TabIndex=-1 is mistakenly set on all elements, no element is reachable.
@@ -160,14 +154,13 @@ class TestMainScreenKeyboardNavigation:
                 return document.querySelectorAll(sel).length;
             }"""
         )
-        assert focusable_count > 0, (
-            "No keyboard-focusable elements found on the main screen"
-        )
+        assert focusable_count > 0, "No keyboard-focusable elements found on the main screen"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ARIA Role and Label Tests
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestMainScreenARIA:
     """
@@ -177,22 +170,17 @@ class TestMainScreenARIA:
     All interactive elements need a non-empty accessible name.
     """
 
-    async def test_main_button_has_role_button(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_main_button_has_role_button(self, page: Page, web_app_available: bool) -> None:
         """The press-to-talk button must have role=button for NVDA/TalkBack."""
         _skip_if_unavailable(web_app_available)
         await page.goto(WEB_APP_URL)
         await page.wait_for_load_state("networkidle")
         buttons = await page.query_selector_all('[role="button"]')
         assert len(buttons) > 0, (
-            "No elements with role=button found — "
-            "screen readers cannot identify interactive elements"
+            "No elements with role=button found — screen readers cannot identify interactive elements"
         )
 
-    async def test_main_button_has_accessible_label(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_main_button_has_accessible_label(self, page: Page, web_app_available: bool) -> None:
         """
         Every button must have a non-empty aria-label.
         An unlabelled button reads as 'button' with no context — useless to NVDA.
@@ -206,13 +194,10 @@ class TestMainScreenARIA:
             label = await button.get_attribute("aria-label")
             text_content = (await button.text_content() or "").strip()
             assert (label and len(label) > 2) or len(text_content) > 2, (
-                f"Button missing accessible name — "
-                f"aria-label='{label}', text='{text_content}'"
+                f"Button missing accessible name — aria-label='{label}', text='{text_content}'"
             )
 
-    async def test_status_region_uses_polite_live_region(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_status_region_uses_polite_live_region(self, page: Page, web_app_available: bool) -> None:
         """
         Status updates (processing, error) must use aria-live='polite'.
         'assertive' would interrupt the user mid-sentence — unacceptable for
@@ -223,13 +208,10 @@ class TestMainScreenARIA:
         await page.wait_for_load_state("networkidle")
         live_regions = await page.query_selector_all('[aria-live="polite"]')
         assert len(live_regions) > 0, (
-            "No aria-live='polite' regions found — "
-            "status updates will not be announced to screen reader users"
+            "No aria-live='polite' regions found — status updates will not be announced to screen reader users"
         )
 
-    async def test_html_element_has_lang_attribute(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_html_element_has_lang_attribute(self, page: Page, web_app_available: bool) -> None:
         """
         The <html> element must have a lang attribute.
         Screen readers use this to select the correct speech synthesis voice.
@@ -244,9 +226,7 @@ class TestMainScreenARIA:
             "Screen readers need this to select the correct TTS voice."
         )
 
-    async def test_page_has_title(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_page_has_title(self, page: Page, web_app_available: bool) -> None:
         """
         The page <title> must not be empty.
         Screen readers announce the title when a tab is focused.
@@ -256,13 +236,9 @@ class TestMainScreenARIA:
         await page.goto(WEB_APP_URL)
         await page.wait_for_load_state("networkidle")
         title = await page.title()
-        assert title and len(title) > 0, (
-            "Page title is empty — screen readers cannot identify this page"
-        )
+        assert title and len(title) > 0, "Page title is empty — screen readers cannot identify this page"
 
-    async def test_no_elements_with_empty_aria_label(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_no_elements_with_empty_aria_label(self, page: Page, web_app_available: bool) -> None:
         """
         Elements with aria-label must not have an empty string value.
         An empty aria-label is worse than no label — it silences NVDA
@@ -287,6 +263,7 @@ class TestMainScreenARIA:
 # Setup Wizard ARIA Tests
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestSetupWizardARIA:
     """
     Verify the setup wizard is accessible.
@@ -296,9 +273,7 @@ class TestSetupWizardARIA:
     This is the most critical accessibility test in the suite.
     """
 
-    async def test_setup_wizard_loads_or_main_screen_loads(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_setup_wizard_loads_or_main_screen_loads(self, page: Page, web_app_available: bool) -> None:
         """
         After loading, either the setup wizard or the main screen must be visible.
         Verifies that the app renders something rather than a blank screen.
@@ -321,9 +296,7 @@ class TestSetupWizardARIA:
             "A blind user would have no way to interact with the app."
         )
 
-    async def test_inputs_have_accessible_names(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_inputs_have_accessible_names(self, page: Page, web_app_available: bool) -> None:
         """
         All <input> elements must have an accessible name via aria-label,
         aria-labelledby, or a visible <label>.

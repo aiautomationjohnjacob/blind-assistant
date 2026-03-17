@@ -22,6 +22,7 @@ try:
     # pytest-playwright registers the `page` fixture as a plugin.
     # Importing it here confirms it is installed and its fixtures are active.
     import pytest_playwright  # noqa: F401
+
     PYTEST_PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     PYTEST_PLAYWRIGHT_AVAILABLE = False
@@ -32,6 +33,7 @@ except ImportError:
 # ─────────────────────────────────────────────────────────────────────────────
 
 if not PYTEST_PLAYWRIGHT_AVAILABLE:
+
     @pytest.fixture
     def page() -> None:
         """

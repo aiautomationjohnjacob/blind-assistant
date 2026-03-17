@@ -20,12 +20,11 @@ Tests cover:
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from blind_assistant.vision.redaction import (
-    ACCOUNT_NUMBER_PATTERN,
     CARD_NUMBER_PATTERN,
     SSN_PATTERN,
     SensitivityAnalysis,
@@ -33,7 +32,6 @@ from blind_assistant.vision.redaction import (
     analyze_sensitivity,
     apply_redaction,
 )
-
 
 # ─────────────────────────────────────────────────────────────
 # Helpers
@@ -43,10 +41,9 @@ from blind_assistant.vision.redaction import (
 def _minimal_png() -> bytes:
     """Return a minimal valid 1x1 white PNG for image tests."""
     import base64
+
     # 1x1 white pixel PNG (67 bytes)
-    b64 = (
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWP4z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg=="
-    )
+    b64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWP4z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg=="
     return base64.b64decode(b64)
 
 
@@ -77,7 +74,11 @@ def test_sensitivity_analysis_defaults():
 
 @pytest.mark.asyncio
 async def test_analyze_sensitivity_password_keyword_returns_password_level():
-    with patch("blind_assistant.vision.redaction._extract_text", new_callable=AsyncMock, return_value="Enter your password here"):
+    with patch(
+        "blind_assistant.vision.redaction._extract_text",
+        new_callable=AsyncMock,
+        return_value="Enter your password here",
+    ):
         result = await analyze_sensitivity(b"fake_screenshot")
     assert result.level == SensitivityLevel.PASSWORD
     assert result.has_password_fields is True
@@ -85,7 +86,11 @@ async def test_analyze_sensitivity_password_keyword_returns_password_level():
 
 @pytest.mark.asyncio
 async def test_analyze_sensitivity_passphrase_detected():
-    with patch("blind_assistant.vision.redaction._extract_text", new_callable=AsyncMock, return_value="Enter passphrase to unlock"):
+    with patch(
+        "blind_assistant.vision.redaction._extract_text",
+        new_callable=AsyncMock,
+        return_value="Enter passphrase to unlock",
+    ):
         result = await analyze_sensitivity(b"fake_screenshot")
     assert result.level == SensitivityLevel.PASSWORD
 
@@ -94,8 +99,11 @@ async def test_analyze_sensitivity_passphrase_detected():
 async def test_analyze_sensitivity_password_returns_immediately_without_further_checks():
     """Once a password field is found, we return immediately — no further checks."""
     # Even if there's also a card number, password takes priority
-    with patch("blind_assistant.vision.redaction._extract_text", new_callable=AsyncMock,
-               return_value="password: xxxx card: 4111 1111 1111 1111"):
+    with patch(
+        "blind_assistant.vision.redaction._extract_text",
+        new_callable=AsyncMock,
+        return_value="password: xxxx card: 4111 1111 1111 1111",
+    ):
         result = await analyze_sensitivity(b"fake")
     assert result.level == SensitivityLevel.PASSWORD
     # has_financial_content should NOT be set (we returned early)
@@ -109,8 +117,11 @@ async def test_analyze_sensitivity_password_returns_immediately_without_further_
 
 @pytest.mark.asyncio
 async def test_analyze_sensitivity_card_number_returns_financial():
-    with patch("blind_assistant.vision.redaction._extract_text", new_callable=AsyncMock,
-               return_value="card number: 4111 1111 1111 1111"):
+    with patch(
+        "blind_assistant.vision.redaction._extract_text",
+        new_callable=AsyncMock,
+        return_value="card number: 4111 1111 1111 1111",
+    ):
         result = await analyze_sensitivity(b"fake")
     assert result.level == SensitivityLevel.FINANCIAL
     assert result.has_financial_content is True
@@ -118,8 +129,11 @@ async def test_analyze_sensitivity_card_number_returns_financial():
 
 @pytest.mark.asyncio
 async def test_analyze_sensitivity_ssn_returns_financial():
-    with patch("blind_assistant.vision.redaction._extract_text", new_callable=AsyncMock,
-               return_value="SSN: 123-45-6789 on file"):
+    with patch(
+        "blind_assistant.vision.redaction._extract_text",
+        new_callable=AsyncMock,
+        return_value="SSN: 123-45-6789 on file",
+    ):
         result = await analyze_sensitivity(b"fake")
     assert result.level == SensitivityLevel.FINANCIAL
     assert result.has_financial_content is True
@@ -127,8 +141,11 @@ async def test_analyze_sensitivity_ssn_returns_financial():
 
 @pytest.mark.asyncio
 async def test_analyze_sensitivity_financial_domain_returns_financial():
-    with patch("blind_assistant.vision.redaction._extract_text", new_callable=AsyncMock,
-               return_value="Welcome to Chase Online Banking"):
+    with patch(
+        "blind_assistant.vision.redaction._extract_text",
+        new_callable=AsyncMock,
+        return_value="Welcome to Chase Online Banking",
+    ):
         result = await analyze_sensitivity(b"fake")
     assert result.level == SensitivityLevel.FINANCIAL
     assert result.has_financial_content is True
@@ -136,8 +153,9 @@ async def test_analyze_sensitivity_financial_domain_returns_financial():
 
 @pytest.mark.asyncio
 async def test_analyze_sensitivity_paypal_detected():
-    with patch("blind_assistant.vision.redaction._extract_text", new_callable=AsyncMock,
-               return_value="Send money via PayPal"):
+    with patch(
+        "blind_assistant.vision.redaction._extract_text", new_callable=AsyncMock, return_value="Send money via PayPal"
+    ):
         result = await analyze_sensitivity(b"fake")
     assert result.level == SensitivityLevel.FINANCIAL
 
@@ -149,8 +167,11 @@ async def test_analyze_sensitivity_paypal_detected():
 
 @pytest.mark.asyncio
 async def test_analyze_sensitivity_clean_text_returns_safe():
-    with patch("blind_assistant.vision.redaction._extract_text", new_callable=AsyncMock,
-               return_value="Today's weather is sunny and warm."):
+    with patch(
+        "blind_assistant.vision.redaction._extract_text",
+        new_callable=AsyncMock,
+        return_value="Today's weather is sunny and warm.",
+    ):
         result = await analyze_sensitivity(b"fake")
     assert result.level == SensitivityLevel.SAFE
     assert result.has_password_fields is False
@@ -172,8 +193,11 @@ async def test_analyze_sensitivity_empty_text_returns_safe():
 @pytest.mark.asyncio
 async def test_analyze_sensitivity_ocr_exception_returns_safe():
     """If OCR fails with an exception, we treat the screen as safe (not crash)."""
-    with patch("blind_assistant.vision.redaction._extract_text", new_callable=AsyncMock,
-               side_effect=RuntimeError("OCR crashed")):
+    with patch(
+        "blind_assistant.vision.redaction._extract_text",
+        new_callable=AsyncMock,
+        side_effect=RuntimeError("OCR crashed"),
+    ):
         result = await analyze_sensitivity(b"fake")
     assert result.level == SensitivityLevel.SAFE
 
@@ -214,20 +238,26 @@ async def test_apply_redaction_with_pil_error_returns_original():
 # ─────────────────────────────────────────────────────────────
 
 
-@pytest.mark.parametrize("text", [
-    "4111 1111 1111 1111",       # spaces
-    "4111-1111-1111-1111",       # dashes
-    "4111111111111111",          # no separators
-])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "4111 1111 1111 1111",  # spaces
+        "4111-1111-1111-1111",  # dashes
+        "4111111111111111",  # no separators
+    ],
+)
 def test_card_number_pattern_matches_valid_cards(text: str):
     assert CARD_NUMBER_PATTERN.search(text) is not None
 
 
-@pytest.mark.parametrize("text", [
-    "123 456 789",       # too short
-    "not-a-card-number",
-    "1234",
-])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "123 456 789",  # too short
+        "not-a-card-number",
+        "1234",
+    ],
+)
 def test_card_number_pattern_does_not_match_non_cards(text: str):
     assert CARD_NUMBER_PATTERN.search(text) is None
 
@@ -237,19 +267,25 @@ def test_card_number_pattern_does_not_match_non_cards(text: str):
 # ─────────────────────────────────────────────────────────────
 
 
-@pytest.mark.parametrize("text", [
-    "123-45-6789",
-    "SSN: 987-65-4321",
-])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "123-45-6789",
+        "SSN: 987-65-4321",
+    ],
+)
 def test_ssn_pattern_matches_valid_ssns(text: str):
     assert SSN_PATTERN.search(text) is not None
 
 
-@pytest.mark.parametrize("text", [
-    "1234-56-789",   # wrong grouping
-    "12-34-5678",    # wrong grouping
-    "no ssn here",
-])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "1234-56-789",  # wrong grouping
+        "12-34-5678",  # wrong grouping
+        "no ssn here",
+    ],
+)
 def test_ssn_pattern_does_not_match_non_ssns(text: str):
     assert SSN_PATTERN.search(text) is None
 
@@ -261,6 +297,7 @@ def test_ssn_pattern_does_not_match_non_ssns(text: str):
 
 def test_password_keywords_includes_core_terms():
     from blind_assistant.vision.redaction import PASSWORD_KEYWORDS
+
     assert "password" in PASSWORD_KEYWORDS
     assert "pin" in PASSWORD_KEYWORDS
     assert "passphrase" in PASSWORD_KEYWORDS
