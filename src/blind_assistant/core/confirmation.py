@@ -143,6 +143,30 @@ class ConfirmationGate:
         await response_callback(order_message)
         return await self.wait_for_confirmation(context, timeout=timeout)
 
+    async def wait_for_response(
+        self,
+        context,
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> str | None:
+        """
+        Wait for any user response (not just yes/no).
+
+        Used in conversational multi-step flows like food ordering selection
+        where the user may say "number 2", "pizza palace", or "the first one".
+
+        Returns:
+            The raw response string, or None if timed out
+        """
+        self.register_session(context.session_id)
+        queue = self._response_queues[context.session_id]
+
+        try:
+            response = await asyncio.wait_for(queue.get(), timeout=timeout)
+            return response.strip() if response and response.strip() else None
+        except TimeoutError:
+            logger.info(f"Response wait timed out for session {context.session_id}")
+            return None
+
     async def confirm_financial_details_collection(
         self,
         context,
