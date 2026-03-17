@@ -7,7 +7,7 @@ anthropic==0.25.0               # Claude API (intent, vision, planning)
 openai-whisper==20231117        # Local speech-to-text (runs offline)
 
 # REST API Server (primary connection point for all client apps)
-fastapi==0.115.14               # Async REST API framework; 0.111 → 0.115 fixes starlette CVE-2024-47874
+fastapi==0.135.1                # Async REST API framework; upgraded from 0.111 (starlette CVE fix)
 uvicorn==0.34.3                 # ASGI server to run FastAPI
 starlette==0.47.3               # Explicit pin to fix CVE-2024-47874 and CVE-2025-54121
 pydantic==2.12.5                # Request/response data validation
