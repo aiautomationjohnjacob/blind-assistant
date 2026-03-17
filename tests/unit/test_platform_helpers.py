@@ -177,10 +177,7 @@ class TestParseContentDescriptions:
 
     def test_multiple_same_description_values_all_returned(self) -> None:
         """Duplicate descriptions are all included (not de-duplicated)."""
-        xml = (
-            '<node content-desc="Button" />'
-            '<node content-desc="Button" />'
-        )
+        xml = '<node content-desc="Button" /><node content-desc="Button" />'
         result = _parse_content_descriptions(xml)
         assert result == ["Button", "Button"]
 
@@ -191,18 +188,12 @@ class TestParseContentDescriptions:
     def test_main_button_check_passes_for_known_keywords(self, keyword: str) -> None:
         """The TalkBack test's assertion passes when any description contains a known keyword."""
         descriptions = [f"Press to {keyword}"]
-        assert any(
-            "speak" in d.lower() or "assistant" in d.lower() or "record" in d.lower()
-            for d in descriptions
-        )
+        assert any("speak" in d.lower() or "assistant" in d.lower() or "record" in d.lower() for d in descriptions)
 
     def test_main_button_check_fails_when_no_known_keywords(self) -> None:
         """The TalkBack test's assertion fails when descriptions lack required keywords."""
         descriptions = ["Button", "View", ""]
-        assert not any(
-            "speak" in d.lower() or "assistant" in d.lower() or "record" in d.lower()
-            for d in descriptions
-        )
+        assert not any("speak" in d.lower() or "assistant" in d.lower() or "record" in d.lower() for d in descriptions)
 
 
 # ===========================================================================
