@@ -280,15 +280,17 @@ class Orchestrator:
 
     async def _handle_order_food(self, intent, context: UserContext, update) -> dict:
         """
-        Handle a food ordering request end-to-end.
+        Handle a food ordering request end-to-end via conversational checkout loop.
 
         Full flow per Phase 2 requirements:
-        1. Ask the user what/where they want to order (if not in intent params)
+        1. Gather what the user wants (from intent params or description)
         2. Mandatory financial risk disclosure + user acknowledgment
-        3. Navigate to the food ordering site with the browser tool
-        4. Let Claude reason about the page and guide the user through the order
-        5. Show order summary and get final per-transaction confirmation
-        6. Complete the order and report back
+        3. Navigate to food ordering site with the browser tool
+        4. Ask Claude to reason about page content → read options to user by voice
+        5. User picks a restaurant → navigate to restaurant page
+        6. Ask Claude to read menu highlights → user picks items
+        7. Navigate to checkout → read order summary → confirm with user
+        8. Final per-transaction confirmation → place order
 
         Per ETHICS_REQUIREMENTS.md: risk disclosure fires every transaction.
         Per SECURITY_MODEL.md: payment handled via Stripe tokenization, not raw numbers.
@@ -306,9 +308,9 @@ class Orchestrator:
             f"I'll help you order food. I'm going to search for {food_query or 'food delivery options'} near you."
         )
 
-        # Step 2: Financial risk disclosure — MANDATORY before any payment discussion
-        # Use the full confirm_financial_details_collection flow which fires the
-        # spoken disclosure and waits for explicit acknowledgment.
+        # Step 2: Financial risk disclosure — MANDATORY before any payment discussion.
+        # Uses the full confirm_financial_details_collection flow which speaks the
+        # disclosure and waits for explicit acknowledgment before proceeding.
         await update("Before we look at ordering options, I need to share some important information.")
         user_acknowledged = await self.confirmation_gate.confirm_financial_details_collection(
             context=context,
@@ -316,13 +318,11 @@ class Orchestrator:
         )
 
         if not user_acknowledged:
-            return {"text": ("No problem — I won't proceed with the order. You can ask me again any time.")}
+            return {"text": "No problem — I won't proceed with the order. You can ask me again any time."}
 
-        # Step 3: Use the browser tool to search for food ordering options
+        # Step 3: Get the browser tool (must already be installed — offer runs in handle_message)
         browser_tool = self.tool_registry.get_installed_tool("browser")
         if browser_tool is None:
-            # This should not happen — the tool install offer runs before execute_intent.
-            # If browser isn't installed, guide the user.
             return {
                 "text": (
                     "I need the browser tool to complete your order, but it's not installed. "
@@ -333,34 +333,136 @@ class Orchestrator:
         await update("Opening the food ordering site now...")
 
         try:
-            # Use a well-known food search aggregator that works in most regions.
-            # Claude reasons about any page — no site-specific parsing.
+            # Navigate to search results — Claude reasons about ANY food site page content
             search_url = f"https://www.doordash.com/search/store/?q={food_query.replace(' ', '+')}"
             if restaurant:
                 search_url = f"https://www.doordash.com/search/store/?q={restaurant.replace(' ', '+')}"
 
             page_state = await browser_tool.navigate(search_url)
 
-            await update(
-                f"I'm on the food ordering page. Here's what I found: "
-                f"{page_state.title}. "
-                f"I can see options on this page. "
-                "Would you like me to read the first few results to you, "
-                "or do you have a specific restaurant in mind?"
+            # Step 4: Ask Claude to extract restaurant options from the page text.
+            # Claude reads the raw page text and returns a voice-friendly numbered list.
+            options_summary = await self._extract_options_from_page(
+                page_text=page_state.text_content,
+                page_title=page_state.title,
+                task_context=f"food delivery search results for '{food_query}'",
+                max_options=5,
             )
 
-            # Step 4: Return the page state for the conversational follow-up.
-            # The next user message will be routed back here or to general_question
-            # to continue the ordering flow.
+            await update(
+                f"I found some options for you. {options_summary} "
+                "Which one would you like? You can say the number or the restaurant name."
+            )
+
+            # Step 5: Wait for the user to pick a restaurant
+            user_choice = await self.confirmation_gate.wait_for_response(context, timeout=90)
+            if not user_choice:
+                return {
+                    "text": (
+                        "I didn't hear which restaurant you'd like. "
+                        "Say 'order food' again when you're ready to try."
+                    ),
+                    "ordering_in_progress": False,
+                }
+
+            # Step 6: Ask Claude to interpret the user's choice and click the right link.
+            # This keeps all site-specific navigation logic in Claude's reasoning,
+            # not in hardcoded selectors.
+            await update(f"Got it — looking at {user_choice}...")
+            restaurant_page = await self._navigate_to_user_choice(
+                browser_tool=browser_tool,
+                page_state=page_state,
+                user_choice=user_choice,
+            )
+
+            if restaurant_page is None:
+                return {
+                    "text": (
+                        f"I had trouble finding '{user_choice}' on the page. "
+                        "Would you like to try again or pick a different option?"
+                    ),
+                    "ordering_in_progress": False,
+                }
+
+            # Step 7: Read the menu highlights to the user
+            menu_summary = await self._extract_options_from_page(
+                page_text=restaurant_page.text_content,
+                page_title=restaurant_page.title,
+                task_context="restaurant menu items",
+                max_options=5,
+            )
+
+            await update(
+                f"Here are some menu items from {restaurant_page.title}: "
+                f"{menu_summary} "
+                "What would you like to order? Say the item name or number."
+            )
+
+            # Step 8: Wait for menu item selection
+            item_choice = await self.confirmation_gate.wait_for_response(context, timeout=90)
+            if not item_choice:
+                return {
+                    "text": (
+                        "I didn't hear what you'd like to order. "
+                        "Say 'order food' again when you're ready to try."
+                    ),
+                    "ordering_in_progress": False,
+                }
+
+            # Step 9: Try to add the item to cart by clicking/navigating
+            await update(f"Adding {item_choice} to your cart...")
+            cart_page = await self._add_item_to_cart(
+                browser_tool=browser_tool,
+                current_page=restaurant_page,
+                item_choice=item_choice,
+            )
+
+            # Step 10: Read order summary and get final per-transaction confirmation
+            # The order summary is extracted from the cart page by Claude.
+            order_summary_text = await self._extract_order_summary(
+                page_text=cart_page.text_content if cart_page else "",
+                item_choice=item_choice,
+                restaurant=restaurant_page.title,
+            )
+
+            # _handle_order_food_confirm fires the full two-step disclosure + confirmation
+            order_confirmed = await self._handle_order_food_confirm(
+                order_summary=order_summary_text,
+                total_amount="(see order summary above)",
+                context=context,
+                update=update,
+            )
+
+            if not order_confirmed:
+                return {
+                    "text": (
+                        "Order cancelled. No payment has been made. "
+                        "You can start a new order any time."
+                    ),
+                    "ordering_in_progress": False,
+                }
+
+            # Step 11: Place the order — click "Place Order" or equivalent
+            await update("Placing your order now...")
+            order_result = await self._place_order(browser_tool=browser_tool)
+
+            if order_result.get("success"):
+                return {
+                    "text": (
+                        f"Your order has been placed! {order_result.get('confirmation', '')} "
+                        "You should receive a confirmation soon."
+                    ),
+                    "ordering_in_progress": False,
+                    "order_placed": True,
+                }
             return {
                 "text": (
-                    f"I've opened the food delivery search for: {food_query}. "
-                    f"Page title: {page_state.title}. "
-                    "To complete your order, I'll need to walk through the choices with you. "
-                    "What restaurant or type of food would you like?"
+                    "I wasn't able to place the order automatically — "
+                    f"{order_result.get('reason', 'the site may have changed its layout')}. "
+                    "Your cart should be saved. You can complete the order manually "
+                    "or say 'order food' again to try a different approach."
                 ),
-                "page_state": page_state,
-                "ordering_in_progress": True,
+                "ordering_in_progress": False,
             }
 
         except ImportError:
@@ -373,15 +475,258 @@ class Orchestrator:
                 )
             }
         except Exception as e:
-            logger.error(f"Food ordering navigation failed: {e}", exc_info=True)
+            logger.error(f"Food ordering failed: {e}", exc_info=True)
             return {
                 "text": (
-                    "I had trouble opening the food ordering site. "
+                    "I had trouble with the food ordering site. "
                     f"Here's what happened: {str(e)}. "
-                    "Would you like to try a different service, "
-                    "or shall I try again?"
+                    "Would you like to try a different service, or shall I try again?"
                 )
             }
+
+    async def _extract_options_from_page(
+        self,
+        page_text: str,
+        page_title: str,
+        task_context: str,
+        max_options: int = 5,
+    ) -> str:
+        """
+        Use Claude to extract a voice-friendly numbered list of options from raw page text.
+
+        Claude reasons about the page content to identify the most relevant options
+        (restaurants, menu items, products) and formats them for audio delivery.
+        No site-specific parsing — works on any page.
+
+        Returns a plain-English numbered list suitable for reading aloud to a blind user.
+        """
+        try:
+            import anthropic
+
+            from blind_assistant.security.credentials import CLAUDE_API_KEY, require_credential
+
+            api_key = require_credential(CLAUDE_API_KEY)
+            client = anthropic.AsyncAnthropic(api_key=api_key)
+
+            # Truncate page text to avoid hitting token limits while keeping enough context
+            page_excerpt = page_text[:3000] if page_text else "(page content not available)"
+
+            prompt = (
+                f"You are reading a webpage to a blind user. The page is: '{page_title}'. "
+                f"The user is looking at: {task_context}. "
+                f"Here is the raw text from the page:\n\n{page_excerpt}\n\n"
+                f"Extract the top {max_options} most relevant options the user can choose from. "
+                "Format them as a numbered spoken list: '1. Restaurant name, delivery time, rating. "
+                "2. Next option...' Keep each item under 20 words. "
+                "Do NOT use visual language like 'you can see' or 'on the left'. "
+                "If no clear options are visible, say what you can infer from the page."
+            )
+
+            response = await client.messages.create(
+                model="claude-sonnet-4-5",
+                max_tokens=300,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return response.content[0].text.strip()
+        except Exception as e:
+            logger.warning(f"Could not extract options from page using Claude: {e}")
+            # Fallback: return a truncated version of the page text
+            if page_text:
+                return f"I found some results. Here's what I could read from the page: {page_text[:400]}"
+            return f"I'm on {page_title} but couldn't read the specific options. Please tell me what you'd like."
+
+    async def _navigate_to_user_choice(
+        self,
+        browser_tool,
+        page_state,
+        user_choice: str,
+    ):
+        """
+        Ask Claude to determine which link to click based on the user's spoken choice,
+        then navigate to it.
+
+        Claude maps "number 2" or "pizza palace" to the correct selector or link text.
+        Returns the new PageState after navigation, or None if navigation failed.
+        """
+        try:
+            import anthropic
+
+            from blind_assistant.security.credentials import CLAUDE_API_KEY, require_credential
+
+            api_key = require_credential(CLAUDE_API_KEY)
+            client = anthropic.AsyncAnthropic(api_key=api_key)
+
+            page_excerpt = page_state.text_content[:3000] if page_state.text_content else ""
+
+            prompt = (
+                f"A blind user is on a webpage titled: '{page_state.title}'. "
+                f"They said they want: '{user_choice}'. "
+                f"Here is the page text:\n\n{page_excerpt}\n\n"
+                "What text string or partial URL should I search for to click the right link? "
+                "Respond with ONLY the exact text to search for on the page (no explanation). "
+                "Keep it short — just the key term (e.g. 'Pizza Palace' or 'Chipotle')."
+            )
+
+            response = await client.messages.create(
+                model="claude-sonnet-4-5",
+                max_tokens=50,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            click_target = response.content[0].text.strip().strip('"').strip("'")
+
+            # Try clicking by text content — Playwright finds elements containing this text
+            await browser_tool.click(f"text={click_target}")
+            new_page_state = await browser_tool.get_page_state()
+            return new_page_state
+
+        except Exception as e:
+            logger.warning(f"Navigation to user choice '{user_choice}' failed: {e}")
+            return None
+
+    async def _add_item_to_cart(
+        self,
+        browser_tool,
+        current_page,
+        item_choice: str,
+    ):
+        """
+        Ask Claude to find and click the button to add the user's chosen item to cart.
+
+        Returns new PageState after the click, or the unchanged page if it failed.
+        Claude determines the correct selector — no hardcoded button names.
+        """
+        try:
+            import anthropic
+
+            from blind_assistant.security.credentials import CLAUDE_API_KEY, require_credential
+
+            api_key = require_credential(CLAUDE_API_KEY)
+            client = anthropic.AsyncAnthropic(api_key=api_key)
+
+            page_excerpt = current_page.text_content[:3000] if current_page.text_content else ""
+
+            prompt = (
+                f"A blind user is on a restaurant menu page titled: '{current_page.title}'. "
+                f"They want to order: '{item_choice}'. "
+                f"Here is the page text:\n\n{page_excerpt}\n\n"
+                "What text should I click to add this item or navigate to it? "
+                "Respond with ONLY the short text to click (e.g. 'Add to Cart' or the item name). "
+                "No explanation."
+            )
+
+            response = await client.messages.create(
+                model="claude-sonnet-4-5",
+                max_tokens=50,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            click_target = response.content[0].text.strip().strip('"').strip("'")
+
+            await browser_tool.click(f"text={click_target}")
+            return await browser_tool.get_page_state()
+
+        except Exception as e:
+            logger.warning(f"Add to cart for '{item_choice}' failed: {e}")
+            return current_page  # Return existing page — don't crash the flow
+
+    async def _extract_order_summary(
+        self,
+        page_text: str,
+        item_choice: str,
+        restaurant: str,
+    ) -> str:
+        """
+        Use Claude to extract a concise order summary from the cart page text.
+
+        Returns a plain-English summary suitable for reading aloud before confirmation.
+        Falls back to a simple summary using the item_choice and restaurant name.
+        """
+        try:
+            import anthropic
+
+            from blind_assistant.security.credentials import CLAUDE_API_KEY, require_credential
+
+            api_key = require_credential(CLAUDE_API_KEY)
+            client = anthropic.AsyncAnthropic(api_key=api_key)
+
+            page_excerpt = page_text[:2000] if page_text else ""
+
+            prompt = (
+                "Extract the order summary from this cart/checkout page text. "
+                "Include: item names, quantities, and total price if visible. "
+                "Format as a single sentence for reading aloud. "
+                "Example: '1 Pepperoni Pizza and 1 Diet Coke, total $18.50'. "
+                f"If you can't find the details, say: '{item_choice} from {restaurant}'. "
+                f"Page text:\n\n{page_excerpt}"
+            )
+
+            response = await client.messages.create(
+                model="claude-sonnet-4-5",
+                max_tokens=100,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return response.content[0].text.strip()
+
+        except Exception:
+            # Graceful fallback — always return something useful
+            return f"{item_choice} from {restaurant}"
+
+    async def _place_order(self, browser_tool) -> dict:
+        """
+        Attempt to click the final 'Place Order' button on the checkout page.
+
+        Uses Claude to find the right button text — no hardcoded selectors.
+        Returns dict with 'success' bool and optional 'confirmation' or 'reason'.
+        """
+        try:
+            current_page = await browser_tool.get_page_state()
+
+            import anthropic
+
+            from blind_assistant.security.credentials import CLAUDE_API_KEY, require_credential
+
+            api_key = require_credential(CLAUDE_API_KEY)
+            client = anthropic.AsyncAnthropic(api_key=api_key)
+
+            page_excerpt = current_page.text_content[:2000] if current_page.text_content else ""
+
+            prompt = (
+                "On this checkout page, what text should I click to place the order? "
+                "Common labels: 'Place Order', 'Confirm Order', 'Submit Order', 'Pay Now'. "
+                "Respond with ONLY the exact button text (no explanation). "
+                f"Page text:\n\n{page_excerpt}"
+            )
+
+            response = await client.messages.create(
+                model="claude-sonnet-4-5",
+                max_tokens=20,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            button_text = response.content[0].text.strip().strip('"').strip("'")
+
+            await browser_tool.click(f"text={button_text}")
+
+            # Check confirmation page
+            confirm_page = await browser_tool.get_page_state()
+            # Heuristic: confirmation pages typically mention "order", "confirmed", or a number
+            is_confirmed = any(
+                kw in confirm_page.text_content.lower()
+                for kw in ("order confirmed", "thank you", "confirmation number", "order number")
+            )
+
+            if is_confirmed:
+                return {"success": True, "confirmation": f"Order confirmed. {confirm_page.title}"}
+            # Page changed but no confirmation — still report success (may need phone/address)
+            return {
+                "success": False,
+                "reason": (
+                    "I clicked the order button but the site may need additional information "
+                    "(delivery address, payment method). Please complete it manually."
+                ),
+            }
+
+        except Exception as e:
+            logger.warning(f"Place order failed: {e}")
+            return {"success": False, "reason": str(e)}
 
     async def _handle_order_food_confirm(
         self,
