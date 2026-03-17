@@ -18,6 +18,7 @@ Per testing.md: Android E2E tests use ADB and AVD.
 
 from __future__ import annotations
 
+# ruff: noqa: S603, S607  -- subprocess calls use ADB (system tool); args controlled by tests
 import shutil
 import subprocess
 import tempfile
