@@ -269,3 +269,72 @@ passphrase on session end. (3) Make the passphrase prompt timeout configurable.
 - Next cycle recommendation: Wire Telegram end-to-end — a real voice message in,
   real TTS audio out, all pieces connected. This is the "product exists" moment and
   the most important single step remaining in Phase 2.
+
+---
+
+## Cycle 4 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: This cycle delivered the foundation for multi-platform expansion
+— the REST API server and framework decision are both enabling infrastructure. The codebase
+is now correctly aligned: Telegram is secondary, the voice CLI is the demo target. Most
+important gap remaining: a real user still cannot use the product end-to-end. The voice E2E
+demo is still the #1 gap. Next cycle must close that gap — it is the "product exists" milestone
+and the Phase 2 gate.
+
+**Code quality (code-reviewer)**: (1) Test count grew from 279 to 314 — no regressions.
+(2) api_server.py is well-structured: pydantic models for all contracts, global safe error
+handler prevents stack trace leaks, auth checks at the right layer. (3) The _PatchedClient
+anti-pattern (test pollution via __del__ unreliability) was caught and corrected during the
+cycle — use context managers, not __del__, for test resource cleanup. (4) clear_sensitive()
+correctly scoped. (5) Concern: clients/ directory doesn't exist yet — arch decision documented
+but not started.
+
+**Security (security-specialist)**: (1) Bearer token auth is acceptable for localhost dev;
+must upgrade before cloud deployment. (2) api_auth_disabled bypass is clearly named with
+a warning log — correct. (3) Global error handler correctly swallows stack traces — a good
+security pattern. (4) MISSING: rate limiting middleware. On localhost low risk; must be added
+before cloud deployment. Add as ISSUE-011.
+
+**Accessibility (accessibility-reviewer)**: Per-request braille_mode, speech_rate, verbosity
+overrides in the API server are the correct pattern for supporting diverse needs without
+server-side state. Voice E2E demo still not delivered — no real accessibility testing possible
+yet. The arch decision (React Native) is the right call for accessibility.
+
+**User perspective (blind-user-tester)**: The API server means any client can connect to the
+brain. But I still can't USE the product — I need a voice interface that works end-to-end.
+React Native for client apps is the right call. VoiceOver and TalkBack have been burned by
+Flutter before. React Native's native accessibility tree is the foundation this product needs.
+
+**Ethics (ethics-advisor)**: api_auth_disabled flag with warning log is good — degrades
+gracefully for development without hiding security state from developers. The rate limiting
+gap is an autonomy concern: if a third party can spam the API and degrade response quality,
+that harms user independence.
+
+**Goal adherence (goal-adherence-reviewer)**: All three P1 items addressed. Two P2 items
+resolved as bonus. Phase 2 gate "product exists" milestone still not met — voice E2E demo
+must be next cycle's first task.
+
+**Consensus recommendation for next cycle**: (1) Wire voice_local.py → Whisper STT →
+orchestrator → TTS → speaker end-to-end; write integration test; this closes Phase 2.
+(2) Create clients/ directory with React Native Expo skeleton — start the first client app.
+
+**Orchestrator self-assessment**:
+- Accomplished: ARCH DECISION (React Native + Expo, documented in ARCHITECTURE.md);
+  REST API server (api_server.py, 6 endpoints, Bearer auth, 28 tests); context.clear_sensitive()
+  (ISSUE-005, 4 tests); configurable passphrase timeout (ISSUE-006, 3 tests); codebase audit
+  (telegram_bot.py docstring + main.py default corrected); OPEN_ISSUES.md updated; total
+  test count 314 (was 279), all passing, no regressions
+- Attempted but failed: none — all planned work completed
+- Confusion/loops: _PatchedClient using __del__ for patch cleanup caused test pollution;
+  fixed by switching to contextmanager + with-block pattern. Lesson: never rely on __del__
+  for resource cleanup in tests — always use context managers or pytest fixtures.
+- New gaps: (1) API server needs rate limiting before cloud deployment (ISSUE-011);
+  (2) clients/ directory doesn't exist yet — React Native skeleton needs to be created;
+  (3) voice E2E demo still the #1 outstanding Phase 2 gate item
+- Next cycle recommendation: Voice E2E demo first (close Phase 2 gate), then React Native
+  client skeleton. In that order — the voice pipeline is the foundation everything else builds on.
+
+**TECHNICAL LESSON (test cleanup)**: When mocking external dependencies in tests, always use
+context managers (with patch(...):) or pytest fixtures, never __del__. Python's garbage
+collector does not guarantee __del__ timing, so cleanup may not happen before the next test
+runs, causing state pollution between test modules.

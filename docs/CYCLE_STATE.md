@@ -4,7 +4,7 @@
 > Every cycle reads this, does work, then updates it before committing.
 > If the AI crashes or restarts, it reads this file first to reorient.
 
-## ⚠ SCOPE EXPANSION — READ THIS BEFORE PICKING WORK (added 2026-03-17 by founder)
+## SCOPE EXPANSION — [REVIEWED: Cycle 4 — findings logged to OPEN_ISSUES.md] (added 2026-03-17 by founder)
 
 Major product scope expansion. The loop MUST be aware of these changes:
 
