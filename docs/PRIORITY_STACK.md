@@ -18,19 +18,13 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P2 | Implement Telegram bot: receive text + voice, reply with text + voice | ARCHITECTURE.md Task 1 | 2026-03-17 |
-| P2 | Implement Whisper STT pipeline (voice messages → transcribed text) | ARCHITECTURE.md Task 1 | 2026-03-17 |
-| P2 | Implement TTS pipeline (ElevenLabs + pyttsx3 fallback, speed control) | ARCHITECTURE.md Task 1 | 2026-03-17 |
-| P2 | Implement screen observer: screenshot + Claude Vision description | ARCHITECTURE.md Task 2 | 2026-03-17 |
-| P2 | Implement screen redaction: detect and mask passwords + financial screens | ARCHITECTURE.md Task 2 | 2026-03-17 |
-| P2 | Implement Second Brain vault: add/query notes by voice, encrypted | ARCHITECTURE.md Task 3 | 2026-03-17 |
-| P2 | Implement orchestrator + planner: intent → tools → execute | ARCHITECTURE.md Task 4 | 2026-03-17 |
-| P2 | End-to-end test: voice → Telegram → transcribe → intent → tool → response | Phase 2 gate | 2026-03-17 |
+| P1 | Fix `_get_vault` silent failure: prompt for passphrase via voice when keychain has no key | Cycle 2 review | 2026-03-17 |
+| P2 | End-to-end Telegram demo: send text/voice → get real spoken response back | Phase 2 gate | 2026-03-17 |
 | P2 | Voice installer: complete voice-guided setup from fresh Python install | ARCHITECTURE.md Task 5 | 2026-03-17 |
-| P2 | Risk disclosure flow: payment confirmation with spoken warning (full test) | SECURITY_MODEL.md | 2026-03-17 |
-| P3 | Voice local interface stub (microphone + speaker on local device) | ARCHITECTURE.md | 2026-03-17 |
+| P2 | Integration test: Telegram message → Whisper STT → orchestrator → TTS → reply | Phase 2 gate | 2026-03-17 |
+| P3 | Voice Activity Detection (VAD) for voice_local.py (replaces fixed recording duration) | Cycle 2 review | 2026-03-17 |
+| P3 | PIL ImageGrab Playwright fallback for headless/server environments | Cycle 2 review | 2026-03-17 |
 | P3 | MCP memory server integration (cross-session user preferences) | INTEGRATION_MAP.md | 2026-03-17 |
-| P3 | Add unit tests for security/credentials.py and second_brain/encryption.py | testing.md | 2026-03-17 |
 | P3 | Set up CHANGELOG.md and populate ROADMAP.md | open source | 2026-03-17 |
 | P3 | Cloud hosting: document Telegram webhook on Railway/Fly.io | cloud-architect | 2026-03-17 |
 
