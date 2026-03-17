@@ -41,7 +41,7 @@
           },
           {
             "type": "command",
-            "command": "bash -c 'FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; d=json.load(sys.stdin); print(d.get(\\\"file_path\\\",\\\"\\\"))\" 2>/dev/null || echo \"\"); if echo \"$FILE\" | grep -q \"/src/\"; then cd \"$CLAUDE_PROJECT_DIR\" && python3 -m pytest tests/ --tb=no -q --no-header 2>&1 | tail -4 || true; fi; true'"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/targeted_tests.sh\""
           }
         ]
       }
