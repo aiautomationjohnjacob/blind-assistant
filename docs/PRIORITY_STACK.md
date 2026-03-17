@@ -84,3 +84,8 @@
 | 32 JS tests for API client + MainScreen accessibility (jest-expo) | 2026-03-17 | 5 |
 | Multi-platform E2E test stubs (Web/Android/iOS/Desktop) per ISSUE-010 | 2026-03-17 | 5 |
 | Total test count: 348 Python passed + 21 skipped; 32 JS tests (requires npm install) | 2026-03-17 | 5 |
+| ISSUE-014: JS CI job ('test-js') added to ci.yml; 77 JS tests now in CI (was 32) | 2026-03-17 | 6 |
+| ISSUE-013: SetupWizardScreen + useSecureStorage + app/index.tsx rewrite; 63 new JS tests | 2026-03-17 | 6 |
+| ISSUE-012: Dead code wake_word_found removed from voice_local.py | 2026-03-17 | 6 |
+| ISSUE-011: RateLimitMiddleware added to api_server.py; 8 new Python tests; configurable | 2026-03-17 | 6 |
+| Total test count: 356 Python (347 unit + 9 E2E, 21 skipped); 77 JS tests in CI | 2026-03-17 | 6 |
