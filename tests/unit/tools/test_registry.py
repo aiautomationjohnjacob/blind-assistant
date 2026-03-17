@@ -18,10 +18,13 @@ from __future__ import annotations
 
 import asyncio
 import json
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 from blind_assistant.tools.registry import ToolRegistry
 
