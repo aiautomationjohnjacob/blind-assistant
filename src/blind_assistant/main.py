@@ -35,12 +35,21 @@ async def start_services(config: dict) -> None:
 
     tasks = []
 
-    if config.get("telegram_enabled", True):
+    # Telegram is optional/secondary — disabled by default (requires manual visual setup)
+    if config.get("telegram_enabled", False):
         bot = TelegramBot(orchestrator, config)
         tasks.append(asyncio.create_task(bot.start(), name="telegram"))
-        logger.info("Telegram bot starting...")
+        logger.info("Telegram bot starting (secondary/super-user channel)...")
 
-    if config.get("voice_local_enabled", False):
+    # API server — primary connection point for all native client apps
+    if config.get("api_server_enabled", False):
+        from blind_assistant.interfaces.api_server import APIServer
+        api_server = APIServer(orchestrator, config)
+        tasks.append(asyncio.create_task(api_server.start(), name="api_server"))
+        logger.info("REST API server starting on localhost:8000...")
+
+    # Local voice interface — primary demo interface for development/desktop
+    if config.get("voice_local_enabled", True):
         voice = VoiceLocalInterface(orchestrator, config)
         tasks.append(asyncio.create_task(voice.start(), name="voice_local"))
         logger.info("Local voice interface starting...")
