@@ -253,7 +253,7 @@ def test_get_client_lazy_initializes_anthropic(mock_keyring):
         patch("blind_assistant.security.credentials.require_credential", return_value="fake_key"),
         patch.dict(sys.modules, {"anthropic": mock_anthropic_module}),
     ):
-        client = obs._get_client()
+        obs._get_client()
 
     mock_anthropic_module.AsyncAnthropic.assert_called_once_with(api_key="fake_key")
     assert obs._claude_client is not None
