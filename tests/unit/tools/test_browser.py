@@ -108,9 +108,8 @@ async def test_initialize_raises_on_launch_error(mock_playwright_instance: Async
 
     mock_apw_callable = MagicMock()
     mock_apw_callable.return_value.start = AsyncMock(return_value=mock_playwright_instance)
-    with patch("blind_assistant.tools.browser.async_playwright", mock_apw_callable):
-        with pytest.raises(Exception, match="launch failed"):
-            await tool.initialize()
+    with patch("blind_assistant.tools.browser.async_playwright", mock_apw_callable), pytest.raises(Exception, match="launch failed"):
+        await tool.initialize()
 
 
 # ─────────────────────────────────────────────────────────────
