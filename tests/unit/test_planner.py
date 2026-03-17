@@ -177,8 +177,7 @@ def mock_planner_client() -> MagicMock:
     The anthropic package may not be installed in this environment; we patch
     Planner._get_client() directly so tests never need to import anthropic.
     """
-    client = MagicMock()
-    return client
+    return MagicMock()
 
 
 async def test_classify_intent_returns_intent_from_api(
