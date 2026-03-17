@@ -99,12 +99,12 @@ class TestTranscribeAudio:
         deleted_files = []
         real_unlink = __import__("os").unlink
 
+        import contextlib
+
         def tracking_unlink(path):
             deleted_files.append(path)
-            try:
+            with contextlib.suppress(FileNotFoundError):
                 real_unlink(path)
-            except FileNotFoundError:
-                pass
 
         with patch("blind_assistant.voice.stt._load_model", return_value=mock_model), \
              patch("os.unlink", side_effect=tracking_unlink):
