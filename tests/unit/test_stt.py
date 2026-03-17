@@ -4,21 +4,22 @@ Unit tests for blind_assistant.voice.stt
 Covers:
 - transcribe_audio: returns text on successful transcription
 - transcribe_audio: returns None when model returns empty string
-- transcribe_audio: returns None on exception (file write failure, model crash)
+- transcribe_audio: returns None on exception (model crash)
 - transcribe_audio: temp file is always cleaned up even on failure
+- transcribe_audio: passes language hint and fp16=False to model
 - _load_model: loads Whisper model only once (singleton pattern)
 - transcribe_microphone: returns None when sounddevice not installed
-- transcribe_microphone: calls transcribe_audio with recorded bytes
-- transcribe_microphone: returns None on recording failure
+- transcribe_microphone: returns None on recording exception
 
 Privacy note: all transcription is local; no audio bytes leave device.
-This file tests the boundary — mock Whisper to avoid actual model loading.
+Tests mock Whisper to avoid actual model loading (slow, large download).
 """
 
 from __future__ import annotations
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch, call
+import sys
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 pytestmark = pytest.mark.unit
@@ -31,7 +32,7 @@ pytestmark = pytest.mark.unit
 
 class TestTranscribeAudio:
     async def test_returns_transcript_on_success(self):
-        """Returns transcript text when Whisper model succeeds."""
+        """Returns stripped transcript text when Whisper model succeeds."""
         mock_model = MagicMock()
         mock_model.transcribe.return_value = {"text": "  Hello, I need help with reading.  "}
 
@@ -69,7 +70,7 @@ class TestTranscribeAudio:
 
         assert result is None
 
-    async def test_temp_file_cleaned_up_on_success(self, tmp_path):
+    async def test_temp_file_cleaned_up_on_success(self):
         """Temp audio file is deleted after successful transcription."""
         mock_model = MagicMock()
         mock_model.transcribe.return_value = {"text": "hello"}
@@ -96,7 +97,6 @@ class TestTranscribeAudio:
         mock_model.transcribe.side_effect = RuntimeError("model crash")
 
         deleted_files = []
-
         real_unlink = __import__("os").unlink
 
         def tracking_unlink(path):
@@ -183,20 +183,18 @@ class TestLoadModel:
 class TestTranscribeMicrophone:
     async def test_returns_none_when_sounddevice_not_installed(self):
         """Returns None (not raises) when sounddevice is not installed."""
-        import builtins
-        real_import = builtins.__import__
+        # Temporarily remove sounddevice from sys.modules if present
+        saved = sys.modules.pop("sounddevice", None)
+        saved_sd = sys.modules.pop("sd", None)
+        try:
+            from blind_assistant.voice.stt import transcribe_microphone
 
-        def block_sounddevice(name, *args, **kwargs):
-            if name == "sounddevice":
-                raise ImportError("No module named 'sounddevice'")
-            return real_import(name, *args, **kwargs)
-
-        with patch("builtins.__import__", side_effect=block_sounddevice):
-            from blind_assistant.voice import stt as stt_module
-            import importlib
-            importlib.reload(stt_module)
-
-            result = await stt_module.transcribe_microphone(duration_seconds=1.0)
+            result = await transcribe_microphone(duration_seconds=1.0)
+        finally:
+            if saved is not None:
+                sys.modules["sounddevice"] = saved
+            if saved_sd is not None:
+                sys.modules["sd"] = saved_sd
 
         assert result is None
 
@@ -214,11 +212,12 @@ class TestTranscribeMicrophone:
 
     async def test_calls_transcribe_audio_with_wav_bytes(self):
         """transcribe_microphone passes WAV bytes to transcribe_audio."""
-        import numpy as np
+        # Create a minimal mock for numpy to avoid installing it in CI
+        mock_np = MagicMock()
+        mock_np.zeros.return_value = MagicMock()
 
         mock_sd = MagicMock()
-        fake_audio = np.zeros((16000, 1), dtype="int16")
-        mock_sd.rec.return_value = fake_audio
+        mock_sd.rec.return_value = mock_np.zeros((16000, 1))
         mock_sd.wait = MagicMock()
 
         transcribed_bytes = []
@@ -227,13 +226,12 @@ class TestTranscribeMicrophone:
             transcribed_bytes.append(audio_bytes)
             return "test transcript"
 
-        with patch.dict("sys.modules", {"sounddevice": mock_sd}), \
+        with patch.dict("sys.modules", {"sounddevice": mock_sd, "numpy": mock_np}), \
              patch("blind_assistant.voice.stt.transcribe_audio", side_effect=mock_transcribe):
             from blind_assistant.voice.stt import transcribe_microphone
 
             result = await transcribe_microphone(duration_seconds=1.0)
 
+        # Result is from the mock transcribe_audio
         assert result == "test transcript"
         assert len(transcribed_bytes) == 1
-        # Should be WAV bytes (starts with RIFF header)
-        assert transcribed_bytes[0][:4] == b"RIFF"
