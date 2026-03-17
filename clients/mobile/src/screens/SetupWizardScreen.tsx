@@ -309,7 +309,7 @@ export function SetupWizardScreen({
         accessibilityLabel={
           tokenInput.trim() ? "Confirm token" : "Confirm token — disabled, please enter a token first"
         }
-        accessibilityHint="Double-tap to review your token before saving."
+        accessibilityHint="Reviews your token before saving."
         accessibilityState={{ disabled: !tokenInput.trim() }}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
