@@ -70,20 +70,24 @@ class BrowserTool:
 
     async def initialize(self) -> None:
         """Start the browser. Must be called before any navigation."""
+        # async_playwright is imported at module level for testability.
+        # If Playwright is not installed, it will be None here.
+        if async_playwright is None:
+            logger.error(
+                "playwright not installed — browser tool unavailable. "
+                "Install it with: pip install playwright && playwright install chromium"
+            )
+            raise ImportError(
+                "playwright is not installed. "
+                "Run: pip install playwright && playwright install chromium"
+            )
         try:
-            from playwright.async_api import async_playwright
             self._playwright = await async_playwright().start()
             # Use Chromium for best screen reader compatibility testing
             self._browser = await self._playwright.chromium.launch(headless=True)
             self._page = await self._browser.new_page()
             self._initialized = True
             logger.info("Browser tool initialized (Chromium headless)")
-        except ImportError:
-            logger.error(
-                "playwright not installed — browser tool unavailable. "
-                "Install it with: pip install playwright && playwright install chromium"
-            )
-            raise
         except Exception as e:
             logger.error(f"Failed to initialize browser: {e}", exc_info=True)
             raise
