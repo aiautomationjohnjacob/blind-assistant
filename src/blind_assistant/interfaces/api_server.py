@@ -13,14 +13,16 @@ Authentication: simple Bearer token stored in OS keychain (API_SERVER_TOKEN).
 In production this will be upgraded to JWT or session-based auth.
 
 Endpoints:
-  POST /query    — send a user message; receive a text response
-  POST /remember — add a voice note to the Second Brain
-  POST /describe — trigger a screen description (desktop only)
-  POST /task     — execute a real-world task (order food, book travel, etc.)
-  GET  /profile  — return the user's preferences and config
-  GET  /health   — server health check; no auth required
+  POST /query      — send a user message; receive a text response
+  POST /transcribe — send base64 audio; receive transcribed text (Whisper STT)
+  POST /remember   — add a voice note to the Second Brain
+  POST /describe   — trigger a screen description (desktop only)
+  POST /task       — execute a real-world task (order food, book travel, etc.)
+  GET  /profile    — return the user's preferences and config
+  GET  /health     — server health check; no auth required
 """
 
+import base64
 import logging
 import time
 from collections import defaultdict, deque
