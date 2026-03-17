@@ -36,7 +36,7 @@
 | P3 | PIL ImageGrab Playwright fallback for headless/server environments | ISSUE-003 | 2026-03-17 |
 | P3 | Add Optional[Callable] type annotations to response_callback params in orchestrator | ISSUE-004 | 2026-03-17 |
 | P3 | MCP memory server integration (cross-session user preferences) | INTEGRATION_MAP.md | 2026-03-17 |
-| P3 | Set up CHANGELOG.md and populate ROADMAP.md | open source | 2026-03-17 |
+| P3 | Populate ROADMAP.md with Phase 3-5 milestones | open source | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
 ## Completed Items
