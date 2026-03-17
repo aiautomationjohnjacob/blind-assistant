@@ -108,6 +108,9 @@ class VoiceLocalInterface:
         from blind_assistant.voice.stt import transcribe_microphone
         from blind_assistant.voice.tts import speak_locally
 
+        # Narrow Optional type — _listen_and_respond only called from start() after context is set
+        assert self._context is not None, "VoiceLocalInterface.start() must be called before _listen_and_respond()"
+
         # Record a fixed-duration utterance
         # Future: add voice activity detection (VAD) for smarter cutoff
         transcript = await transcribe_microphone(duration_seconds=self._record_duration)
