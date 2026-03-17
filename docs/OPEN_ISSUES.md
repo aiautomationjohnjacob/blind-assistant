@@ -25,7 +25,11 @@ session if they didn't store vault key in keychain during setup.
 **Proposed fix**: When `_get_vault` returns None, speak a passphrase prompt, collect
 via active interface, derive the key, and continue. Add
 `unlock_vault_with_prompt(context, response_callback)` to orchestrator.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 3 — `_get_vault` now prompts for passphrase via response_callback,
+registers confirmation gate session before prompt, caches passphrase in context for the
+session, derives key from passphrase+salt, and speaks a clear error if the passphrase is
+wrong. 10 unit tests added covering all paths.
 
 ### ISSUE-002: Fixed-duration microphone recording
 **Severity**: MEDIUM

@@ -32,7 +32,7 @@ Full vision: `docs/PRODUCT_BRIEF.md`
 4. Read `docs/LESSONS.md` — tells you what past cycles learned (avoid repeating mistakes)
 5. Run `/run-cycle` — executes one full autonomous development iteration
 
-## Agent Roster (28 agents available)
+## Agent Roster (36 agents available)
 
 All agent definitions in `.claude/agents/`. Key agents by function:
 
@@ -66,6 +66,14 @@ All agent definitions in `.claude/agents/`. Key agents by function:
 | Education website | `education-website-designer` |
 | Unit + integration tests | `test-engineer` |
 | Test strategy & quality | `qa-lead` |
+| End-to-end tests | `e2e-tester` |
+| Holistic gap detection | `project-inspector` |
+| iOS app accessibility | `ios-accessibility-expert` |
+| Android app accessibility | `android-accessibility-expert` |
+| Windows app + NVDA/JAWS | `windows-accessibility-expert` |
+| macOS app + VoiceOver | `macos-accessibility-expert` |
+| Web + browser accessibility | `web-accessibility-expert` |
+| Documentation accuracy | `documentation-steward` |
 
 ## Custom Skills
 
