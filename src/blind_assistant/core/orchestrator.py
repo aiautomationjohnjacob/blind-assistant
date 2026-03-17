@@ -7,8 +7,10 @@ execute → respond.
 This is the central coordinator for all user interactions.
 """
 
+import asyncio
 import logging
 from dataclasses import dataclass, field
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
