@@ -447,11 +447,4 @@ const styles = StyleSheet.create({
     color: COLORS.primaryText,
     lineHeight: 24,
   },
-  platformHint: {
-    fontSize: 12,
-    color: COLORS.secondaryText,
-    textAlign: "center",
-    opacity: 0.5,
-    paddingTop: 8,
-  },
 });
