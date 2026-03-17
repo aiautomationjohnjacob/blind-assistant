@@ -338,3 +338,89 @@ orchestrator → TTS → speaker end-to-end; write integration test; this closes
 context managers (with patch(...):) or pytest fixtures, never __del__. Python's garbage
 collector does not guarantee __del__ timing, so cleanup may not happen before the next test
 runs, causing state pollution between test modules.
+
+---
+
+## Cycle 5 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: This cycle closed the most important open gap — ISSUE-007, the
+Phase 2 "product exists" gate. The voice pipeline is proven end-to-end with 9 E2E tests. The
+React Native skeleton gives us the first client app with accessibility from the start. These
+two together mean a developer can now connect a phone to the backend. The most critical next
+step is getting real TalkBack/VoiceOver testing on a device — that requires the npm install
+and an emulator. Cloud deployment planning should start next cycle so we can reach real users.
+
+**Code quality (code-reviewer)**: (1) Test count grew from 314 to 348 — no regressions.
+(2) Wake-word-only bug in voice_local.py was correctly found by a failing test and fixed in
+src/ (not the test) — correct process. (3) Minor dead code: `wake_word_found` variable is
+declared in voice_local.py after the fix but is never read. Low priority. (4) React Native
+API client is well-typed with proper error class. (5) E2E test uses sys.modules patching
+for anthropic — correct pattern when package not installed in CI. (6) Platform test stubs
+are correctly skipped with clear reason strings pointing to ISSUE-010.
+
+**Security (security-specialist)**: No new security concerns. The TODO in app/index.tsx
+(`BEARER_TOKEN: string | null = null`) is clearly documented and harmless for development.
+The voice local bug fix (wake word stripping) has no security implications. Rate limiting
+(ISSUE-011) remains open — still localhost-only, still acceptable for dev.
+
+**Accessibility (accessibility-reviewer)**: MainScreen.tsx is accessibility-correct from
+the first commit: `role="button"` with label AND hint; `role="header"` for title; status
+text uses `accessibilityLiveRegion="polite"`; emoji decorated with `importantForAccessibility="no"`.
+The E2E accessibility test (no visual-only language in responses) is novel and important —
+first time we've asserted on voice output content quality. Recommend adding the visual-language
+check to every new orchestrator response path in future cycles.
+
+**User perspective (blind-user-tester)**: The wake-word fix is real user impact — saying
+"assistant" alone without a command used to silently send garbage to the AI. Now it correctly
+asks "Yes? How can I help?" exactly like a real voice assistant should. The React Native
+screen's startup announcement is correct. I'd want to run TalkBack on a real device to
+verify the double-tap activation flow works as expected.
+
+**Ethics (ethics-advisor)**: No concerns. The bearer token TODO is clearly commented and
+doesn't ship to users in this state. The voice pipeline correctly routes all AI processing
+through the backend — nothing runs client-side that could leak user data.
+
+**Goal adherence (goal-adherence-reviewer)**: Both P1 items delivered exactly as scoped in
+PRIORITY_STACK.md. ISSUE-007 (Phase 2 gate) resolved. ISSUE-009 (React Native skeleton)
+resolved. The 21 skipped platform E2E tests are correctly documented stubs — they match the
+test structure in testing.md and point to ISSUE-010 for follow-up. No requirements dropped.
+
+**Consensus recommendation for next cycle**: (1) Run `npm install` in clients/mobile and
+verify the 32 JS tests pass — this should be a Cycle 6 P1. (2) Begin cloud deployment
+planning so React Native clients can connect to a real server, not just localhost — the
+clients/ directory is built, the backend is built; connecting them on a real device is the
+next "product exists" milestone.
+
+**Orchestrator self-assessment**:
+- Accomplished: ISSUE-007 resolved (9 E2E voice pipeline tests, accessibility assertion);
+  25 unit tests for voice_local.py; wake-word-only bug fixed in voice_local.py;
+  React Native Expo skeleton (clients/mobile/) with accessibility-first MainScreen.tsx,
+  typed API client, 32 JS tests; multi-platform E2E stubs (Web/Android/iOS/Desktop)
+  properly skipped with ISSUE-010 references; Python test count 348 (was 314)
+- Attempted but failed: none — all planned work completed
+- Confusion/loops: lifecycle tests for VoiceLocalInterface.start() initially hung because
+  the loop is infinite and the transcription mock needed to raise CancelledError to exit
+  cleanly. Fixed by having the mock raise asyncio.CancelledError instead of returning None.
+  Lesson: when testing infinite loops, the mock must interrupt the loop, not just return
+  a null value.
+- New gaps: (1) `wake_word_found` variable in voice_local.py after fix is dead code —
+  minor cleanup item; (2) clients/mobile/ JS tests need `npm install` to run — should be
+  part of CI next cycle; (3) bearer token storage needs expo-secure-store integration
+  before any user can actually use the React Native app
+- Next cycle recommendation: (1) Add npm install + jest to CI (clients/mobile/); resolve
+  the 32 JS tests in CI; (2) Design the setup wizard voice flow for mobile — the
+  `BEARER_TOKEN = null` TODO needs to become a real first-run experience
+
+**TECHNICAL LESSON (wake word detection)**: When the wake word is the entire utterance
+("assistant" with nothing after it), the code must explicitly set `clean_transcript = ""`
+after finding an empty `after_wake`. Setting it to the original transcript (the default)
+left a non-empty string that bypassed the "Yes?" follow-up prompt. Always verify the
+control flow for the wake-word-only case — it's the most common first interaction for a
+new user learning the app.
+
+**TECHNICAL LESSON (infinite loop testing)**: When testing a method that runs an infinite
+loop (`while self._running`), the test mock must cause the loop to exit, not just return
+a value. The cleanest pattern: have the mock raise `asyncio.CancelledError` (which the loop
+catches and breaks on), or set `self._running = False` and then raise. Never rely on the
+loop checking `_running` between a return value and the next iteration — there may be
+more code between them.
