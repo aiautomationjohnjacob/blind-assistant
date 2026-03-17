@@ -246,9 +246,11 @@ class TestSpeakLocally:
         texts_spoken = []
 
         mock_engine = MagicMock()
-        mock_engine.setProperty = lambda prop, val: rate_calls.append(
-            (prop, val)
-        ) if prop == "rate" else None
+
+        def record_set_property(prop, val):
+            rate_calls.append((prop, val))
+
+        mock_engine.setProperty = record_set_property
         mock_engine.say = lambda text: texts_spoken.append(text)
         mock_engine.runAndWait = MagicMock()
         mock_pyttsx3.init.return_value = mock_engine
@@ -258,7 +260,7 @@ class TestSpeakLocally:
         await speak_locally("Testing speech", speed=0.75)
 
         expected_rate = int(200 * 0.75)  # 150
-        assert any(rate == expected_rate for (_, rate) in rate_calls)
+        assert any(prop == "rate" and rate == expected_rate for (prop, rate) in rate_calls)
         assert texts_spoken == ["Testing speech"]
 
     async def test_handles_pyttsx3_init_exception_gracefully(self):
