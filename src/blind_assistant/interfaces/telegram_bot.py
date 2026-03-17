@@ -25,6 +25,10 @@ Accessibility requirements:
 
 import io
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from telegram.ext import Application
 
 logger = logging.getLogger(__name__)
 
