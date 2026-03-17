@@ -184,17 +184,145 @@ class Orchestrator:
         return False
 
     async def _execute_intent(self, intent, context: UserContext, update) -> dict:
-        """Execute a classified intent using the appropriate tools."""
-        # This will grow substantially in Phase 2 as tools are implemented.
-        # For now: stub that returns a descriptive response.
+        """
+        Execute a classified intent using the appropriate tools.
 
-        tool_names = ", ".join(intent.required_tools) if intent.required_tools else "none"
+        Routes to the correct handler based on intent type.
+        """
+        handler = self._intent_handlers.get(intent.type)
+        if handler:
+            return await handler(intent, context, update)
+
+        # Unknown intent — try to answer as a general question
+        return await self._handle_general_question(intent, context, update)
+
+    async def _handle_screen_description(self, intent, context: UserContext, update) -> dict:
+        """Capture and describe the current screen."""
+        await update("Taking a look at your screen...")
+        from blind_assistant.vision.screen_observer import ScreenObserver
+        observer = ScreenObserver(self.config)
+        description = await observer.describe_screen()
+        return {"text": description}
+
+    async def _handle_add_note(self, intent, context: UserContext, update) -> dict:
+        """Add a note to the Second Brain vault."""
+        await update("Saving that to your notes...")
+        vault = await self._get_vault(context)
+        if vault is None:
+            return {
+                "text": (
+                    "I couldn't access your notes vault. "
+                    "It may need to be unlocked. "
+                    "Please say your vault passphrase to unlock it."
+                )
+            }
+        from blind_assistant.second_brain.query import VaultQuery
+        q = VaultQuery(vault)
+        # The note content is in the intent parameters or the raw description
+        content = intent.parameters.get("content") or intent.description
+        response_text = await q.add_note_from_voice(content=content, context=context)
+        return {"text": response_text}
+
+    async def _handle_query_note(self, intent, context: UserContext, update) -> dict:
+        """Query the Second Brain vault for matching notes."""
+        await update("Searching your notes...")
+        vault = await self._get_vault(context)
+        if vault is None:
+            return {
+                "text": (
+                    "I couldn't access your notes vault. "
+                    "Please unlock it with your vault passphrase."
+                )
+            }
+        from blind_assistant.second_brain.query import VaultQuery
+        q = VaultQuery(vault)
+        query_text = intent.parameters.get("query") or intent.description
+        response_text = await q.answer_query(query=query_text, context=context)
+        return {"text": response_text}
+
+    async def _handle_general_question(self, intent, context: UserContext, update) -> dict:
+        """Answer a general question using Claude."""
+        await update("Let me think about that...")
+        try:
+            import anthropic
+            from blind_assistant.security.credentials import require_credential, CLAUDE_API_KEY
+            api_key = require_credential(CLAUDE_API_KEY)
+            client = anthropic.AsyncAnthropic(api_key=api_key)
+
+            system_prompt = (
+                "You are Blind Assistant, a helpful AI companion for blind and visually "
+                "impaired users. Give clear, concise answers. Avoid visual descriptions "
+                "unless explaining something to the user. No emoji."
+            )
+
+            response = await client.messages.create(
+                model="claude-sonnet-4-5",
+                max_tokens=400,
+                system=system_prompt,
+                messages=[{"role": "user", "content": intent.description}],
+            )
+            return {"text": response.content[0].text}
+        except Exception as e:
+            logger.error(f"General question failed: {e}", exc_info=True)
+            return {
+                "text": (
+                    "I wasn't able to answer that right now. "
+                    f"Error: {str(e)}"
+                )
+            }
+
+    async def _handle_high_stakes_stub(self, intent, context: UserContext, update) -> dict:
+        """Placeholder for high-stakes intents not yet fully implemented."""
         return {
             "text": (
-                f"I understand you want to: {intent.description}. "
-                f"I'll need: {tool_names}. "
-                "This capability is being built — check back soon."
+                f"I understand you want to {intent.description}. "
+                "This feature is coming soon. "
+                "I'll need to walk you through it step by step when it's ready."
             )
+        }
+
+    async def _get_vault(self, context: UserContext):
+        """
+        Get or initialize the vault for this user.
+        Returns None if vault cannot be accessed.
+        """
+        import os
+        from pathlib import Path
+        from blind_assistant.second_brain.vault import EncryptedVault
+        from blind_assistant.second_brain.encryption import VaultKey
+
+        vault_path = Path(
+            self.config.get("vault_path", os.path.expanduser("~/.blind-assistant/vault"))
+        )
+
+        key = VaultKey()
+
+        # Try OS keychain first
+        if key.unlock_from_keychain():
+            vault = EncryptedVault(vault_path=vault_path, vault_key=key)
+            await vault.initialize()
+            return vault
+
+        # Vault not accessible without passphrase in this session
+        logger.warning("Vault key not in keychain — vault locked")
+        return None
+
+    @property
+    def _intent_handlers(self) -> dict:
+        """Map of intent type → handler method."""
+        return {
+            "screen_description": self._handle_screen_description,
+            "navigate_app": self._handle_screen_description,  # Starts with screen look
+            "add_note": self._handle_add_note,
+            "query_note": self._handle_query_note,
+            "general_question": self._handle_general_question,
+            # High-stakes intents — stubs until ordering/travel tools built
+            "order_food": self._handle_high_stakes_stub,
+            "order_groceries": self._handle_high_stakes_stub,
+            "book_travel": self._handle_high_stakes_stub,
+            "fill_form": self._handle_high_stakes_stub,
+            "smart_home": self._handle_high_stakes_stub,
+            "search_web": self._handle_high_stakes_stub,
         }
 
     def _format_response(self, result: dict, context: UserContext) -> Response:
