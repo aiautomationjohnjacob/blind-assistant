@@ -749,3 +749,93 @@ Pattern (b) works when you only need to verify calls. Pattern (a) is needed when
 **TECHNICAL LESSON (Playwright in WSL2 without root)**: Playwright requires system-level shared libraries (libnss3, libnspr4, libasound2) that are installed via `playwright install-deps` which needs root/sudo. In WSL2 without sudo, Playwright cannot launch browsers. The correct engineering response is: (1) write the tests with a clean skip mechanism (pytestmark.skipif on a boolean probe), (2) set up a CI job that has sudo (GitHub Actions ubuntu-latest runners do), (3) provide PLAYWRIGHT_AVAILABLE=1 env var override for developers who have the deps installed manually. Never use `pytest.mark.skip` alone — use `skipif` with a condition so tests auto-enable when the environment is ready.
 
 **TECHNICAL LESSON (integration test skip patterns)**: The `_check_playwright()` pattern — run a minimal probe at module import time and store the result in a boolean — is a reliable way to detect environment capability. The overhead (~0.2-0.5s) is acceptable at module scope for integration tests but would be unacceptable in unit tests. Use `scope="module"` for expensive fixtures. The env var override (`PLAYWRIGHT_AVAILABLE=1`) gives CI and developers an escape hatch without modifying the test code.
+
+## Cycle 13 Review — 2026-03-17
+
+**Context**: This cycle was dominated by a P0 CI blocker: 56 mypy type errors + openai-whisper
+build failure caused every push to fail, blocking all Phase 3 work. The CI fix was the entire
+meaningful output this cycle.
+
+**Strategy (nonprofit-ceo)**: The right call. No new features while CI is broken — that's waste.
+The 20+ P0 GitHub issues created by failing CI were accumulating and creating noise. Fixing the
+root cause (type annotations + setuptools) now means every future cycle gets real CI feedback.
+The mission impact is: without working CI, we can't verify that we're not regressing the
+accessibility improvements we've made. This was the right priority.
+
+**Code quality (code-reviewer)**: The type fixes are clean and correct. Using `from __future__
+import annotations` with `TYPE_CHECKING` guards is the right pattern — it avoids circular
+imports at runtime while giving mypy full type information. The `assert X is not None` pattern
+for narrowing post-init Optional attributes is appropriate. Test count: 465 Python (unchanged —
+no regressions). No new src/ files without tests. mypy: 0 errors (was 56).
+
+**Security (security-specialist)**: No security implications from the type fixes. The
+`vars(self)["_vault_passphrase"] = None` change for clearing sensitive data is functionally
+equivalent to the previous approach — it still zeroes the passphrase at session end. The
+`object.__setattr__` replacement is marginally cleaner. No concerns.
+
+**Accessibility (accessibility-reviewer)**: No user-facing changes this cycle. The CI
+infrastructure fix has an indirect accessibility benefit: CI now verifies accessibility
+improvements are not regressed on every push. No findings.
+
+**User perspective (blind-user-tester)**: As a blind user, I care that the app works. CI
+being broken means nothing is being verified — any broken feature could go undetected. This
+fix matters even if I can't see it directly. The next cycle must return to real user-facing
+work: the Phase 3 platform testing gate is still unmet.
+
+**Ethics (ethics-advisor)**: No ethical implications in a CI infrastructure fix. The
+maintenance of a working test pipeline is ethically important — it's how we verify that
+the app's autonomy safeguards and risk disclosure flows haven't been accidentally broken.
+
+**Goal adherence (goal-adherence-reviewer)**: PRIORITY_STACK P1 (verify CI) addressed via
+the push triggering the CI run. The 20+ stale P0 GitHub issues for historical CI failures
+are now superceded by a green CI run (pending verification of the pushed fix). Phase 3 gate
+still requires real device test on at least 3 platforms — only Desktop CLI is currently
+demonstrated. This is the outstanding goal gap.
+
+**Consensus recommendation for next cycle**: (1) Verify the pushed fix results in a green
+CI run on GitHub Actions (check gh run list output). (2) If CI is green, move to Phase 3
+platform testing. The web platform is most achievable: build Expo web export in CI and
+add axe-core accessibility checks. This would give us platform #2 (alongside Desktop CLI).
+(3) Android TalkBack testing via AVD emulator remains the highest-value unblocked item
+if device simulation is feasible.
+
+**Orchestrator self-assessment**:
+- Accomplished: Fixed P0 CI blocker — 56 mypy errors + openai-whisper build failure resolved
+  in 9 source files. CI push triggered (pending verification). OPEN_ISSUES.md updated with
+  ISSUE-022. LESSONS.md updated. State docs partially updated.
+- Attempted but failed: Expo web export build — missing App.tsx at project root (Expo Router
+  uses app/index.tsx pattern but the Metro bundler looked for App.tsx in AppEntry.js). Did
+  not invest further time since CI fix was the P0 priority.
+- Confusion/loops: none this cycle.
+- New gaps: (1) Expo web export requires Metro config fix to work with Expo Router (the
+  AppEntry.js points to ../../App which doesn't exist in Expo Router projects). (2) The
+  installer STEP_TELEGRAM_INTRO still describes Telegram as Step 1 — contradicts the current
+  architecture where Telegram is secondary. (3) 20+ stale GitHub issues from historical CI
+  failures will continue to clutter the issue tracker until closed.
+- Next cycle recommendation: (1) Confirm CI green (gh run list). (2) Fix Expo web export
+  (add app.json "main" field pointing to app/index.tsx). (3) Add basic web E2E accessibility
+  tests. (4) Close stale CI-failure GitHub issues (batch close with gh issue close).
+
+**TECHNICAL LESSON (mypy Optional narrowing patterns)**:
+When a class has attributes that start as None and are set during an initialization method
+(not `__init__`), mypy sees them as `Optional[X]` for the entire class. Four valid narrowing
+approaches in order of preference:
+1. `assert self.attr is not None` — narrows the type for the rest of the function scope.
+   Raises AssertionError if violated (good for "only called after init()" invariants).
+2. `if self.attr is None: raise RuntimeError(...)` — same narrowing effect, more explicit error.
+3. Type cast with `# type: ignore[assignment]` — appropriate when typing from `get_installed_tool`
+   which returns `object | None`.
+4. `# type: ignore[union-attr]` — last resort when the narrowing would be too verbose.
+Avoid: `getattr(self, "attr")` (ruff B009), forward references in non-__future__ files (ruff UP037).
+Always pair `from __future__ import annotations` with `TYPE_CHECKING` guards for forward refs.
+
+**TECHNICAL LESSON (openai-whisper setuptools dependency)**:
+openai-whisper==20231117 uses a legacy setup.py with `pkg_resources` from setuptools.
+When pip builds it in an isolated environment (PEP 517 build isolation), setuptools is NOT
+automatically included in the build environment unless explicitly listed in build-system
+requirements. The symptom: "Getting requirements to build wheel did not run successfully."
+The fix: `pip install setuptools` BEFORE `pip install -r requirements.txt` in all CI jobs
+that install this package. The security audit job had this fix in Cycle 10 but the test and
+integration-browser jobs did not — corrected in Cycle 13.
+Long-term fix: upgrade to a newer whisper package (openai-whisper is unmaintained;
+consider `faster-whisper` or `whisper-timestamped`) that uses a modern pyproject.toml.
