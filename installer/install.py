@@ -242,12 +242,10 @@ class VoiceInstaller:
             self._speak("Okay. Run setup again when you're ready.")
             return False
 
-        # Step 1: Telegram
-        success = await self._setup_telegram()
-        if not success:
-            return False
+        # Step 1: Native app connection info (primary interface)
+        await self._setup_native_app()
 
-        # Step 2: Claude API
+        # Step 2: Claude API (required)
         success = await self._setup_claude()
         if not success:
             return False
@@ -259,6 +257,9 @@ class VoiceInstaller:
         success = await self._setup_vault()
         if not success:
             return False
+
+        # Step 5: Telegram (optional power-user channel)
+        await self._setup_telegram_optional()
 
         # Install Python dependencies
         await self._install_dependencies()
