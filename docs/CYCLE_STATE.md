@@ -205,13 +205,14 @@ via config.yaml). Python tests: 356 total (347 unit + 9 E2E), 21 skipped. JS tes
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 5.** Loop is clean and ready for Cycle 6.
+**Loop completed Cycle 6.** Loop is clean and ready for Cycle 7.
 No mid-cycle state artifacts. All changes committed and pushed.
 
-The most important work for Cycle 6:
-1. **P1: clients/mobile/ JS CI job** (ISSUE-014) — add `npm ci && npm test` step to
-   GitHub Actions so the 32 Jest tests run in CI. Without this, JS regressions are invisible.
-2. **P1: Mobile first-run setup wizard** (ISSUE-013) — voice-guided flow to configure
-   bearer token via expo-secure-store; the React Native app cannot authenticate until this exists.
-3. **P3: Remove dead code** (ISSUE-012) — `wake_word_found` in voice_local.py.
-4. **P3: Rate limiting** (ISSUE-011) — add slowapi middleware to api_server.py.
+The most important work for Cycle 7:
+1. **P1: Real voice recording in MainScreen** (ISSUE-015) — replace hardcoded
+   "Hello, what can you do?" with expo-av AudioRecorder → WAV encoding →
+   send to backend /query → speak AI response. This closes the "app actually
+   works as a voice assistant" milestone.
+2. **P3 quick fixes from Cycle 6 review**:
+   - ISSUE-016: Add `importantForAccessibility="yes"` to SetupWizardScreen TextInput
+   - ISSUE-017: Validate URL scheme in saveApiBaseUrl() before SecureStore.setItemAsync
