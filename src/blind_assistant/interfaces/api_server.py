@@ -22,13 +22,92 @@ Endpoints:
 """
 
 import logging
+import time
+from collections import defaultdict, deque
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger(__name__)
+
+# ─────────────────────────────────────────────────────────────
+# Rate limiting middleware
+# ─────────────────────────────────────────────────────────────
+
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    """
+    Sliding-window rate limiter for the API server.
+
+    Limits requests per IP address using a deque-based sliding window.
+    Two limits are applied:
+      - Authenticated endpoints: up to `auth_limit` requests per 60 seconds
+      - /health (unauthenticated): up to `health_limit` requests per 60 seconds
+
+    This middleware runs on the backend server before any route handler.
+    On localhost during development the blind user is the only caller, so
+    these limits only matter once the server is cloud-deployed.
+    Values are configurable in config.yaml under `api_server.rate_limit_per_minute`.
+
+    Per SECURITY_MODEL.md: rate limiting protects the Claude API budget and
+    prevents a compromised client from degrading service quality for the user.
+    """
+
+    def __init__(
+        self,
+        app,
+        auth_limit: int = 60,
+        health_limit: int = 120,
+        window_seconds: int = 60,
+    ) -> None:
+        super().__init__(app)
+        self._auth_limit = auth_limit
+        self._health_limit = health_limit
+        self._window = window_seconds
+        # {ip: deque of timestamps} — one deque per IP
+        self._auth_windows: dict[str, deque[float]] = defaultdict(deque)
+        self._health_windows: dict[str, deque[float]] = defaultdict(deque)
+
+    def _is_rate_limited(self, windows: dict[str, deque[float]], ip: str, limit: int) -> bool:
+        """Return True if the IP has exceeded the limit in the current window."""
+        now = time.monotonic()
+        window = windows[ip]
+        # Remove timestamps outside the sliding window
+        cutoff = now - self._window
+        while window and window[0] < cutoff:
+            window.popleft()
+        if len(window) >= limit:
+            return True
+        window.append(now)
+        return False
+
+    async def dispatch(self, request: Request, call_next):
+        """Check rate limit before passing the request to the route handler."""
+        # Extract client IP — X-Forwarded-For for reverse-proxy setups
+        forwarded_for = request.headers.get("X-Forwarded-For")
+        client_ip = forwarded_for.split(",")[0].strip() if forwarded_for else (
+            request.client.host if request.client else "unknown"
+        )
+
+        if request.url.path == "/health":
+            if self._is_rate_limited(self._health_windows, client_ip, self._health_limit):
+                logger.warning(f"Rate limit exceeded on /health from {client_ip}")
+                return JSONResponse(
+                    status_code=429,
+                    content={"detail": "Rate limit exceeded. Please slow down."},
+                )
+        else:
+            if self._is_rate_limited(self._auth_windows, client_ip, self._auth_limit):
+                logger.warning(f"Rate limit exceeded on {request.url.path} from {client_ip}")
+                return JSONResponse(
+                    status_code=429,
+                    content={"detail": "Rate limit exceeded. Please slow down."},
+                )
+
+        return await call_next(request)
 
 # ─────────────────────────────────────────────────────────────
 # Request / Response models
