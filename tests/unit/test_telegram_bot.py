@@ -379,23 +379,26 @@ def _make_fake_telegram_modules() -> tuple[MagicMock, MagicMock]:
     """
     Build a fake `telegram` + `telegram.ext` module tree so tests can run
     even when python-telegram-bot is not installed in the local environment.
-    Returns (mock_app, mock_ext_module).
-    """
-    import sys
+    Returns (mock_app, mock_telegram_module).
 
+    The Application.builder().token(token).build() chain in start() must return
+    mock_app. We wire the full builder chain so self._app == mock_app.
+    """
     mock_app = MagicMock()
     mock_app.run_polling = MagicMock()
     mock_app.add_handler = MagicMock()
 
-    mock_builder = MagicMock()
-    mock_builder.token.return_value = mock_builder
-    mock_builder.build.return_value = mock_app
+    # builder chain: Application.builder() → builder_instance → .token() → .build() → mock_app
+    mock_builder_instance = MagicMock()
+    mock_builder_instance.token.return_value = mock_builder_instance
+    mock_builder_instance.build.return_value = mock_app
 
-    mock_app_builder_cls = MagicMock(return_value=mock_builder)
+    mock_application_cls = MagicMock()
+    mock_application_cls.builder.return_value = mock_builder_instance
 
     mock_ext = MagicMock()
-    mock_ext.Application = MagicMock()
-    mock_ext.ApplicationBuilder = mock_app_builder_cls
+    mock_ext.Application = mock_application_cls
+    mock_ext.ApplicationBuilder = MagicMock()  # not used by start() but imported
     mock_ext.MessageHandler = MagicMock()
     mock_ext.filters = MagicMock()
 
