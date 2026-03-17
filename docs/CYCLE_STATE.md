@@ -187,8 +187,9 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P2: Close stale GitHub CI-failure issues** — batch-closed 79 stale issues in Cycle 14 (commit d593482)
 - [x] **P2: Fix Expo web export** — App.tsx shim added (Cycle 15); `npx expo export --platform web` builds successfully; 11 web E2E accessibility tests added; CI e2e-web job rebuilt to actually run tests (Cycle 15)
 - [x] **P2: Missing unit tests (ISSUE-028)** — 118 new tests: test_telegram_bot.py (24), test_query.py (49), test_redaction.py (27), test_screen_observer.py (18); ruff format CI blocker from Cycle 15 also fixed (Cycle 16)
+- [x] **P2: Voice installer** — Telegram demoted to optional Step 5; _setup_native_app() added as Step 1 (TalkBack/VoiceOver); server address discovery (socket IP); STEP_APP_INTRO mentions both TalkBack + VoiceOver; STEP_COMPLETE updated; _run_self_test reclassified Telegram as optional; 58 new tests; 641 unit tests passing (Cycle 17)
+- [x] **P2: Verify web E2E CI** — CI run 23219936377: ALL 7 jobs green including e2e-web (Playwright Chromium + Firefox accessibility tests) (Cycle 17)
 - [ ] **P2: End-to-end food ordering on real device** — Android TalkBack + iOS VoiceOver
-- [ ] **P2: Voice installer** — voice-guided setup from fresh install; update Telegram refs to native app
 - [ ] **P2: Web app deployed** — WCAG 2.1 AA verification requires real deployment (Netlify/Vercel staging); web E2E CI tests now exist
 - [ ] **P3: Android TalkBack device test** — expo build + AVD
 - [ ] **P3: iOS VoiceOver device test** — expo build:ios + xcrun simctl
