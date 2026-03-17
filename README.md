@@ -140,6 +140,37 @@ To report an issue: github.com/blind-assistant/blind-assistant/issues
 
 ---
 
+## Web App Staging Deployment (Operators Only)
+
+The web app at blind-assistant.org deploys automatically to Netlify when code is pushed
+to the main branch. Before this works, a sighted operator must complete a one-time setup:
+
+Step 1: Create a Netlify account at app.netlify.com and create a new site.
+
+Step 2: Add these two secrets to the GitHub repository settings
+(Settings > Secrets and variables > Actions > New repository secret):
+
+  NETLIFY_AUTH_TOKEN   — from app.netlify.com/user/applications > Personal access tokens
+  NETLIFY_SITE_ID      — from your Netlify site settings > Site information > Site ID
+
+Step 3: In the Netlify site settings, add this environment variable:
+
+  EXPO_PUBLIC_API_BASE_URL   — the URL of the Python backend
+                               (e.g. https://api.blind-assistant.org)
+
+Step 4: After the next push to main, the web app will deploy automatically.
+The staging URL will appear in the GitHub Actions deploy-staging workflow run.
+
+Note: The backend server must be deployed separately (see docs/ARCHITECTURE.md for the
+cloud migration plan). For local development testing, run:
+
+    python -m blind_assistant.main --api
+
+Then point EXPO_PUBLIC_API_BASE_URL to a publicly accessible tunnel URL such as
+ngrok or Cloudflare Tunnel — localhost:8000 is not reachable from Netlify.
+
+---
+
 ## For Developers
 
 If you want to help build this, see docs/ARCHITECTURE.md for the technical design.
