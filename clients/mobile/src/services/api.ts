@@ -190,6 +190,21 @@ export class BlindAssistantAPIClient {
   }
 
   /**
+   * Transcribe audio to text using the backend's Whisper STT.
+   *
+   * Usage: record audio with expo-av, base64-encode the raw bytes, call this method.
+   * Returns the transcribed text which can then be passed to query().
+   *
+   * Privacy: Whisper runs locally on the backend server — speech never leaves the machine.
+   */
+  async transcribe(req: TranscribeRequest): Promise<TranscribeResponse> {
+    return this.request<TranscribeResponse>("POST", "/transcribe", {
+      session_id: "default",
+      ...req,
+    });
+  }
+
+  /**
    * Store a voice note in the user's Second Brain vault.
    * Used when user says "remember this" or "add a note".
    */
