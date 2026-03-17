@@ -95,7 +95,9 @@ class TelegramBot:
         self._app.add_handler(MessageHandler(filters.VOICE, self._handle_voice))
 
         logger.info("Telegram bot starting...")
-        await self._app.run_polling()
+        # run_polling() in python-telegram-bot v20+ is synchronous (manages its own
+        # event loop internally); do not await it.
+        self._app.run_polling()
 
     async def _get_user_context(self, user_id: int, chat_id: int):
         """Get or create context for a Telegram user."""
