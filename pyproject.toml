@@ -19,6 +19,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+pythonpath = ["src"]
 addopts = [
     "--tb=short",
     "-v",
