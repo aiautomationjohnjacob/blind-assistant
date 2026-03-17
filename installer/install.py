@@ -183,16 +183,13 @@ class VoiceInstaller:
         """Initialize local TTS engine (no external services needed at this point)."""
         try:
             import pyttsx3
+
             self._tts = pyttsx3.init()
             if self._tts is not None:  # pyttsx3.init() can return None on some systems
                 self._tts.setProperty("rate", 160)  # Slightly slower for clarity
                 self._tts.setProperty("volume", 0.95)
         except ImportError:
-            print(
-                "\nWARNING: pyttsx3 not installed. "
-                "Please run: pip install pyttsx3\n"
-                "Then restart setup.\n"
-            )
+            print("\nWARNING: pyttsx3 not installed. Please run: pip install pyttsx3\nThen restart setup.\n")
             # Still continue — print to terminal as fallback
             self._tts = None
 
@@ -282,10 +279,7 @@ class VoiceInstaller:
         response = self._wait_for_input()
 
         if self._check_skip(response):
-            self._speak(
-                "No problem. You can connect the app later. "
-                "Run setup again to get your server address."
-            )
+            self._speak("No problem. You can connect the app later. Run setup again to get your server address.")
             return
 
         # Determine the local IP so the phone can connect
@@ -333,8 +327,7 @@ class VoiceInstaller:
             response = self._wait_for_input()
 
         self._speak(
-            "Please type or paste your Telegram bot token now. "
-            "It should start with numbers followed by a colon."
+            "Please type or paste your Telegram bot token now. It should start with numbers followed by a colon."
         )
         token = self._wait_for_input("Bot token:")
 
@@ -360,10 +353,7 @@ class VoiceInstaller:
 
         if user_id.isdigit():
             store_credential(TELEGRAM_ALLOWED_USER_IDS, user_id)
-            self._speak(
-                f"Your user ID {user_id} has been saved. "
-                "Only you can control this assistant via Telegram."
-            )
+            self._speak(f"Your user ID {user_id} has been saved. Only you can control this assistant via Telegram.")
         else:
             self._speak(
                 "I didn't catch a number. I'll save this step for later. "
@@ -378,20 +368,14 @@ class VoiceInstaller:
         response = self._wait_for_input()
 
         if not self._check_ready(response):
-            self._speak(
-                "Please get your Claude API key from anthropic.com "
-                "and run setup again."
-            )
+            self._speak("Please get your Claude API key from anthropic.com and run setup again.")
             return False
 
         self._speak("Please type or paste your Claude API key.")
         api_key = self._wait_for_input("Claude API key:")
 
         if not api_key or not api_key.startswith("sk-"):
-            self._speak(
-                "That doesn't look quite right. Claude API keys start with sk-ant. "
-                "Try again."
-            )
+            self._speak("That doesn't look quite right. Claude API keys start with sk-ant. Try again.")
             api_key = self._wait_for_input("Claude API key:")
 
         store_credential(CLAUDE_API_KEY, api_key)
@@ -476,7 +460,11 @@ class VoiceInstaller:
 
         try:
             proc = await asyncio.create_subprocess_exec(
-                sys.executable, "-m", "pip", "install", "-r",
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "-r",
                 str(Path(__file__).parent.parent / "requirements.txt"),
                 "--quiet",
                 stdout=asyncio.subprocess.PIPE,
@@ -512,6 +500,7 @@ class VoiceInstaller:
         # Test Claude API (required)
         try:
             from blind_assistant.security.credentials import CLAUDE_API_KEY, get_credential
+
             if get_credential(CLAUDE_API_KEY):
                 required_passed += 1
                 self._speak("Claude AI connection: ready.")
@@ -529,16 +518,14 @@ class VoiceInstaller:
         # Test Telegram (optional — just report, do not count against total)
         try:
             from blind_assistant.security.credentials import TELEGRAM_BOT_TOKEN, get_credential
+
             if get_credential(TELEGRAM_BOT_TOKEN):
                 self._speak("Telegram remote access: configured (optional).")
         except Exception:  # noqa: S110 — Telegram is optional; silent skip is intentional
             pass
 
         if required_passed == required_total:
-            self._speak(
-                "All required components are ready. "
-                "You can start using the assistant now."
-            )
+            self._speak("All required components are ready. You can start using the assistant now.")
         else:
             missing = required_total - required_passed
             self._speak(

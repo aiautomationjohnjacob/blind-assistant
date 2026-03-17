@@ -488,6 +488,7 @@ async def test_run_self_test_telegram_optional_not_counted_as_required(installer
     def fake_get_credential(key):
         # Returns key for Claude; returns None for Telegram
         from blind_assistant.security.credentials import CLAUDE_API_KEY
+
         if key == CLAUDE_API_KEY:
             return "sk-ant-key"
         return None  # Telegram token absent
