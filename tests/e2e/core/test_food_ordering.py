@@ -160,9 +160,11 @@ async def test_food_order_happy_path_disclosure_accepted(
     """
     Full happy path: user says "order me food" →
     risk disclosure → user says "yes" →
-    browser navigates to food site → page state returned.
+    browser navigates to food site → checkout loop completes.
 
-    Verifies: disclosure fires, browser navigates, result has page_state.
+    Verifies: disclosure fires, browser navigates, order completes.
+    The Claude-powered page analysis helpers are patched so this test
+    does not require the anthropic package in the test environment.
     """
     orc, mock_browser, gate = _make_orchestrator_with_mock_browser(config, mock_food_page_state, installed=True)
     gate.register_session(user_context.session_id)
@@ -170,24 +172,32 @@ async def test_food_order_happy_path_disclosure_accepted(
     updates: list[str] = []
     response_count = [0]
 
-    async def update_cb(msg: str) -> None:
-        updates.append(msg)
-        response_count[0] += 1
-        # Accept risk disclosure on second update (first = "I'll help...", second = "Before...")
-        if response_count[0] == 2:
+    # Patch all Claude-powered helpers — E2E tests verify the flow, not the AI reasoning
+    with (
+        patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Pizza Palace. 2. Taco Town.")),
+        patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=mock_food_page_state)),
+        patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=mock_food_page_state)),
+        patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x Pepperoni Pizza, $18.50")),
+        patch.object(orc, "_place_order", new=AsyncMock(return_value={"success": True, "confirmation": "Order #12345"})),
+    ):
+
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+            response_count[0] += 1
+            # Accept all prompts (disclosure + restaurant pick + item pick + confirmations)
             gate.submit_response(user_context.session_id, "yes")
 
-    result = await orc._handle_order_food(
-        MagicMock(
-            type="order_food",
-            description="order me a pizza",
-            parameters={"food": "pizza"},
-            is_high_stakes=True,
-            required_tools=["browser"],
-        ),
-        user_context,
-        update_cb,
-    )
+        result = await orc._handle_order_food(
+            MagicMock(
+                type="order_food",
+                description="order me a pizza",
+                parameters={"food": "pizza"},
+                is_high_stakes=True,
+                required_tools=["browser"],
+            ),
+            user_context,
+            update_cb,
+        )
 
     # Risk disclosure must have been sent
     all_updates = " ".join(updates).lower()
@@ -200,9 +210,10 @@ async def test_food_order_happy_path_disclosure_accepted(
     call_url = mock_browser.navigate.call_args[0][0]
     assert "doordash" in call_url.lower(), f"Expected doordash URL, got: {call_url}"
 
-    # Result must include page state and ordering flag
-    assert result.get("ordering_in_progress") is True
-    assert result.get("page_state") is mock_food_page_state
+    # Order should have completed (order_placed or order placed message)
+    assert result.get("order_placed") is True or "placed" in result["text"].lower() or "confirmed" in result["text"].lower(), (
+        f"Expected order to be placed, got: {result}"
+    )
 
 
 # ─────────────────────────────────────────────────────────────
