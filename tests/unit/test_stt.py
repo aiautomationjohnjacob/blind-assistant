@@ -210,14 +210,28 @@ class TestTranscribeMicrophone:
 
         assert result is None
 
-    async def test_calls_transcribe_audio_with_wav_bytes(self):
-        """transcribe_microphone passes WAV bytes to transcribe_audio."""
-        # Create a minimal mock for numpy to avoid installing it in CI
-        mock_np = MagicMock()
-        mock_np.zeros.return_value = MagicMock()
+    async def test_calls_transcribe_audio_with_recorded_bytes(self):
+        """transcribe_microphone passes audio bytes to transcribe_audio."""
+        import io
 
+        # Build mock scipy.io.wavfile that writes a minimal WAV header
+        mock_wav = MagicMock()
+
+        def fake_wav_write(buf, rate, audio):
+            buf.write(b"RIFF\x00\x00\x00\x00WAVEfmt ")
+
+        mock_wav.write = fake_wav_write
+        mock_scipy_io = MagicMock()
+        mock_scipy_io.wavfile = mock_wav
+
+        # Build mock numpy
+        mock_np = MagicMock()
+        fake_recorded_audio = MagicMock()
+        mock_np.zeros.return_value = fake_recorded_audio
+
+        # Build mock sounddevice
         mock_sd = MagicMock()
-        mock_sd.rec.return_value = mock_np.zeros((16000, 1))
+        mock_sd.rec.return_value = fake_recorded_audio
         mock_sd.wait = MagicMock()
 
         transcribed_bytes = []
@@ -226,8 +240,16 @@ class TestTranscribeMicrophone:
             transcribed_bytes.append(audio_bytes)
             return "test transcript"
 
-        with patch.dict("sys.modules", {"sounddevice": mock_sd, "numpy": mock_np}), \
-             patch("blind_assistant.voice.stt.transcribe_audio", side_effect=mock_transcribe):
+        with patch.dict(
+            "sys.modules",
+            {
+                "sounddevice": mock_sd,
+                "numpy": mock_np,
+                "scipy": MagicMock(),
+                "scipy.io": mock_scipy_io,
+                "scipy.io.wavfile": mock_wav,
+            },
+        ), patch("blind_assistant.voice.stt.transcribe_audio", side_effect=mock_transcribe):
             from blind_assistant.voice.stt import transcribe_microphone
 
             result = await transcribe_microphone(duration_seconds=1.0)
