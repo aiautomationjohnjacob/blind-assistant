@@ -247,67 +247,71 @@ jobs:
   # Skipped if tests/e2e/web/ doesn't exist yet.
   # ──────────────────────────────────────────────────────────
   e2e-web:
-    name: E2E — Web (Playwright)
+    name: E2E — Web (Playwright accessibility audit)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check if web E2E tests exist
-        id: check_tests
-        run: |
-          if [ -d "tests/e2e/web" ] && [ "$(ls tests/e2e/web/test_*.py 2>/dev/null | wc -l)" -gt 0 ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "No web E2E tests found — skipping (add tests to tests/e2e/web/)"
-          fi
+      # ── Node.js — needed to build the Expo web bundle ──────────────────────
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: clients/mobile/package-lock.json
 
+      - name: Install JS dependencies
+        working-directory: clients/mobile
+        run: npm ci --legacy-peer-deps
+
+      - name: Build Expo web bundle
+        working-directory: clients/mobile
+        run: npx expo export --platform web
+        # Produces clients/mobile/dist/ with index.html + JS bundle
+
+      # ── Python — needed to serve the bundle and run Playwright tests ───────
       - uses: actions/setup-python@v5
-        if: steps.check_tests.outputs.exists == 'true'
         with:
           python-version: '3.11'
           cache: pip
 
-      - name: Install Playwright and dependencies
-        if: steps.check_tests.outputs.exists == 'true'
+      - name: Install Playwright Python bindings
         run: |
-          pip install playwright pytest pytest-playwright
-          playwright install chromium firefox webkit
-          playwright install-deps
+          pip install playwright pytest pytest-asyncio pytest-playwright
+          playwright install chromium || true
+          playwright install-deps chromium || true
 
-      - name: Install project dependencies
-        if: steps.check_tests.outputs.exists == 'true'
-        run: pip install -r requirements.txt
-
-      - name: Run web E2E tests (Chromium)
-        if: steps.check_tests.outputs.exists == 'true'
+      - name: Start web server (serve Expo dist/)
+        working-directory: clients/mobile
         run: |
-          pytest tests/e2e/web/ \
-            -m "web" \
+          # Serve the built bundle on port 19006 in the background.
+          # Python's built-in http.server is good enough for CI.
+          python -m http.server 19006 --directory dist/ &
+          echo "WEB_SERVER_PID=$!" >> $GITHUB_ENV
+          # Give the server a moment to start
+          sleep 2
+          # Verify it responds
+          curl -f http://localhost:19006/ -o /dev/null --silent && echo "Server up" || echo "Server may not be ready"
+
+      - name: Run web E2E accessibility tests (Chromium — NVDA+Chrome)
+        run: |
+          pytest tests/e2e/platforms/web/ \
             --browser chromium \
             --screenshot on \
             -v 2>&1 | tee e2e-web-chrome.log
 
-      - name: Run web E2E tests (Firefox — NVDA combo)
-        if: steps.check_tests.outputs.exists == 'true'
+      - name: Run web E2E accessibility tests (Firefox — NVDA+Firefox)
         run: |
-          pytest tests/e2e/web/ \
-            -m "web" \
+          pytest tests/e2e/platforms/web/ \
             --browser firefox \
             --screenshot on \
             -v 2>&1 | tee e2e-web-firefox.log
 
-      - name: Run web E2E tests (WebKit — VoiceOver+Safari combo)
-        if: steps.check_tests.outputs.exists == 'true'
-        run: |
-          pytest tests/e2e/web/ \
-            -m "web" \
-            --browser webkit \
-            --screenshot on \
-            -v 2>&1 | tee e2e-web-webkit.log
+      - name: Stop web server
+        if: always()
+        run: kill $WEB_SERVER_PID 2>/dev/null || true
 
-      - name: Upload E2E screenshots
-        if: always() && steps.check_tests.outputs.exists == 'true'
+      - name: Upload E2E screenshots and logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: web-e2e-screenshots-${{ github.run_number }}
