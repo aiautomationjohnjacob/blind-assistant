@@ -406,8 +406,10 @@ jobs:
         run: pip install -e . 2>/dev/null || pip install -e . --no-build-isolation 2>/dev/null || true
 
       - name: Install Playwright system dependencies
-        # This is the step that requires root — available in GitHub Actions
-        run: playwright install-deps chromium
+        # This is the step that requires root — available in GitHub Actions.
+        # "|| true" because playwright 1.41 lists libasound2 which is a virtual package
+        # on Ubuntu 24.04 (Noble); apt exits 100 but chromium still works for our tests.
+        run: playwright install-deps chromium || true
 
       - name: Install Playwright Chromium browser
         run: playwright install chromium
