@@ -1,11 +1,17 @@
 """
 Blind Assistant — Main Entry Point
 
-Starts all services: Telegram bot interface, voice interface, and background tasks.
+Starts all enabled services: voice interface (default), API server, and optionally
+the Telegram bot (secondary/super-user channel — disabled by default).
+
+Primary interfaces are the native standalone apps (Android, iOS, Desktop, Web) which
+connect to the API server. The local voice interface is the development demo target.
+Telegram is an optional super-user channel — not the primary interface.
 
 Usage:
-  python -m blind_assistant.main          # Start all services
-  python -m blind_assistant.main --voice  # Local voice interface only
+  python -m blind_assistant.main          # Local voice interface (default)
+  python -m blind_assistant.main --api    # Start the REST API server (port 8000)
+  python -m blind_assistant.main --voice  # Explicitly enable local voice interface
   python -m blind_assistant.main --setup  # Run voice-guided setup wizard
 """
 
