@@ -36,15 +36,31 @@ class ToolRegistry:
         self._loaded = False
 
     async def load(self) -> None:
-        """Load the tool registry from disk."""
+        """
+        Load the tool registry from disk.
+
+        The YAML file uses two top-level lists:
+          - capabilities: core capabilities (browser, desktop_control, http_client)
+          - integrations: service-specific integrations (stripe, google_calendar, etc.)
+        Both are merged into _available under their tool name.
+        Legacy files using a single 'tools:' key are also supported.
+        """
         if REGISTRY_PATH.exists():
             import yaml
             with open(REGISTRY_PATH) as f:
-                data = yaml.safe_load(f)
-                self._available = {
-                    tool["name"]: tool
-                    for tool in (data.get("tools") or [])
-                }
+                data = yaml.safe_load(f) or {}
+
+            # Support both the current two-section format and legacy single-list format
+            all_tools: list[dict] = []
+            all_tools.extend(data.get("capabilities") or [])
+            all_tools.extend(data.get("integrations") or [])
+            all_tools.extend(data.get("tools") or [])  # legacy key — still supported
+
+            self._available = {
+                tool["name"]: tool
+                for tool in all_tools
+                if isinstance(tool, dict) and "name" in tool
+            }
             logger.info(f"Loaded {len(self._available)} available tools from registry")
         else:
             logger.warning(f"Tool registry not found at {REGISTRY_PATH}")
