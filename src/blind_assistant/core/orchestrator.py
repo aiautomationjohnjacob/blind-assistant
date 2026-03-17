@@ -7,6 +7,8 @@ execute → respond.
 This is the central coordinator for all user interactions.
 """
 
+from __future__ import annotations
+
 import asyncio
 import logging
 from collections.abc import Awaitable, Callable
