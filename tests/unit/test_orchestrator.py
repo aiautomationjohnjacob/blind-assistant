@@ -678,25 +678,32 @@ class TestHandleOrderFood:
         orc = _make_order_food_orchestrator(minimal_config)
 
         navigate_urls = []
-        mock_browser = AsyncMock()
 
         async def mock_navigate(url: str) -> PageState:
             navigate_urls.append(url)
             return PageState(url=url, title="DoorDash", text_content="Results")
 
+        mock_browser = AsyncMock()
         mock_browser.navigate = mock_navigate
         orc.tool_registry.get_installed_tool.return_value = mock_browser
 
-        updates = []
+        with (
+            patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="1. Pizza Palace.")),
+            patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=PageState(url="x", title="Pizza Palace", text_content=""))),
+            patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=PageState(url="x", title="Cart", text_content=""))),
+            patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="pizza")),
+            patch.object(orc, "_place_order", new=AsyncMock(return_value={"success": True})),
+        ):
+            updates = []
 
-        async def update_cb(msg: str) -> None:
-            updates.append(msg)
-            orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
+            async def update_cb(msg: str) -> None:
+                updates.append(msg)
+                orc.confirmation_gate.submit_response(standard_context.session_id, "yes")
 
-        orc.confirmation_gate.register_session(standard_context.session_id)
-        intent = _make_order_intent(params={"restaurant": "Pizza Palace"})
+            orc.confirmation_gate.register_session(standard_context.session_id)
+            intent = _make_order_intent(params={"restaurant": "Pizza Palace"})
 
-        await orc._handle_order_food(intent, standard_context, update_cb)
+            await orc._handle_order_food(intent, standard_context, update_cb)
 
         # URL should contain the restaurant name, not generic food query
         assert navigate_urls, "navigate() was not called"
