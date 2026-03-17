@@ -156,6 +156,49 @@ describe("saveApiBaseUrl", () => {
     const result = await loadApiBaseUrl();
     expect(result).toBe("http://localhost:8000/");
   });
+
+  // ── URL scheme validation (ISSUE-017) ─────────────────────────
+
+  it("accepts http:// URLs without throwing", async () => {
+    await expect(saveApiBaseUrl("http://localhost:8000")).resolves.toBeUndefined();
+  });
+
+  it("accepts https:// URLs without throwing", async () => {
+    await expect(saveApiBaseUrl("https://api.example.com")).resolves.toBeUndefined();
+  });
+
+  it("rejects file:// URLs and throws with readable message", async () => {
+    await expect(saveApiBaseUrl("file:///etc/passwd")).rejects.toThrow(
+      /must start with http:\/\/ or https:\/\//i
+    );
+  });
+
+  it("rejects javascript: URLs and throws", async () => {
+    await expect(saveApiBaseUrl("javascript:alert(1)")).rejects.toThrow(
+      /must start with http:\/\/ or https:\/\//i
+    );
+  });
+
+  it("rejects data: URLs and throws", async () => {
+    await expect(saveApiBaseUrl("data:text/html,<script>")).rejects.toThrow(
+      /must start with http:\/\/ or https:\/\//i
+    );
+  });
+
+  it("rejects bare hostnames without scheme and throws", async () => {
+    await expect(saveApiBaseUrl("localhost:8000")).rejects.toThrow(
+      /must start with http:\/\/ or https:\/\//i
+    );
+  });
+
+  it("does not call SecureStore when URL scheme is invalid", async () => {
+    try {
+      await saveApiBaseUrl("ftp://example.com");
+    } catch {
+      // expected
+    }
+    expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
+  });
 });
 
 // ─────────────────────────────────────────────────────────────
