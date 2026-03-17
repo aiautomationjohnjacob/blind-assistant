@@ -20,11 +20,10 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P1 | **Live food ordering validation (ISSUE-021)**: run `_handle_order_food` on a real Playwright browser (DoorDash or accessible test site) to validate the full 11-step checkout loop works against an actual web page. Use computer-use-tester + device-simulator. | Phase 3 start | 2026-03-17 |
+| P1 | **Verify CI integration-browser job (ISSUE-021 follow-up)**: The new 'integration-browser' CI job added in Cycle 12 must pass on the next push to confirm BrowserTool real Playwright tests work end-to-end. If CI fails, diagnose and fix before starting new features. | Cycle 12 self-assessment | 2026-03-17 |
 | P2 | End-to-end food ordering demo on real device: blind user on Android (TalkBack) + iOS (VoiceOver) can say "order me food" and complete the full flow by voice. | Phase 3 sprint | 2026-03-17 |
 | P2 | Voice installer: complete voice-guided setup from fresh Python install | ARCHITECTURE.md Task 5 | 2026-03-17 |
 | P2 | Web app: accessible web interface at blind-assistant.org (WCAG 2.1 AA; NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome) | Founder scope expansion | 2026-03-17 |
-| P3 | **ISSUE-020**: Remove or replace platform hint text in MainScreen that says "Double-tap to activate" — visual-only, contradicts accessibility copy guidelines | accessibility-reviewer | 2026-03-17 |
 | P3 | Android app: run npm install + expo build:android + TalkBack test on AVD | Founder scope expansion | 2026-03-17 |
 | P3 | iOS app: run npm install + expo build:ios --simulator + VoiceOver test on xcrun simctl | Founder scope expansion | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
