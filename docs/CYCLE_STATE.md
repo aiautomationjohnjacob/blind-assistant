@@ -181,17 +181,15 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 10 (Phase 2 — final + CI repair + documentation). Delivered: (1) Fixed 45 ruff
-lint errors + pip-audit CI failure — CI is now green again. (2) Implemented full food
-ordering checkout loop in orchestrator._handle_order_food — 11-step conversational flow
-where Claude reads page content, generates voice-friendly option lists, guides the user
-through restaurant and item selection, adds to cart, runs 2-step financial confirmation,
-and places the order. 5 Claude-powered helper methods, each with graceful fallback when
-Anthropic API unavailable. (3) Added ConfirmationGate.wait_for_response() for free-text
-user input in multi-step flows (5 new tests). (4) Documentation-steward: README.md
-updated (Telegram demoted from "Recommended" to secondary channel), CHANGELOG.md
-created. Python tests: 482 total (465 unit + 17 E2E, 21 skipped).
-Phase 2 completion gate reached — Phase 3 begins next cycle.
+Cycle 11 (Phase 3 — start / cross-platform accessibility audit). Delivered: (1) Cross-platform
+accessibility audit — code-level review by iOS, Android, Web platform agents; found 2 bug classes:
+"Double-tap" in accessibilityHints (wrong for VoiceOver), importantForAccessibility="no-hide-descendants"
+on SetupWizardScreen progress Text. (2) Fixed all VoiceOver hint language: 7 accessibilityHints
+in MainScreen + SetupWizardScreen now use outcome-first wording (e.g. "Proceeds to token entry step.")
+per Apple VoiceOver guidelines. (3) Added haptic recording cue — expo-haptics impactAsync(Medium)
+on recording start, impactAsync(Light) on stop — closes ISSUE open since Cycle 7; 3 new JS tests.
+(4) ISSUE-004 resolved: ResponseCallback type alias + 9 method signatures annotated in orchestrator.py.
+JS tests: 117 (was 114). Python: 465 unit (unchanged). 2 new open issues: ISSUE-020, ISSUE-021.
 
 ## Known Issues / Technical Debt
 
