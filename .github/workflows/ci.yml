@@ -170,7 +170,17 @@ jobs:
       - name: Audit dependencies for known CVEs
         # Audit the currently-installed environment (not -r requirements.txt)
         # so pip-audit reads installed package metadata rather than building wheels.
-        run: pip-audit --desc
+        # torch CVE ignores:
+        #   PYSEC-2024-259: disputed — intended behavior in PyTorch distributed
+        #   CVE-2025-2953, CVE-2025-3730: local-only DoS; no network attack surface
+        #   PYSEC-2025-41: local RCE via weights_only=True; we don't load untrusted models
+        # All four are low/no risk for our local-execution, offline STT use case.
+        run: |
+          pip-audit --desc \
+            --ignore-vuln PYSEC-2024-259 \
+            --ignore-vuln PYSEC-2025-41 \
+            --ignore-vuln CVE-2025-2953 \
+            --ignore-vuln CVE-2025-3730
 
       - name: Static security analysis (bandit)
         run: |
