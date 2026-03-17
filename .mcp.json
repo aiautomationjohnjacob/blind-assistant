@@ -20,7 +20,12 @@
     "playwright": {
       "command": "npx",
       "args": ["-y", "@playwright/mcp"],
-      "note": "Used for automated accessibility audits and keyboard navigation testing"
+      "note": "Browser automation for accessibility audits and keyboard navigation testing"
+    },
+    "desktop-commander": {
+      "command": "npx",
+      "args": ["-y", "@wonderwhy-er/desktop-commander"],
+      "note": "Native OS/terminal control — lets AI navigate non-browser apps for blind users"
     }
   }
 }
