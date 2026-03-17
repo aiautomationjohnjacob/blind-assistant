@@ -209,14 +209,16 @@ ISSUE-017 (URL scheme validation) also resolved. Python tests: 363 (354 unit + 9
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 6.** Loop is clean and ready for Cycle 7.
+**Loop completed Cycle 7.** Loop is clean and ready for Cycle 8.
 No mid-cycle state artifacts. All changes committed and pushed.
 
-The most important work for Cycle 7:
-1. **P1: Real voice recording in MainScreen** (ISSUE-015) — replace hardcoded
-   "Hello, what can you do?" with expo-av AudioRecorder → WAV encoding →
-   send to backend /query → speak AI response. This closes the "app actually
-   works as a voice assistant" milestone.
-2. **P3 quick fixes from Cycle 6 review**:
-   - ISSUE-016: Add `importantForAccessibility="yes"` to SetupWizardScreen TextInput
-   - ISSUE-017: Validate URL scheme in saveApiBaseUrl() before SecureStore.setItemAsync
+The most important work for Cycle 8:
+1. **P1: Tool registry + installer** — self-expanding pattern with user confirmation.
+   When a user asks for a task that requires an external tool (DoorDash API, Instacart,
+   etc.), the app should: discover the required tool from `tools/registry.yaml` →
+   speak "I need to install [tool] to do this. Shall I?" → install on confirmation →
+   execute the task. This is the final major Phase 2 technical gate before the
+   food-ordering E2E demo and Phase 2 completion.
+2. **P2: End-to-end food ordering demo** — once tool registry is built, wire a complete
+   "order me food" request through the pipeline with risk disclosure and confirmation.
+3. **P3: Add body size limit to /transcribe** (ISSUE-018, quick fix)
