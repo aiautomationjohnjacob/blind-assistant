@@ -158,6 +158,49 @@ A blind user can:
 
 ---
 
+## Client Platforms
+
+Blind Assistant is not a single app — it is a family of clients sharing the same backend:
+
+| Platform | Interface | Primary screen reader |
+|----------|-----------|-----------------------|
+| **Android app** | Native Android app | TalkBack (Android Accessibility Suite) |
+| **iPhone/iPad app** | Native iOS app | VoiceOver |
+| **Desktop (Windows)** | Native Windows app or Python CLI | NVDA, JAWS |
+| **Desktop (macOS)** | Native macOS app or Python CLI | VoiceOver |
+| **Web app** | Accessible website (Chrome/Firefox/Safari) | NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome |
+
+All five clients must:
+1. Work entirely by voice/screen reader — zero mouse, zero vision required
+2. Integrate with the platform's native accessibility API (not fight it)
+3. Pass the NVDA keyboard-only test (if NVDA fails it, it doesn't ship)
+4. Work with the platform's built-in AT: VoiceOver, TalkBack, NVDA, JAWS, Narrator (as backup)
+
+The **education website** (`learn.blind-assistant.org`) is a sixth client — an accessible
+course platform that must be fully operable by NVDA+Chrome with zero mouse use.
+
+---
+
+## Multi-Platform Accessibility
+
+Every interaction pattern must be designed for the specific accessibility model of each platform:
+
+- **iOS**: VoiceOver gesture navigation (swipes, taps, rotor); Siri Shortcuts integration;
+  Dynamic Type support; Switch Control for motor disabilities
+- **Android**: TalkBack swipe-to-navigate; Explore by Touch; BrailleBack for braille displays;
+  Voice Access for hands-free; Google Assistant integration
+- **Windows desktop**: NVDA + Chrome/Firefox for web; NVDA + native app for desktop;
+  JAWS compatibility for professional users; Windows Narrator as minimum baseline
+- **macOS desktop**: VoiceOver + Safari for web; VoiceOver + native app for desktop;
+  Siri integration; macOS Keychain for credential storage
+- **Web**: WCAG 2.1 AA minimum; semantic HTML first; ARIA only when HTML is insufficient;
+  keyboard-only navigation; works in NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome
+
+**The cross-platform test**: every feature must be completable on at least 3 of the 5
+platforms before it is considered shipped. Platform experts audit each platform independently.
+
+---
+
 ## Technical Principles
 
 - **Voice-first, vision-optional** — every single interaction works by voice

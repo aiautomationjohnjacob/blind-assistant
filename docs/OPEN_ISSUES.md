@@ -74,6 +74,65 @@ local mode. Handle ImportError with clear user message.
 
 ---
 
+### ISSUE-004: Missing type annotations on response_callback parameters
+**Severity**: LOW
+**Category**: testing, architecture
+**Detected by**: Cycle 3 self-assessment
+**Detected**: 2026-03-17
+**Description**: Several orchestrator methods have `response_callback=None` parameters
+with no type annotation. Should be typed as `Optional[Callable[[str], Awaitable[None]]]`.
+**Impact**: Type checker cannot catch missing callbacks; harder for contributors to
+understand the interface.
+**Proposed fix**: Add proper type annotations to all response_callback parameters.
+**Status**: OPEN
+
+### ISSUE-005: Session context has no clear_sensitive() method
+**Severity**: MEDIUM
+**Category**: security
+**Detected by**: security-specialist (Cycle 3 review)
+**Detected**: 2026-03-17
+**Description**: The vault passphrase is cached in `context._vault_passphrase` as a
+plain string for session duration. When the session ends, this is never explicitly
+zeroed out. While OS memory isolation prevents other processes reading it, explicit
+zeroing is defense-in-depth.
+**Impact**: Passphrase remains in heap memory until garbage collected after session ends.
+**Proposed fix**: Add `context.clear_sensitive()` method that sets `_vault_passphrase = None`
+and call it in session teardown paths.
+**Status**: OPEN
+
+### ISSUE-006: Passphrase prompt timeout is hardcoded at 120 seconds
+**Severity**: LOW
+**Category**: accessibility, ux
+**Detected by**: accessibility-reviewer (Cycle 3 review)
+**Detected**: 2026-03-17
+**Description**: `_collect_vault_passphrase` times out after 120 seconds, hardcoded.
+Dorothy (elder) may need more time; Marcus (power user) might want less.
+**Impact**: Poor fit for users on either end of the speed spectrum.
+**Proposed fix**: Read from `config.yaml voice.prompt_timeout_seconds` with default 120.
+**Status**: OPEN
+
+### ISSUE-007: Telegram end-to-end demo not yet delivered
+**Severity**: HIGH
+**Category**: integration, architecture
+**Detected by**: Phase 2 gate review (Cycle 3)
+**Detected**: 2026-03-17
+**Description**: A real user still cannot send a voice message to the Telegram bot and
+get a spoken audio reply back. All individual pieces exist (STT, TTS, orchestrator,
+Telegram bot) but they have not been wired together and tested end-to-end on real
+hardware/infrastructure.
+**Impact**: Phase 2 is not complete. The "product exists" milestone is not met.
+**Proposed fix**: Wire Telegram bot → Whisper STT → orchestrator → TTS → reply.
+Write integration test. Test with real Telegram credentials in a staging environment.
+**Status**: OPEN
+
+---
+
 ## Resolved Issues
 
-*(Moved here when fixed)*
+### ISSUE-001 — RESOLVED (Cycle 3)
+Silent vault failure when keychain has no key. Fixed in `src/blind_assistant/core/orchestrator.py`
+`_get_vault()`: now prompts user for passphrase via response_callback when keychain is empty,
+derives key from passphrase+salt, caches in session context, offers to store in keychain.
+10 unit tests added in `tests/unit/test_vault_passphrase_prompt.py`.
+
+*(Previously open issues moved here when fixed)*
