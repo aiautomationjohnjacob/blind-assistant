@@ -169,6 +169,9 @@ export function MainScreen(): React.JSX.Element {
     if (state === "listening") {
       // ── Phase 2: Stop recording + transcribe + query ──────
       setState("transcribing");
+      // Light haptic on stop — distinct from the medium impact on start,
+      // so TalkBack/VoiceOver users can distinguish start vs stop by touch feel.
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
       announceToScreenReader("Got it. Converting your speech now.");
 
       const audioBase64 = await stopRecording();
