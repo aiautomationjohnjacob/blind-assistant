@@ -41,6 +41,8 @@ markers = [
     "accessibility: voice output and accessibility behaviour tests",
     "e2e: end-to-end tests covering full user flows (only external APIs mocked)",
     "web: web platform E2E tests via Playwright (requires web server running)",
+    "android: Android TalkBack E2E tests via ADB (requires AVD + ADB + Android app build)",
+    "ios: iOS VoiceOver E2E tests via xcrun simctl (requires macOS + Xcode + booted simulator)",
 ]
 
 # ─────────────────────────────────────────────
