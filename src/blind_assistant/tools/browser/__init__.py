@@ -18,6 +18,13 @@ from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
 
+# Lazy import of Playwright — imported at module level for testability (patchable)
+# but the actual module is only loaded when initialize() is called.
+try:
+    from playwright.async_api import async_playwright
+except ImportError:  # pragma: no cover — Playwright not installed in all environments
+    async_playwright = None  # type: ignore[assignment]
+
 
 @dataclass
 class PageState:
