@@ -37,7 +37,7 @@ class ADBClient:
 
     def shell(self, command: str) -> str:
         """Run an ADB shell command and return stdout as a string."""
-        result = subprocess.run(  # noqa: S607
+        result = subprocess.run(
             ["adb", *self._serial_flag, "shell", command],
             capture_output=True,
             text=True,
