@@ -325,6 +325,9 @@ class Orchestrator:
         session_passphrase: str | None = getattr(context, "_vault_passphrase", None)
 
         if session_passphrase is None:
+            # Register the response queue BEFORE sending the prompt so that if the
+            # user responds instantly (e.g. automated tests), the response is captured.
+            self.confirmation_gate.register_session(context.session_id)
             await response_callback(
                 "To access your notes, I need your vault passphrase. "
                 "Please say or type your passphrase now. "
