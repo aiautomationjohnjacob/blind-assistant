@@ -214,11 +214,25 @@ Make it real, working code — not placeholders."
 
 Read `docs/FEATURE_PRIORITY.md` and `docs/USER_STORIES.md`.
 Find the highest-priority story that has NO implementation in src/.
-Use `tech-lead` to break it into tasks.
-Implement each task. Use `code-reviewer` after each significant change.
-Use `accessibility-reviewer` on any UI/voice output.
-Use `blind-user-tester` to verify each completed story.
-Use `security-specialist` on any feature touching credentials or personal data.
+
+Use `tech-lead` to break it into 3-5 implementation tasks with clear file targets.
+
+For each task, pick the right implementer:
+- Core Python logic, async code, Claude API usage → `backend-developer`
+- Telegram, Obsidian, Whisper, ElevenLabs, ordering APIs → `integration-engineer`
+- Packaging, installer, CI/CD, pyproject.toml → `devops-engineer`
+
+After implementation:
+- Use `code-reviewer` to review the code (read-only — it reports, doesn't fix)
+- Use `backend-developer` or `integration-engineer` to apply fixes from the review
+- Use `accessibility-reviewer` on any voice output or user-facing strings
+- Use the most relevant blind persona agent to verify the feature from their perspective
+- Use `security-specialist` on any feature touching credentials or personal data
+
+After any significant batch of features, use `open-source-steward` to:
+- Update CHANGELOG.md with plain-English descriptions of what changed
+- Ensure CONTRIBUTING.md and docs reflect any new setup requirements
+- Check if any new `good-first-issue` opportunities exist from the work done
 
 ### For any P0/P1 issue:
 

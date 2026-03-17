@@ -26,6 +26,9 @@
 | P2 | Design risk-disclosure flow for payment/banking details (spoken warning + confirmation) | PRODUCT_BRIEF examples | 2026-03-17 |
 | P2 | Payment tokenization architecture (Stripe tokens — never store raw card numbers) | security model | 2026-03-17 |
 | P2 | Second Brain / personal knowledge base design (voice-first, encrypted, conversational query) | PRODUCT_BRIEF synthesis vision | 2026-03-17 |
+| P3 | Set up CHANGELOG.md with initial entry | open source | 2026-03-17 |
+| P3 | Populate ROADMAP.md once FEATURE_PRIORITY.md exists | open source | 2026-03-17 |
+| P3 | Create good-first-issue labels and 5 starter issues once scaffold exists | open source | 2026-03-17 |
 | P2 | Research+action compound task design (research options → user chooses → AI executes) | PRODUCT_BRIEF trip booking example | 2026-03-17 |
 | P2 | Telegram bot architecture as primary 24/7 multi-device interface | PRODUCT_BRIEF synthesis vision | 2026-03-17 |
 
