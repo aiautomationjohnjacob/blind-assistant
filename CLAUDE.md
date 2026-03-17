@@ -88,6 +88,12 @@ to work in parallel, review each other's work, and commit progress continuously.
 ### Nonprofit Operations Agents
 - **grant-writer** — Frames impact in grant language; identifies fundable milestones
 
+### Testing & Quality Agents
+- **test-engineer** — Writes exhaustive unit tests for all Python code; 80% coverage floor;
+  100% on security modules; called after every backend-developer or integration-engineer task
+- **qa-lead** — Owns test strategy and test quality (not just coverage); detects test rot;
+  designs regression suites; ensures test pyramid is balanced
+
 ### Infrastructure & Education Agents
 - **cloud-architect** — Designs cloud infrastructure in planning mode (no live accounts yet);
   recommends Railway/Fly.io for Telegram webhook, local-first for user vault; infrastructure as code
