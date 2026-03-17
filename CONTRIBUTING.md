@@ -48,18 +48,24 @@ cd blind-assistant
 # 2. Install with dev dependencies
 pip install -e ".[dev]"
 
-# 3. Copy and fill in environment variables
-cp .env.example .env
-# Edit .env with your API keys (Claude API key minimum)
+# 3. Store your Claude API key in the OS keychain (no .env files)
+#    The setup wizard handles this interactively:
+python installer/install.py
+#    Or you can store the key manually and run the API server:
+#      python -m blind_assistant.main --api
 
 # 4. Run the tests
-pytest
+pytest tests/unit/ -q
 
-# 5. Start the assistant
-blind-assistant
+# 5. Start the assistant (voice interface)
+python -m blind_assistant.main --voice
 ```
 
 If any step doesn't work, open an issue — setup friction is a bug.
+
+**Note**: This project uses the OS keychain (via the `keyring` library) for all credentials.
+There is no `.env` file in production. Credentials are stored securely at setup time and
+retrieved by the app on each run.
 
 ### Screen Reader Users
 The development environment is fully accessible:
