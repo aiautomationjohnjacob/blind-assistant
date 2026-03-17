@@ -57,11 +57,14 @@ class VaultQuery:
             A natural language response (for speech or braille)
         """
         if not self.vault.key.is_unlocked:
-            return (
+            locked_msg = (
                 "Your notes vault is locked. "
                 "I need your vault passphrase to access your notes. "
                 "What is your vault passphrase?"
             )
+            if context.braille_mode:
+                return _format_for_braille(locked_msg)
+            return locked_msg
 
         results = await self.vault.search(query, limit=3)
 
