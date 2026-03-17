@@ -19,10 +19,18 @@
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
 | P1 | Telegram end-to-end demo: voice message in → STT → orchestrator → TTS audio reply | ISSUE-007, Phase 2 gate | 2026-03-17 |
+| P1 | **ARCH DECISION**: unified (React Native/Flutter) vs native per platform for Android+iOS+Desktop+Web — use tech-lead + gap-analyst before any mobile/web implementation | Founder scope expansion | 2026-03-17 |
 | P2 | Add `context.clear_sensitive()` to zero vault passphrase on session end | ISSUE-005 | 2026-03-17 |
 | P2 | Make passphrase prompt timeout configurable in config.yaml | ISSUE-006 | 2026-03-17 |
 | P2 | Integration test: Telegram message → Whisper STT → orchestrator → TTS → reply | Phase 2 gate | 2026-03-17 |
 | P2 | Voice installer: complete voice-guided setup from fresh Python install | ARCHITECTURE.md Task 5 | 2026-03-17 |
+| P2 | Web app: accessible web interface at blind-assistant.org (WCAG 2.1 AA; NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome) | Founder scope expansion | 2026-03-17 |
+| P2 | Per-platform E2E test suite structure: create tests/e2e/platforms/ with Android/iOS/Web/Desktop dirs | Founder scope expansion | 2026-03-17 |
+| P2 | Cross-platform accessibility audit: run all 5 platform agents on current codebase | Founder scope expansion | 2026-03-17 |
+| P3 | Android app: native Android app (TalkBack); architecture per ARCH DECISION above | Founder scope expansion | 2026-03-17 |
+| P3 | iOS app: native iPhone/iPad app (VoiceOver); architecture per ARCH DECISION above | Founder scope expansion | 2026-03-17 |
+| P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
+| P3 | Education website (learn.blind-assistant.org): audio-primary; NVDA+Chrome; zero mouse | education-website-designer | 2026-03-17 |
 | P3 | Voice Activity Detection (VAD) for voice_local.py (replaces fixed recording duration) | ISSUE-002 | 2026-03-17 |
 | P3 | PIL ImageGrab Playwright fallback for headless/server environments | ISSUE-003 | 2026-03-17 |
 | P3 | Add Optional[Callable] type annotations to response_callback params in orchestrator | ISSUE-004 | 2026-03-17 |

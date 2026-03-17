@@ -4,6 +4,37 @@
 > Every cycle reads this, does work, then updates it before committing.
 > If the AI crashes or restarts, it reads this file first to reorient.
 
+## ⚠ SCOPE EXPANSION — READ THIS BEFORE PICKING WORK (added 2026-03-17 by founder)
+
+Major product scope expansion. The loop MUST be aware of these changes:
+
+**Four client platforms** (not just a Python CLI):
+1. Android native app (TalkBack)
+2. iPhone/iPad native app (VoiceOver)
+3. Desktop app — Windows + macOS (NVDA / VoiceOver)
+4. Web app at blind-assistant.org (NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome)
+(Plus the education website: learn.blind-assistant.org)
+
+**Architecture decision is now P1**: tech-lead must decide unified framework
+(React Native / Flutter) vs native per platform BEFORE any mobile/web implementation.
+
+**Per-platform test suites**: each platform needs unit + E2E tests + device simulation.
+Claude Code will run Android emulators (AVD+ADB) and iOS simulators (xcrun simctl)
+to take real screenshots and interact with running apps. Playwright for web.
+
+**9 new agents added** (see `.claude/agents/` and CLAUDE.md):
+`project-inspector`, `e2e-tester`, `ios-accessibility-expert`, `android-accessibility-expert`,
+`windows-accessibility-expert`, `macos-accessibility-expert`, `web-accessibility-expert`,
+`device-simulator`, `documentation-steward`
+
+New wiring in run-cycle:
+- Every 5th cycle: call `project-inspector` in STEP 3
+- Every 10th cycle: call `documentation-steward` in STEP 3
+- After major features: call `e2e-tester` + `device-simulator`
+- For any voice/UI feature: call the relevant platform accessibility agent
+
+---
+
 ## Current Phase
 
 **Phase**: 2 — Core Build Sprint

@@ -94,10 +94,12 @@ to work in parallel, review each other's work, and commit progress continuously.
 - **qa-lead** — Owns test strategy and test quality (not just coverage); detects test rot;
   designs regression suites; ensures test pyramid is balanced
 - **e2e-tester** — Designs and writes end-to-end tests covering full user flows (voice → STT →
-  orchestrator → tool → TTS); only external APIs mocked; one test per blind persona scenario
+  orchestrator → tool → TTS); per-platform test suites; only external APIs mocked
 - **project-inspector** — Proactively hunts for holistic gaps (missing tests, missing CI, missing
   E2E, agent roster gaps, doc gaps, dependency hygiene); called every 5th cycle; writes directly
   to OPEN_ISSUES.md and PRIORITY_STACK.md
+- **device-simulator** — Spins up Android emulator (AVD+ADB), iOS Simulator (xcrun simctl), and
+  Playwright browser sessions to take real screenshots and run accessibility checks on running apps
 
 ### Platform Accessibility Agents
 - **ios-accessibility-expert** — Native iOS app + Safari web app; VoiceOver, Switch Control,
