@@ -21,14 +21,22 @@ class Intent:
     confidence: float = 1.0
 
 
-# Intent types and their tool requirements
+# Intent types and their tool requirements.
+#
+# Tool names must match keys in tools/registry.yaml (capabilities + integrations sections).
+# Per ARCHITECTURE.md: Claude handles ordering, travel, home control autonomously via the
+# browser tool — no service-specific wrappers. So "order_food" requires ["browser"],
+# not a DoorDash-specific tool. Payments may also require ["stripe_payments"].
+#
+# Tools with no registry entry (screen_observer, second_brain, desktop_commander) are
+# built-in — they do not trigger the install flow.
 INTENT_TOOL_MAP = {
     "screen_description": ["screen_observer"],
-    "navigate_app": ["screen_observer", "desktop_commander"],
+    "navigate_app": ["screen_observer", "desktop_control"],
     "fill_form": ["screen_observer", "browser"],
-    "order_food": ["ordering"],
-    "order_groceries": ["grocery"],
-    "book_travel": ["travel"],
+    "order_food": ["browser"],           # Claude navigates the ordering site via browser
+    "order_groceries": ["browser"],      # Same: any grocery site navigated via browser
+    "book_travel": ["browser"],          # Any travel site navigated via browser
     "add_note": ["second_brain"],
     "query_note": ["second_brain"],
     "smart_home": ["home_assistant"],
