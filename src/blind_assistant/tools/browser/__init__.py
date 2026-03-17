@@ -85,8 +85,10 @@ class BrowserTool:
             raise ImportError("playwright is not installed. Run: pip install playwright && playwright install chromium")
         try:
             self._playwright = await async_playwright().start()
+            assert self._playwright is not None  # start() always returns Playwright; narrows type
             # Use Chromium for best screen reader compatibility testing
             self._browser = await self._playwright.chromium.launch(headless=True)
+            assert self._browser is not None  # launch() always returns Browser; narrows type
             self._page = await self._browser.new_page()
             self._initialized = True
             logger.info("Browser tool initialized (Chromium headless)")
