@@ -196,17 +196,17 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 12 (Phase 3 — live Playwright validation + accessibility cleanup). Delivered: (1) ISSUE-021:
-11 real Playwright integration tests in tests/integration/test_browser_tool_real.py covering BrowserTool
-against local HTML fixtures (navigate, text extraction, find_elements, type_text, click-by-text,
-truncation, PNG screenshot, context manager, 404 handling, cart page). Tests auto-skip when Playwright
-system deps unavailable (WSL2 limitation); CI job 'integration-browser' added to ci.yml to run them
-in GitHub Actions where deps are available. (2) ISSUE-020: "Double-tap to activate" platform hint
-text removed from MainScreen.tsx; Platform import + platformHint style removed. 117 JS tests pass.
-482 Python tests pass. No regressions.
+Cycle 13 (Phase 3 — CI repair). Dominated by P0 CI blocker: 56 mypy type errors and openai-whisper
+setuptools build failure were causing every push to trigger a CI failure GitHub issue (20+ accumulated).
+Fixed by: (1) adding `from __future__ import annotations` + TYPE_CHECKING guards to 6 files; (2)
+`assert X is not None` narrowing for Optional post-init attributes in orchestrator, browser tool,
+voice interface, telegram bot; (3) explicit `bytes()` casts for cryptography library Any returns;
+(4) `vars(self)` pattern for dynamic dataclass attributes; (5) setuptools pre-install in CI test and
+integration-browser jobs. mypy: 0 errors (was 56). ruff: 0 errors. 465 unit tests pass. CI push
+triggered — pending verification of green run.
 
-Cycle 13 priority: (1) Verify CI integration-browser job passes (auto-triggers on push). (2) Android
-TalkBack real device test — Phase 3 gate remains unvalidated for real device usage.
+Cycle 14 priority: (1) Verify CI is green (gh run list). (2) Close 20+ stale P0 GitHub CI-failure
+issues. (3) Fix Expo web export Metro config (App.tsx vs app/index.tsx). (4) Web platform E2E tests.
 
 ## Known Issues / Technical Debt
 
