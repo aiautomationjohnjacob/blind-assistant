@@ -444,7 +444,7 @@ async def test_setup_telegram_optional_handles_non_digit_user_id(installer, mock
     with patch.object(installer, "_wait_for_input", side_effect=inputs):
         await installer._setup_telegram_optional()
     # Token stored, but user ID not stored (non-digit)
-    token_calls = [c for c in mock_store_credential.call_args_list]
+    token_calls = list(mock_store_credential.call_args_list)
     # Only token was stored (user ID was not a digit — skipped)
     assert len(token_calls) == 1
 
