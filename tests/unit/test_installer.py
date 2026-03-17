@@ -342,19 +342,24 @@ async def test_setup_elevenlabs_stores_key_when_provided(installer, mock_store_c
 # ─────────────────────────────────────────────────────────────
 
 
-async def test_setup_vault_returns_false_on_cancel(installer):
-    """_setup_vault must return False if user never says ready."""
-    # User says 'no' both times asked
-    inputs = iter(["no", "no"])
-    with patch.object(installer, "_wait_for_input", side_effect=inputs):
+async def test_setup_vault_accepts_response_after_not_ready(installer, tmp_path):
+    """_setup_vault must proceed after user says 'not ready yet' then provides passphrase."""
+    # First "no" = not ready yet; second input = waiting again; third = actual passphrase
+    inputs = iter(["no", "ready", "correct horse battery staple"])
+
+    mock_vault_key = MagicMock()
+    mock_vault_key.unlock = MagicMock()
+    mock_vault_key.store_in_keychain = MagicMock()
+
+    with (
+        patch.object(installer, "_wait_for_input", side_effect=inputs),
+        patch("pathlib.Path.home", return_value=tmp_path),
+        patch("blind_assistant.second_brain.encryption.VaultKey", return_value=mock_vault_key),
+        patch("blind_assistant.second_brain.encryption.generate_salt", return_value=b"\x00" * 16),
+    ):
         result = await installer._setup_vault()
-    # The second wait_for_input is for passphrase — if it proceeds, True is returned
-    # The first 'no' means "not ready yet" → we ask again → second 'no' is the passphrase
-    # Actually: the current code only asks once; let's check what actually happens
-    # After "no" at ready check, it says "Take your time" and calls _wait_for_input again
-    # Then prompts for passphrase. So it doesn't return False early — it continues.
-    # A 2-char passphrase triggers a retry. Let's test with proper passphrase.
-    assert result is True or result is False  # both valid — just no crash
+
+    assert result is True
 
 
 async def test_setup_vault_creates_vault_directory(installer, tmp_path):
