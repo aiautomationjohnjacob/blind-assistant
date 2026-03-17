@@ -20,7 +20,7 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P3 | Unit tests for ADB/simctl helper functions (_parse_content_descriptions, _parse_bounds) — device-free, runs in WSL2, improves coverage | Cycle 19 self-assessment | 2026-03-17 |
+| P3 | Create ROADMAP.md with Phase 3-5 milestones — CONTRIBUTING.md references it (broken link) | Cycle 20 doc audit | 2026-03-17 |
 | P3 | Android TalkBack device test: trigger release tag to run AVD CI job (e2e-android); verify 8 TalkBack tests pass on real emulator | Phase 3 sprint | 2026-03-17 |
 | P3 | iOS VoiceOver device test: trigger release tag on macOS runner (ios-e2e.yml); verify 9 VoiceOver tests pass on iOS Simulator | Founder scope expansion | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
