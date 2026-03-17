@@ -97,12 +97,14 @@ jobs:
             cryptography
 
       - name: Install project dependencies
-        # setuptools must be pre-installed because openai-whisper uses legacy setup.py
-        # with pkg_resources (a setuptools component). Without it, pip build isolation
-        # fails to find pkg_resources when building the wheel.
+        # openai-whisper uses legacy setup.py with pkg_resources. Modern pip uses PEP 517
+        # build isolation which creates a fresh env; in setuptools>=71 pkg_resources was
+        # split out and the isolated env doesn't include it. --no-build-isolation uses
+        # the outer env where setuptools ships pkg_resources. setuptools pre-install is
+        # still needed for the editable install step.
         run: |
           pip install setuptools
-          pip install -r requirements.txt
+          pip install -r requirements.txt --no-build-isolation
 
       - name: Install project (editable)
         run: pip install -e . 2>/dev/null || pip install -e . --no-build-isolation 2>/dev/null || true
