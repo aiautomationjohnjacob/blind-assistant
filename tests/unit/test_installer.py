@@ -237,24 +237,30 @@ async def test_setup_native_app_skip_exits_early(installer):
 
 
 async def test_setup_native_app_shows_server_address_when_ready(installer):
-    """_setup_native_app must resolve local IP and speak server address."""
+    """_setup_native_app must resolve local IP and speak server address to user."""
     fake_ip = "192.168.1.42"
     inputs = iter(["ready", "ready"])  # 1) app step, 2) after address shown
 
+    spoken_messages = []
+
+    def capture_speak(msg):
+        """Capture all spoken messages during the method call."""
+        spoken_messages.append(msg)
+        installer._last_message = msg
+
+    mock_sock = MagicMock()
+    mock_sock.getsockname.return_value = (fake_ip, 0)
+
     with (
         patch.object(installer, "_wait_for_input", side_effect=inputs),
-        patch("socket.socket") as mock_socket_cls,
+        patch.object(installer, "_speak", side_effect=capture_speak),
+        patch("installer.install.socket.socket", return_value=mock_sock),
     ):
-        mock_sock = MagicMock()
-        mock_sock.getsockname.return_value = (fake_ip, 0)
-        mock_socket_cls.return_value.__enter__ = MagicMock(return_value=mock_sock)
-        mock_socket_cls.return_value.__exit__ = MagicMock(return_value=False)
-        mock_socket_cls.return_value = mock_sock
         await installer._setup_native_app()
 
-    # Server address must have been spoken
-    spoken = installer._last_message
-    assert "192.168.1.42" in spoken or "8000" in spoken or "Blind Assistant app" in spoken.lower()
+    # The IP address should appear in one of the spoken messages
+    all_spoken = " ".join(spoken_messages)
+    assert "192.168.1.42" in all_spoken or "8000" in all_spoken
 
 
 async def test_setup_native_app_falls_back_to_localhost_on_socket_error(installer):
