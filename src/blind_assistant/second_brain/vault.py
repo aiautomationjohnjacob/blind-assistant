@@ -165,7 +165,7 @@ class EncryptedVault:
 
             # Parse YAML frontmatter
             parts = content.split("---", 2)
-            metadata = {}
+            metadata: dict[str, object] = {}
             body = content
             if len(parts) >= 3:
                 import yaml
