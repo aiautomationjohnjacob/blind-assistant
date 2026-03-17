@@ -6,7 +6,12 @@
 anthropic==0.25.0               # Claude API (intent, vision, planning)
 openai-whisper==20231117        # Local speech-to-text (runs offline)
 
-# Telegram Bot Interface
+# REST API Server (primary connection point for all client apps)
+fastapi==0.111.0                # Async REST API framework
+uvicorn==0.29.0                 # ASGI server to run FastAPI
+pydantic==2.7.0                 # Request/response data validation
+
+# Telegram Bot Interface (secondary/super-user channel — optional)
 python-telegram-bot==21.1.1    # Telegram bot framework
 
 # Text-to-Speech
