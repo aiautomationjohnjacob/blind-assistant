@@ -400,15 +400,21 @@ class Orchestrator:
 
         Reuses the confirmation gate's response queue so Telegram messages and
         local voice input are both routed here automatically.
-        Returns None on timeout (120 seconds).
+        Timeout is read from config.yaml `voice.prompt_timeout_seconds` (default 120).
+        Per ISSUE-006: hardcoded timeout was inaccessible; now configurable for Dorothy
+        (elder, needs more time) and Marcus (power user, wants less).
         """
+        # Read timeout from config — allows per-user customisation in config.yaml
+        timeout_seconds: float = float(
+            self.config.get("voice", {}).get("prompt_timeout_seconds", 120)
+        )
         self.confirmation_gate.register_session(context.session_id)
         queue = self.confirmation_gate._response_queues[context.session_id]
         try:
-            response = await asyncio.wait_for(queue.get(), timeout=120)
+            response = await asyncio.wait_for(queue.get(), timeout=timeout_seconds)
             return response.strip() if response and response.strip() else None
         except asyncio.TimeoutError:
-            logger.info("Vault passphrase prompt timed out after 120 seconds")
+            logger.info(f"Vault passphrase prompt timed out after {timeout_seconds}s")
             return None
 
     @property
