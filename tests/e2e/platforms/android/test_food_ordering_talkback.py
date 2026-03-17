@@ -311,8 +311,6 @@ class TestFoodOrderingTalkBackFlow:
             # Inject an "order me food" request via the API to test the disclosure flow.
             # In a real E2E the user would speak this; here we inject via the backend
             # to test the UI response pathway without requiring a real microphone.
-            import json
-
             import httpx
 
             httpx.post(
