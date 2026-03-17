@@ -64,7 +64,8 @@ def encrypt(plaintext: bytes, key: bytes) -> bytes:
 
     aesgcm = AESGCM(key)
     nonce = os.urandom(12)  # 96-bit nonce for GCM
-    ciphertext = aesgcm.encrypt(nonce, plaintext, None)
+    # AESGCM.encrypt returns Any — cast to bytes for type safety
+    ciphertext: bytes = bytes(aesgcm.encrypt(nonce, plaintext, None))
     return nonce + ciphertext  # nonce prepended for decryption
 
 
