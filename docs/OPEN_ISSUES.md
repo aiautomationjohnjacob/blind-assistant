@@ -479,6 +479,26 @@ PytestUnknownMarkWarning for `@pytest.mark.e2e` in test_food_ordering.py and
 **Status**: RESOLVED
 **Resolved in**: Cycle 15 — `e2e` and `web` markers added to `pyproject.toml` [tool.pytest.ini_options] markers list.
 
+### ISSUE-029: Web staging deployment requires manual Netlify secret setup
+**Severity**: MEDIUM
+**Category**: infrastructure, ux
+**Detected by**: orchestrator (Cycle 18)
+**Detected**: 2026-03-17
+**Description**: `netlify.toml` and `.github/workflows/deploy-staging.yml` are now in the
+repo. The web app will auto-deploy to Netlify staging on every push to main — but only
+after a sighted developer completes one-time setup:
+  1. Create a Netlify site at app.netlify.com (or `netlify init`)
+  2. Add GitHub repository secret: `NETLIFY_AUTH_TOKEN` (from app.netlify.com/user/applications)
+  3. Add GitHub repository secret: `NETLIFY_SITE_ID` (from Netlify site settings → Site ID)
+Until these secrets are added, the `deploy-staging` workflow will fail with an auth error.
+**Impact**: Real blind users cannot test the app on NVDA+Chrome until the staging URL exists.
+**Proposed fix**: A sighted developer or DevOps engineer must complete the Netlify setup.
+Once done, the staging URL (e.g. https://blind-assistant-staging.netlify.app) should be:
+  - Added to README.md for testers
+  - Used in the NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome Phase 3 testing scenarios
+  - Configured in Netlify UI with EXPO_PUBLIC_API_BASE_URL pointing to backend
+**Status**: OPEN
+
 ### ISSUE-028: Missing unit tests for telegram_bot.py, query.py, redaction.py, screen_observer.py
 **Severity**: MEDIUM
 **Category**: testing
