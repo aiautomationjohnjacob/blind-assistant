@@ -169,12 +169,13 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 3 (Phase 2 Core Build Sprint) delivered: pyproject.toml pythonpath fix (tests now
-run without manual PYTHONPATH), P1 ISSUE-001 fix (_get_vault now prompts for passphrase
-via voice/Telegram when keychain is empty, never fails silently), 10 new tests for
-passphrase prompt flow, 25 new TTS/STT unit tests (synthesize_speech dispatch,
-ElevenLabs/pyttsx3 fallback, singleton model loading, transcribe_microphone). Total:
-212 test functions across 8 test files, no regressions.
+Cycle 4 (Phase 2 Core Build Sprint) delivered: full codebase audit (Telegram de-emphasis
+corrected in main.py default + telegram_bot.py docstring), ARCH DECISION (React Native +
+Expo for all client apps — documented in ARCHITECTURE.md), REST API server (api_server.py:
+6 endpoints, Bearer token auth, global safe error handler, 28 tests), ISSUE-005
+(context.clear_sensitive() — 4 tests), ISSUE-006 (configurable passphrase timeout — 3
+tests). Total: 314 tests (was 279), all passing, no regressions. API_SERVER_TOKEN
+credential key added to credentials.py.
 
 ## Known Issues / Technical Debt
 
