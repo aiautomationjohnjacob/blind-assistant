@@ -484,7 +484,6 @@ async def test_run_self_test_reports_missing_when_claude_not_configured(installe
 async def test_run_self_test_telegram_optional_not_counted_as_required(installer, tmp_path):
     """Telegram absence must not cause 'missing required component' message."""
     # Both required (Claude + vault) pass; Telegram absent
-    call_count = 0
 
     def fake_get_credential(key):
         # Returns key for Claude; returns None for Telegram
