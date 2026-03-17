@@ -223,7 +223,9 @@ class Orchestrator:
         description = await observer.describe_screen()
         return {"text": description}
 
-    async def _handle_add_note(self, intent, context: UserContext, update) -> dict:
+    async def _handle_add_note(
+        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
+    ) -> dict:
         """Add a note to the Second Brain vault."""
         await update("Saving that to your notes...")
         vault = await self._get_vault(context, response_callback=update)
