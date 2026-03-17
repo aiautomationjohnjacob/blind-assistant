@@ -154,10 +154,9 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] Vault passphrase prompt recovery: user can self-unlock Second Brain by voice (Cycle 3)
 - [x] TTS + STT unit tests: 25 new tests covering voice pipeline (Cycle 3)
 - [x] Risk disclosure flow: payment confirmation with spoken warning (Cycle 1)
-- [ ] **P1: Backend API server** — expose Python backend as FastAPI HTTP server; all clients
-      connect via REST; endpoints: /query, /remember, /describe, /task, /profile
+- [x] **P1: Backend API server** — FastAPI HTTP server created in api_server.py; endpoints /query /remember /describe /task /profile /health; Bearer token auth; 28 tests (Cycle 4)
+- [x] **P1: ARCH DECISION** — React Native + Expo chosen; documented in ARCHITECTURE.md; clients/ directory to be created in Cycle 5 (Cycle 4)
 - [ ] **P1: Native voice E2E demo** — voice in → STT → orchestrator → TTS audio reply out (Desktop CLI first; NOT Telegram — Telegram is secondary/super-user only)
-- [ ] **P1: ARCH DECISION** — tech-lead decides unified (React Native/Flutter) vs native for clients
 - [ ] Tool registry + installer: self-expanding pattern with user confirmation
 - [ ] Voice installer: voice-guided setup from zero to functional
 - [ ] End-to-end test: blind user asks to order food → full flow with confirmations
