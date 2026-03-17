@@ -149,9 +149,11 @@ class VaultKey:
 
     @property
     def is_unlocked(self) -> bool:
+        """Return True if the vault has been unlocked and the key is in memory."""
         return self._key is not None
 
     def get_key(self) -> bytes:
+        """Return the in-memory AES key; raises RuntimeError if the vault is locked."""
         if self._key is None:
             raise RuntimeError("Vault is locked. Please unlock with your passphrase first.")
         return self._key
