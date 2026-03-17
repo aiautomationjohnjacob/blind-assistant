@@ -32,6 +32,15 @@
 | P3 | Populate ROADMAP.md with Phase 3-5 milestones | open source | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
+## Completed Items (Cycle 18 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| netlify.toml + deploy-staging.yml: web app auto-deploys to Netlify on push to main | 2026-03-17 | 18 |
+| 11 new food ordering web E2E accessibility tests (keyboard nav, aria-live, focus management) | 2026-03-17 | 18 |
+| WEB_APP_URL env var override in web E2E tests (enables staging URL testing) | 2026-03-17 | 18 |
+| CSP fixed: no localhost in production CSP; connect-src restricted to api.blind-assistant.org | 2026-03-17 | 18 |
+
 ## Completed Items
 
 | Item | Completed | Cycle # |
