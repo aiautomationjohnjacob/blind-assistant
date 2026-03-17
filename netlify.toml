@@ -1,0 +1,97 @@
+# Netlify deployment configuration for blind-assistant.org
+#
+# Deploys the Expo web build (clients/mobile/dist/) to Netlify.
+# Staging: auto-deploys on every push to main (requires NETLIFY_AUTH_TOKEN +
+#   NETLIFY_SITE_ID secrets in GitHub → see .github/workflows/deploy-staging.yml).
+# Production: tag a release (vX.Y.Z) to deploy to blind-assistant.org.
+#
+# Accessibility notes:
+# - SPA routing: all routes → index.html (Expo Router uses hash-based routing on web)
+# - Security headers protect screen content (CSP) and prevent click-jacking
+# - Cache-Control is set per-file type to minimise load time for slow connections
+
+[build]
+  # Where to run the build command (relative to repo root)
+  base = "clients/mobile"
+  # Build command — produces dist/ with index.html + JS bundle
+  command = "npm ci --legacy-peer-deps && npx expo export --platform web"
+  # Directory to publish (relative to repo root)
+  publish = "clients/mobile/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Override the API base URL for the staging/production deployment.
+  # Set EXPO_PUBLIC_API_BASE_URL in Netlify's environment variables UI.
+  # Default (localhost:8000) is only correct for local development.
+  EXPO_PUBLIC_API_BASE_URL = "https://api.blind-assistant.org"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SPA routing: Expo Web uses client-side routing. All paths must serve index.html.
+# Without this redirect, reloading /dashboard returns a 404 from Netlify.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HTTP security headers
+# ─────────────────────────────────────────────────────────────────────────────
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Prevent the page from being embedded in an iframe (clickjacking protection)
+    X-Frame-Options = "SAMEORIGIN"
+    # Block MIME-type sniffing (prevents XSS via uploaded files)
+    X-Content-Type-Options = "nosniff"
+    # Referrer policy — no referrer sent to third-party sites (privacy)
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # Content Security Policy:
+    # - default-src self: only load resources from our own domain
+    # - script-src self + unsafe-inline: React needs inline scripts for hydration
+    # - connect-src: allow API calls to the backend server
+    # - Note: tighten this in Phase 4 (security hardening) to remove unsafe-inline
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.blind-assistant.org http://localhost:8000; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:;"
+    # Strict Transport Security (HTTPS only in production)
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Cache control: static assets get long cache; index.html is never cached
+# so users always get the latest app version
+# ─────────────────────────────────────────────────────────────────────────────
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/_expo/static/*"
+  [headers.values]
+    # Expo content-hashes the filenames — safe to cache for a long time
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Context-specific settings
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Staging branch deploys (e.g. main → staging.blind-assistant.org)
+[context.branch-deploy]
+  command = "npm ci --legacy-peer-deps && npx expo export --platform web"
+
+[context.branch-deploy.environment]
+  EXPO_PUBLIC_API_BASE_URL = "https://api-staging.blind-assistant.org"
+
+# Deploy previews (pull requests)
+[context.deploy-preview]
+  command = "npm ci --legacy-peer-deps && npx expo export --platform web"
+
+[context.deploy-preview.environment]
+  EXPO_PUBLIC_API_BASE_URL = "http://localhost:8000"
