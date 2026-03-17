@@ -201,12 +201,6 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 17 (Phase 3 — voice installer refactored + web E2E CI confirmed). Voice installer now has
-_setup_native_app() as Step 1 (tells user to install Blind Assistant app via TalkBack/VoiceOver
-app store, gives server address). Telegram demoted to optional Step 5 with explicit sighted-help
-warning. 58 new installer unit tests written. 641 unit tests passing. Web E2E CI run 23219936377
-confirmed ALL 7 jobs green (including e2e-web Playwright accessibility tests).
-
 Cycle 18 (Phase 3 — web staging deploy + food ordering web E2E). netlify.toml + deploy-staging.yml
 created for auto-deploy on push to main (requires NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID secrets —
 ISSUE-029). 11 new Playwright food ordering accessibility tests: keyboard reach, aria-live='polite',
@@ -214,10 +208,18 @@ confirmation prompts in live regions, no visual-only instructions, focus managem
 var override added so staging workflow can test against real Netlify URL. 22 web E2E tests total.
 641 Python unit tests unchanged. Ruff clean.
 
-Cycle 19 priority:
-1. **P2: End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver (use AVD emulator in CI if available)
-2. **P2: ISSUE-029**: Add Netlify secrets — manual step needed; document in README for operators
-3. **P3: Android TalkBack device test**: expo build:android + AVD
+Cycle 19 (Phase 3 — Android TalkBack + iOS VoiceOver E2E tests). ADBClient wrapper + 8 TalkBack
+E2E tests (launch/crash, unlabelled elements, 44dp touch target, focusable speak button, risk
+disclosure flow, confirmation prompt, screenshot). SimctlClient wrapper + 9 VoiceOver tests (launch,
+double-tap hint regression, visual-only language, risk disclosure, live region, screenshot). CI path
+bug fixed (tests/e2e/android/ -> tests/e2e/platforms/android/). ios-e2e.yml macOS workflow created.
+android/ios marks registered in pyproject.toml. ISSUE-029 Netlify operator docs in README.md.
+641 unit tests unchanged. Ruff clean.
+
+Cycle 20 priority:
+1. **Every-10th-cycle**: documentation-steward run (README, CHANGELOG, CONTRIBUTING.md, docstrings)
+2. **P3: Android TalkBack device test**: trigger a v0.x.x release tag to run the AVD CI job
+3. **P3: Unit tests for ADB helper functions**: _parse_content_descriptions, _parse_bounds (device-free)
 
 ## Known Issues / Technical Debt
 
