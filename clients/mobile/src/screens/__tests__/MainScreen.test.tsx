@@ -33,24 +33,23 @@ jest.mock("expo-speech", () => ({
   stop: jest.fn(),
 }));
 
-// Mock AccessibilityInfo.announceForAccessibility so we can assert on it.
-// We do NOT spread jest.requireActual("react-native") here because in the
-// Jest/jest-expo environment that would pull in Settings.ios.js which requires
-// the SettingsManager native module — not available in Node-based Jest.
-// Instead, jest-expo already provides all other RN mocks via its preset.
-jest.mock("react-native/Libraries/Components/AccessibilityInfo/AccessibilityInfo", () => ({
-  announceForAccessibility: jest.fn(),
-  addEventListener: jest.fn(() => ({ remove: jest.fn() })),
-  isScreenReaderEnabled: jest.fn().mockResolvedValue(false),
-  isBoldTextEnabled: jest.fn().mockResolvedValue(false),
-  isGrayscaleEnabled: jest.fn().mockResolvedValue(false),
-  isInvertColorsEnabled: jest.fn().mockResolvedValue(false),
-  isReduceMotionEnabled: jest.fn().mockResolvedValue(false),
-  isReduceTransparencyEnabled: jest.fn().mockResolvedValue(false),
-  prefersCrossFadeTransitions: jest.fn().mockResolvedValue(false),
-  setAccessibilityFocus: jest.fn(),
-  sendAccessibilityEvent: jest.fn(),
-}));
+// Mock react-native selectively.
+// We only override AccessibilityInfo.announceForAccessibility to make it
+// spy-able in tests. All other RN APIs come from jest-expo's preset mocks.
+// IMPORTANT: Do NOT use jest.requireActual("react-native") here — that path
+// imports Settings.ios.js which requires SettingsManager native module, which
+// is not available in Node-based Jest (even with jest-expo preset).
+jest.mock("react-native", () => {
+  // jest-expo preset already mocks react-native; pull that mock as our base
+  const rnMock = jest.requireMock("react-native");
+  return {
+    ...rnMock,
+    AccessibilityInfo: {
+      ...(rnMock.AccessibilityInfo ?? {}),
+      announceForAccessibility: jest.fn(),
+    },
+  };
+});
 
 const mockQuery = jest.fn();
 
