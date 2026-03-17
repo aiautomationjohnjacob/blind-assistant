@@ -235,16 +235,17 @@ issues. (3) Fix Expo web export Metro config (App.tsx vs app/index.tsx). (4) Web
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 12.** Phase 3 in progress. ISSUE-021 browser integration tests + ISSUE-020 fix done.
-No mid-cycle state artifacts. All changes committed and pushed.
+**Loop completed Cycle 13.** Phase 3 in progress. ISSUE-022 CI repair done (56 mypy errors fixed,
+setuptools added to CI). Push triggered; CI run pending verification.
 
-The most important work for Cycle 13 (Phase 3: Blind User Testing):
-1. **Verify CI**: The 'integration-browser' job was added to ci.yml this cycle. Confirm it passes
-   on the next GitHub Actions run. If it fails (system deps wrong, test logic error), fix immediately.
-2. **P2: Real device test** — Android TalkBack or iOS VoiceOver end-to-end food ordering. This is
-   the core Phase 3 gate that hasn't been addressed. Use device-simulator agent with AVD if hardware
-   not available. If device testing is blocked, pivot to Web app (P2) — React Native Web export.
-3. **P3: Conversational recovery** in checkout loop — handle mid-flow "show me the menu again"
-   or "go back" user requests; currently the loop does not support backtracking.
-4. **Every 5th cycle (Cycle 15)**: project-inspector should run.
-5. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
+The most important work for Cycle 14 (Phase 3: Blind User Testing):
+1. **Verify CI is green**: `gh run list --limit 3` — the fix was pushed as commit 687e58b. If any
+   job still fails, diagnose immediately before starting new features.
+2. **Close stale GitHub issues**: 20+ historical P0 CI-failure issues from before Cycle 13 fix.
+   Use `gh issue close` to clean up the tracker. These are noise, not real open issues.
+3. **Fix Expo web export**: Add `"main": "app/index.tsx"` to app.json (or add App.tsx shim) so
+   `npx expo export --platform web` resolves the Metro AppEntry.js path correctly.
+4. **P2: Web platform accessibility tests**: Once Expo web export works, serve with `serve dist/`
+   and run Playwright axe-core accessibility audit + keyboard navigation tests.
+5. **Every 5th cycle (Cycle 15)**: project-inspector should run.
+6. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
