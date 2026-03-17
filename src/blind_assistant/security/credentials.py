@@ -146,3 +146,4 @@ ELEVENLABS_API_KEY = "elevenlabs_api_key"
 STRIPE_SECRET_KEY = "stripe_secret_key"
 STRIPE_PAYMENT_METHOD = "stripe_payment_method_token"
 VAULT_PASSPHRASE_HINT = "vault_passphrase_hint"  # Hint only, never the passphrase itself
+API_SERVER_TOKEN = "api_server_token"             # Bearer token for the REST API server
