@@ -104,15 +104,15 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 2 (Phase 2 Core Build Sprint) delivered: voice_local.py interface (continuous
-listen-speak loop), second_brain/query.py (voice-queryable vault layer with braille
-formatting), orchestrator real intent routing for screen/note/query/general flows,
-vault filename bug fix (microseconds), conftest.py audio suppression fix, and 244
-passing unit tests covering encryption, vault, orchestrator, and all security modules.
+Cycle 3 (Phase 2 Core Build Sprint) delivered: pyproject.toml pythonpath fix (tests now
+run without manual PYTHONPATH), P1 ISSUE-001 fix (_get_vault now prompts for passphrase
+via voice/Telegram when keychain is empty, never fails silently), 10 new tests for
+passphrase prompt flow, 25 new TTS/STT unit tests (synthesize_speech dispatch,
+ElevenLabs/pyttsx3 fallback, singleton model loading, transcribe_microphone). Total:
+279 passing tests, no regressions.
 
 ## Known Issues / Technical Debt
 
-- `_get_vault` silently returns None if vault key not in keychain — needs passphrase prompt
 - `transcribe_microphone` uses fixed duration — needs Voice Activity Detection (VAD)
 - Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — Phase 2 work
 - `src/blind_assistant/memory/mcp_memory.py` not yet implemented — Phase 2 work
