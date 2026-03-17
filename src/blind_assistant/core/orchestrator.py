@@ -768,7 +768,9 @@ class Orchestrator:
             )
         }
 
-    async def _get_vault(self, context: UserContext, response_callback=None):
+    async def _get_vault(
+        self, context: UserContext, response_callback: ResponseCallback = None
+    ):
         """
         Get or initialize the vault for this user.
 
