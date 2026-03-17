@@ -160,8 +160,8 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [ ] Tool registry + installer: self-expanding pattern with user confirmation
 - [ ] Voice installer: voice-guided setup from zero to functional
 - [ ] End-to-end test: blind user asks to order food → full flow with confirmations
-- [ ] context.clear_sensitive(): zero vault passphrase on session end
-- [ ] Make passphrase prompt timeout configurable in config.yaml
+- [x] context.clear_sensitive(): UserContext.clear_sensitive() added (Cycle 4, 4 tests)
+- [x] Make passphrase prompt timeout configurable in config.yaml (Cycle 4, 3 tests)
 
 ## Blockers
 
