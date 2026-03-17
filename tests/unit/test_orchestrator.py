@@ -330,3 +330,107 @@ class TestConfirmationGateActions:
             response_callback=None,
         )
         assert result is False
+
+
+# ─────────────────────────────────────────────────────────────
+# UserContext.clear_sensitive() — ISSUE-005
+# ─────────────────────────────────────────────────────────────
+
+
+class TestUserContextClearSensitive:
+    """Tests for the defense-in-depth passphrase zeroing at session end."""
+
+    def test_clear_sensitive_clears_cached_passphrase(self):
+        """clear_sensitive() sets _vault_passphrase to None."""
+        ctx = UserContext(user_id="u", session_id="s")
+        ctx._vault_passphrase = "correct-horse-battery-staple"  # type: ignore[attr-defined]
+        ctx.clear_sensitive()
+        assert ctx._vault_passphrase is None  # type: ignore[attr-defined]
+
+    def test_clear_sensitive_no_error_when_no_passphrase_cached(self):
+        """clear_sensitive() is safe to call even if no passphrase was ever cached."""
+        ctx = UserContext(user_id="u", session_id="s")
+        # Must not raise — passphrase was never set
+        ctx.clear_sensitive()  # no exception
+
+    def test_clear_sensitive_idempotent_when_already_none(self):
+        """clear_sensitive() can be called multiple times without error."""
+        ctx = UserContext(user_id="u", session_id="s")
+        ctx._vault_passphrase = "passphrase"  # type: ignore[attr-defined]
+        ctx.clear_sensitive()
+        ctx.clear_sensitive()  # second call — no exception
+        assert ctx._vault_passphrase is None  # type: ignore[attr-defined]
+
+    def test_clear_sensitive_does_not_affect_other_fields(self):
+        """clear_sensitive() only clears the passphrase, not other context fields."""
+        ctx = UserContext(
+            user_id="alice",
+            session_id="sess-1",
+            verbosity="detailed",
+            speech_rate=0.75,
+            braille_mode=True,
+        )
+        ctx._vault_passphrase = "secret"  # type: ignore[attr-defined]
+        ctx.clear_sensitive()
+        # Passphrase cleared
+        assert ctx._vault_passphrase is None  # type: ignore[attr-defined]
+        # Other fields untouched
+        assert ctx.user_id == "alice"
+        assert ctx.verbosity == "detailed"
+        assert ctx.speech_rate == 0.75
+        assert ctx.braille_mode is True
+
+
+# ─────────────────────────────────────────────────────────────
+# Configurable passphrase timeout — ISSUE-006
+# ─────────────────────────────────────────────────────────────
+
+
+class TestConfigurablePassphraseTimeout:
+    """Tests that _collect_vault_passphrase reads timeout from config."""
+
+    async def test_passphrase_timeout_uses_config_value(self, minimal_config):
+        """_collect_vault_passphrase uses voice.prompt_timeout_seconds from config."""
+        # Set a very short timeout via config
+        config = {**minimal_config, "voice": {"prompt_timeout_seconds": 0.05}}
+        orc = Orchestrator(config)
+        # Manually initialise only the confirmation gate (skip full initialize)
+        from blind_assistant.core.confirmation import ConfirmationGate
+        orc.confirmation_gate = ConfirmationGate()
+
+        ctx = UserContext(user_id="u", session_id="test-timeout-session")
+        result = await orc._collect_vault_passphrase(ctx)
+        # Queue was empty; with 0.05s timeout it must time out and return None
+        assert result is None
+
+    async def test_passphrase_timeout_defaults_to_120_when_not_configured(self, minimal_config):
+        """_collect_vault_passphrase defaults to 120s if config has no voice section."""
+        import asyncio
+        from blind_assistant.core.confirmation import ConfirmationGate
+
+        orc = Orchestrator(minimal_config)
+        orc.confirmation_gate = ConfirmationGate()
+
+        ctx = UserContext(user_id="u", session_id="test-default-timeout")
+
+        # Register session and pre-fill the queue so we don't actually wait 120s
+        orc.confirmation_gate.register_session(ctx.session_id)
+        queue = orc.confirmation_gate._response_queues[ctx.session_id]
+        await queue.put("my-passphrase")
+
+        result = await orc._collect_vault_passphrase(ctx)
+        assert result == "my-passphrase"
+
+    async def test_passphrase_timeout_returns_none_on_empty_queue_short_timeout(
+        self, minimal_config
+    ):
+        """With a 0.05s timeout and no response, returns None immediately."""
+        from blind_assistant.core.confirmation import ConfirmationGate
+
+        config = {**minimal_config, "voice": {"prompt_timeout_seconds": 0.05}}
+        orc = Orchestrator(config)
+        orc.confirmation_gate = ConfirmationGate()
+
+        ctx = UserContext(user_id="u", session_id="test-quick-timeout")
+        result = await orc._collect_vault_passphrase(ctx)
+        assert result is None
