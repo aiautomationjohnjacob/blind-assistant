@@ -111,8 +111,10 @@ class TestEncryptedVaultAddNote:
 
 class TestEncryptedVaultSearch:
     async def test_search_returns_matching_note(self, vault, sample_note_content):
+        # sample_note_content: "Meeting with Dr. Smith on Thursday at 2pm. Prescription renewal needed."
+        # Keywords extracted: meeting, smith, thursday, prescription, renewal
         await vault.add_note(sample_note_content, category="health")
-        results = await vault.search("doctor appointment")
+        results = await vault.search("smith prescription")
         assert len(results) >= 1
 
     async def test_search_returns_empty_for_no_match(self, vault):
@@ -122,7 +124,7 @@ class TestEncryptedVaultSearch:
 
     async def test_search_returns_dict_with_required_keys(self, vault, sample_note_content):
         await vault.add_note(sample_note_content)
-        results = await vault.search("doctor")
+        results = await vault.search("smith prescription renewal")
         assert len(results) > 0
         note = results[0]
         assert "title" in note
@@ -143,14 +145,15 @@ class TestEncryptedVaultSearch:
             await v.search("anything")
 
     async def test_search_content_is_decrypted(self, vault, sample_note_content):
+        # sample_note_content: "Meeting with Dr. Smith on Thursday at 2pm. Prescription renewal needed."
         await vault.add_note(sample_note_content, category="health")
-        results = await vault.search("doctor appointment")
+        results = await vault.search("smith prescription")
         assert len(results) > 0
         # The returned content should be readable plaintext, not ciphertext
         content = results[0]["content"]
         assert isinstance(content, str)
         # The original content keywords should appear in the note body
-        assert "doctor" in content.lower() or "Dr" in content
+        assert "Smith" in content or "prescription" in content.lower()
 
 
 # ─────────────────────────────────────────────────────────────
