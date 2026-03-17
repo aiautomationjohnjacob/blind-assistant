@@ -199,16 +199,11 @@ placeholder files. Add Playwright dependency. Wire the first web smoke test.
 **Category**: security, architecture
 **Detected by**: security-specialist (Cycle 4 review)
 **Detected**: 2026-03-17
-**Description**: `api_server.py` has no rate limiting middleware. On localhost during
-development this is acceptable (only the local user can send requests), but before any
-cloud deployment, an unauthenticated attacker who discovers the server could flood it
-with requests, degrading response quality for the blind user.
-**Impact**: Service quality degradation for the blind user when server is exposed to
-the network. Potential cost escalation from excessive Claude API calls.
-**Proposed fix**: Add `slowapi` or custom middleware to limit requests per IP to
-e.g. 60/minute for authenticated endpoints and 10/minute for /health. Configure via
-`config.yaml api_server.rate_limit_per_minute`.
-**Status**: OPEN
+**Description**: `api_server.py` has no rate limiting middleware.
+**Status**: RESOLVED
+**Resolved in**: Cycle 6 — RateLimitMiddleware added to api_server.py (sliding window,
+defaultdict(deque), no new dependency). 60 req/min auth endpoints, 120 req/min /health,
+both configurable via config.yaml api_server.rate_limit_per_minute. 8 unit tests added.
 
 ### ISSUE-012: Dead code — wake_word_found variable in voice_local.py
 **Severity**: LOW
