@@ -166,6 +166,8 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P1: Mobile first-run setup wizard** — SetupWizardScreen + useSecureStorage + app/index.tsx; 63 new JS tests (Cycle 6)
 - [x] **P3: Dead code removed** — wake_word_found in voice_local.py removed (Cycle 6)
 - [x] **P3: Rate limiting** — RateLimitMiddleware in api_server.py; 8 new Python tests (Cycle 6)
+- [x] **P1: Real voice recording** — useAudioRecorder hook + 2-press flow in MainScreen + /transcribe endpoint; 41 new tests (Cycle 7)
+- [x] **P3: Quick fixes** — ISSUE-016 (TextInput importantForAccessibility) + ISSUE-017 (URL validation); 14 new JS tests (Cycle 7)
 
 ## Blockers
 
@@ -173,12 +175,12 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 6 (Phase 2 Core Build Sprint) delivered: ISSUE-014 (JS CI job 'test-js' added to
-ci.yml; 77 JS tests now run on every push); ISSUE-013 (SetupWizardScreen voice-guided
-first-run wizard — useSecureStorage hook, 5-step flow, 63 new JS tests); ISSUE-012
-(dead code wake_word_found removed from voice_local.py); ISSUE-011 (RateLimitMiddleware
-added to api_server.py with sliding-window per-IP limiting, 8 new Python tests, configurable
-via config.yaml). Python tests: 356 total (347 unit + 9 E2E), 21 skipped. JS tests: 77.
+Cycle 7 (Phase 2 Core Build Sprint) delivered: ISSUE-015 resolved — real voice recording
+in MainScreen using expo-av; new `useAudioRecorder` hook encapsulates recording lifecycle;
+backend POST /transcribe added (base64 audio → Whisper → text); JS API client extended
+with `transcribe()` method; ISSUE-016 (importantForAccessibility on TextInput) and
+ISSUE-017 (URL scheme validation) also resolved. Python tests: 363 (354 unit + 9 E2E,
+21 skipped). JS tests: 114. The mobile app is now a real voice assistant.
 
 ## Known Issues / Technical Debt
 
@@ -186,9 +188,7 @@ via config.yaml). Python tests: 356 total (347 unit + 9 E2E), 21 skipped. JS tes
 - Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — Phase 2 work
 - `src/blind_assistant/memory/mcp_memory.py` not yet implemented — Phase 2 work
 - response_callback params in orchestrator lack Optional[Callable] type annotations — ISSUE-004
-- MainScreen.tsx sends hardcoded "Hello, what can you do?" — no real voice recording yet — ISSUE-015
-- SetupWizardScreen TextInput missing importantForAccessibility="yes" — ISSUE-016
-- saveApiBaseUrl should validate URL scheme before storing — ISSUE-017
+- /transcribe has no body size limit — ISSUE-018
 
 ## Decisions Made
 
