@@ -21,7 +21,7 @@
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
 | P2 | End-to-end food ordering demo on real device: blind user on Android (TalkBack) + iOS (VoiceOver) can say "order me food" and complete the full flow by voice. Use AVD emulator + ADB. | Phase 3 sprint | 2026-03-17 |
-| P2 | Web app deployed to staging: Netlify/Vercel deploy of Expo web build for real NVDA+Chrome testing. Web E2E tests exist and CI builds the bundle — next step is deploy so real users can test. | Cycle 15 review | 2026-03-17 |
+| P2 | ISSUE-029: Netlify secrets setup — a sighted operator must add NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID to GitHub repo secrets; then web app auto-deploys. Document in README.md. netlify.toml + deploy-staging.yml already in repo (Cycle 18). | Cycle 18 | 2026-03-17 |
 | P3 | Android app: run npm install + expo build:android + TalkBack test on AVD | Founder scope expansion | 2026-03-17 |
 | P3 | iOS app: run npm install + expo build:ios --simulator + VoiceOver test on xcrun simctl | Founder scope expansion | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
