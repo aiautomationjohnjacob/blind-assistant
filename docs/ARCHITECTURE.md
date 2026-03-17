@@ -119,114 +119,77 @@ targets.
 
 ---
 
-## Directory Structure
+## Repository Layout
+
+The repo is split by deployment unit. Never mix code across boundaries.
 
 ```
 blind-assistant/
-├── README.md                    # Voice-screen-reader-friendly setup guide
-├── requirements.txt             # Pinned production dependencies
-├── requirements-dev.txt         # Dev/test dependencies
-├── setup.py                     # Package setup
-├── config.yaml                  # Non-secret configuration (no API keys)
-├── .gitignore                   # Excludes all secret files
 │
-├── src/
+├── src/                         ← PYTHON BACKEND (the only thing that runs AI)
 │   └── blind_assistant/
-│       ├── __init__.py
-│       ├── main.py              # Entry point; starts all services
-│       │
-│       ├── core/
-│       │   ├── __init__.py
-│       │   ├── orchestrator.py  # Intent → tool selection → execution loop
-│       │   ├── planner.py       # Claude API: task decomposition and planning
-│       │   ├── context.py       # Memory, Second Brain, user preferences
-│       │   └── confirmation.py  # All confirmation gate logic
-│       │
-│       ├── interfaces/
-│       │   ├── __init__.py
-│       │   ├── telegram_bot.py  # Telegram bot interface (secondary/super-user only)
-│       │   ├── voice_local.py   # Local microphone/speaker interface
-│       │   └── braille.py       # Braille-safe text formatting utilities
-│       │
-│       ├── voice/
-│       │   ├── __init__.py
-│       │   ├── stt.py           # Whisper speech-to-text
-│       │   ├── tts.py           # ElevenLabs / Kokoro text-to-speech
-│       │   └── audio.py         # Microphone capture, audio playback
-│       │
-│       ├── vision/
-│       │   ├── __init__.py
-│       │   ├── screen_observer.py  # Screenshot capture + Claude Vision
-│       │   ├── redaction.py        # Sensitive content redaction
-│       │   └── ocr.py              # Azure Computer Vision / Tesseract
-│       │
-│       ├── second_brain/
-│       │   ├── __init__.py
-│       │   ├── vault.py         # Obsidian-compatible markdown vault
-│       │   ├── encryption.py    # AES-256-GCM vault encryption
-│       │   ├── query.py         # Conversational query interface
-│       │   └── indexer.py       # Search index for vault content
-│       │
-│       ├── tools/
-│       │   ├── __init__.py
-│       │   ├── registry.py      # Tool registry and discovery
-│       │   ├── installer.py     # Self-expanding: install tools with confirmation
-│       │   ├── base.py          # Tool base class and interface
-│       │   │
-│       │   ├── browser/
-│       │   │   ├── __init__.py
-│       │   │   └── playwright_tool.py  # Web browser control
-│       │   │
-│       │   ├── desktop/
-│       │   │   ├── __init__.py
-│       │   │   └── desktop_commander.py  # Native app control
-│       │   │
-│       │   ├── ordering/
-│       │   │   ├── __init__.py
-│       │   │   ├── doordash.py
-│       │   │   └── instacart.py
-│       │   │
-│       │   ├── travel/
-│       │   │   ├── __init__.py
-│       │   │   └── booking.py
-│       │   │
-│       │   └── home/
-│       │       ├── __init__.py
-│       │       └── home_assistant.py
-│       │
-│       ├── security/
-│       │   ├── __init__.py
-│       │   ├── credentials.py   # OS keychain access
-│       │   ├── audit.py         # Audit log for all actions
-│       │   ├── disclosure.py    # Risk disclosure flows
-│       │   └── sanitize.py      # Input sanitization, prompt injection defense
-│       │
-│       └── memory/
-│           ├── __init__.py
-│           └── mcp_memory.py    # MCP memory server integration
+│       ├── core/                # Orchestrator, planner, context, confirmation
+│       ├── interfaces/          # voice_local.py, api_server.py, telegram_bot.py
+│       ├── voice/               # stt.py (Whisper), tts.py (ElevenLabs/Kokoro)
+│       ├── vision/              # screen_observer.py, redaction.py, ocr.py
+│       ├── second_brain/        # vault.py, encryption.py, query.py
+│       ├── tools/               # browser/, desktop/ — general capabilities only
+│       ├── security/            # credentials.py, disclosure.py, sanitize.py
+│       └── memory/              # mcp_memory.py
 │
-├── tools/
-│   └── registry.yaml            # Curated approved tool/package registry
+├── android/                     ← ANDROID CLIENT (Kotlin/React Native/Flutter — TBD)
+│   └── (created after ARCH DECISION — calls src/ backend via REST API)
 │
-├── installer/
-│   ├── install.py               # Voice-guided installer script
-│   └── voice_setup.py           # Voice-first configuration wizard
+├── ios/                         ← iOS CLIENT (Swift/React Native/Flutter — TBD)
+│   └── (created after ARCH DECISION — calls src/ backend via REST API)
 │
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── accessibility/           # Screen reader simulation tests
+├── desktop/                     ← DESKTOP CLIENT (Windows + macOS)
+│   └── (Phase 3 — may wrap voice_local.py or be a separate native app)
 │
-└── docs/
-    ├── ARCHITECTURE.md          # This file
-    ├── GAP_ANALYSIS.md
-    ├── INTEGRATION_MAP.md
-    ├── SECURITY_MODEL.md
-    ├── ETHICS_REQUIREMENTS.md
-    ├── USER_STORIES.md
-    ├── FEATURE_PRIORITY.md
-    └── ...
+├── web/                         ← WEB CLIENT (TypeScript/React — TBD)
+│   └── (Phase 3 — calls src/ backend via REST API)
+│
+├── shared/                      ← SHARED API TYPES (used by all clients)
+│   └── api_types/               # Request/response schemas (JSON Schema or OpenAPI)
+│
+├── installer/                   # Voice-guided setup script (Python)
+├── tools/registry.yaml          # Approved packages for self-expanding capability
+├── tests/                       # unit/, integration/, accessibility/, e2e/
+├── docs/                        # Architecture, user stories, gap analysis, etc.
+├── config.yaml                  # Non-secret configuration
+└── requirements.txt             # Python backend dependencies only
 ```
+
+**Rule**: `src/` is Python only. `android/`, `ios/`, `web/` use their own language and
+build tools. They never import from `src/` — they call it over HTTP. The `shared/`
+directory holds only language-agnostic schemas (OpenAPI/JSON Schema) so all clients
+stay in sync with the backend API contract.
+
+### Tools: Capabilities, Not Pre-Built Wrappers
+
+`src/blind_assistant/tools/` contains **general capabilities** that Claude uses
+autonomously — NOT hardcoded wrappers for specific services:
+
+```
+tools/
+├── browser/          # Playwright-based web browser control
+│   └── playwright_tool.py   # Claude navigates ANY website by reasoning about it
+│
+└── desktop/          # Desktop Commander — controls native apps
+    └── desktop_commander.py  # Claude controls ANY app by seeing the screen
+```
+
+**There is no `ordering/doordash.py`, no `travel/booking.py`, no `home/home_assistant.py`.**
+Claude uses the browser tool and figures out how to order food on DoorDash the same way
+a human does — by navigating the website. This means:
+- Zero maintenance when DoorDash changes their UI
+- Works for ANY ordering/travel/home service, not just pre-approved ones
+- Claude can handle novel services the founders never anticipated
+- The only pre-built integrations worth building are APIs that require OAuth or special
+  auth that can't be done via browser (e.g. Home Assistant local API, Stripe tokenization)
+
+`tools/registry.yaml` lists approved **packages** (Playwright, aiohttp) that the
+self-expanding capability can install — not approved services. The services are open-ended.
 
 ---
 
