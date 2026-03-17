@@ -211,16 +211,15 @@ Phase 2 food ordering pipeline is established; checkout loop is next.
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 7.** Loop is clean and ready for Cycle 8.
+**Loop completed Cycle 9.** Loop is clean and ready for Cycle 10.
 No mid-cycle state artifacts. All changes committed and pushed.
 
-The most important work for Cycle 8:
-1. **P1: Tool registry + installer** — self-expanding pattern with user confirmation.
-   When a user asks for a task that requires an external tool (DoorDash API, Instacart,
-   etc.), the app should: discover the required tool from `tools/registry.yaml` →
-   speak "I need to install [tool] to do this. Shall I?" → install on confirmation →
-   execute the task. This is the final major Phase 2 technical gate before the
-   food-ordering E2E demo and Phase 2 completion.
-2. **P2: End-to-end food ordering demo** — once tool registry is built, wire a complete
-   "order me food" request through the pipeline with risk disclosure and confirmation.
-3. **P3: Add body size limit to /transcribe** (ISSUE-018, quick fix)
+The most important work for Cycle 10:
+1. **P1: Food ordering checkout loop** — after BrowserTool navigates to search page,
+   have Claude reason about page_state.text_content, generate a voice-friendly list of
+   restaurant options, let the user pick by speaking, then navigate through item selection
+   and checkout with further browser.click() calls. This completes Phase 2.
+2. **P3: Recording confirmation haptic/audio cue** in MainScreen — TalkBack users need
+   confirmation the microphone is active (ISSUE from Cycle 7 review, still open).
+3. **Documentation (Cycle 10 = every 10th cycle)**: documentation-steward should run
+   to audit README, CHANGELOG, and CONTRIBUTING.md.
