@@ -162,6 +162,10 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [ ] End-to-end test: blind user asks to order food → full flow with confirmations
 - [x] context.clear_sensitive(): UserContext.clear_sensitive() added (Cycle 4, 4 tests)
 - [x] Make passphrase prompt timeout configurable in config.yaml (Cycle 4, 3 tests)
+- [x] **P1: JS CI job** — 'test-js' job in ci.yml; 77 Jest tests run in CI (Cycle 6)
+- [x] **P1: Mobile first-run setup wizard** — SetupWizardScreen + useSecureStorage + app/index.tsx; 63 new JS tests (Cycle 6)
+- [x] **P3: Dead code removed** — wake_word_found in voice_local.py removed (Cycle 6)
+- [x] **P3: Rate limiting** — RateLimitMiddleware in api_server.py; 8 new Python tests (Cycle 6)
 
 ## Blockers
 
