@@ -51,7 +51,9 @@ def get_credential(key: str) -> str | None:
         The stored value, or None if not found
     """
     try:
-        value = keyring.get_password(SERVICE_NAME, key)
+        raw = keyring.get_password(SERVICE_NAME, key)
+        # keyring.get_password returns Any — cast to str | None for type safety
+        value: str | None = str(raw) if raw is not None else None
         if value is None:
             logger.debug(f"Credential not found: {key}")
         return value
