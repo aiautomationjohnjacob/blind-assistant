@@ -60,17 +60,46 @@ def _make_orchestrator(response_text: str = "Here is your answer.") -> MagicMock
     return orc
 
 
+class _PatchedClient:
+    """
+    Helper that keeps the keyring patch active for the lifetime of all requests.
+
+    The API server imports get_credential lazily inside _authenticate(), so we must
+    patch at the credentials module level and keep the patch alive during requests.
+    """
+
+    def __init__(self, app, token_in_keychain: str | None) -> None:
+        self._token = token_in_keychain
+        self._patcher = patch(
+            "blind_assistant.security.credentials.get_credential",
+            return_value=token_in_keychain,
+        )
+        self._patcher.start()
+        self._client = TestClient(app, raise_server_exceptions=False)
+
+    def __del__(self) -> None:
+        try:
+            self._patcher.stop()
+        except RuntimeError:
+            pass  # Already stopped
+
+    # Proxy HTTP verbs to the inner TestClient
+    def get(self, *args, **kwargs):
+        return self._client.get(*args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        return self._client.post(*args, **kwargs)
+
+
 def _make_server(
     orchestrator=None,
     token_in_keychain: str | None = "test-token-123",
     auth_disabled: bool = False,
-) -> tuple[APIServer, TestClient]:
+) -> tuple[APIServer, _PatchedClient]:
     """
-    Build an APIServer and return a TestClient for it.
+    Build an APIServer and return a patched TestClient for it.
 
-    Uses mock keyring so no real OS credential access happens.
-    The patch targets the credentials module where get_credential is defined,
-    since api_server imports it inside the _authenticate method.
+    The keyring mock stays active for all requests made through the returned client.
     """
     if orchestrator is None:
         orchestrator = _make_orchestrator()
@@ -79,13 +108,7 @@ def _make_server(
     server = APIServer(orchestrator, config)
     app = server._build_app()
 
-    # Patch at the credentials module since it's imported lazily inside _authenticate
-    with patch(
-        "blind_assistant.security.credentials.get_credential",
-        return_value=token_in_keychain,
-    ):
-        client = TestClient(app, raise_server_exceptions=False)
-        return server, client
+    return server, _PatchedClient(app, token_in_keychain)
 
 
 # ─────────────────────────────────────────────────────────────
