@@ -220,15 +220,18 @@ Phase 2 completion gate reached — Phase 3 begins next cycle.
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 9.** Loop is clean and ready for Cycle 10.
+**Loop completed Cycle 10.** Phase 2 complete. Loop is clean and ready for Cycle 11 (Phase 3 start).
 No mid-cycle state artifacts. All changes committed and pushed.
 
-The most important work for Cycle 10:
-1. **P1: Food ordering checkout loop** — after BrowserTool navigates to search page,
-   have Claude reason about page_state.text_content, generate a voice-friendly list of
-   restaurant options, let the user pick by speaking, then navigate through item selection
-   and checkout with further browser.click() calls. This completes Phase 2.
-2. **P3: Recording confirmation haptic/audio cue** in MainScreen — TalkBack users need
-   confirmation the microphone is active (ISSUE from Cycle 7 review, still open).
-3. **Documentation (Cycle 10 = every 10th cycle)**: documentation-steward should run
-   to audit README, CHANGELOG, and CONTRIBUTING.md.
+The most important work for Cycle 11 (Phase 3: Blind User Testing):
+1. **P1: Live food ordering validation** — run `_handle_order_food` on a real Playwright
+   browser against DoorDash (or a test site) to validate the full checkout loop works on
+   an actual web page, not just mocked helpers. Use computer-use-tester or device-simulator.
+2. **P2: Cross-platform accessibility audit** — call the 5 platform accessibility agents
+   (Android, iOS, Web, Windows, macOS) to audit current codebase before user testing starts.
+3. **P3: Recording confirmation cue** in MainScreen — haptic/audio feedback when recording
+   starts (open since Cycle 7 review; TalkBack UX issue).
+4. **P3: Conversational recovery** in checkout loop — handle mid-flow "show me the menu again"
+   or "go back" user requests; currently the loop does not support backtracking.
+5. **Every 5th cycle (Cycle 15)**: project-inspector should run.
+6. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
