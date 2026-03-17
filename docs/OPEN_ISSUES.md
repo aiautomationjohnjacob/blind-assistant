@@ -351,7 +351,9 @@ copy guidelines established this cycle. No impact on blind users.
 **Proposed fix**: Remove the platform hint text entirely, or replace with a brief
 developer note comment in JSX (not rendered). Alternatively, update to: "Blind
 Assistant — keyboard-free, voice-first."
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 12 (commit d726bc6) — hint Text element replaced with JSX comment.
+Platform import + platformHint StyleSheet entry removed. 24 MainScreen JS tests pass.
 
 ### ISSUE-021: Food ordering checkout loop not validated on real Playwright browser
 **Severity**: HIGH
