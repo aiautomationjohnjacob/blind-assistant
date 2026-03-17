@@ -281,20 +281,9 @@ async def test_food_order_triggers_browser_install_when_not_installed(
         # Respond "yes" to install consent
         gate.submit_response(user_context.session_id, "yes")
 
-    # Simulate the full handle_message flow which includes the install offer
-    from blind_assistant.core.planner import Intent
-    intent = Intent(
-        type="order_food",
-        description="order me a pizza",
-        required_tools=["browser"],
-        parameters={"food": "pizza"},
-        is_high_stakes=True,
-        confidence=0.95,
-    )
-
     # Call _offer_tool_install directly (the part of handle_message that fires for missing tools)
     tool_info = orc.tool_registry.get_available_tool("browser")
-    installed = await orc._offer_tool_install(
+    await orc._offer_tool_install(
         tool_name="browser",
         tool_info=tool_info,
         context=user_context,
