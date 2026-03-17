@@ -280,26 +280,95 @@ the fix actually resolves their experience. Commit immediately with message: "fi
 ## STEP 6: COMMIT AND PUSH AFTER EVERY SIGNIFICANT CHANGE
 
 Do NOT wait until the end of the cycle to commit. Commit after:
-- Each document is created
-- Each agent returns a significant output
-- Each implementation task completes
+- Each document is created or substantially updated
+- Each implementation task completes (with tests)
 - Any fix is applied
+- Each agent returns a significant output
+
+**Every commit MUST use this format:**
+
+```
+[type]([scope]): [what changed, max 72 chars]
+
+[2-4 sentences explaining WHY this change was made, not just what.
+Reference the user story or priority stack item it addresses.]
+
+Test plan:
+- [test file(s) added or updated, e.g. "tests/unit/voice/test_tts.py: 14 tests"]
+- [what the tests cover, e.g. "covers ElevenLabs happy path, fallback to pyttsx3, error handling"]
+- [coverage result, e.g. "coverage: 94% on voice/tts.py"]
+- [gaps or follow-ups, e.g. "gap: integration test with real audio hardware needed (#issue)"]
+- [if no code changed: "n/a — documentation/config only"]
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+```
+
+**Types:** `feat` `fix` `docs` `research` `a11y` `security` `test` `refactor` `ci` `chore`
+**Scope:** the module or area (e.g. `voice/tts`, `security`, `telegram`, `second-brain`, `ci`)
+
+**Examples of good commit messages:**
+
+```
+feat(voice/tts): add ElevenLabs TTS with pyttsx3 offline fallback
+
+Implements TTSProvider with ElevenLabs as primary and pyttsx3 as fallback
+so Dorothy can use the app even when offline. Speed and verbosity are
+controlled by config.yaml voice.speech_rate and voice.verbosity settings.
+Addresses USER_STORIES.md #3 (elder user needs clear, patient voice output).
+
+Test plan:
+- tests/unit/voice/test_tts.py: 14 new tests
+- covers: ElevenLabs API call, pyttsx3 fallback on network error, speed
+  control (0.5x–2.0x), verbosity levels, empty-string input guard
+- coverage: 94% on src/blind_assistant/voice/tts.py
+- gap: integration test with real speakers skipped in CI (hardware required)
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+```
+
+```
+fix(security/credentials): raise RuntimeError on KeyringError, not silently fail
+
+Silent credential failures left the app in a broken state with no user
+feedback. Now raises RuntimeError with a clear message directing the user
+to the setup wizard. Caught by test_store_credential_raises_when_keychain_unavailable.
+
+Test plan:
+- tests/unit/security/test_credentials.py: existing tests already covered
+  this path; confirmed all 23 tests still pass after fix
+- coverage: 100% on security/credentials.py (unchanged)
+- gap: none
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+```
+
+**Commit commands:**
 
 ```bash
 git add -A
 git status --short
-# Only commit if there are actual changes
-git status --short | grep -q . && git commit -m "[type]: [description]
 
-[2-3 line body explaining what was done and why]"
+# Use --allow-empty if the wip() auto-commits already staged everything
+# This creates a meaningful summary commit even if nothing new to stage
+git status --short | grep -q . && git add -A
+git commit --allow-empty -m "$(cat <<'COMMITMSG'
+[type]([scope]): [description]
 
-# ALWAYS push immediately after committing
-git push
+[body]
+
+Test plan:
+- [test details]
+- coverage: [X%]
+- gap: [or 'none']
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+COMMITMSG
+)"
+
+git push || git pull --rebase && git push
 ```
 
-Commit types: `feat:` `fix:` `docs:` `research:` `a11y:` `security:` `test:` `refactor:`
-
-If push fails (upstream changed), pull and retry:
+If push fails (upstream changed):
 ```bash
 git pull --rebase && git push
 ```

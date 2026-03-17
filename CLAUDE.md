@@ -143,9 +143,33 @@ The goal is to integrate existing tools, not reinvent them:
   every `backend-developer` or `integration-engineer` task. No code ships untested.
 
 ## Git Workflow
-- Feature branches: `feature/description`
-- Commit messages: conventional commits (feat:, fix:, a11y:, docs:, test:, research:)
-- PRs require: code-reviewer + accessibility-reviewer approval
+
+Feature branches: `feature/description`
+PRs require: code-reviewer + accessibility-reviewer approval
+
+**Every commit must use this format** (enforced by run-cycle STEP 6):
+
+```
+[type]([scope]): [what changed, max 72 chars]
+
+[2-4 sentences explaining WHY — not just what — was changed.
+Reference the user story or PRIORITY_STACK item it addresses.]
+
+Test plan:
+- [test file(s) added/updated and number of tests]
+- [what the tests cover]
+- coverage: [X% on the changed module]
+- gap: [known test gap or 'none']
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+```
+
+Types: `feat` `fix` `docs` `research` `a11y` `security` `test` `refactor` `ci` `chore`
+Scope: the module/area touched (`voice/tts`, `security`, `telegram`, `second-brain`, `ci`)
+
+The `wip(src: filename.py) HH:MM` commits from the auto-hook are intermediate saves.
+The meaningful commit with the test plan is the `feat/fix/etc` commit from STEP 6.
+Both appear in history; reviewers focus on the typed commits.
 
 ## Detailed Rules
 @.claude/rules/accessibility.md
