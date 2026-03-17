@@ -18,10 +18,13 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P1 | **Real voice recording in MainScreen**: replace hardcoded "Hello" with expo-av AudioRecorder → send to backend → speak response; without this the mobile app is not a voice assistant — ISSUE-015 | ISSUE-015, Cycle 6 review | 2026-03-17 |
+| P1 | **Tool registry + installer**: self-expanding pattern with user confirmation (user asks for food order → AI discovers needed tools → asks permission to install → installs → executes); last major Phase 2 technical gate | Phase 2 sprint | 2026-03-17 |
+| P2 | End-to-end food ordering demo: blind user asks to order food → full flow with confirmations and risk disclosure | Phase 2 sprint | 2026-03-17 |
 | P2 | Voice installer: complete voice-guided setup from fresh Python install | ARCHITECTURE.md Task 5 | 2026-03-17 |
 | P2 | Web app: accessible web interface at blind-assistant.org (WCAG 2.1 AA; NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome) | Founder scope expansion | 2026-03-17 |
 | P2 | Cross-platform accessibility audit: run all 5 platform agents on current codebase | Founder scope expansion | 2026-03-17 |
+| P3 | Add body size limit to /transcribe endpoint (ISSUE-018) | security-specialist | 2026-03-17 |
+| P3 | Add recording-started haptic/audio cue to MainScreen for TalkBack confirmation | blind-user-tester | 2026-03-17 |
 | P3 | Android app: run npm install + expo build:android + TalkBack test on AVD | Founder scope expansion | 2026-03-17 |
 | P3 | iOS app: run npm install + expo build:ios --simulator + VoiceOver test on xcrun simctl | Founder scope expansion | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
@@ -30,8 +33,6 @@
 | P3 | PIL ImageGrab Playwright fallback for headless/server environments | ISSUE-003 | 2026-03-17 |
 | P3 | Add Optional[Callable] type annotations to response_callback params in orchestrator | ISSUE-004 | 2026-03-17 |
 | P3 | MCP memory server integration (cross-session user preferences) | INTEGRATION_MAP.md | 2026-03-17 |
-| P3 | Add rate limiting middleware to api_server.py before cloud deployment — ISSUE-011 | security-specialist | 2026-03-17 |
-| P3 | Remove dead code: wake_word_found variable in voice_local.py — ISSUE-012 | Cycle 5 code-reviewer | 2026-03-17 |
 | P3 | Set up CHANGELOG.md and populate ROADMAP.md | open source | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
