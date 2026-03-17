@@ -18,6 +18,40 @@ Each entry is dated and tagged with:
 
 ---
 
+## Scope Expansion — 2026-03-17 (Founder directives — read before Cycle 4)
+
+**PRODUCT**: The product is now a family of clients, not a single Python CLI:
+1. Android native app
+2. iPhone/iPad native app
+3. Desktop app (Windows + macOS)
+4. Web app (blind-assistant.org)
+5. Education website (learn.blind-assistant.org)
+
+**TECHNICAL**: Python is the right choice for the backend (orchestrator, second brain,
+security, TTS/STT, Telegram bot) — keep it. Python is NOT the right language for
+Android or iOS native apps. Android apps are typically Kotlin/Java; iOS apps are
+Swift/SwiftUI. However, a cross-platform framework (React Native, Flutter) may let
+us write once and deploy to both. This is a critical architectural decision that must
+be made by tech-lead + gap-analyst BEFORE any mobile/web implementation starts.
+
+Key question for tech-lead to answer:
+- Should client apps be React Native (JS), Flutter (Dart), or native (Swift/Kotlin)?
+- How do client apps communicate with the Python backend? (REST API? WebSocket? gRPC?)
+- Can we reuse the Python orchestrator logic across platforms, or does each client
+  embed its own AI logic?
+- Accessibility quality: which framework has the best NVDA/VoiceOver/TalkBack support?
+
+**PROCESS**: The loop started before the full product vision was defined. Significant scope
+expansion happened during Cycle 3 (added 4 client platforms, 9 new agents, multi-platform
+accessibility requirements, device simulation testing). The loop must re-read CYCLE_STATE.md
+and PRIORITY_STACK.md carefully at the start of Cycle 4 — things have changed.
+
+**PROCESS**: Do not start implementing Android or iOS apps until the ARCH DECISION P1
+item is resolved. Building native Android (Python-incompatible) before deciding on
+React Native vs Flutter would create throwaway work.
+
+---
+
 ## Cycle 1 — 2026-03-17
 
 **Accomplished**:

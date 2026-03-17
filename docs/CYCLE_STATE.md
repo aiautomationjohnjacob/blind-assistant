@@ -17,6 +17,9 @@ Major product scope expansion. The loop MUST be aware of these changes:
 
 **Architecture decision is now P1**: tech-lead must decide unified framework
 (React Native / Flutter) vs native per platform BEFORE any mobile/web implementation.
+**IMPORTANT**: Python stays for the backend (orchestrator, second brain, TTS/STT,
+security). Python is NOT used for Android/iOS client apps — that requires a separate
+tech stack decision. Client apps will talk to the Python backend via an API layer.
 
 **Per-platform test suites**: each platform needs unit + E2E tests + device simulation.
 Claude Code will run Android emulators (AVD+ADB) and iOS simulators (xcrun simctl)

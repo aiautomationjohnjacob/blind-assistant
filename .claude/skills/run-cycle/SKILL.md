@@ -90,14 +90,16 @@ For each gap found:
 
 ---
 
-## STEP 3: CREATIVE EXPLORATION (run on cycles 5, 10, 15, 20... check cycle number)
+## STEP 3: CREATIVE EXPLORATION AND HEALTH CHECKS
 
-Check `docs/CYCLE_STATE.md` for cycle count. If cycle number is divisible by 5:
+Check `docs/CYCLE_STATE.md` for the current cycle count.
+
+### Every 5th cycle (cycles 5, 10, 15, 20...):
 
 Ask yourself honestly: **"What is the most important thing this project is STILL missing
 that nobody has explicitly written down yet?"**
 
-Use these agents in parallel to explore:
+Use these agents in parallel:
 
 **gap-analyst**: "Look at docs/PRODUCT_BRIEF.md and what has been built so far (src/ directory,
 docs/). What gaps exist between the vision and reality? What integrations are promised but
@@ -108,7 +110,26 @@ anyone's list yet. Output 3-5 new items for OPEN_ISSUES.md."
 mission? What would a real blind user say is missing if they tried the app today?
 What would a grant funder say is missing from our impact story? Output any strategic gaps."
 
-After creative exploration: add findings to OPEN_ISSUES.md and PRIORITY_STACK.md.
+**project-inspector**: "Read CLAUDE.md, the current src/ directory, tests/ directory, and
+.github/workflows/. Hunt for holistic gaps: (1) which src/ files have no tests? (2) which
+critical user flows have no E2E test? (3) are all 5 client platforms (Android, iOS, Desktop,
+Web, Education site) represented in the test plan? (4) are there CI jobs missing for any
+platform? (5) are there agent files missing for new work the loop is doing? (6) do docs
+reflect current reality? Output your findings directly to OPEN_ISSUES.md (use the standard
+format) and add any P2/P3 items to PRIORITY_STACK.md."
+
+After creative exploration: add all findings to OPEN_ISSUES.md and PRIORITY_STACK.md.
+
+### Every 10th cycle (cycles 10, 20, 30...):
+
+In addition to the above, run:
+
+**documentation-steward**: "Audit README.md, CHANGELOG.md, and CONTRIBUTING.md. Check if
+setup instructions still match the current code, if the feature list reflects what's
+actually implemented, and if any new features since the last CHANGELOG entry need to be
+documented. Check that all public functions in recently changed src/ files have docstrings.
+Do NOT modify PRODUCT_BRIEF.md, ARCHITECTURE.md, USER_STORIES.md, PRIORITY_STACK.md,
+LESSONS.md, CLAUDE.md, or any .claude/ files."
 
 ---
 
@@ -264,6 +285,30 @@ After implementation:
 - Use `accessibility-reviewer` on any voice output or user-facing strings
 - Use the most relevant blind persona agent to verify the feature from their perspective
 - Use `security-specialist` on any feature touching credentials or personal data
+
+**For any feature that touches user-facing output or UI on a specific platform:**
+- Voice output / Telegram messages → call `windows-accessibility-expert` (NVDA),
+  `ios-accessibility-expert` (VoiceOver), `android-accessibility-expert` (TalkBack)
+- Web UI changes → call `web-accessibility-expert` (NVDA+Chrome, VoiceOver+Safari)
+- macOS desktop changes → call `macos-accessibility-expert`
+
+**After completing a major feature or user story (not every task — judge significance):**
+
+Call `e2e-tester`:
+"The following user-facing feature was just completed: [describe feature].
+Read the relevant src/ files and tests/e2e/ directory. Design and implement an end-to-end
+test that exercises the complete flow from user input to output. Use real encryption and
+real file I/O; only mock external APIs (Claude, ElevenLabs, Telegram servers). Include
+an accessibility assertion that voice output contains no visual-only language. Place the
+test in the correct platform subdirectory under tests/e2e/. Report pass/fail."
+
+Then call `device-simulator` if the feature touches any client UI:
+"The following feature was just implemented: [describe]. Determine which platforms it
+affects (web, Android, iOS, desktop). For web: write a Playwright test that opens
+the app and verifies the feature is keyboard-accessible and has correct ARIA labels.
+For Android/iOS: document what an emulator test would verify and create the test stub
+in tests/e2e/platforms/. If an emulator is available in this environment, run it and
+capture a screenshot."
 
 After any significant batch of features, use `open-source-steward` to:
 - Update CHANGELOG.md with plain-English descriptions of what changed
