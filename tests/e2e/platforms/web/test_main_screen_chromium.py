@@ -31,11 +31,18 @@ SKIP BEHAVIOUR:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
-# Skip gracefully if playwright is not installed (e.g., unit test job)
-try:
+if TYPE_CHECKING:
+    # Only imported for type hints — not needed at runtime.
+    # TC002: playwright is a third-party dep available only in the e2e-web CI job.
     from playwright.async_api import Page
+
+# Skip gracefully if pytest-playwright is not installed (e.g., unit test job)
+try:
+    import pytest_playwright as _  # noqa: F401
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
@@ -54,8 +61,8 @@ def web_app_available() -> bool:
     Avoids confusing connection-refused errors in test output.
     Returns True if the server responds, False otherwise.
     """
-    import urllib.request
     import urllib.error
+    import urllib.request
     try:
         with urllib.request.urlopen(WEB_APP_URL, timeout=3) as resp:
             return resp.status == 200
@@ -93,7 +100,7 @@ class TestMainScreenKeyboardNavigation:
     """
 
     async def test_can_reach_main_button_by_tab(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         Tab from the page start should reach the main press-to-talk button.
@@ -117,7 +124,7 @@ class TestMainScreenKeyboardNavigation:
         )
 
     async def test_no_keyboard_trap(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         Focus must not get trapped anywhere in the app.
@@ -133,7 +140,7 @@ class TestMainScreenKeyboardNavigation:
         # No assertion needed — if focus traps, the test will time out or error
 
     async def test_interactive_elements_reachable_by_tab(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         At least one focusable element must exist on the main screen.
@@ -168,7 +175,7 @@ class TestMainScreenARIA:
     """
 
     async def test_main_button_has_role_button(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """The press-to-talk button must have role=button for NVDA/TalkBack."""
         _skip_if_unavailable(web_app_available)
@@ -181,7 +188,7 @@ class TestMainScreenARIA:
         )
 
     async def test_main_button_has_accessible_label(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         Every button must have a non-empty aria-label.
@@ -201,7 +208,7 @@ class TestMainScreenARIA:
             )
 
     async def test_status_region_uses_polite_live_region(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         Status updates (processing, error) must use aria-live='polite'.
@@ -218,7 +225,7 @@ class TestMainScreenARIA:
         )
 
     async def test_html_element_has_lang_attribute(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         The <html> element must have a lang attribute.
@@ -235,7 +242,7 @@ class TestMainScreenARIA:
         )
 
     async def test_page_has_title(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         The page <title> must not be empty.
@@ -251,7 +258,7 @@ class TestMainScreenARIA:
         )
 
     async def test_no_elements_with_empty_aria_label(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         Elements with aria-label must not have an empty string value.
@@ -287,7 +294,7 @@ class TestSetupWizardARIA:
     """
 
     async def test_setup_wizard_loads_or_main_screen_loads(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         After loading, either the setup wizard or the main screen must be visible.
@@ -312,7 +319,7 @@ class TestSetupWizardARIA:
         )
 
     async def test_inputs_have_accessible_names(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         All <input> elements must have an accessible name via aria-label,
