@@ -634,3 +634,89 @@ announcement, or an accessible header on the same screen) is present.
 
 **PROCESS LESSON (ruff accumulation)**: Ruff errors accumulate silently between cycles because the wip auto-commit hooks do not run `ruff format`. The fix: after every substantive code edit batch, run `ruff check src/ tests/ --fix && ruff format src/ tests/` before the meaningful feat commit. Do not save ruff cleanup for a separate P0 cycle — fix it as part of the same commit.
 
+
+---
+
+## Cycle 11 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: Cycle 11 opened Phase 3 with a cross-platform accessibility audit
+that found and fixed real VoiceOver bugs before any user testing begins. The "Double-tap" hint
+issue would have caused confusion for every iOS VoiceOver user on first use; fixing it now
+(not post-testing) was correct prioritization. The haptic recording cue closes a gap flagged
+by blind-user-tester in Cycles 7, 9, and 10 — responsiveness to accumulated user feedback.
+Next cycle: the P1 item (live food ordering on a real Playwright browser) must not slip again.
+
+**Code quality (code-reviewer)**: (1) Test count: 465 Python (unchanged), 117 JS (was 114, +3).
+No regressions. (2) `jest.requireMock()` pattern for factory-mocked modules is documented in
+comments — correct idiom for future contributors. (3) ResponseCallback type alias avoids
+repeating Callable[[str], Awaitable[None]] | None in 9 method signatures. (4) Haptic
+`.catch(() => {})` with explanatory comment is acceptable — haptics are enhancement only,
+screen reader announcement is primary. (5) Announcement updated from "Tap again" to
+"Activate again" — platform-neutral language.
+
+**Security (security-specialist)**: No security-relevant changes. No concerns.
+
+**Accessibility (accessibility-reviewer)**: (1) VoiceOver hint fix is HIGH SEVERITY — "Double-tap
+to..." in accessibilityHints is one of the most common iOS VoiceOver bugs; Apple WWDC sessions
+specifically call it out. Fixed correctly by describing the outcome, not the gesture. (2)
+importantForAccessibility="no-hide-descendants" → "yes" on progress Text is correct. (3)
+Haptic medium/light distinction (start/stop) is the right pattern — different intensities
+allow non-visual state identification. REMAINING: platform hint text at the bottom of MainScreen
+still says "VoiceOver: Double-tap to activate." — it's hidden from screen readers
+(importantForAccessibility="no") but should eventually be removed to avoid confusion for
+sighted accessibility testers. LOW severity, add to OPEN_ISSUES.
+
+**User perspective (blind-user-tester)**: The haptic cue is exactly what I needed — tactile
+confirmation that recording started, with medium/light distinction for start/stop. What still
+concerns me: no real device test yet. These fixes need to run on an actual TalkBack device to
+verify haptic timing doesn't interfere with TalkBack's own vibration patterns.
+
+**Ethics (ethics-advisor)**: No new concerns. Haptic feedback enhances state awareness without
+introducing dependency.
+
+**Goal adherence (goal-adherence-reviewer)**: The P2 cross-platform accessibility audit was
+delivered as a code-level review, not device-simulator testing — this is a gap. The P1 item
+(live food ordering validation on real Playwright browser) was not started. Accessibility fixes
+were correct priority but P1 must not slip a third cycle.
+
+**Consensus recommendation for next cycle**: (1) P1: Run food ordering on a real Playwright
+browser session against a food ordering site — validate the 11-step checkout loop works on
+actual web pages. (2) P3: Remove or update the VoiceOver platform hint text in MainScreen
+that says "Double-tap to activate" (LOW severity, add to OPEN_ISSUES). (3) device-simulator
+for web Playwright accessibility test — ISSUE-pending.
+
+**Orchestrator self-assessment**:
+- Accomplished: VoiceOver hint fix (6 hints in SetupWizardScreen + 1 in MainScreen — all
+  now use outcome-first language); haptic cue on recording start (Medium) and stop (Light)
+  with 3 new tests; importantForAccessibility bug fixed (no-hide-descendants → yes on
+  SetupWizardScreen progress text); ResponseCallback type alias + 9 annotated method
+  signatures (ISSUE-004 resolved); ruff clean, 465 Python + 117 JS tests passing.
+- Attempted but failed: none — all planned work completed.
+- Confusion/loops: jest.mock() hoisting — the factory mock pattern broke when const
+  mockImpactAsync was defined at module scope. Fixed using jest.requireMock() in the test
+  body. Documented in test comments.
+- New gaps: (1) Platform hint text in MainScreen says "Double-tap to activate" but is
+  visually-only (importantForAccessibility="no") — LOW severity cleanup; (2) No real
+  device test for haptic feedback (Taptic Engine timing vs TalkBack vibrations); (3) P1
+  live food ordering still untested on real browser.
+- Next cycle recommendation: P1 — live food ordering on real Playwright browser. This
+  is the top Phase 3 validation item and has been deferred twice.
+
+**TECHNICAL LESSON (VoiceOver accessibilityHint rules)**: Apple's VoiceOver guidelines
+explicitly state: "Do not tell people what gesture to use to interact with the element.
+VoiceOver automatically tells users how to interact based on the control type." Specifically:
+never say "double-tap," "swipe left," "tap and hold" in accessibilityHint. The hint should
+only describe what will happen (the outcome), not how to trigger it. TalkBack has similar
+guidance. Violation of this rule results in redundant, confusing announcements: VoiceOver
+says "Button. [label]. Double-tap to activate. Double-tap to proceed." — the double
+"double-tap" is jarring. Correct pattern: "Button. [label]. [outcome description]."
+
+**TECHNICAL LESSON (jest.mock() hoisting + factory patterns)**: When you write
+`const mockFn = jest.fn(); jest.mock("module", () => ({ fn: mockFn }))`, the mock factory
+is hoisted to the top of the file by Babel's jest-hoist transform. At hoist time, `mockFn`
+is undefined (TDZ). The mock will then have `fn: undefined`. This is the root cause of
+"TypeError: X.fn is not a function" in tests after seemingly correct mock setup. The fix:
+either (a) use `jest.requireMock("module")` inside the test to get the live mock object,
+or (b) make the factory self-contained: `jest.mock("module", () => ({ fn: jest.fn() }))`.
+Pattern (b) works when you only need to verify calls. Pattern (a) is needed when you need
+`mockFn.mockReturnValueOnce()` across tests.

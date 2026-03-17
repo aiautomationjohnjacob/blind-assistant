@@ -84,7 +84,9 @@ with no type annotation. Should be typed as `Optional[Callable[[str], Awaitable[
 **Impact**: Type checker cannot catch missing callbacks; harder for contributors to
 understand the interface.
 **Proposed fix**: Add proper type annotations to all response_callback parameters.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 11 — ResponseCallback type alias added to orchestrator.py; all 9
+response_callback/update params annotated as Callable[[str], Awaitable[None]] | None.
 
 ### ISSUE-005: Session context has no clear_sensitive() method
 **Severity**: MEDIUM
@@ -327,3 +329,40 @@ derives key from passphrase+salt, caches in session context, offers to store in 
 10 unit tests added in `tests/unit/test_vault_passphrase_prompt.py`.
 
 *(Previously open issues moved here when fixed)*
+
+### ISSUE-020: Platform hint text in MainScreen says "Double-tap to activate" — visual-only copy
+**Severity**: LOW
+**Category**: accessibility, ux
+**Detected by**: accessibility-reviewer (Cycle 11 audit)
+**Detected**: 2026-03-17
+**Description**: MainScreen.tsx bottom text (styles.platformHint) shows:
+"VoiceOver: Swipe to navigate. Double-tap to activate." / "TalkBack: Explore by touch.
+Double-tap to activate." This is correctly hidden from screen readers via
+`importantForAccessibility="no"`, so VoiceOver/TalkBack users don't hear it. However,
+the text is confusing for sighted accessibility testers and QA engineers: it references
+VoiceOver gestures but is not spoken, and it's redundant since the button's hint already
+covers activation. The copy also mentions "Double-tap" which was fixed as incorrect in
+hints this cycle — seeing it in the visual UI is contradictory.
+**Impact**: Confuses sighted developers and QA testers; contradicts the accessibility
+copy guidelines established this cycle. No impact on blind users.
+**Proposed fix**: Remove the platform hint text entirely, or replace with a brief
+developer note comment in JSX (not rendered). Alternatively, update to: "Blind
+Assistant — keyboard-free, voice-first."
+**Status**: OPEN
+
+### ISSUE-021: Food ordering checkout loop not validated on real Playwright browser
+**Severity**: HIGH
+**Category**: testing, integration
+**Detected by**: Phase 3 audit, Cycle 11 self-assessment
+**Detected**: 2026-03-17
+**Description**: The 11-step food ordering checkout loop (implemented Cycle 10) is tested
+entirely with mocked Claude helpers and mocked browser navigation. The `_extract_options_from_page`,
+`_navigate_to_user_choice`, `_add_item_to_cart`, `_extract_order_summary`, and `_place_order`
+methods have never run against a real website. It is unknown whether the CSS selectors,
+page_state text parsing, or Claude reasoning about real page content actually works.
+**Impact**: Phase 3 "blind user completes food order by voice" milestone cannot be verified
+until this is validated. A working integration may be broken in practice.
+**Proposed fix**: Use computer-use-tester or device-simulator to run `_handle_order_food`
+against a real Playwright browser session (DoorDash, Instacart, or a test food ordering site).
+Observe page_state returns, adjust Claude helper prompts if needed.
+**Status**: OPEN (P1)
