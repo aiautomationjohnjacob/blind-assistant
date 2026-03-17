@@ -233,12 +233,13 @@ Minor open items from review: (1) TextInput missing importantForAccessibility="y
 **Category**: testing, ci
 **Detected by**: Cycle 5 self-assessment
 **Detected**: 2026-03-17
-**Description**: `clients/mobile/` has 32 Jest tests (19 for api.ts, 13 for MainScreen.tsx)
-but no CI job runs them. The `.github/workflows/ci.yml` only runs Python tests. The npm
-install and jest run must be added to CI.
-**Impact**: JS test regressions will go undetected.
-**Proposed fix**: Add `npm ci && npm test` step to CI for `clients/mobile/`.
-**Status**: OPEN
+**Description**: 32 Jest tests existed but no CI job ran them.
+**Status**: RESOLVED
+**Resolved in**: Cycle 6 — 'test-js' job added to ci.yml (npm ci --legacy-peer-deps +
+jest --watchAll=false --ci). Coverage gate from package.json enforced. Package dependency
+fixes: @expo-google-fonts/roboto pinned to ~0.4.3 (latest available), babel-plugin-
+module-resolver added as devDependency, MainScreen test mock fixed (spyOn not requireActual).
+JS test count now 77 (was 31).
 
 ---
 
