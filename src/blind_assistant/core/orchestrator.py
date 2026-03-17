@@ -131,6 +131,12 @@ class Orchestrator:
         if not self._initialized:
             raise RuntimeError("Orchestrator not initialized. Call initialize() first.")
 
+        # These assertions narrow the Optional types for mypy — guaranteed non-None after initialize()
+        assert self.planner is not None, "Planner not initialized"
+        assert self.tool_registry is not None, "ToolRegistry not initialized"
+        assert self.confirmation_gate is not None, "ConfirmationGate not initialized"
+        assert self.context_manager is not None, "ContextManager not initialized"
+
         # Progress callback helper
         async def update(message: str) -> None:
             if response_callback:
