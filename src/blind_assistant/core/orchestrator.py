@@ -362,8 +362,10 @@ class Orchestrator:
             return {"text": "No problem — I won't proceed with the order. You can ask me again any time."}
 
         # Step 3: Get the browser tool (must already be installed — offer runs in handle_message)
-        browser_tool = self.tool_registry.get_installed_tool("browser")
-        if browser_tool is None:
+        from blind_assistant.tools.browser import BrowserTool
+
+        _raw_browser_tool = self.tool_registry.get_installed_tool("browser")
+        if _raw_browser_tool is None:
             return {
                 "text": (
                     "I need the browser tool to complete your order, but it's not installed. "
