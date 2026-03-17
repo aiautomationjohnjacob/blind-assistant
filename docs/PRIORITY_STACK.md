@@ -20,10 +20,9 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P2 | End-to-end food ordering demo on real device: blind user on Android (TalkBack) + iOS (VoiceOver) can say "order me food" and complete the full flow by voice. Use AVD emulator + ADB. | Phase 3 sprint | 2026-03-17 |
-| P2 | ISSUE-029: Netlify secrets setup — a sighted operator must add NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID to GitHub repo secrets; then web app auto-deploys. Document in README.md. netlify.toml + deploy-staging.yml already in repo (Cycle 18). | Cycle 18 | 2026-03-17 |
-| P3 | Android app: run npm install + expo build:android + TalkBack test on AVD | Founder scope expansion | 2026-03-17 |
-| P3 | iOS app: run npm install + expo build:ios --simulator + VoiceOver test on xcrun simctl | Founder scope expansion | 2026-03-17 |
+| P3 | Unit tests for ADB/simctl helper functions (_parse_content_descriptions, _parse_bounds) — device-free, runs in WSL2, improves coverage | Cycle 19 self-assessment | 2026-03-17 |
+| P3 | Android TalkBack device test: trigger release tag to run AVD CI job (e2e-android); verify 8 TalkBack tests pass on real emulator | Phase 3 sprint | 2026-03-17 |
+| P3 | iOS VoiceOver device test: trigger release tag on macOS runner (ios-e2e.yml); verify 9 VoiceOver tests pass on iOS Simulator | Founder scope expansion | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Education website (learn.blind-assistant.org): audio-primary; NVDA+Chrome; zero mouse | education-website-designer | 2026-03-17 |
 | P3 | Voice Activity Detection (VAD) for voice_local.py (replaces fixed recording duration) | ISSUE-002 | 2026-03-17 |
