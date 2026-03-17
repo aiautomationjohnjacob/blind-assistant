@@ -120,3 +120,11 @@
 | Total test count Cycle 13: 482 Python (unchanged); 117 JS (unchanged); mypy reports 0 errors in 32 source files | 2026-03-17 | 13 |
 | CI fully green (Cycle 14): 11 CVEs patched (cryptography→46, Pillow→12.1.1, starlette→0.49.1, fastapi→0.135.1); pip-audit switched to installed-env mode; 5 new mypy errors from updated stubs fixed; Playwright libasound2 workaround | 2026-03-17 | 14 |
 | Total test count Cycle 14: 482 Python (unchanged); 117 JS (unchanged); ALL 7 CI jobs green on run 23218631525 | 2026-03-17 | 14 |
+| ISSUE-023: Batch-closed 79 stale GitHub CI-failure issues (d593482) | 2026-03-17 | 14 |
+| project-inspector gap scan (Cycle 15): 5 new issues found (ISSUE-024 through ISSUE-028) | 2026-03-17 | 15 |
+| ISSUE-024: App.tsx shim added — Expo web export now works (npx expo export --platform web) | 2026-03-17 | 15 |
+| ISSUE-025: CI e2e-web job rebuilt — builds Expo bundle, serves dist/, runs Playwright tests | 2026-03-17 | 15 |
+| ISSUE-026: test_food_ordering.py E2E test fixed — context_manager mocked in test helper | 2026-03-17 | 15 |
+| ISSUE-027: e2e + web pytest markers registered in pyproject.toml | 2026-03-17 | 15 |
+| 11 web E2E accessibility tests written (WCAG 2.1 AA: keyboard nav, ARIA, lang, title, focus) | 2026-03-17 | 15 |
+| Total test count Cycle 15: 482 Python (unchanged); 117 JS (unchanged); 11 web E2E tests (skip locally, run in CI) | 2026-03-17 | 15 |

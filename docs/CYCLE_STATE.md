@@ -248,15 +248,15 @@ Cycle 16 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 14.** Phase 3 in progress. CI is fully green (run 23218631525, all 7 jobs pass).
-11 security CVEs patched. 5 new mypy errors from updated type stubs fixed.
+**Loop completed Cycle 15.** Phase 3 in progress. Expo web export fixed. 11 web E2E accessibility
+tests written and wired to CI. Food ordering E2E test fixed. Project-inspector ran (every 5th cycle).
+5 new issues found (ISSUE-024 through ISSUE-028).
 
-The most important work for Cycle 15 (Phase 3: Blind User Testing):
-1. **EVERY 5TH CYCLE**: project-inspector must run STEP 3 gap scan across the full codebase.
-2. **Close stale GitHub issues**: 20+ historical P0 CI-failure issues from before Cycle 14 fix.
-   Use `gh issue close` in bulk. These are noise — the underlying CI is now fixed.
-3. **Fix Expo web export**: Add `"main": "app/index.tsx"` to app.json (or add App.tsx shim) so
-   `npx expo export --platform web` resolves the Metro AppEntry.js path correctly.
-4. **P2: Web platform accessibility tests**: Once Expo web export works, serve with `serve dist/`
-   and run Playwright axe-core accessibility audit + keyboard navigation tests.
-5. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
+The most important work for Cycle 16 (Phase 3: Blind User Testing):
+1. **P2: Write missing unit tests (ISSUE-028)**: 4 src/ files with no tests —
+   telegram_bot.py, second_brain/query.py, vision/redaction.py, vision/screen_observer.py.
+   Use test-engineer agent with each file.
+2. **P2: Verify web E2E CI results**: Check GitHub Actions run after this cycle's push.
+   The e2e-web job now actually runs — look at results and fix any ARIA assertion failures.
+3. **P2: Voice installer**: voice-guided setup from fresh Python install.
+4. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
