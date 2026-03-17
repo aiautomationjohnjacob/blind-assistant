@@ -72,3 +72,9 @@
 | TTS unit tests: synthesize_speech, ElevenLabs, pyttsx3, speak_locally (14 tests) | 2026-03-17 | 3 |
 | STT unit tests: transcribe_audio, singleton model, transcribe_microphone (11 tests) | 2026-03-17 | 3 |
 | Total test count: 279 (was 244) | 2026-03-17 | 3 |
+| ARCH DECISION (ISSUE-009): React Native + Expo for all client apps | 2026-03-17 | 4 |
+| REST API server (ISSUE-008): FastAPI /query /remember /describe /task /profile /health | 2026-03-17 | 4 |
+| ISSUE-005: UserContext.clear_sensitive() added (4 tests) | 2026-03-17 | 4 |
+| ISSUE-006: configurable passphrase timeout from config.yaml (3 tests) | 2026-03-17 | 4 |
+| Telegram de-emphasis: main.py default + telegram_bot.py docstring corrected | 2026-03-17 | 4 |
+| Total test count: 314 (was 279) | 2026-03-17 | 4 |
