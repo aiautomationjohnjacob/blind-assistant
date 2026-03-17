@@ -144,7 +144,16 @@ export function MainScreen(): React.JSX.Element {
     if (state === "idle" || state === "error") {
       // ── Phase 1: Start recording ──────────────────────────
       setState("listening");
-      announceToScreenReader("Listening. Speak now. Tap again when done.");
+      // Haptic + audio cue: TalkBack/VoiceOver users need a non-visual signal
+      // that recording has actually started. A medium impact haptic provides
+      // confirmation that the button press was registered and the mic is live.
+      // On Android, this is distinct from the soft tap haptic used by TalkBack itself.
+      // On iOS, this fires even in silent mode (impactAsync uses the Taptic Engine).
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {
+        // Haptics may not be available on all devices (e.g. iPad without Taptic Engine)
+        // Silently ignore — the screen reader announcement is the primary cue.
+      });
+      announceToScreenReader("Listening. Speak now. Activate again when done.");
       try {
         await startRecording();
       } catch {
