@@ -106,6 +106,7 @@ class BrowserTool:
     async def navigate(self, url: str) -> PageState:
         """Navigate to a URL and return the page state."""
         self._require_initialized()
+        assert self._page is not None  # guaranteed by _require_initialized; narrows type for mypy
         logger.info(f"Navigating to: {url}")
         await self._page.goto(url, wait_until="domcontentloaded", timeout=30_000)
         return await self.get_page_state()
@@ -118,6 +119,7 @@ class BrowserTool:
         when needed, since they trigger the redaction pipeline.
         """
         self._require_initialized()
+        assert self._page is not None  # guaranteed by _require_initialized; narrows type for mypy
         url = self._page.url
         title = await self._page.title()
 
