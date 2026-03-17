@@ -116,3 +116,6 @@
 | ISSUE-021: 11 real Playwright integration tests in tests/integration/test_browser_tool_real.py; CI job 'integration-browser' added | 2026-03-17 | 12 |
 | ISSUE-020: "Double-tap to activate" platform hint removed from MainScreen.tsx; Platform import + platformHint style removed | 2026-03-17 | 12 |
 | Total test count Cycle 12: 482 Python (unchanged); 117 JS (unchanged); +11 integration tests (skip locally) | 2026-03-17 | 12 |
+| ISSUE-022: 56 mypy type errors fixed across 7 src/ files (from __future__ annotations + assert narrowing + bytes casts) | 2026-03-17 | 13 |
+| CI: openai-whisper setuptools build fix applied to test + integration-browser jobs (was already in security-audit) | 2026-03-17 | 13 |
+| Total test count Cycle 13: 482 Python (unchanged); 117 JS (unchanged); mypy reports 0 errors in 32 source files | 2026-03-17 | 13 |
