@@ -20,7 +20,9 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import tempfile
 import time
+from pathlib import Path
 
 import pytest
 
@@ -34,7 +36,7 @@ class ADBClient:
 
     def shell(self, command: str) -> str:
         """Run an ADB shell command and return stdout as a string."""
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S607
             ["adb", *self._serial_flag, "shell", command],
             capture_output=True,
             text=True,
@@ -44,24 +46,30 @@ class ADBClient:
 
     def pull(self, remote_path: str) -> str:
         """Pull a file from the device and return its text content."""
-        local_path = "/tmp/adb_pull_temp"
-        subprocess.run(
+        # Use a named temp file for the ADB pull destination.
+        # The file is created in the system temp directory (not /tmp directly).
+        with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as tmp:
+            local_path = tmp.name
+        subprocess.run(  # noqa: S607
             ["adb", *self._serial_flag, "pull", remote_path, local_path],
             capture_output=True,
             timeout=30,
         )
         try:
-            with open(local_path) as f:
-                return f.read()
+            return Path(local_path).read_text()
         except FileNotFoundError:
             return ""
 
-    def screenshot(self, output_path: str = "/tmp/adb_screenshot.png") -> str:
+    def screenshot(self, output_path: str | None = None) -> str:
         """Capture a device screenshot and save it locally. Returns local path."""
+        if output_path is None:
+            # Default to a temp file in the system temp dir (not hardcoded /tmp)
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                output_path = tmp.name
         # Capture on device
         self.shell("screencap -p /sdcard/screenshot.png")
         # Pull to local
-        subprocess.run(
+        subprocess.run(  # noqa: S607
             ["adb", *self._serial_flag, "pull", "/sdcard/screenshot.png", output_path],
             capture_output=True,
             timeout=30,
@@ -116,7 +124,7 @@ def adb_available() -> bool:
     """Return True if ADB is available and a device is connected."""
     if shutil.which("adb") is None:
         return False
-    result = subprocess.run(
+    result = subprocess.run(  # noqa: S607
         ["adb", "devices"],
         capture_output=True,
         text=True,
