@@ -744,21 +744,22 @@ class TestHandleOrderFood:
     ) -> None:
         """
         order_groceries intent routes to _handle_order_food (same flow).
-        Verifies the intent handler map is correct.
+        Verifies the intent handler map is correct by comparing __name__.
         """
         orc = _make_order_food_orchestrator(minimal_config)
         assert "order_groceries" in orc._intent_handlers
-        assert orc._intent_handlers["order_groceries"] is orc._handle_order_food
+        # Compare function names — bound methods are different objects even for the same method
+        assert orc._intent_handlers["order_groceries"].__name__ == "_handle_order_food"
 
     def test_order_food_in_intent_handlers(self, minimal_config) -> None:
         """order_food is in _intent_handlers pointing to _handle_order_food."""
         orc = Orchestrator(minimal_config)
         handlers = orc._intent_handlers
         assert "order_food" in handlers
-        assert handlers["order_food"] is orc._handle_order_food
+        assert handlers["order_food"].__name__ == "_handle_order_food"
 
     def test_order_food_not_stub_anymore(self, minimal_config) -> None:
         """order_food no longer points to _handle_high_stakes_stub."""
         orc = Orchestrator(minimal_config)
         handlers = orc._intent_handlers
-        assert handlers["order_food"] is not orc._handle_high_stakes_stub
+        assert handlers["order_food"].__name__ != "_handle_high_stakes_stub"
