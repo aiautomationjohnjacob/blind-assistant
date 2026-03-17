@@ -210,12 +210,10 @@ both configurable via config.yaml api_server.rate_limit_per_minute. 8 unit tests
 **Category**: testing, architecture
 **Detected by**: Cycle 5 code-reviewer
 **Detected**: 2026-03-17
-**Description**: The `wake_word_found` boolean added in the Cycle 5 wake-word fix
-is declared but never read in the subsequent control flow. The fix correctly uses
-`clean_transcript = ""` instead, making `wake_word_found` redundant.
-**Impact**: No functional impact — dead code only.
-**Proposed fix**: Remove `wake_word_found` variable from voice_local.py.
-**Status**: OPEN
+**Description**: The `wake_word_found` boolean was declared but never read.
+**Status**: RESOLVED
+**Resolved in**: Cycle 6 — two lines removed from voice_local.py. All 25 voice_local
+unit tests continue to pass.
 
 ### ISSUE-013: Mobile app has no bearer token — first-run flow not implemented
 **Severity**: MEDIUM
