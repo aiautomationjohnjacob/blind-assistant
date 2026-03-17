@@ -206,11 +206,13 @@ class BrowserTool:
         automatically protected by screen_observer.
         """
         self._require_initialized()
+        assert self._page is not None  # guaranteed by _require_initialized; narrows type for mypy
         return await self._page.screenshot()
 
     async def find_elements(self, selector: str) -> list[str]:
         """Find all elements matching a selector and return their text content."""
         self._require_initialized()
+        assert self._page is not None  # guaranteed by _require_initialized; narrows type for mypy
         elements = await self._page.query_selector_all(selector)
         texts = []
         for el in elements:
