@@ -123,10 +123,8 @@ class VoiceLocalInterface:
 
         # Remove wake word prefix if present
         clean_transcript = transcript
-        wake_word_found = False
         wake_idx = transcript.lower().find(self._wake_word)
         if wake_idx != -1:
-            wake_word_found = True
             after_wake = transcript[wake_idx + len(self._wake_word):].strip()
             if after_wake:
                 clean_transcript = after_wake
