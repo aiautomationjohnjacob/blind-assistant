@@ -47,20 +47,49 @@ You can say "I need help" at any time to get more explanation.
 Are you ready to start? Say yes when you're ready.
 """
 
-STEP_TELEGRAM_INTRO = """
-Step 1: Setting up your Telegram connection.
+STEP_APP_INTRO = """
+Step 1: Setting up the Blind Assistant app on your phone.
 
-Telegram is a free messaging app that you can use to talk to me from your phone,
-your tablet, or your computer — anywhere, any time.
+The Blind Assistant app is a free app for Android and iPhone.
+It works with TalkBack on Android, and with VoiceOver on iPhone.
 
-You will need to create a special bot on Telegram. I will tell you exactly how to do it.
+To install it: open the Play Store on Android, or the App Store on iPhone.
+Search for Blind Assistant.
+Install it and open it.
+The app will ask for your server address, which is the address of this computer.
 
-First: do you have Telegram installed on your phone or computer?
-Say yes if you do, or no if you need to install it first.
+If you are setting up on this computer now, say ready and I will tell you your server address.
+If you want to do this later, say skip.
+"""
+
+STEP_API_SERVER_INFO = """
+Your server is running at:
+http colon slash slash {server_address} colon 8000
+
+Write this down or take a screenshot.
+You will enter this address in the Blind Assistant app on your phone.
+
+Say ready when you have noted the address.
+"""
+
+STEP_TELEGRAM_OPTIONAL_INTRO = """
+Optional power-user step: Telegram remote access.
+
+Telegram is a messaging app that power users can optionally use to control
+Blind Assistant remotely — from any device, anywhere in the world.
+
+This step is entirely optional. The native Blind Assistant app on your phone is the
+primary way to use this assistant. Telegram is only for power users who want
+an extra remote access channel.
+
+Note: setting up Telegram requires sighted assistance to navigate some visual menus.
+If you are a blind user and do not have sighted help available, say skip.
+
+Would you like to set up Telegram remote access? Say yes or skip.
 """
 
 STEP_TELEGRAM_BOT_CREATION = """
-Here is how to create your bot. I will say each step, then wait.
+Here is how to create your Telegram bot. I will say each step, then wait.
 
 Open Telegram and search for BotFather. That is spelled B-O-T-F-A-T-H-E-R, all one word.
 Start a chat with BotFather.
