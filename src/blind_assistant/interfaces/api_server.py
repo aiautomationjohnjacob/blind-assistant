@@ -354,6 +354,7 @@ class APIServer:
         updates: list[str] = []
 
         async def collect_update(message: str) -> None:
+            """Buffer an interim progress message; all updates are returned in the response."""
             updates.append(message)
             logger.debug(f"Interim update: {message}")
 
