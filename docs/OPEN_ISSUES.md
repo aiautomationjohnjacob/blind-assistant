@@ -294,6 +294,26 @@ cloud-deployed.
 **Proposed fix**: Add a ContentLength check in the route handler or configure
 FastAPI's `max_request_size`. Document the maximum supported audio length (e.g. 5 min
 at 16kHz mono = ~2MB WAV = ~2.7MB base64).
+**Status**: RESOLVED
+**Resolved in**: Cycle 8 — 14MB base64 limit check added to /transcribe route handler.
+4 unit tests added in test_api_server.py covering 413 response on oversized payloads.
+
+### ISSUE-019: Food ordering stops at search navigation — checkout loop not implemented
+**Severity**: MEDIUM
+**Category**: ux, architecture
+**Detected by**: Cycle 9 self-assessment
+**Detected**: 2026-03-17
+**Description**: `_handle_order_food` navigates to DoorDash search and returns
+`ordering_in_progress=True`, but does not continue to read restaurant options,
+guide item selection, or complete checkout. The Phase 2 gate requires a full
+order-to-completion flow by voice.
+**Impact**: A blind user can trigger the food ordering pipeline and hear the risk
+disclosure, but the order is never placed. The conversational loop for item
+selection and checkout is missing.
+**Proposed fix**: After getting page_state from browser.navigate(), use Claude to
+reason about page_state.text_content and generate a voice-friendly list of restaurant
+options. Route the next user response back through the orchestrator to continue the
+ordering flow (pick restaurant → view menu → add item → checkout → confirm).
 **Status**: OPEN
 
 ---
