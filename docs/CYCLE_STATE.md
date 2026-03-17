@@ -203,13 +203,6 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 18 (Phase 3 — web staging deploy + food ordering web E2E). netlify.toml + deploy-staging.yml
-created for auto-deploy on push to main (requires NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID secrets —
-ISSUE-029). 11 new Playwright food ordering accessibility tests: keyboard reach, aria-live='polite',
-confirmation prompts in live regions, no visual-only instructions, focus management. WEB_APP_URL env
-var override added so staging workflow can test against real Netlify URL. 22 web E2E tests total.
-641 Python unit tests unchanged. Ruff clean.
-
 Cycle 19 (Phase 3 — Android TalkBack + iOS VoiceOver E2E tests). ADBClient wrapper + 8 TalkBack
 E2E tests (launch/crash, unlabelled elements, 44dp touch target, focusable speak button, risk
 disclosure flow, confirmation prompt, screenshot). SimctlClient wrapper + 9 VoiceOver tests (launch,
@@ -218,10 +211,18 @@ bug fixed (tests/e2e/android/ -> tests/e2e/platforms/android/). ios-e2e.yml macO
 android/ios marks registered in pyproject.toml. ISSUE-029 Netlify operator docs in README.md.
 641 unit tests unchanged. Ruff clean.
 
-Cycle 20 priority:
-1. **Every-10th-cycle**: documentation-steward run (README, CHANGELOG, CONTRIBUTING.md, docstrings)
-2. **P3: Android TalkBack device test**: trigger a v0.x.x release tag to run the AVD CI job
-3. **P3: Unit tests for ADB helper functions**: _parse_content_descriptions, _parse_bounds (device-free)
+Cycle 20 (Phase 3 — documentation-steward run + platform helper unit tests). CHANGELOG.md updated
+through Cycle 19 (was frozen at Cycle 10 — 9 cycles out of date). CONTRIBUTING.md setup steps
+corrected: removed broken .env.example reference, added OS keychain instructions, fixed ROADMAP.md
+link to docs/FEATURE_PRIORITY.md. 8 missing public docstrings added (configure_logging, main,
+is_unlocked, get_key, and 4 inner callback functions). 72 new device-free unit tests for
+_parse_content_descriptions, _parse_bounds, _has_visual_only_language, _has_double_tap_hint
+via importlib dynamic import pattern. 641 → 713 Python unit tests. Ruff clean.
+
+Cycle 21 priority:
+1. **P3: ROADMAP.md** — Create with Phase 3-5 milestones (CONTRIBUTING.md references it)
+2. **P3: Android TalkBack device test** — trigger release tag to run AVD CI job
+3. **P3: iOS VoiceOver device test** — trigger release tag on macOS runner
 
 ## Known Issues / Technical Debt
 
