@@ -23,6 +23,8 @@ Accessibility requirements:
 - Responses structured for 40-char braille display in braille_mode
 """
 
+from __future__ import annotations
+
 import io
 import logging
 from typing import TYPE_CHECKING
