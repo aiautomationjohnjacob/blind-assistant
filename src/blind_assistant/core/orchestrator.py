@@ -782,6 +782,8 @@ class Orchestrator:
 
         Returns True if the user confirmed, False if cancelled.
         """
+        # Assert narrows Optional type — method only called after initialize()
+        assert self.confirmation_gate is not None
         return await self.confirmation_gate.confirm_financial_action(
             order_summary=order_summary,
             total_amount=total_amount,
