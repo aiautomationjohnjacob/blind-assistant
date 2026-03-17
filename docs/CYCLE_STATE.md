@@ -251,11 +251,11 @@ Cycle 21 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 19.** Phase 3 in progress. Android TalkBack + iOS VoiceOver E2E test
-infrastructure complete (ADBClient, SimctlClient, 17 new platform E2E tests). CI path bug fixed.
-ios-e2e.yml macOS workflow created. ISSUE-029 Netlify docs in README. 641 Python unit tests. Ruff clean.
+**Loop completed Cycle 20.** Phase 3 in progress. Documentation-steward run complete (every-10th-cycle
+task). CHANGELOG through Cycle 19. CONTRIBUTING.md corrected. 8 docstrings added. 72 new platform
+helper unit tests (device-free). 713 Python unit tests. Ruff clean.
 
-The most important work for Cycle 20 (Phase 3: Blind User Testing):
-1. **Every-10th-cycle**: documentation-steward run (README, CHANGELOG, CONTRIBUTING.md, docstrings)
-2. **P3: Unit tests for ADB/simctl helper functions** — device-free, fast, improves coverage
-3. **P3: Android TalkBack device test** — trigger release tag to run AVD CI job
+The most important work for Cycle 21 (Phase 3: Blind User Testing):
+1. **P3: ROADMAP.md** — Create with Phase 3-5 milestones; CONTRIBUTING.md links to it
+2. **P3: Android TalkBack device test** — trigger release tag to run the e2e-android AVD CI job
+3. **P3: iOS VoiceOver device test** — trigger release tag on macOS runner (ios-e2e.yml)
