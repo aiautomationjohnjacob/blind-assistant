@@ -69,6 +69,8 @@ def _make_server(
     Build an APIServer and return a TestClient for it.
 
     Uses mock keyring so no real OS credential access happens.
+    The patch targets the credentials module where get_credential is defined,
+    since api_server imports it inside the _authenticate method.
     """
     if orchestrator is None:
         orchestrator = _make_orchestrator()
@@ -77,9 +79,9 @@ def _make_server(
     server = APIServer(orchestrator, config)
     app = server._build_app()
 
-    # Mock keyring inside the api_server module
+    # Patch at the credentials module since it's imported lazily inside _authenticate
     with patch(
-        "blind_assistant.interfaces.api_server.get_credential",
+        "blind_assistant.security.credentials.get_credential",
         return_value=token_in_keychain,
     ):
         client = TestClient(app, raise_server_exceptions=False)
