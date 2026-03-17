@@ -93,12 +93,32 @@ to work in parallel, review each other's work, and commit progress continuously.
   100% on security modules; called after every backend-developer or integration-engineer task
 - **qa-lead** — Owns test strategy and test quality (not just coverage); detects test rot;
   designs regression suites; ensures test pyramid is balanced
+- **e2e-tester** — Designs and writes end-to-end tests covering full user flows (voice → STT →
+  orchestrator → tool → TTS); only external APIs mocked; one test per blind persona scenario
+- **project-inspector** — Proactively hunts for holistic gaps (missing tests, missing CI, missing
+  E2E, agent roster gaps, doc gaps, dependency hygiene); called every 5th cycle; writes directly
+  to OPEN_ISSUES.md and PRIORITY_STACK.md
+
+### Platform Accessibility Agents
+- **ios-accessibility-expert** — iOS VoiceOver, Switch Control, AssistiveTouch; ensures Telegram
+  bot messages are accessible in iOS TalkBack; no emoji in TTS, no visual-only instructions
+- **android-accessibility-expert** — Android TalkBack, BrailleBack, Switch Access; message
+  formatting for TalkBack; Telegram Android integration; gesture-based setup instructions
+- **windows-accessibility-expert** — NVDA and JAWS on Windows; the NVDA keyboard-only test is
+  the project's accessibility floor; installer must use pyttsx3 before any GUI; console-only input
+- **macos-accessibility-expert** — macOS VoiceOver (shares architecture with iOS VoiceOver);
+  macOS Keychain integration; pyttsx3 nsss backend; Terminal.app VoiceOver compatibility
 
 ### Infrastructure & Education Agents
 - **cloud-architect** — Designs cloud infrastructure in planning mode (no live accounts yet);
   recommends Railway/Fly.io for Telegram webhook, local-first for user vault; infrastructure as code
 - **education-website-designer** — Builds accessible course platform at `learn.blind-assistant.org`;
   audio-primary design; must be fully completable by NVDA user with zero mouse use
+
+### Documentation Agent
+- **documentation-steward** — Keeps README.md, CHANGELOG.md, CONTRIBUTING.md, and code-level
+  docstrings accurate and up to date; called every 10th cycle; NEVER modifies strategic docs
+  (PRODUCT_BRIEF.md, ARCHITECTURE.md, USER_STORIES.md, PRIORITY_STACK.md, CLAUDE.md, LESSONS.md)
 
 ## Custom Skills (Slash Commands)
 - `/audit-a11y [path]` — Full WCAG audit via parallel agents

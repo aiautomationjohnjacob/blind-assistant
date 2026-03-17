@@ -119,3 +119,75 @@ Phase 2 "product exists" milestone.
   screenshot fallback for servers
 - Next cycle recommendation: Close the "product exists" gap — wire Telegram end-to-end
   so a real message gets a real voice response. Fix silent vault failure.
+
+---
+
+## Cycle 3 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: Cycle 3 fixed the most dangerous silent failure in the
+product (blind user can't access notes, gets no explanation). That is exactly the right
+priority — a tool that fails silently is worse than no tool. The 279-test suite is solid.
+However, we still have not reached the "product exists" milestone: a blind user still
+cannot demo the app end-to-end without developer intervention. Next cycle must close
+that gap. Telegram end-to-end demo (voice in, voice out) is the single most important
+remaining Phase 2 deliverable.
+
+**Code quality (code-reviewer)**: (1) The vault passphrase recovery in `_get_vault` is
+well-structured: register session BEFORE sending prompt (correct ordering), cache
+passphrase in context to avoid re-prompting, clear cached passphrase on wrong input.
+(2) `_collect_vault_passphrase` reuses the ConfirmationGate queue — elegant, avoids
+a second communication mechanism. (3) pyproject.toml `pythonpath = ["src"]` fix is
+essential — tests should never require manual PYTHONPATH. (4) One concern: `Optional`
+import was missing and only caught at test time. The type annotation coverage in
+orchestrator.py is incomplete — `response_callback` params should be typed as
+`Optional[Callable]`. (5) Test count grew from 244 to 279: no regressions.
+
+**Security (security-specialist)**: (1) The vault passphrase is cached in `context._vault_passphrase`
+as a plain string in memory for the session duration. This is acceptable (OS doesn't
+expose process memory to other processes), but should be cleared on session end. Add a
+`context.clear_sensitive()` method. (2) The 120-second passphrase timeout window is
+reasonable. (3) The `session_passphrase` is never logged — correct. No regressions.
+
+**Accessibility (accessibility-reviewer)**: The passphrase prompt text is clear and
+non-visual: "Please say or type your passphrase now." — correct, works for voice AND
+Telegram text users. The "Notes unlocked" confirmation is good UX — user knows the
+action succeeded. The offer to remember the passphrase is opt-in, not opt-out — correct.
+One note: the 120-second timeout may still be too short for Dorothy (elder); consider
+making it configurable (e.g., config.yaml voice.prompt_timeout_seconds).
+
+**User perspective (blind-user-tester)**: Before this fix, if my keychain didn't have
+the vault key (e.g., new session, different machine, keychain reset), I was locked out
+with no explanation. Now I get a clear spoken prompt and can recover by speaking my
+passphrase. This is a real usability win. My next question: can I use the app yet?
+Can I send a Telegram message and get a voice reply? That's the test that matters.
+
+**Ethics (ethics-advisor)**: Caching the passphrase in the session context is acceptable
+and actually better for autonomy — the user doesn't have to repeat themselves every
+time they access a note in the same session. The opt-in offer to store in keychain
+respects informed consent. The 120-second timeout respects user agency without being
+so short it creates frustration.
+
+**Consensus recommendation for next cycle**: (1) Wire Telegram end-to-end: send a
+voice message → get transcription → orchestrator → TTS audio reply. This closes the
+Phase 2 "product exists" gap. (2) Add `context.clear_sensitive()` to clear cached
+passphrase on session end. (3) Make the passphrase prompt timeout configurable.
+
+**Orchestrator self-assessment**:
+- Accomplished: pyproject.toml pythonpath fix (tests now run without PYTHONPATH hack);
+  ISSUE-001 _get_vault silent failure fix with voice passphrase prompt recovery;
+  10 new tests for passphrase prompt flow (all pass); 14 new TTS tests covering
+  synthesize_speech dispatch, ElevenLabs/pyttsx3 fallback, speed formula, speak_locally;
+  11 new STT tests covering transcribe_audio, singleton model loading, transcribe_microphone;
+  total: 279 tests, all passing, no regressions from 244.
+- Attempted but failed: none — all planned work completed.
+- Confusion/loops: mock injection pattern for missing optional deps (pyttsx3, elevenlabs)
+  required fresh mock per test (setdefault caused mock state bleed between tests). Fixed
+  by using sys.modules["pyttsx3"] = fresh_mock instead of setdefault.
+- New gaps: (1) `Optional[Callable]` type annotations missing on response_callback params
+  throughout orchestrator.py; (2) session context has no clear_sensitive() method to
+  zero out cached passphrase at session end; (3) passphrase prompt timeout is hardcoded
+  at 120s — should be config.yaml setting; (4) Telegram end-to-end demo still not
+  delivered — remains the #1 Phase 2 gate item.
+- Next cycle recommendation: Wire Telegram end-to-end — a real voice message in,
+  real TTS audio out, all pieces connected. This is the "product exists" moment and
+  the most important single step remaining in Phase 2.
