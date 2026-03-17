@@ -28,7 +28,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
   ActivityIndicator,
-  Platform,
   Pressable,
   StatusBar,
   StyleSheet,
