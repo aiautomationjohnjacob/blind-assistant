@@ -78,8 +78,13 @@ to work in parallel, review each other's work, and commit progress continuously.
 ### Ethics & Safety Agents
 - **privacy-guardian** — Protects sensitive screen content (passwords, banking, health data)
 - **ethics-advisor** — Ensures AI enhances autonomy, not dependency; informed consent
-- **security-specialist** — Implementation security audit: encryption, credential storage,
-  Telegram security, plain-text sensitive data, prompt injection, dependency CVEs
+- **security-specialist** — User data security: encryption, credential storage, screen
+  redaction, payment risk disclosure, prompt injection, dependency CVEs; owns the threat
+  model for sensitive personal data (medical, financial, Second Brain)
+- **backend-security-expert** — REST API and server-side security: OWASP API Security Top 10,
+  FastAPI hardening, authentication design, rate limiting, CORS, input validation, error
+  handling; called after any backend-developer task that creates or modifies API endpoints;
+  writes security tests for the API layer; distinct from security-specialist
 
 ### Open Source & Community Agents
 - **open-source-steward** — Community health, CONTRIBUTING.md, issue triage, PR reviews,
@@ -147,7 +152,11 @@ The goal is to integrate existing tools, not reinvent them:
 - **Computer control**: Playwright MCP (browser), Desktop Commander MCP (native apps)
 - **Voice I/O**: Whisper (STT) + ElevenLabs/Kokoro (TTS) — better than screen reader voices
 - **Personal knowledge (Second Brain)**: Obsidian-compatible markdown vault, voice-queried
-- **Multi-device access**: Telegram bot as primary 24/7 interface (phone + laptop)
+- **Primary interfaces**: Native standalone apps (Android, iOS, Desktop, Web) — built
+  specifically for blind users with zero-visual-setup and native screen reader integration
+- **Secondary/super-user channel**: Telegram bot — available for power users who want
+  remote command access, but NOT the primary interface; requires visual setup that blind
+  users cannot easily complete independently
 - **Memory**: MCP memory server (cross-session knowledge graph)
 - **Automation**: n8n or similar for background task workflows
 - **Physical-world tasks**: Shopping/ordering APIs (with explicit user confirmation always)

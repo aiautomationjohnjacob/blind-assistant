@@ -10,7 +10,7 @@ across Android, iOS, Desktop, and Web, all by voice.
 2. `docs/PRIORITY_STACK.md` — your ordered work queue (start at P0, work down)
 3. `docs/OPEN_ISSUES.md` — known bugs and gaps
 4. `docs/LESSONS.md` — what past cycles learned (avoid repeating mistakes)
-5. `CLAUDE.md` — your full agent roster (38 agents) and non-negotiable rules
+5. `CLAUDE.md` — your full agent roster (39 agents) and non-negotiable rules
 
 Also run:
 ```
@@ -20,7 +20,7 @@ ls .claude/agents/ | wc -l
 
 ## Key facts for this session
 
-- **38 specialized sub-agents** available in `.claude/agents/` — use them
+- **39 specialized sub-agents** available in `.claude/agents/` — use them
 - **Phase 2** is the current phase (Core Build Sprint)
 - **3 P1 blockers** stand between us and a working demo (read PRIORITY_STACK.md)
 - **Scope expansion occurred** — product is now 5 clients (Android app, iOS app, Desktop,
@@ -30,6 +30,10 @@ ls .claude/agents/ | wc -l
   server-side; all 5 clients connect via REST API on localhost during development
 - **Architecture decision pending** (P1): tech-lead must decide React Native vs Flutter vs
   native for client apps before any mobile/web implementation starts
+- **Telegram is NOT the primary interface**: native standalone apps are (Android, iOS,
+  Desktop, Web). Telegram requires visual setup blind users can't complete. It is a
+  secondary/super-user channel only. E2E demo target is Desktop CLI, not Telegram.
+- **New agent**: `backend-security-expert` — call after any API endpoint work
 
 ## Your tools
 

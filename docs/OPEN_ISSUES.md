@@ -111,18 +111,23 @@ Dorothy (elder) may need more time; Marcus (power user) might want less.
 **Proposed fix**: Read from `config.yaml voice.prompt_timeout_seconds` with default 120.
 **Status**: OPEN
 
-### ISSUE-007: Telegram end-to-end demo not yet delivered
+### ISSUE-007: Native voice E2E demo not yet delivered
 **Severity**: HIGH
 **Category**: integration, architecture
-**Detected by**: Phase 2 gate review (Cycle 3)
+**Detected by**: Phase 2 gate review (Cycle 3); updated by founder directive 2026-03-17
 **Detected**: 2026-03-17
-**Description**: A real user still cannot send a voice message to the Telegram bot and
-get a spoken audio reply back. All individual pieces exist (STT, TTS, orchestrator,
-Telegram bot) but they have not been wired together and tested end-to-end on real
-hardware/infrastructure.
+**Description**: A real user still cannot interact with the assistant end-to-end through
+a native interface. All individual pieces exist (STT, TTS, orchestrator) but they have
+not been wired together and tested on real hardware.
+**Note (2026-03-17 founder update)**: Telegram is NOT the target for this demo. Native
+standalone apps are the primary interface. Telegram requires visual setup that blind users
+cannot complete independently — it is a secondary/super-user channel only. The E2E demo
+should be via the Desktop CLI (voice in → TTS audio out), which is the most accessible
+and requires zero external accounts to test.
 **Impact**: Phase 2 is not complete. The "product exists" milestone is not met.
-**Proposed fix**: Wire Telegram bot → Whisper STT → orchestrator → TTS → reply.
-Write integration test. Test with real Telegram credentials in a staging environment.
+**Proposed fix**: Wire Desktop CLI → microphone → Whisper STT → orchestrator → TTS →
+speaker output. Test on real hardware. Telegram integration can follow later as an
+optional super-user feature.
 **Status**: OPEN
 
 ### ISSUE-008: No REST API server — all clients have no connection point

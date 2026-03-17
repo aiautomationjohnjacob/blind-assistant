@@ -25,10 +25,16 @@ tech stack decision. Client apps will talk to the Python backend via an API laye
 Claude Code will run Android emulators (AVD+ADB) and iOS simulators (xcrun simctl)
 to take real screenshots and interact with running apps. Playwright for web.
 
-**9 new agents added** (see `.claude/agents/` and CLAUDE.md):
+**10 new agents added** (see `.claude/agents/` and CLAUDE.md):
 `project-inspector`, `e2e-tester`, `ios-accessibility-expert`, `android-accessibility-expert`,
 `windows-accessibility-expert`, `macos-accessibility-expert`, `web-accessibility-expert`,
-`device-simulator`, `documentation-steward`
+`device-simulator`, `documentation-steward`, `backend-security-expert`
+
+**Telegram de-emphasized** (founder directive 2026-03-17):
+- Native standalone apps (Android, iOS, Desktop, Web) are the PRIMARY interfaces
+- Telegram setup requires visual configuration that blind users cannot easily complete
+- Telegram demoted to secondary/super-user channel; power users can enable it optionally
+- All references to "Telegram E2E demo" as a P1 have been updated to "Native voice E2E demo"
 
 New wiring in run-cycle:
 - Every 5th cycle: call `project-inspector` in STEP 3
@@ -150,7 +156,7 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] Risk disclosure flow: payment confirmation with spoken warning (Cycle 1)
 - [ ] **P1: Backend API server** — expose Python backend as FastAPI HTTP server; all clients
       connect via REST; endpoints: /query, /remember, /describe, /task, /profile
-- [ ] **P1: Telegram end-to-end demo** — voice message in → TTS audio reply out (real hardware test)
+- [ ] **P1: Native voice E2E demo** — voice in → STT → orchestrator → TTS audio reply out (Desktop CLI first; NOT Telegram — Telegram is secondary/super-user only)
 - [ ] **P1: ARCH DECISION** — tech-lead decides unified (React Native/Flutter) vs native for clients
 - [ ] Tool registry + installer: self-expanding pattern with user confirmation
 - [ ] Voice installer: voice-guided setup from zero to functional
@@ -186,7 +192,7 @@ ElevenLabs/pyttsx3 fallback, singleton model loading, transcribe_microphone). To
 | Date | Decision | Made by | Reasoning |
 |------|----------|---------|-----------|
 | 2026-03-17 | Python 3.11+ as primary language | tech-lead | Best AI ecosystem, async support, keyring library |
-| 2026-03-17 | Telegram as primary interface | tech-lead + gap-analyst | 24/7 multi-device, accessible, no visual UI needed |
+| 2026-03-17 | ~~Telegram as primary interface~~ — REVISED 2026-03-17 | Founder directive | Telegram setup is visual and inaccessible for blind users; native standalone apps are the primary interface; Telegram is secondary/super-user only |
 | 2026-03-17 | Obsidian vault format (file only, no app) | tech-lead | Accessible storage without inaccessible app |
 | 2026-03-17 | AES-256-GCM for vault encryption | security-specialist | Industry standard, authenticated encryption |
 | 2026-03-17 | OS keychain for all credentials | security-specialist | No .env files, cross-platform, secure |
@@ -206,4 +212,4 @@ then reading PRIORITY_STACK.md (which now has 3 P1 items), then LESSONS.md.
 The most important work for Cycle 4:
 1. **P1 ARCH DECISION** — tech-lead + gap-analyst decide client framework before any mobile code
 2. **P1 Backend API server** — FastAPI server exposing REST endpoints for all clients
-3. **P1 Telegram E2E demo** — wire voice in → TTS audio out on real infrastructure
+3. **P1 Native voice E2E demo** — wire voice in → TTS audio out via Desktop CLI (NOT Telegram)

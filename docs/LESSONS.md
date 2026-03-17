@@ -18,6 +18,29 @@ Each entry is dated and tagged with:
 
 ---
 
+## Interface Architecture Update — 2026-03-17 (Founder directive — read before any interface work)
+
+**PRODUCT**: Telegram is NOT the primary interface for Blind Assistant.
+- **Why**: Telegram setup requires a visual configuration process (scanning QR codes,
+  navigating Telegram's website, phone verification via visual flow). Most blind users
+  cannot complete this independently. Building the primary interface on a foundation
+  that requires sighted setup contradicts the project's core mission.
+- **What is primary**: Native standalone apps built from scratch for blind users — Android
+  (TalkBack), iOS (VoiceOver), Desktop (NVDA/VoiceOver), Web (NVDA+Chrome/VoiceOver+Safari).
+  Each app must be fully setupable by voice with zero visual interaction required.
+- **What Telegram is**: A secondary/super-user channel. Power users who want remote
+  access from any device can optionally configure Telegram. It is never required, never
+  default, and never the demo target.
+- **Implication for the loop**: When ISSUE-007 (E2E demo) is worked on, the target is
+  Desktop CLI (voice in → STT → orchestrator → TTS → speaker out). Do NOT prioritize
+  Telegram integration as a Phase 2 goal.
+
+**PRODUCT**: Backend-security-expert agent added (2026-03-17).
+- Call `backend-security-expert` after any `backend-developer` task touching API endpoints.
+- Different from `security-specialist` (user data) — this agent owns the REST API attack surface.
+
+---
+
 ## Scope Expansion — 2026-03-17 (Founder directives — read before Cycle 4)
 
 **PRODUCT**: The product is now a family of clients, not a single Python CLI:

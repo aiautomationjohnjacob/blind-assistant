@@ -53,12 +53,22 @@ Let's say a blind person wants to book a trip to a destination but doesn't know 
   (bill reminders, email organization, calendar management) — but require visual setup.
 - **AutoGPT / AgentGPT** — Autonomous AI agents that can browse and act. Not accessible.
 
-**Communication & Multiplatform Access**
-- **Telegram bot integration** — A blind user can talk to their assistant 24/7 from any
-  device: laptop, phone, even a feature phone with internet. No visual interface required.
-  This is a critical access channel — the assistant is available everywhere, always.
-- **WhatsApp / SMS integration** — Further extends reach; important for users in
-  developing countries where smartphone accessibility varies.
+**Native App Interfaces (Primary)**
+- **Android app** — Built specifically for blind users with TalkBack from day one;
+  zero-visual-setup; no Telegram account or external accounts required to get started
+- **iOS app** — VoiceOver-native; Siri Shortcuts integration; single-download setup
+- **Desktop app** — Windows (NVDA/JAWS) + macOS (VoiceOver); voice-guided installer
+- **Web app** — WCAG 2.1 AA; NVDA+Chrome, VoiceOver+Safari; no download required
+
+**Secondary/Super-User Channel**
+- **Telegram bot** — Optional for power users who want remote access from any device
+  via a chat interface. NOT a primary interface — Telegram setup requires visual
+  configuration that most blind users cannot complete independently. Available as an
+  optional power-user feature once the native apps exist. WhatsApp / SMS similar.
+
+**Important**: the Telegram bot integration that is partially built is a prototype
+demonstration of the backend capabilities — it is NOT the target product interface.
+Native apps are what ships to blind users.
 
 **Vision & World Interpretation**
 - **Be My Eyes / Be My AI** — Ask a human or AI to describe a photo. Slow. Manual.
@@ -100,8 +110,8 @@ complexity underneath.**
 A blind user can:
 1. **Set up everything entirely by voice** — install, configure, and start using without
    ever needing to see a screen or ask a sighted person for help
-2. **Access their AI assistant 24/7 from any device** — laptop, phone, tablet, via
-   Telegram or SMS — wherever they are
+2. **Access their AI assistant 24/7 from any device** — through native apps on Android,
+   iOS, Desktop (Windows/macOS), or the Web — wherever they are
 3. **Get help with any computer task** — "read me this document," "fill out this form,"
    "find and book a flight," "what's on my screen right now"
 4. **Navigate inaccessible apps** — the AI sees the screen and acts as their eyes even

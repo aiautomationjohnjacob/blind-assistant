@@ -185,7 +185,8 @@ If top P1 is **LOCAL BACKEND SERVER** (ISSUE-008):
   (execute real-world task), GET /profile (return user config), GET /health (ping).
   Each endpoint must authenticate the request (simple Bearer token for now — store in
   OS keychain). Server must run on localhost:8000. Add startup script. Write unit tests."
-  Then call `test-engineer`. Then add `uvicorn` or `fastapi` to requirements.txt.
+  Then call `test-engineer`. Then call `backend-security-expert` on the new endpoints.
+  Then add `uvicorn` or `fastapi` to requirements.txt.
 
 State your decision: "This cycle I will work on: [item 1], [item 2 if any]."
 State your reasoning: "Because: [reason based on priority and current phase]."
@@ -220,7 +221,7 @@ the heading '## Gap Analysis — [date]'. Do NOT create a new GAP_ANALYSIS.md fi
 Be specific and opinionated. Max 80 lines."
 
 **B. Security Model**
-Use `security-specialist` agent:
+Use `security-specialist` and `backend-security-expert` in parallel:
 "Read docs/PRODUCT_BRIEF.md including the Examples section. The app will handle payment
 details for tasks like food ordering and travel booking. Design the complete security model.
 Cover: (1) Obsidian vault encryption; (2) Telegram bot auth (whitelist by user ID);
@@ -317,7 +318,11 @@ After implementation:
   (tab order, announcement sequence, ARIA live region timing)
 - Use `voice-interface-designer` for any new voice prompt or conversational UX pattern
 - Use the most relevant blind persona agent to verify the feature from their perspective
-- Use `security-specialist` on any feature touching credentials or personal data
+- Use `security-specialist` on any feature touching credentials, personal data, or payment flows
+- Use `backend-security-expert` after any `backend-developer` task that creates or modifies
+  API endpoints: "The following endpoints were just created/modified: [list]. Review each for
+  OWASP API Security Top 10 issues. Check auth, rate limiting, input validation, CORS, error
+  messages. Write security tests for any gaps found. Output a findings report."
 - Use `qa-lead` every 3rd cycle to audit overall test quality (not just coverage — checks
   for test rot, mocking-what-you-test, assertion roulette, orphaned test files)
 
