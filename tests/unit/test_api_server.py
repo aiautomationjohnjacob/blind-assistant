@@ -62,7 +62,7 @@ def _make_orchestrator(response_text: str = "Here is your answer.") -> MagicMock
 @contextmanager
 def _make_server(
     orchestrator=None,
-    token_in_keychain: str | None = "test-token-123",
+    token_in_keychain: str | None = "test-token-123",  # noqa: S107
     auth_disabled: bool = False,
 ):
     """
