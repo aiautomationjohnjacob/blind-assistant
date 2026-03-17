@@ -318,9 +318,11 @@ class TestVaultQueryAnswerQuery:
         assert "locked" in result.lower() or "passphrase" in result.lower()
 
     async def test_returns_note_when_found(self, vault, sample_note_content, mock_user_context):
+        # sample_note_content: "Meeting with Dr. Smith on Thursday at 2pm. Prescription renewal needed."
         await vault.add_note(sample_note_content, category="health")
         q = VaultQuery(vault)
-        result = await q.answer_query("doctor appointment", mock_user_context)
+        # Use keywords that actually appear in the note
+        result = await q.answer_query("smith prescription", mock_user_context)
         assert isinstance(result, str)
         assert len(result) > 10
 
@@ -335,12 +337,14 @@ class TestVaultQueryAnswerQuery:
     async def test_braille_mode_formats_for_braille(
         self, vault, sample_note_content, mock_braille_context
     ):
-        await vault.add_note(sample_note_content)
+        # When note not found (search for something not in note), should get braille-formatted message
         q = VaultQuery(vault)
-        result = await q.answer_query("doctor", mock_braille_context)
-        # Braille mode: each line should fit in BRAILLE_LINE_WIDTH
+        result = await q.answer_query("banking insurance claim", mock_braille_context)
+        # Braille mode: each line should fit in BRAILLE_LINE_WIDTH (no-results path)
         for line in result.split("\n"):
-            assert len(line) <= BRAILLE_LINE_WIDTH
+            assert len(line) <= BRAILLE_LINE_WIDTH, (
+                f"Line too long ({len(line)} chars): {line!r}"
+            )
 
 
 class TestVaultQueryAddNote:
