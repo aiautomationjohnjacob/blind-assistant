@@ -47,7 +47,7 @@ class VoiceLocalInterface:
         self.orchestrator = orchestrator
         self.config = config
         self._running = False
-        self._context: object | None = None
+        self._context: UserContext | None = None
 
         # Config
         self._wake_word = config.get("wake_word", DEFAULT_WAKE_WORD).lower()
