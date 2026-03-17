@@ -241,12 +241,9 @@ Cycle 18 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 16.** Phase 3 in progress. ISSUE-028 resolved (118 new unit tests).
-Ruff format CI blocker from Cycle 15 fixed. 583 unit tests passing. Ruff lint+format clean.
+**Loop completed Cycle 17.** Phase 3 in progress. Voice installer refactored (native app first, Telegram optional). 641 unit tests passing. Web E2E CI confirmed green (run 23219936377). Ruff clean.
 
-The most important work for Cycle 17 (Phase 3: Blind User Testing):
-1. **P2: Verify web E2E CI results**: Check GitHub Actions e2e-web job from this push.
-   Ruff format is now fixed — the web E2E Playwright tests should run. Fix ARIA assertions if needed.
-2. **P2: Voice installer**: voice-guided setup from fresh Python install (P2 phase gate item).
-3. **P2: End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver.
-4. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
+The most important work for Cycle 18 (Phase 3: Blind User Testing):
+1. **P2: End-to-end food ordering on real device**: Android TalkBack + iOS VoiceOver. Use AVD emulator (ADB) to verify the full flow works with TalkBack enabled.
+2. **P2: Web app deployed**: Netlify/Vercel staging deploy. Once deployed, test with real NVDA+Chrome users.
+3. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
