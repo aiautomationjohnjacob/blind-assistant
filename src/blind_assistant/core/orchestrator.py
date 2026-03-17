@@ -201,6 +201,9 @@ class Orchestrator:
 
         await update(message)
 
+        # These asserts narrow Optional types — this method is only called after initialize()
+        assert self.confirmation_gate is not None
+        assert self.tool_registry is not None
         confirmed = await self.confirmation_gate.wait_for_confirmation(context)
         if confirmed:
             await update(f"Installing {tool_name}...")
