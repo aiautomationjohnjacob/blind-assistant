@@ -129,7 +129,7 @@ def simctl_available() -> bool:
     if shutil.which("xcrun") is None:
         return False
     # Check that at least one simulator is booted
-    result = subprocess.run(  # noqa: S603, S607
+    result = subprocess.run(
         ["xcrun", "simctl", "list", "devices", "--json"],
         capture_output=True,
         text=True,
