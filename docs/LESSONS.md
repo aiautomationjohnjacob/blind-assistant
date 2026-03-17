@@ -977,3 +977,40 @@ CI run results to find and fix any ARIA/accessibility failures the tests discove
 
 **TECHNICAL LESSON (mocking unavailable packages in unit tests)**:
 When a src/ module uses lazy imports (imports inside function bodies), patch the source module path (e.g., `blind_assistant.vision.redaction.analyze_sensitivity`) rather than the calling module's namespace (which doesn't exist until runtime). For packages not installed in the local environment (e.g., `telegram`, `anthropic`), use `patch.dict(sys.modules, {...})` to inject a MagicMock module — `patch("telegram.ext.ApplicationBuilder")` fails with ModuleNotFoundError if the package isn't installed.
+
+---
+
+## Cycle 17 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: The installer fix is critical for the mission. Before this cycle, setup.py told a blind user "Step 1: Open Telegram" — a showstopper since Telegram requires visual configuration that blind users cannot complete independently. Now Step 1 is the native app (TalkBack/VoiceOver accessible via app store). Web E2E CI confirmed green (run 23219936377). Next cycle should focus on end-to-end food ordering on a real Android device with TalkBack — the clearest demonstration of mission impact.
+
+**Code quality (code-reviewer)**: Test count: 583 → 641 (+58). No test files deleted or weakened. Installer tests are solid: parametrized for all ready/skip words, mocked all external I/O (pyttsx3, keychain, socket, filesystem), vault creation verified with real tmp_path. One gap: `_install_dependencies()` subprocess path not tested (acceptable — subprocess mocking adds complexity without proportional value). The `noqa: S110` on the Telegram try/except is correct. No security anti-patterns.
+
+**Security (security-specialist)**: `_setup_native_app()` socket IP discovery (connect 8.8.8.8:80, getsockname) is standard and sends no data. localhost:8000 address spoken locally only. Telegram token still stored in OS keychain when optional step is used. No security regressions. No new credential exposure.
+
+**Accessibility (accessibility-reviewer)**: STEP_APP_INTRO explicitly names "TalkBack on Android" and "VoiceOver on iPhone" — blind users immediately know the app works with their screen reader. Setup order is now accessibility-first: native app → Claude API → ElevenLabs (optional) → vault → Telegram (optional). STEP_COMPLETE correctly says "open the Blind Assistant app on your phone." No WCAG violations introduced.
+
+**User perspective (blind-user-tester)**: Before: installer told me to set up Telegram first — impossible without sighted help. Now: install app from store (doable with TalkBack/NVDA), enter server address in app. Server address spoken as "http colon slash slash [ip] colon 8000" — I can type that. This is a real independence improvement. The Telegram warning ("Note: sighted assistance may be needed") is honest and lets me decide.
+
+**Ethics (ethics-advisor)**: The change respects user autonomy — blind users are no longer forced into a visual-dependent primary setup path. The Telegram optional step includes an explicit warning about visual requirements, enabling informed consent. No new autonomy concerns.
+
+**Goal adherence (goal-adherence-reviewer)**: Phase 3 target "complete setup/onboarding with zero sighted assistance" was broken by the old Telegram Step 1. Now satisfied. Web E2E CI green confirmed. Remaining Phase 3 blockers: (1) end-to-end food ordering on real Android TalkBack / iOS VoiceOver, (2) web app deployed to staging for real NVDA+Chrome testing.
+
+**Consensus recommendation for next cycle**: (1) Verify the food ordering E2E flow works on Android emulator with TalkBack (AVD + ADB). (2) Deploy web app to Netlify/Vercel staging for real NVDA+Chrome testing.
+
+**Orchestrator self-assessment**:
+- Accomplished: Voice installer refactored (Telegram demoted, native app as Step 1, server address discovery, Telegram optional warning); 58 new unit tests for installer; ruff clean; 641 unit tests passing; web E2E CI confirmed green from CI run 23219936377
+- Attempted but failed: none — all planned items completed
+- Confusion/loops: none this cycle
+- New gaps: `_install_dependencies()` subprocess path has no test coverage (acceptable complexity tradeoff); web app staging deployment not yet done (next cycle)
+- Next cycle recommendation: (1) Android TalkBack E2E food ordering on AVD emulator; (2) web app deploy to staging
+
+**TECHNICAL LESSON (socket-based local IP discovery)**:
+To find the local network IP (for telling a mobile app which address to connect to), use the pattern:
+```python
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.connect(("8.8.8.8", 80))  # Does NOT send data — just resolves local routing
+local_ip = sock.getsockname()[0]
+sock.close()
+```
+This works even without internet access (the connect is not completed). Wrap in try/except OSError and fall back to "127.0.0.1".
