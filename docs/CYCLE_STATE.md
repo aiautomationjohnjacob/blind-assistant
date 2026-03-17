@@ -218,18 +218,17 @@ JS tests: 117 (was 114). Python: 465 unit (unchanged). 2 new open issues: ISSUE-
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 10.** Phase 2 complete. Loop is clean and ready for Cycle 11 (Phase 3 start).
+**Loop completed Cycle 11.** Phase 3 in progress. Accessibility audit + haptic cue + type annotations done.
 No mid-cycle state artifacts. All changes committed and pushed.
 
-The most important work for Cycle 11 (Phase 3: Blind User Testing):
-1. **P1: Live food ordering validation** — run `_handle_order_food` on a real Playwright
+The most important work for Cycle 12 (Phase 3: Blind User Testing):
+1. **P1: Live food ordering validation (ISSUE-021)** — run `_handle_order_food` on a real Playwright
    browser against DoorDash (or a test site) to validate the full checkout loop works on
    an actual web page, not just mocked helpers. Use computer-use-tester or device-simulator.
-2. **P2: Cross-platform accessibility audit** — call the 5 platform accessibility agents
-   (Android, iOS, Web, Windows, macOS) to audit current codebase before user testing starts.
-3. **P3: Recording confirmation cue** in MainScreen — haptic/audio feedback when recording
-   starts (open since Cycle 7 review; TalkBack UX issue).
-4. **P3: Conversational recovery** in checkout loop — handle mid-flow "show me the menu again"
+   This has been deferred 2 cycles — do NOT defer again.
+2. **P3: ISSUE-020** — Remove or replace visual platform hint text in MainScreen ("Double-tap to activate")
+   — LOW severity cleanup, 15-minute fix.
+3. **P3: Conversational recovery** in checkout loop — handle mid-flow "show me the menu again"
    or "go back" user requests; currently the loop does not support backtracking.
-5. **Every 5th cycle (Cycle 15)**: project-inspector should run.
-6. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
+4. **Every 5th cycle (Cycle 15)**: project-inspector should run.
+5. **Every 10th cycle (Cycle 20)**: documentation-steward should run.
