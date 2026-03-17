@@ -50,10 +50,10 @@ class UserContext:
         where a memory dump could expose it. Per ISSUE-005.
         """
         # Clear vault passphrase if it was cached during this session.
-        # _vault_passphrase is set dynamically (not in __init__) so we use getattr/setattr
-        # to avoid mypy 'attr-defined' and 'has-type' errors while still zeroing the value.
-        if hasattr(self, "_vault_passphrase") and getattr(self, "_vault_passphrase") is not None:
-            object.__setattr__(self, "_vault_passphrase", None)
+        # _vault_passphrase is a dynamic attribute (not declared in the dataclass).
+        # We use vars(self) to check and clear it without triggering mypy attr errors.
+        if "_vault_passphrase" in vars(self) and vars(self)["_vault_passphrase"] is not None:
+            vars(self)["_vault_passphrase"] = None
         logger.debug(f"Sensitive data cleared for session {self.session_id}")
 
 
