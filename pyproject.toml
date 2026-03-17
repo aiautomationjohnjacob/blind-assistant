@@ -27,6 +27,12 @@ addopts = [
     "--strict-config",
     "-ra",  # show summary of all non-passing tests
 ]
+filterwarnings = [
+    # asyncio.wait_for emits a RuntimeWarning when the Queue.get() coroutine it
+    # cancels on timeout is later garbage-collected. This is benign — the cancel
+    # is intentional. The warning appears after the test session ends at GC time.
+    "ignore::RuntimeWarning:asyncio",
+]
 markers = [
     "unit: pure unit tests with no I/O or external dependencies",
     "integration: tests that touch real file system, OS keychain, or external APIs",
