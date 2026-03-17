@@ -176,9 +176,11 @@ describe("SetupWizardScreen — welcome step", () => {
     });
   });
 
-  it("shows Step 1 of 3 progress text", () => {
+  it("shows Step 1 of 3 progress text (via accessibilityLabel)", () => {
     renderWizard();
-    expect(screen.getByText(/step 1 of 3/i)).toBeTruthy();
+    // The progress indicator has importantForAccessibility="no-hide-descendants",
+    // so we use getByLabelText which reads the accessibilityLabel directly.
+    expect(screen.getByLabelText(/setup step: welcome/i)).toBeTruthy();
   });
 });
 
