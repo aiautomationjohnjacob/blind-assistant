@@ -720,3 +720,32 @@ either (a) use `jest.requireMock("module")` inside the test to get the live mock
 or (b) make the factory self-contained: `jest.mock("module", () => ({ fn: jest.fn() }))`.
 Pattern (b) works when you only need to verify calls. Pattern (a) is needed when you need
 `mockFn.mockReturnValueOnce()` across tests.
+
+## Cycle 12 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: P1 ISSUE-021 addressed: real Playwright integration tests written and wired to CI. WSL2 environment limitation (no sudo for system deps) was handled correctly — tests skip locally, run in CI. ISSUE-020 is resolved: "Double-tap to activate" visual text removed. Both are mission-aligned. Next cycle must confirm CI integration-browser job passes and advance Phase 3: blind user completing an order on a real device.
+
+**Code quality (code-reviewer)**: Test count: 482 Python + 117 JS (both unchanged — no regressions). Integration tests use correct pytestmark.skipif pattern. module-level `_check_playwright()` probe is ~0.5s overhead at import — acceptable for integration test layer. Platform import removal was correct. All 11 integration tests cover sound logic. No concerns.
+
+**Security (security-specialist)**: Integration test server uses 127.0.0.1:0 (random port), local only, no credentials. No concerns.
+
+**Accessibility (accessibility-reviewer)**: ISSUE-020 fix is correct: "Double-tap to activate" in visible UI (even screen-reader-hidden) contradicted the VoiceOver copy guidelines established Cycle 11. JSX comment replacement is cleaner than any rendered alternative. Integration tests correctly have no accessibility assertions — they test BrowserTool plumbing, not user-facing output.
+
+**User perspective (blind-user-tester)**: ISSUE-021 being resolved via CI job (not local verification) is correct engineering, but as a blind user I still cannot observe a food order completing on a real device. The Phase 3 milestone (order by voice on TalkBack or VoiceOver) is still not reached. Haptic recording cue (Cycle 11) continues to be the most tangible improvement felt so far.
+
+**Ethics (ethics-advisor)**: No new concerns. Integration tests are technical infrastructure with no user-facing autonomy implications.
+
+**Goal adherence (goal-adherence-reviewer)**: ISSUE-021 was the P1. It is now in a state where CI can verify it — a meaningful advance. However, the Phase 3 gate ("blind user completes core tasks on 3 of 5 platforms") is not yet demonstrated. The next cycle must focus on real device validation: Android TalkBack or iOS VoiceOver completing the food ordering flow end-to-end.
+
+**Consensus recommendation for next cycle**: (1) Confirm CI integration-browser job passes (should auto-trigger on push). (2) P2: Real device validation — run the food ordering flow on an Android emulator with TalkBack or iOS Simulator with VoiceOver. (3) If real device testing is blocked (no device available), prioritize the Web app (P2 item) — React Native Web export to blind-assistant.org, WCAG 2.1 AA.
+
+**Orchestrator self-assessment**:
+- Accomplished: ISSUE-020 resolved (Platform import + hint text removed from MainScreen.tsx, 24 JS tests still pass); ISSUE-021 addressed with 11 real Playwright integration tests + new CI job; integration tests correctly skip when system deps unavailable with clear install instructions.
+- Attempted but failed: Running Playwright tests locally — WSL2 lacks libnss3/libnspr4 system deps that require root. Could not verify the 11 new tests actually pass (they skip). CI will be the verification path.
+- Confusion/loops: none — environment limitation was diagnosed quickly.
+- New gaps: (1) Integration tests in tests/integration/ are not counted in the main 80% coverage gate (correct, but means no coverage metric for this work); (2) The CI integration-browser job has not yet been verified to pass — needs one CI run to confirm.
+- Next cycle recommendation: (1) Check CI run for integration-browser job pass/fail. (2) Android TalkBack real device test — this is the Phase 3 validation gate that no other cycle has addressed. Consider using device-simulator agent with AVD.
+
+**TECHNICAL LESSON (Playwright in WSL2 without root)**: Playwright requires system-level shared libraries (libnss3, libnspr4, libasound2) that are installed via `playwright install-deps` which needs root/sudo. In WSL2 without sudo, Playwright cannot launch browsers. The correct engineering response is: (1) write the tests with a clean skip mechanism (pytestmark.skipif on a boolean probe), (2) set up a CI job that has sudo (GitHub Actions ubuntu-latest runners do), (3) provide PLAYWRIGHT_AVAILABLE=1 env var override for developers who have the deps installed manually. Never use `pytest.mark.skip` alone — use `skipif` with a condition so tests auto-enable when the environment is ready.
+
+**TECHNICAL LESSON (integration test skip patterns)**: The `_check_playwright()` pattern — run a minimal probe at module import time and store the result in a boolean — is a reliable way to detect environment capability. The overhead (~0.2-0.5s) is acceptable at module scope for integration tests but would be unacceptable in unit tests. Use `scope="module"` for expensive fixtures. The env var override (`PLAYWRIGHT_AVAILABLE=1`) gives CI and developers an escape hatch without modifying the test code.
