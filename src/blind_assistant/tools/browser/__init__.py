@@ -193,6 +193,7 @@ class BrowserTool:
     async def select_option(self, selector: str, value: str) -> PageState:
         """Select an option from a dropdown by value or label."""
         self._require_initialized()
+        assert self._page is not None  # guaranteed by _require_initialized; narrows type for mypy
         await self._page.select_option(selector, value, timeout=10_000)
         return await self.get_page_state()
 
