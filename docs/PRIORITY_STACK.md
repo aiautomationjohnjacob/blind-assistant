@@ -14,12 +14,15 @@
 5. **P4 — IMPROVEMENT**: Enhancement that improves the product meaningfully
 6. **P5 — CREATIVE**: New idea or integration opportunity worth exploring
 
-## Current Stack (Phase 2 — Core Build Sprint)
+## Current Stack (Phase 3 — Blind User Testing)
+
+**Phase 3 goal**: All 5 blind user personas can complete core life-assistant tasks on at least 3 of 5 client platforms.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P1 | **Food ordering checkout loop**: after BrowserTool navigates to search page, Claude reasons about page_state.text_content → reads options to user by voice → user picks by speaking → browser.click() through item selection → checkout → risk disclosure → order confirm → placed. Completes Phase 2. | Phase 2 completion | 2026-03-17 |
-| P2 | End-to-end food ordering demo: blind user asks to order food → full flow including item selection, checkout, and order placement (not just navigation) | Phase 2 sprint | 2026-03-17 |
+| P1 | **Live food ordering validation**: run `_handle_order_food` on a real Playwright browser (DoorDash or accessible test site) to validate the full 11-step checkout loop works against an actual web page. Use computer-use-tester + device-simulator. | Phase 3 start | 2026-03-17 |
+| P2 | **Cross-platform accessibility audit**: call 5 platform agents (Android, iOS, Web, Windows, macOS) to audit current code for WCAG/accessibility issues before user testing starts. | Phase 3 gate | 2026-03-17 |
+| P2 | End-to-end food ordering demo on real device: blind user on Android (TalkBack) + iOS (VoiceOver) can say "order me food" and complete the full flow by voice. | Phase 3 sprint | 2026-03-17 |
 | P2 | Voice installer: complete voice-guided setup from fresh Python install | ARCHITECTURE.md Task 5 | 2026-03-17 |
 | P2 | Web app: accessible web interface at blind-assistant.org (WCAG 2.1 AA; NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome) | Founder scope expansion | 2026-03-17 |
 | P2 | Cross-platform accessibility audit: run all 5 platform agents on current codebase | Founder scope expansion | 2026-03-17 |
