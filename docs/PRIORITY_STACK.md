@@ -128,3 +128,6 @@
 | ISSUE-028: 118 new unit tests — test_telegram_bot.py (24), test_query.py (49), test_redaction.py (27), test_screen_observer.py (18) | 2026-03-17 | 16 |
 | Ruff format CI blocker fixed (Cycle 15 web E2E files: conftest.py + test_main_screen_chromium.py) | 2026-03-17 | 16 |
 | Total test count Cycle 16: 583 Python unit tests (was 465 Python + was counting separately); ruff lint+format clean | 2026-03-17 | 16 |
+| Voice installer refactored: Telegram demoted to optional Step 5; _setup_native_app() added as Step 1 (TalkBack/VoiceOver); server address discovery (socket IP); 58 new installer tests | 2026-03-17 | 17 |
+| Web E2E CI confirmed green: CI run 23219936377 all 7 jobs green including e2e-web (Playwright Chromium + Firefox accessibility tests) | 2026-03-17 | 17 |
+| Total test count Cycle 17: 641 Python unit tests (+58 installer); ruff clean | 2026-03-17 | 17 |
