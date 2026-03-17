@@ -78,3 +78,10 @@
 | ISSUE-006: configurable passphrase timeout from config.yaml (3 tests) | 2026-03-17 | 4 |
 | Telegram de-emphasis: main.py default + telegram_bot.py docstring corrected | 2026-03-17 | 4 |
 | Total test count: 314 (was 279) | 2026-03-17 | 4 |
+| ISSUE-007: Voice E2E demo — 9 E2E tests, pipeline proven end-to-end | 2026-03-17 | 5 |
+| Wake-word-only bug fix in voice_local.py ("assistant" alone now prompts "Yes?") | 2026-03-17 | 5 |
+| 25 unit tests for VoiceLocalInterface (test_voice_local.py) | 2026-03-17 | 5 |
+| React Native Expo skeleton: clients/mobile/ with MainScreen.tsx + API client | 2026-03-17 | 5 |
+| 32 JS tests for API client + MainScreen accessibility (jest-expo) | 2026-03-17 | 5 |
+| Multi-platform E2E test stubs (Web/Android/iOS/Desktop) per ISSUE-010 | 2026-03-17 | 5 |
+| Total test count: 348 Python passed + 21 skipped; 32 JS tests (requires npm install) | 2026-03-17 | 5 |
