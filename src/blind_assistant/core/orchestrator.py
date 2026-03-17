@@ -562,9 +562,10 @@ class Orchestrator:
             "add_note": self._handle_add_note,
             "query_note": self._handle_query_note,
             "general_question": self._handle_general_question,
-            # High-stakes intents — stubs until ordering/travel tools built
-            "order_food": self._handle_high_stakes_stub,
-            "order_groceries": self._handle_high_stakes_stub,
+            # Food/grocery ordering: real implementation — browser tool + risk disclosure
+            "order_food": self._handle_order_food,
+            "order_groceries": self._handle_order_food,  # Same flow, different food query
+            # High-stakes intents — stubs until travel/smart home tools built
             "book_travel": self._handle_high_stakes_stub,
             "fill_form": self._handle_high_stakes_stub,
             "smart_home": self._handle_high_stakes_stub,
