@@ -168,6 +168,7 @@ class TelegramBot:
 
             # Process the transcribed text
             async def send_update(message: str) -> None:
+                """Send an interim orchestrator update back to the Telegram chat."""
                 await update.message.reply_text(message)
 
             response = await self.orchestrator.handle_message(
