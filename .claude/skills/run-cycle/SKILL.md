@@ -284,9 +284,62 @@ git pull --rebase && git push
 
 ---
 
-## STEP 7: SELF-ASSESSMENT AND STATE UPDATE
+## STEP 7: END-OF-CYCLE REVIEW PANEL
 
-After the work, honestly answer:
+After all work is done and committed, convene a multi-perspective review. Run ALL reviewers
+in parallel. Each reviewer reads the git diff of this cycle (`git diff HEAD~3..HEAD` or
+similar) and the current state of `docs/CYCLE_STATE.md`.
+
+**Run these agents simultaneously:**
+
+- **`nonprofit-ceo`**: "Review what was built this cycle (read recent git commits and
+  current docs). Are we still aligned with the mission? Does this advance real blind user
+  independence? What is the single most important thing to do next cycle? What are we
+  at risk of deprioritizing that we shouldn't? Be blunt. 3-5 sentences."
+
+- **`code-reviewer`**: "Review the code and documents written this cycle (read recent
+  git commits). What is technically wrong, incomplete, or fragile? What would a senior
+  engineer flag in a PR review? If no code was written this cycle, evaluate document
+  quality and accuracy instead. Max 5 issues."
+
+- **`security-specialist`**: "Review what was built or decided this cycle. Are there any
+  security implications — credentials, data handling, API integrations, supply chain —
+  that weren't addressed? What must be fixed before this ships? Max 3 concerns."
+
+- **`accessibility-reviewer`**: "Review any user-facing content, voice flows, or UX
+  decisions made this cycle. Does anything fail WCAG 2.1 AA or screen reader compatibility?
+  Are all voice prompts clear and non-visual? Max 3 findings."
+
+- **`blind-user-tester`**: "Based on what was built or planned this cycle, would a real
+  blind user be better off? What is missing or confusing from a lived experience
+  perspective? What would you test first? 3-5 sentences."
+
+- **`ethics-advisor`**: "Review decisions made this cycle. Any autonomy, consent, or
+  dependency risks introduced? Anything that shifts power away from the blind user?
+  1-3 sentences only."
+
+**Aggregate all review outputs into a single dated entry in `docs/LESSONS.md`:**
+
+```markdown
+## Cycle [N] Review — [date]
+
+**Strategy (nonprofit-ceo)**: [output]
+**Code quality (code-reviewer)**: [output]
+**Security (security-specialist)**: [output]
+**Accessibility (accessibility-reviewer)**: [output]
+**User perspective (blind-user-tester)**: [output]
+**Ethics (ethics-advisor)**: [output]
+
+**Consensus recommendation for next cycle**: [synthesize the top 1-2 actions from the panel]
+```
+
+Do NOT create separate review documents. All review output goes into LESSONS.md.
+
+---
+
+## STEP 8: SELF-ASSESSMENT AND STATE UPDATE
+
+After the review panel, honestly answer:
 
 1. **What I accomplished**: [specific deliverables created or tasks completed]
 2. **What I attempted but failed or skipped**: [be honest — what didn't work and why]
@@ -295,20 +348,21 @@ After the work, honestly answer:
 5. **What would make next cycle better**: [process or knowledge improvement]
 6. **Recommendation for next cycle**: [top 1-2 things the next iteration should prioritize]
 
-Write this as a dated entry to `docs/LESSONS.md`:
-```markdown
-## Cycle [N] — [date]
+Write this as a continuation of the cycle's entry in `docs/LESSONS.md` (same entry as
+the review panel above, not a separate section):
 
-**Accomplished**: [list]
-**Attempted but failed**: [list or 'none']
-**Confusion/loops**: [or 'none']
-**New gaps detected**: [or 'none']
-**Recommendation for next cycle**: [specific]
+```markdown
+**Orchestrator self-assessment**:
+- Accomplished: [list]
+- Attempted but failed: [list or 'none']
+- Confusion/loops: [or 'none']
+- New gaps: [or 'none']
+- Next cycle recommendation: [specific]
 ```
 
 ---
 
-## STEP 8: UPDATE ALL STATE DOCUMENTS
+## STEP 9: UPDATE ALL STATE DOCUMENTS
 
 **Update `docs/CYCLE_STATE.md`:**
 - Check off completed deliverables
