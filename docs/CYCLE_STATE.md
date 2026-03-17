@@ -175,6 +175,19 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 
 **PHASE 2 COMPLETE** — "A blind user can ask the AI to do a real-world task entirely by voice" milestone reached (Cycle 10).
 
+## Phase 3 Sprint Items (Blind User Testing)
+- [x] **a11y: VoiceOver hint fix** — 7 accessibilityHints now use outcome-first language; no "Double-tap" (Cycle 11)
+- [x] **a11y: haptic recording cue** — Medium on start, Light on stop; 3 new JS tests (Cycle 11)
+- [x] **a11y: importantForAccessibility bug** — SetupWizardScreen progress Text fixed (Cycle 11)
+- [x] **ISSUE-004: type annotations** — ResponseCallback alias + 9 method signatures annotated (Cycle 11)
+- [ ] **P1: Live food ordering validation (ISSUE-021)** — real Playwright browser test
+- [ ] **P2: End-to-end food ordering on real device** — Android TalkBack + iOS VoiceOver
+- [ ] **P2: Voice installer** — voice-guided setup from fresh install
+- [ ] **P2: Web app** — WCAG 2.1 AA at blind-assistant.org
+- [ ] **P3: ISSUE-020** — Remove "Double-tap" visual platform hint in MainScreen
+- [ ] **P3: Android TalkBack device test** — expo build + AVD
+- [ ] **P3: iOS VoiceOver device test** — expo build:ios + xcrun simctl
+
 ## Blockers
 
 None currently. If blockers exist, they will be listed here with workarounds attempted.
