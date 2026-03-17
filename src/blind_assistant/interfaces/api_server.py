@@ -181,6 +181,23 @@ class ProfileResponse(BaseModel):
     braille_mode: bool
 
 
+class TranscribeRequest(BaseModel):
+    """Audio transcription request — base64-encoded audio bytes from the client microphone."""
+    # Audio file as base64 string (WAV, M4A, OGG, or any format supported by Whisper/ffmpeg).
+    # Maximum ~10 MB of audio (about 5 minutes of speech at 16kHz mono WAV).
+    audio_base64: str
+    # Optional BCP-47 language tag (e.g. "en", "es"). Auto-detected by Whisper if omitted.
+    language: str | None = None
+    session_id: str = "default"
+
+
+class TranscribeResponse(BaseModel):
+    """Transcribed text from the submitted audio clip."""
+    text: str               # Transcribed speech — empty string if nothing detected
+    language: str | None    # Language Whisper detected (e.g. "en", "es")
+    session_id: str = "default"
+
+
 class HealthResponse(BaseModel):
     """Server health — no auth required."""
     status: str = "ok"
