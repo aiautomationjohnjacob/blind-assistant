@@ -70,9 +70,9 @@ class BrowserTool:
     """
 
     def __init__(self) -> None:
-        self._browser: "Browser | None" = None
-        self._page: "Page | None" = None
-        self._playwright: "Playwright | None" = None
+        self._browser: Browser | None = None
+        self._page: Page | None = None
+        self._playwright: Playwright | None = None
         self._initialized = False
 
     async def initialize(self) -> None:
