@@ -12,6 +12,8 @@ Per SECURITY_MODEL.md §2.4: screenshot content is screened before any API call;
 financial pages are protected and never sent externally.
 """
 
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
