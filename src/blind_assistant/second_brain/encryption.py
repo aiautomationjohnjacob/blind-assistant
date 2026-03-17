@@ -88,7 +88,8 @@ def decrypt(ciphertext_with_nonce: bytes, key: bytes) -> bytes:
     nonce = ciphertext_with_nonce[:12]
     ciphertext = ciphertext_with_nonce[12:]
     aesgcm = AESGCM(key)
-    return aesgcm.decrypt(nonce, ciphertext, None)
+    # AESGCM.decrypt returns Any — cast to bytes for type safety
+    return bytes(aesgcm.decrypt(nonce, ciphertext, None))
 
 
 def encrypt_string(text: str, key: bytes) -> bytes:
