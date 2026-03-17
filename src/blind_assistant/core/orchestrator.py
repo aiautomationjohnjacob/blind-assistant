@@ -344,6 +344,9 @@ class Orchestrator:
             f"I'll help you order food. I'm going to search for {food_query or 'food delivery options'} near you."
         )
 
+        # These asserts narrow Optional types — this method is only called after initialize()
+        assert self.confirmation_gate is not None
+        assert self.tool_registry is not None
         # Step 2: Financial risk disclosure — MANDATORY before any payment discussion.
         # Uses the full confirm_financial_details_collection flow which speaks the
         # disclosure and waits for explicit acknowledgment before proceeding.
