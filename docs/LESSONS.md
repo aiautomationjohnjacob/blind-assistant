@@ -1014,3 +1014,34 @@ local_ip = sock.getsockname()[0]
 sock.close()
 ```
 This works even without internet access (the connect is not completed). Wrap in try/except OSError and fall back to "127.0.0.1".
+
+
+---
+
+## Cycle 18 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: Netlify deploy infrastructure is critical for the mission. Without a real URL, no blind user can test with NVDA or VoiceOver on their actual device. The food ordering accessibility tests are mission-aligned — they verify the exact Phase 3 scenario every blind persona needs. Remaining gap: the Netlify secrets must be added by a human operator (ISSUE-029). Next cycle should focus on documenting this one-time setup in README and then the Android TalkBack device test.
+
+**Code quality (code-reviewer)**: Test count: 641 Python unit (unchanged) + 22 web E2E total (+11 food ordering). No test files deleted. The `deploy-staging.yml` `if:` secret check was removed (correct — the job should fail informatively when secrets are missing, not silently skip). CSP fixed: localhost removed from production connect-src. The WEB_APP_URL env var override is clean — a single point of control for the staging vs localhost URL.
+
+**Security (security-specialist)**: `netlify.toml` CSP: `unsafe-inline` and `unsafe-eval` are present but documented for Phase 4 tightening (nonce-based approach). Production connect-src no longer includes localhost — good. HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy headers are all correctly configured. No credentials in config files. The `deploy-staging.yml` uses GitHub Secrets for NETLIFY_AUTH_TOKEN — correct pattern.
+
+**Accessibility (accessibility-reviewer)**: The 11 new food ordering web E2E tests directly enforce WCAG 2.1 AA for the ordering flow: SC 2.1.1 (keyboard reach), SC 4.1.3 (status messages via aria-live), SC 1.3.1 (info not hidden from AT), SC 4.1.2 (name/role/value), SC 1.4.1 (no colour alone), SC 1.3.2 + 2.4.3 (focus order), SC 2.1.2 (no keyboard trap). The assertive live region test correctly allows `role="alert"` while rejecting assertive on non-error regions. Solid audit coverage.
+
+**User perspective (blind-user-tester)**: The Enter key test is the most important one. When I Tab to a button and press Enter, I need to know it worked. The test `test_enter_key_activates_main_button` verifies this. The visual-only instructions test catches "click the button" copy — I cannot follow visual directions. The aria-live tests protect my ability to hear ordering results without navigating away from the button. Still missing: a test that actually completes a multi-step ordering interaction (Phase 4).
+
+**Ethics (ethics-advisor)**: No new autonomy concerns. The staging deploy goes to a URL with no real user data (backend is localhost-only for now). Risk disclosure accessibility tests remain in place from Cycle 10. No new consent or dependency issues.
+
+**Goal adherence (goal-adherence-reviewer)**: Phase 3 target "Web app deployed" is now infrastructure-complete. ISSUE-029 is the only remaining blocker (Netlify secrets). The 11 food ordering tests directly address Phase 3 scenario: "Order food entirely by voice including risk-disclosure flow." Android/iOS device testing remains the most important unresolved Phase 3 item.
+
+**Consensus recommendation for next cycle**: (1) Add Netlify setup instructions to README.md (ISSUE-029 operator task). (2) Android TalkBack device test — expo build:android + AVD if environment supports it. (3) Cycle 20 will be the every-10th-cycle documentation-steward run.
+
+**Orchestrator self-assessment**:
+- Accomplished: netlify.toml (SPA routing, CSP, HSTS, cache headers); deploy-staging.yml (auto-deploy on push to main + staging E2E); 11 food ordering web E2E tests; WEB_APP_URL env var override; CSP localhost fix; OPEN_ISSUES ISSUE-029 added; PRIORITY_STACK updated; all 641 unit tests passing; ruff clean
+- Attempted but failed: Android TalkBack device test (ADB not available in WSL2); web staging actual deploy (Netlify CLI not installed — requires human secret setup)
+- Confusion/loops: none
+- New gaps: ISSUE-029 (Netlify secrets — manual human step); CSP unsafe-eval/unsafe-inline should be tightened in Phase 4
+- Next cycle recommendation: README.md Netlify setup docs; Android AVD if available in CI; documentation-steward at Cycle 20
+
+**TECHNICAL LESSON (Netlify deployment)**:
+For Expo web apps, `netlify.toml` with `publish = "clients/mobile/dist"` and `[[redirects]] from = "/*" to = "/index.html" status = 200` handles SPA routing correctly. The redirect is mandatory — without it, reloading any sub-route returns 404. Content-hashed Expo assets (`/_expo/static/`) can be cached for 1 year (`max-age=31536000, immutable`) safely because Expo changes the filename on every build.
