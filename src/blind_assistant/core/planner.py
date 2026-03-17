@@ -96,7 +96,7 @@ class Planner:
 
     def __init__(self, config: dict) -> None:
         self.config = config
-        self._client = None
+        self._client: AsyncAnthropic | None = None
 
     def _get_client(self):
         """Lazy initialization of Anthropic client."""
