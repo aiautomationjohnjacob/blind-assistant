@@ -134,13 +134,14 @@ STEP_VAULT_INTRO = """
 Step 4: Setting up your personal knowledge base.
 
 I can remember things for you — appointments, medications, important notes, and more.
-This is stored privately on your device, protected with your own password.
+This is stored privately on your device, protected with a secret phrase only you know.
 
-I need you to choose a passphrase. This should be something you can remember,
-like a phrase from a song or a sentence that means something to you.
-You will say it to unlock your notes at the start of each session.
+I need you to choose a secret phrase. It can be anything easy for you to remember —
+like a line from a song, or a sentence that means something to you.
+For example: my dog likes walks on Tuesday. Make it personal and easy to say.
+You will use this phrase to unlock your notes each session.
 
-Please think of your passphrase now. Say ready when you have one in mind.
+Please think of your secret phrase now. Say ready when you have one in mind.
 """
 
 STEP_COMPLETE = """
