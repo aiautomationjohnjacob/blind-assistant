@@ -344,7 +344,7 @@ export function MainScreen(): React.JSX.Element {
       {lastResponse ? (
         <View
           style={styles.responseContainer}
-          accessibilityRole="text"
+          accessibilityRole={Platform.OS === "web" ? undefined : "text"}
           accessibilityLabel={`Assistant replied: ${lastResponse}`}
           accessibilityLiveRegion="polite"
         >
