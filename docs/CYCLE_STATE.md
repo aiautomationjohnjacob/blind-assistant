@@ -234,8 +234,18 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P0: ISSUE-041 identified + diagnostic added (Cycle 34)** — React bundle not mounting in CI Playwright Chromium; 9 web E2E tests fail; screenshots show blank white page; diagnostic logging added to _wait_for_app_ready() in all 3 web E2E test files (page.on("pageerror") + page.on("console")); timeout increased to 30s; ISSUE-041 logged in OPEN_ISSUES.md; awaiting next CI run for exact JS error
 - [x] **P0: ISSUE-041 RESOLVED (Cycle 35)** — Root cause: react-dom@19.2.4 incompatible with react@18.2.0 (React DOM 19 calls .S method missing from React 18 internals). Fix: pinned react-dom@18.2.0 in package.json. Diagnostic: conftest.py add_init_script() captured the crash. Result: CI run 23230759864 — ALL 33 Chromium web E2E tests PASS.
 - [x] **P0: ISSUE-042 RESOLVED (Cycle 35)** — Firefox binary missing from e2e-web CI job. Fix: added playwright install firefox + playwright install-deps firefox to ci.yml. Next CI run will confirm 36 Firefox E2E tests pass.
-- [ ] **P4: ISSUE-039: identify and fix 1 moderate axe-core violation** — will surface now that ISSUE-041 resolved and React mounts correctly in CI
-- [ ] **P4: Phase 4 completion assessment** — zero CRITICAL axe violations ✓; ISSUE-041 RESOLVED; ISSUE-042 RESOLVED; web E2E gate: Chromium ✓ (all 33 pass), Firefox pending next CI run; platform sign-offs: iOS ✓, Android ✓, Windows/macOS pending
+- [x] **P4: ISSUE-039 RESOLVED (Cycle 36)** — Root cause: axe was auditing the loading spinner (blank page), not the real app. CI run 23231203014: 0 critical, 0 serious, 0 moderate violations. 36 Chromium + 36 Firefox E2E + 4 axe-core ALL PASS.
+- [x] **P4: Phase 4 completion assessment COMPLETE (Cycle 36)** — zero CRITICAL axe violations ✓; Chromium 36/36 ✓; Firefox 36/36 ✓; iOS VoiceOver ✓; Android TalkBack ✓; Windows/macOS sign-off ✓ (ISSUE-043); closed stale GitHub issues 86-91.
+
+**PHASE 4 COMPLETE** — WCAG 2.1 AA on web confirmed; all platform accessibility sign-offs done (Cycle 36).
+
+## Phase 5 Sprint Items (Polish & Community Ready)
+- [ ] **P5: Dorothy test design** — newly-blind-user + blind-elder-user review setup wizard + main screen for simplicity gaps
+- [ ] **P5: Simplicity audit of voice strings** — audit installer + voice responses for non-technical language; no jargon; patient tone
+- [ ] **P5: ROADMAP.md + CHANGELOG.md update** — mark Phase 4 complete; describe Phase 5 goals; update test counts
+- [ ] **P5: Grant narrative** — grant-writer produces GRANT_NARRATIVE.md (Phase 5 completion criterion)
+- [ ] **P5: Community launch prep** — open-source-steward reviews CONTRIBUTING.md, good-first-issues, README for first-time contributor UX
+- [ ] **P5: VoiceOver+Safari CI** — add WebKit E2E tests for Safari/VoiceOver (separate from Chromium/Firefox)
 
 ## Blockers
 
