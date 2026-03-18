@@ -30,6 +30,15 @@
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
+## Completed Items (Cycle 37 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Dorothy test — language simplification: "API token" → "connection code", "backend server" → "your computer", "passphrase" → "secret phrase" in SetupWizardScreen + installer; welcome screen "ask to repeat" affordance; actionable error messages; 6 new Dorothy test assertions; 134 JS tests | 2026-03-18 | 37 |
+| GRANT_NARRATIVE.md created: problem statement (7M blind Americans), impact metrics (812+134 tests, 0 WCAG violations), 3 fundable milestones, budget narrative, sustainability plan | 2026-03-18 | 37 |
+| ROADMAP.md updated: Phase 3 ✅ COMPLETE, Phase 4 ✅ COMPLETE (all deliverables listed), Phase 5 🔄 IN PROGRESS with test count table | 2026-03-18 | 37 |
+| CHANGELOG.md updated: Phase 5 section added; Phase 4 reclassified as [v0.4.0] | 2026-03-18 | 37 |
+
 ## Completed Items (Cycle 36 additions)
 
 | Item | Completed | Cycle # |
