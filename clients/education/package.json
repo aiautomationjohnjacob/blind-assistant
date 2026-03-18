@@ -45,5 +45,11 @@
         "lines": 80
       }
     }
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   }
 }
