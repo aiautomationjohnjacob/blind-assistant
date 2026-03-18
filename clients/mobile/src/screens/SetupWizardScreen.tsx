@@ -174,17 +174,15 @@ export function SetupWizardScreen({
     Keyboard.dismiss();
     setStep("confirm");
 
-    // Speak token back — character by character for verification
-    // Spell out the first 8 characters and last 4 as a checksum read
-    const preview =
-      trimmed.length > 12
-        ? `${trimmed.slice(0, 8)} ... ${trimmed.slice(-4)}`
-        : trimmed;
+    // Speak code back — character by character for verification
+    // Spell out the first 4 characters and last 4 as a checksum read
+    // Dorothy test (Cycle 37): "token" replaced with "connection code" throughout
+    // so non-technical users understand what they are confirming.
     const confirmInstruction =
-      `Your token starts with ${trimmed.slice(0, 4).split("").join(" ")} ` +
+      `Your connection code starts with ${trimmed.slice(0, 4).split("").join(" ")} ` +
       `and ends with ${trimmed.slice(-4).split("").join(" ")}. ` +
-      `The full token is ${trimmed.length} characters long. ` +
-      `Tap Confirm to save this token, or tap Re-enter to change it.`;
+      `The full code is ${trimmed.length} characters long. ` +
+      `Tap Confirm to save this code, or tap Re-enter to change it.`;
     STEP_INSTRUCTIONS.confirm = confirmInstruction;
     speak(confirmInstruction);
   }, [tokenInput, speak]);
