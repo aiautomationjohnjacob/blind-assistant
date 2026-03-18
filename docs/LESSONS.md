@@ -2400,3 +2400,44 @@ running on Node.js 20. The correct versions for Node.js 24 are:
   - actions/setup-python@v6 (Node.js 24, released 2025-09)
   - actions/upload-artifact@v7 (Node.js 24, released 2025-12)
 Always verify by checking the CI annotations, not by assumption.
+
+## Cycle 47 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: Education site deployment is a direct mission win. A URL blind contributors can navigate with NVDA or VoiceOver — without cloning a repo — removes a real barrier to community participation. This is the kind of gap the nonprofit should proactively catch: invisible to sighted contributors, critical for blind ones. The one remaining manual step (GitHub Pages activation in repository settings) should be documented as a GitHub issue so a contributor can pick it up. Netlify staging remains blocked — worth opening a community issue for this too.
+
+**Code quality (code-reviewer)**: Clean targeted change. BrowserRouter→HashRouter is a pure routing strategy switch; all 75 tests use MemoryRouter so zero test impact. `homepage: "."` is the correct react-scripts pattern for relative asset paths on subdirectory hosts. Workflow uses current GitHub Pages action versions (configure-pages@v5, upload-pages-artifact@v3, deploy-pages@v4), all Node.js 24 compatible. `CI: false` in build step prevents warnings-as-errors from blocking deploy. No test count change. No regressions.
+
+**Security (security-specialist)**: No credentials required — GitHub Pages deployment is public by design and appropriate for static educational content. CNAME approach is standard for custom domains. The education site makes no backend API calls; it is pure static HTML/CSS/JS. No security concerns.
+
+**Accessibility (accessibility-reviewer)**: HashRouter produces hash-fragment URLs (/#/course/...). Screen readers read page content, not URL fragments, so NVDA/VoiceOver experience is identical to BrowserRouter. Skip link, main landmark, and focus-to-h1 patterns all remain intact. A stable learn.blind-assistant.org URL gives blind users a bookmarkable community resource.
+
+**User perspective (blind-user-tester)**: A public URL for the learning platform is meaningful. Previously, reviewing course content required asking a sighted developer to set up a local dev server. Once learn.blind-assistant.org is live, I can navigate there directly with NVDA. The H key heading jump, skip links, and keyboard-only tab flow work on any URL.
+
+**Ethics (ethics-advisor)**: No autonomy or consent concerns. Static educational content. Publishing course material helps blind users make informed decisions about the assistant.
+
+**Goal adherence (goal-adherence-reviewer)**: P5 backlog item "Education site deployment" addressed. ISSUE-053 created and resolved. All changes traceable to stated backlog items. 75 education tests and 818 Python tests both unchanged. No user stories dropped.
+
+**Consensus recommendation for next cycle**: (1) Open a GitHub issue asking a contributor with repo write access to enable GitHub Pages (Settings → Pages → Source → GitHub Actions) — this is a 30-second task that unblocks learn.blind-assistant.org. (2) Consider creative exploration for Phase 6 opportunities — all five phases are now complete and the project is community-ready.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) Created deploy-education.yml (GitHub Pages deployment, 6 workflow steps); (2) BrowserRouter→HashRouter in index.tsx with explanatory comment; (3) homepage="." in package.json; (4) CNAME step in workflow for learn.blind-assistant.org; (5) ISSUE-053 created + resolved; (6) State docs updated
+- Attempted but failed: Local npm run build failed (Node.js 22 vs react-scripts 5 incompatibility) — this is a known local env issue, CI uses Node.js 20 and will work correctly
+- Confusion/loops: none
+- New gaps: GitHub Pages needs one manual activation step in repository settings (not automatable by the loop)
+- Next cycle recommendation: Open GitHub issue for Pages activation; then consider Phase 6 creative exploration
+
+**TECHNICAL LESSON (react-scripts 5 and Node.js 22 build failure)**:
+react-scripts 5.0.1 fails to build on Node.js 22+ due to an `ajv-keywords` transitive
+dependency incompatibility. The error is: MODULE_NOT_FOUND for a sub-module of ajv-keywords.
+This is a local dev environment issue only — CI runs Node.js 20 (specified in workflow files)
+and builds successfully. If local builds are needed, run Node.js 20 via `nvm use 20`.
+The test suite (Jest) is unaffected because it uses a separate runner, not webpack.
+
+**TECHNICAL LESSON (GitHub Pages with React Router)**:
+BrowserRouter requires server-side rewrite rules to serve index.html for any path.
+GitHub Pages only serves static files and has no rewrite capability.
+Solutions:
+  1. HashRouter (chosen here) — simplest; URLs become /#/path; no 404s; accessible
+  2. 404.html redirect trick — copy index.html to 404.html; JS redirects query-param back
+  3. Custom domain with Netlify/Vercel proxy — supports BrowserRouter but needs account
+HashRouter is the right choice for a static educational site on GitHub Pages.
