@@ -25,10 +25,20 @@
 **Marcus power user scenario COMPLETE (Cycle 42)**: 31 Marcus tests; brief mode pipeline verified; financial disclosure survives brief mode; DRY web_app_available fixture; CI renamed to persona gate; 919 tests total.
 **Telegram integration COMPLETE (Cycle 43)**: --telegram CLI flag; api_server_enabled forced; 6 new tests in test_main.py (9 total); ruff CI fix; 925 tests total.
 **Node.js 24 migration COMPLETE (Cycle 44)**: checkout/setup-node/upload-artifact v4→v5 across all 5 workflow files; ISSUE-050 resolved; June 2026 deadline met.
+**Device simulation CI COMPLETE (Cycle 45)**: Playwright screenshot tests (7 tests); named device-sim-screenshots/{browser}/ artifact in CI; Netlify deploy skips gracefully without secrets; Marcus test hang fixed (wait_for_confirmation mock missing).
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
+| P4 | Netlify staging activation: configure NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID secrets so community members can test https://staging.blind-assistant.org with real NVDA+Chrome, TalkBack+Chrome, VoiceOver+Safari | cycle 45 review | 2026-03-18 |
+| P4 | pytest-timeout: add pytest-timeout package + asyncio_timeout config so tests that block for DEFAULT_TIMEOUT (60s) fail fast instead of silently hanging in CI | cycle 45 review | 2026-03-18 |
+| P5 | Education site deployment: deploy clients/education/ to learn.blind-assistant.org; document as a community touchpoint for blind contributors who prefer reading course material to browsing GitHub | cycle 45 creative | 2026-03-18 |
+
+## Completed Items (Cycle 45 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Device simulation CI (P3): Playwright screenshot tests (7 tests in test_device_simulation_screenshots.py); named screenshots for initial load, app-ready, setup wizard, main screen, mobile 375x812, tablet 768x1024 across Chromium/Firefox/WebKit; separate device-sim-screenshots CI artifact; Netlify staging workflow skips gracefully without secrets; Marcus wait_for_confirmation hang fixed | 2026-03-18 | 45 |
+| Marcus test hang fix: test_financial_disclosure_present_in_brief_mode and test_food_order_updates_have_no_jargon_for_marcus — added wait_for_confirmation mock alongside wait_for_response; 31 Marcus tests now run in 0.10s (was hanging 60s+ per test) | 2026-03-18 | 45 |
 
 ## Completed Items (Cycle 44 additions)
 
