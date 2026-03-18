@@ -120,14 +120,16 @@ def _wait_for_app_ready(page: Page) -> None:
     Called after page.wait_for_load_state("networkidle") in tests that check
     React-rendered ARIA properties (not the static HTML structure).
     """
-    # Wait up to 5 seconds for at least one React-rendered interactive element.
+    # Wait up to 15 seconds for at least one React-rendered interactive element.
     # Both SetupWizardScreen and MainScreen have role="button" elements.
     # ActivityIndicator (loading state) does NOT have role="button", so this
     # correctly waits until the loading spinner transitions to the real screen.
+    # 15s timeout: CI can be slow to complete checkStoredCredentials() and
+    # transition from the loading spinner state (expo-secure-store async read).
     with contextlib.suppress(Exception):
         page.wait_for_selector(
             '[role="button"], input[aria-label]',
-            timeout=5000,
+            timeout=15000,
             state="attached",
         )
 
