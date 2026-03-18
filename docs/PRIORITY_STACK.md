@@ -22,14 +22,13 @@
 **Community launch prep COMPLETE (Cycle 39)**: CONTRIBUTING.md expanded with blind contributor welcome, braille display callout, Dorothy persona explanation, JS test instructions, good-first-issue guide, commit format; 5 GitHub good-first-issues created (#92-#96); CHANGELOG v0.5.0 complete.
 **CI hardening COMPLETE (Cycle 40)**: lint fix (issue #97/#98); WebKit E2E CI (issue #92); Dorothy E2E CI job (issue #96); 842 Python tests + 7 new WebKit tests.
 **Jordan DeafBlind scenario COMPLETE (Cycle 41)**: 16 Jordan tests; braille formatter fix; shared accessibility helpers; NVDA/braille README; issues #93/#94/#95 closed; 858 tests total.
+**Marcus power user scenario COMPLETE (Cycle 42)**: 31 Marcus tests; brief mode pipeline verified; financial disclosure survives brief mode; DRY web_app_available fixture; CI renamed to persona gate; 919 tests total.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
-| P3 | Marcus (power user) scenario tests: efficiency/brevity/keyboard-speed persona E2E coverage | code-reviewer (Cycle 41) | 2026-03-18 |
 | P4 | Consolidate FORBIDDEN_JARGON: remove duplicate list in test_dorothy_scenario.py; both files should use helpers.py | code-reviewer (Cycle 41) | 2026-03-18 |
-| P4 | DRY web_app_available fixture: extracted from 3 E2E test files to conftest.py | code-reviewer (Cycle 40) | 2026-03-18 |
 
 ## Completed Items (Cycle 41 additions)
 

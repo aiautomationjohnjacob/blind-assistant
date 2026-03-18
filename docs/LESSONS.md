@@ -2234,3 +2234,39 @@ Use `re.search(r'\b' + re.escape(word) + r'\b', text.lower())` for accurate word
 matching. This is now in helpers.py assert_no_jargon(). The Dorothy test also benefits
 retroactively since it delegates to the shared helper.
 
+
+## Cycle 42 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: Marcus scenario tests are high-value for the mission. Power users are often the most vocal advocates in the blind community — a working, efficient assistant recruits more blind users than documentation ever could. The financial disclosure test that confirms it survives brief mode is particularly important: even expert users bear financial risk, and the ethics boundary holds regardless of user preference. Next cycle: the Telegram integration (--telegram flag) would add the secondary super-user channel that power users like Marcus want.
+
+**Code quality (code-reviewer)**: 31 tests added with clean structure, organized test classes, no test deletions. Ruff issues caught and fixed before commit (unused import, long lines, SIM105/S110, SIM117). The contextlib.suppress(Exception) pattern is idiomatic. DRY refactor moves web_app_available to conftest.py — clean. Test count: 842 Python unit + 30 E2E core + 47 accessibility = 919 tests in the suite. No test count decrease anywhere.
+
+**Security (security-specialist)**: test_financial_disclosure_present_in_brief_mode is the critical security contribution. It proves that verbosity settings cannot suppress payment risk warnings. This is exactly the regression protection needed as the codebase grows. No new security concerns introduced.
+
+**Accessibility (accessibility-reviewer)**: Marcus tests verify the brief mode pipeline end to end. The test that braille_mode and verbosity="brief" are independent is good defensive coverage. The parametrized preamble test covers all 6 known preambles. CI job renamed from "Dorothy E2E" to "Persona scenario gate" — accurate for 60 total tests (13 Dorothy + 16 Jordan + 31 Marcus).
+
+**User perspective (blind-user-tester)**: From Marcus's perspective: it matters that the assistant doesn't waste his time with "Certainly!" before every answer. These tests would catch a regression immediately. From Dorothy's perspective: the standard mode test confirms she still gets preambles (she benefits from them). Good separation of concerns by verbosity level.
+
+**Ethics (ethics-advisor)**: The financial disclosure test in brief mode directly enforces the ethics requirement. Expert users choose brevity, not "skip all warnings." No new autonomy concerns this cycle.
+
+**Goal adherence (goal-adherence-reviewer)**: PRIORITY_STACK.md P3 "Marcus scenario tests" and P4 "DRY web_app_available fixture" both resolved this cycle. Items traced directly to code-reviewer feedback from Cycle 41. No requirements silently dropped.
+
+**Consensus recommendation for next cycle**: (1) Telegram integration: add --telegram flag to main.py that starts both the API server and Telegram bot simultaneously; this completes the secondary super-user channel described in the architecture. (2) If Telegram is complex, consider the device simulation CI item (P3) which would add AVD + Playwright to the CI matrix.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) Created tests/accessibility/test_marcus_scenario.py with 31 Marcus (power user) scenario tests covering all 6 test classes; (2) Extracted web_app_available fixture from 4 web E2E files to conftest.py; (3) Removed http.client imports from 4 test files; (4) Updated CI dorothy-e2e job name + step description + artifact name to reflect all 3 personas; (5) Fixed all ruff issues (unused import, long lines, SIM105, SIM117, S110)
+- Attempted but failed: none
+- Confusion/loops: Brief — needed to look up correct method names (_extract_options_from_page, _navigate_to_user_choice, etc.) before writing food ordering mock patches. Resolved by reading Jordan test file which had correct names.
+- New gaps: None discovered this cycle
+- Next cycle recommendation: (1) Telegram integration (--telegram flag on main.py); (2) If blocked, Device simulation CI (P3 item)
+
+**TECHNICAL LESSON (use contextlib.suppress when try/except/pass needed in tests)**:
+When a test needs to run a method that might raise (and the test only cares about what
+was spoken up to the exception), prefer contextlib.suppress(Exception) over try/except/pass:
+  with contextlib.suppress(Exception):
+      await orc._handle_order_food(intent, context, capture_update)
+For the case where you need to capture the result AND suppress, use:
+  result: dict = {"text": ""}  # set default
+  with contextlib.suppress(Exception):
+      result = await ...
+This avoids SIM105/S110 ruff warnings and makes intent clearer.
