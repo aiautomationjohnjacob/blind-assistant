@@ -5,6 +5,13 @@ Transcribes audio to text using OpenAI Whisper (runs locally).
 
 Privacy note: Whisper runs locally by default — speech never leaves the device.
 This is important for users who speak sensitive information (passwords, health details).
+
+Voice Activity Detection (VAD):
+`transcribe_microphone_with_vad()` uses webrtcvad to detect when the user stops speaking
+and cuts off recording at that point — instead of always waiting a fixed duration.
+This is critical accessibility: Dorothy (elder) won't be cut off mid-sentence, and
+Marcus (power user) won't waste time waiting after he's done.
+Falls back to fixed-duration recording if webrtcvad is not installed.
 """
 
 import asyncio
@@ -22,6 +29,22 @@ DEFAULT_MODEL = "base"
 # Global model instance (loaded once, reused)
 _whisper_model = None
 _model_lock = asyncio.Lock()
+
+# VAD configuration
+# webrtcvad aggressiveness: 0 (least aggressive) to 3 (most aggressive).
+# 1 is a good balance: catches silence without cutting off slow speakers.
+VAD_AGGRESSIVENESS = 1
+
+# After this many consecutive silent frames, stop recording.
+# At 30ms per frame, 20 frames = 600ms of silence — long enough for natural speech pauses.
+VAD_SILENCE_FRAMES = 20
+
+# Maximum recording duration even if the user keeps talking (seconds).
+# Prevents runaway recordings (network noise, accidental activation).
+VAD_MAX_DURATION = 30.0
+
+# Minimum recording duration (seconds) — ensures we don't cut off too fast.
+VAD_MIN_DURATION = 0.5
 
 
 async def _load_model(model_name: str = DEFAULT_MODEL):
