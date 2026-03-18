@@ -142,3 +142,63 @@ else:
             };
             """
         )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Shared web E2E fixtures and helpers
+#
+# web_app_available — checks if the web server is reachable
+# _skip_if_unavailable — helper called at the start of each test
+#
+# These used to be duplicated in all 4 web E2E test files.
+# Extracted here (ISSUE P4: DRY web_app_available fixture) so that
+# a single definition serves all tests in this directory.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.fixture(scope="session")
+def web_app_available() -> bool:
+    """Check if the web app server is running before any tests execute.
+
+    Avoids confusing connection-refused errors in test output.
+    Returns True if the server responds to GET /, False otherwise.
+
+    Session-scoped: the HTTP probe runs once per pytest session, not per test.
+    This avoids hammering localhost with 36+ probes during a full E2E run.
+    """
+    try:
+        # http.client used directly — WEB_APP_URL is always http://localhost:19006
+        # (not user-supplied), so ruff S310 (arbitrary URL open) does not apply.
+        conn = http.client.HTTPConnection("localhost", 19006, timeout=3)
+        conn.request("GET", "/")
+        resp = conn.getresponse()
+        return resp.status == 200
+    except (TimeoutError, http.client.HTTPException, OSError):
+        # If WEB_APP_URL is overridden to a remote staging URL, assume available.
+        return WEB_APP_URL != "http://localhost:19006"
+
+
+def _skip_if_unavailable(web_app_available: bool) -> None:  # noqa: F811
+    """Skip a web E2E test if Playwright or the web server is unavailable.
+
+    Call this at the start of every test method that uses the page fixture.
+
+    Args:
+        web_app_available: Boolean from the web_app_available session fixture.
+            True → server is reachable; False → skip the test.
+    """
+    if not PYTEST_PLAYWRIGHT_AVAILABLE:
+        pytest.skip(
+            "pytest-playwright is not installed. Web E2E tests run only in the 'e2e-web' CI job. "
+            "To run locally: pip install pytest pytest-playwright && "
+            "playwright install chromium webkit firefox && "
+            "cd clients/mobile && npx expo export -p web && "
+            "python3 -m http.server 19006 --directory dist/ & "
+            "pytest tests/e2e/platforms/web/ --browser chromium"
+        )
+    if not web_app_available:
+        pytest.skip(
+            f"Web app not running at {WEB_APP_URL}. "
+            "Start the server: cd clients/mobile && npx expo export -p web && "
+            "python3 -m http.server 19006 --directory dist/"
+        )
