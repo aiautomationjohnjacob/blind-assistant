@@ -83,7 +83,8 @@ async function advanceToTokenStep() {
   renderWizard();
   const continueButton = screen.getByRole("button", { name: /continue/i });
   fireEvent.press(continueButton);
-  await waitFor(() => screen.getByLabelText(/enter your connection code/i));
+  // Wait for the TextInput (connection code input field) to appear
+  await waitFor(() => screen.getByLabelText(/connection code input field/i));
 }
 
 /** Advance to confirm step with a valid connection code. */
