@@ -191,6 +191,25 @@ class ProfileResponse(BaseModel):
     speech_rate: float
     output_mode: str
     braille_mode: bool
+    # Optional extended preferences from the MCP memory store.
+    # Present on GET /profile responses; keys match MCPMemoryClient PREF_* constants.
+    preferences: dict | None = None
+
+
+class ProfileUpdateRequest(BaseModel):
+    """Payload for PUT /profile — update one or more user preferences.
+
+    All fields are optional — only provided fields are written to the memory store.
+    Unrecognised keys are silently ignored so clients remain forward-compatible.
+    """
+
+    verbosity: str | None = None
+    speech_rate: float | None = None
+    output_mode: str | None = None
+    braille_mode: bool | None = None
+    # Arbitrary preference key-value pairs (e.g. timezone, user_name, common_tasks).
+    # These are passed directly to MCPMemoryClient.set_preference().
+    extra: dict | None = None
 
 
 class TranscribeRequest(BaseModel):
