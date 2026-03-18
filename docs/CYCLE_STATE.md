@@ -256,24 +256,28 @@ No active blockers. Phase 4 COMPLETE as of Cycle 36.
 
 ## Last Cycle Summary
 
-Cycle 46 (Node.js 24 full migration completion + pytest-timeout).
+Cycle 47 (Education site GitHub Pages deployment).
 
-(1) GITHUB ACTIONS FULL MIGRATION: Discovered that Cycle 44's Node.js 24 migration was
-incomplete — upload-artifact@v5 and setup-python@v5 were still on Node.js 20 (confirmed
-by CI annotations in Cycle 45 run). Bumped all 4 action families to their latest Node.js 24
-versions: checkout v5→v6, setup-node v5→v6, setup-python v5→v6, upload-artifact v5→v7
-across all 5 workflow files. CI deprecation warnings now fully eliminated.
+(1) EDUCATION SITE DEPLOYMENT: Created .github/workflows/deploy-education.yml to deploy
+clients/education/ to GitHub Pages on every push to main. The workflow uses the standard
+GitHub Pages action chain (configure-pages@v5, upload-pages-artifact@v3, deploy-pages@v4)
+with Node.js 24-compatible actions throughout. A CNAME file for learn.blind-assistant.org
+is written into the build output automatically.
 
-(2) PYTEST-TIMEOUT: Added pytest-timeout to ci.yml and autonomous-cycle.yml Install test
-dependencies steps; added `--timeout=30` to pyproject.toml pytest addopts. 818 unit tests
-all pass within 30s ceiling. ISSUE-052 resolved. GitHub issue #101 (stale CI failure from
-intermediate wip commit) closed.
+(2) HASHROUTER MIGRATION: Switched clients/education/src/index.tsx from BrowserRouter to
+HashRouter so all routes work on GitHub Pages without server-side rewrites. Added
+homepage="." to package.json so react-scripts generates relative asset paths. All 75
+existing Jest education tests pass unchanged (they use MemoryRouter, not BrowserRouter).
 
-Total tests: 818 Python unit tests (unchanged — no src/ or test files modified this cycle).
+ISSUE-053 created and resolved. One manual step remains: enable GitHub Pages in repository
+Settings → Pages → Source → GitHub Actions.
 
-Cycle 47 priorities:
-1. **P5: Education site deployment** — deploy clients/education/ to learn.blind-assistant.org
-   via GitHub Pages (fully automatable; requires no external secrets unlike Netlify)
+Total tests: 818 Python unit tests (unchanged) + 75 education Jest tests (unchanged).
+
+Cycle 48 priorities:
+1. **P4: Netlify staging activation** — requires a sighted developer with Netlify account
+   (blocked for the loop; may need community contributor)
+2. **P5: GitHub Pages activation** — one-time manual step in repository settings
 
 ## Known Issues / Technical Debt
 
