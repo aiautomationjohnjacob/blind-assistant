@@ -400,7 +400,10 @@ class TestMarcusSecondBrain:
             patch("blind_assistant.core.orchestrator.Orchestrator._get_vault") as mock_vault,
         ):
             mock_vault.return_value = MagicMock()
-            mock_query.return_value = "Found 2 notes about asyncio. First note: gather() vs wait() — use gather() for concurrent tasks."
+            mock_query.return_value = (
+                "Found 2 notes about asyncio. "
+                "First note: gather() vs wait() — use gather() for concurrent tasks."
+            )
 
             result = await orc._handle_query_note(intent, MARCUS_CONTEXT, capture_update)
 
