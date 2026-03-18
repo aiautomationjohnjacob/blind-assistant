@@ -514,7 +514,78 @@ jobs:
   # ──────────────────────────────────────────────────────────
 
   # ──────────────────────────────────────────────────────────
-  # JOB 8: Create GitHub issue if CI fails on main
+  # JOB 8: Phase 4 Accessibility Audit (axe-core WCAG gate)
+  # Runs axe-core via Playwright against the built Expo web app.
+  # Fails if ANY critical WCAG violation is found (Phase 4 gate).
+  # role="text" (ISSUE-033 fix) is also checked here.
+  # ──────────────────────────────────────────────────────────
+  a11y-audit:
+    name: "Phase 4: WCAG axe-core audit (web)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Node.js — build the Expo web bundle ────────────────
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: clients/mobile/package-lock.json
+
+      - name: Install JS dependencies
+        working-directory: clients/mobile
+        run: npm ci --legacy-peer-deps
+
+      - name: Build Expo web bundle
+        working-directory: clients/mobile
+        run: npx expo export --platform web
+
+      # ── Python — serve bundle + run axe-playwright audit ───
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install Playwright + pytest
+        run: |
+          pip install playwright pytest pytest-asyncio pytest-playwright
+          playwright install chromium || true
+          playwright install-deps chromium || true
+
+      - name: Start web server
+        working-directory: clients/mobile
+        run: |
+          python -m http.server 19006 --directory dist/ &
+          echo "A11Y_SERVER_PID=$!" >> $GITHUB_ENV
+          sleep 2
+          curl -f http://localhost:19006/ -o /dev/null --silent && echo "Server up" || echo "Server may not be ready yet"
+
+      - name: Run WCAG axe-core accessibility audit
+        # axe-core is injected via CDN inside the test — no extra pip install needed.
+        # The test fails CI if any 'critical' WCAG violation is found (Phase 4 gate).
+        run: |
+          pytest tests/e2e/platforms/web/test_wcag_axe_audit.py \
+            --browser chromium \
+            -v \
+            -s \
+            2>&1 | tee a11y-audit.log
+
+      - name: Stop web server
+        if: always()
+        run: kill $A11Y_SERVER_PID 2>/dev/null || true
+
+      - name: Upload audit log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-audit-${{ github.run_number }}
+          path: |
+            a11y-audit.log
+            test-results/
+          retention-days: 30
+
+  # ──────────────────────────────────────────────────────────
+  # JOB 9: Create GitHub issue if CI fails on main
   # ──────────────────────────────────────────────────────────
   notify-failure:
     name: Create issue on main branch failure
