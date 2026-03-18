@@ -37,6 +37,9 @@ def minimal_config():
     return {
         "wake_word": "assistant",
         "record_duration": 8.0,
+        # Disable VAD in existing tests so they continue to mock transcribe_microphone
+        # (the fixed-duration path). VAD behavior is tested separately in TestVADIntegration.
+        "use_vad": False,
     }
 
 
