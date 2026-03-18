@@ -240,18 +240,20 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 32 (Phase 4: Accessibility Hardening). Three deliverables:
-(1) Fixed 10 web E2E test failures from Cycle 31 push — 3 root causes: Python `or` syntax in
-JS eval string (SyntaxError), React hydration race condition (tests ran before React rendered
-interactive elements), and setup wizard vs main screen mismatch (CI shows setup wizard, tests
-expected main screen labels). Fixed with `_wait_for_app_ready()` helper in all web E2E tests.
-(2) Added `_wait_for_app_ready()` to axe-core audit tests so axe now audits the hydrated app.
-(3) Checked axe-core CI gate results: 0 critical, 0 serious, 1 unidentified moderate violation
-(ISSUE-039 logged). Phase 4 CI gate: PASSED. 812 Python unit tests unchanged. ruff clean.
+Cycle 33 (Phase 4: Accessibility Hardening). Two deliverables:
+(1) Fixed WCAG 4.1.3 violation (ISSUE-040): transcript and response containers in MainScreen.tsx
+were conditionally rendered — aria-live regions must be in DOM before first content injection.
+Fixed with always-rendered containers + hiddenLiveRegion style (opacity=0, maxHeight=0).
+128 JS tests pass. This means NVDA/VoiceOver users will now hear the first AI response via
+live region announcement automatically.
+(2) Increased _wait_for_app_ready() timeout from 5s to 15s in all 3 web E2E test files.
+CI was running 8 tests against the loading spinner (5s too short). Expected to fix
+test_main_button_has_role_button, test_status_region_uses_polite_live_region, and 6 others.
+Commit c3e55df pushed; CI run 23228687988 in progress.
 
-Cycle 33 priority:
-1. **P4: ISSUE-039** — identify the 1 moderate axe-core violation (CI run from this push will show details with improved hydration wait); fix or document as acceptable
-2. **P4: Phase 4 completion assessment** — if ISSUE-039 resolves, assess completion: zero CRITICAL axe violations ✓; platform agent sign-offs needed
+Cycle 34 priority:
+1. **P4: Check CI run c3e55df** — verify web E2E tests now pass; identify ISSUE-039 violation from axe output
+2. **P4: Phase 4 completion assessment** — if ISSUE-039 is acceptable (moderate only), Phase 4 is complete; begin Phase 5
 
 ## Known Issues / Technical Debt
 
