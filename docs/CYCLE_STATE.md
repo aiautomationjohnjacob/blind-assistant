@@ -299,15 +299,13 @@ Cycle 45 priorities:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 42.** Phase 5 (Polish & Community Ready) is COMPLETE.
+**Loop completed Cycle 44.** Phase 5 (Polish & Community Ready) is COMPLETE.
 
-Key deliverables Cycle 42: (1) Marcus (power user) scenario tests — 31 tests in
-tests/accessibility/test_marcus_scenario.py covering brief mode pipeline, preamble trimming,
-financial disclosure survives brief mode, independence from braille mode. (2) web_app_available
-fixture extracted from 4 web E2E test files to conftest.py (DRY). (3) CI persona gate job
-renamed to cover all 3 personas (Dorothy + Jordan + Marcus, 60 tests total).
+Key deliverables Cycle 44: Node.js 24 GitHub Actions migration — bumped checkout/setup-node/
+upload-artifact from v4→v5 across all 5 workflow files. Resolves ISSUE-050 (June 2026
+deprecation deadline). No product code changed. 925 tests unchanged.
 
-Next cycle priorities: (1) Telegram integration (`--telegram` flag, concurrent API server + bot);
-(2) Device simulation CI; (3) Consolidate FORBIDDEN_JARGON list.
+Next cycle priorities: (1) Device simulation CI (P3) — the only remaining stack item;
+start with Playwright screenshot artifacts for web; document Android AVD test plan.
 Phase 5 is fully complete — all criteria met (Dorothy scenario tests ✓, GRANT_NARRATIVE.md ✓,
-community launch prep ✓).
+community launch prep ✓, Telegram super-user channel ✓, Node.js 24 migration ✓).
