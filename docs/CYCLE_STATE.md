@@ -304,14 +304,15 @@ Cycle 40 priority (post-Phase 5 — maintenance and community):
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 37.** Phase 5 (Polish & Community Ready) is IN PROGRESS.
+**Loop completed Cycle 39.** Phase 5 (Polish & Community Ready) is COMPLETE.
 
-Key deliverables Cycle 37: (1) Dorothy test language simplification — "API token" → "connection code"
-throughout SetupWizardScreen + installer; 6 new Dorothy test assertions; 134 JS tests pass.
-(2) GRANT_NARRATIVE.md created — full grant application document per Phase 5 completion criterion.
-(3) ROADMAP.md + CHANGELOG.md updated — Phase 3+4 marked COMPLETE; Phase 5 milestones defined.
+Key deliverables Cycle 39: (1) CONTRIBUTING.md expanded with blind contributor welcome, braille
+display callout, Dorothy persona explanation, JS test instructions, good-first-issue guide,
+commit format. (2) 5 GitHub good-first-issues created (#92-#96). (3) CHANGELOG v0.5.0 entry.
+Phase 5 is fully complete — all criteria met (Dorothy scenario tests ✓, GRANT_NARRATIVE.md ✓,
+community launch prep ✓).
 
-Most important for Cycle 38:
-1. **P5: Fix missed jargon** — handleConfirmToken validation "API tokens are usually at least 32 characters" → "connection codes" + add test
-2. **P5: Full Dorothy scenario test** — complete flows (setup → food ordering → Second Brain note); find remaining gaps
-3. **P5: Community launch prep** — CONTRIBUTING.md for blind contributors; good-first-issues identified
+Most important for Cycle 40:
+1. **P3: VoiceOver+Safari CI** — WebKit E2E tests (GitHub issue #92 created as good-first-issue)
+2. **P3: Dorothy E2E in CI** — dorothy-e2e CI job (GitHub issue #96 created as good-first-issue)
+3. **P3: Telegram integration** — secondary/super-user channel; voice-guided Telegram setup for power users
