@@ -157,8 +157,13 @@ class VoiceLocalInterface:
                 "Yes? How can I help?",
                 speed=self._context.speech_rate,
             )
-            # Listen for the actual request
-            transcript2 = await transcribe_microphone(duration_seconds=self._record_duration)
+            # Listen for the actual request using the same VAD/fixed-duration setting
+            if self._use_vad:
+                transcript2 = await transcribe_microphone_with_vad(
+                    fallback_duration=self._record_duration,
+                )
+            else:
+                transcript2 = await transcribe_microphone(duration_seconds=self._record_duration)
             if transcript2 and transcript2.strip():
                 clean_transcript = transcript2.strip()
             else:
