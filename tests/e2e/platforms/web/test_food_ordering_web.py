@@ -54,25 +54,18 @@ pytestmark = pytest.mark.web
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Fixtures
+# Helpers
+#
+# NOTE: web_app_available fixture is defined in conftest.py (DRY: shared
+# across all 4 web E2E test files).
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-@pytest.fixture(scope="session")
-def web_app_available() -> bool:
-    """Check if the web app server is running before any tests execute."""
-    try:
-        conn = http.client.HTTPConnection("localhost", 19006, timeout=3)
-        conn.request("GET", "/")
-        resp = conn.getresponse()
-        return resp.status == 200
-    except (TimeoutError, http.client.HTTPException, OSError):
-        # If using a remote staging URL (not localhost), assume available
-        return WEB_APP_URL != "http://localhost:19006"
-
-
 def _skip_if_unavailable(web_app_available: bool) -> None:
-    """Raise pytest.skip if Playwright or web server is not available."""
+    """Raise pytest.skip if Playwright or web server is not available.
+
+    NOTE: web_app_available is injected from the session fixture in conftest.py.
+    """
     if not PLAYWRIGHT_AVAILABLE:
         pytest.skip("playwright not installed — web E2E tests run only in CI")
     if not web_app_available:
