@@ -277,14 +277,15 @@ Cycle 31 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 29.** Phase 4 (Accessibility Hardening) in progress. Three critical
-fixes: (1) 26 web E2E tests were silently failing — converted to sync playwright API, fixed
-CI pipefail, bundled axe-core locally (ISSUE-034, ISSUE-035 resolved); (2) iOS VoiceOver live
-region bug fixed — accessibilityLiveRegion moved from View to Text nodes in MainScreen.tsx
-(ISSUE-036 resolved); (3) VoiceOver rotor accessibilityActions added to main button.
-127 JS tests (+6). 812 Python unit tests. Ruff clean.
+**Loop completed Cycle 30.** Phase 4 (Accessibility Hardening) in progress. Four deliverables:
+(1) Skip link added — `clients/mobile/public/index.html` custom Expo HTML template with
+WCAG 2.4.1 skip-to-main-content link and `<div role="main">` landmark wrapper;
+(2) SetupWizardScreen token step live region fixed — `accessibilityLiveRegion="polite"` added
+to instructions Text; 1 new JS test; 128 JS total; (3) 5 new web E2E structural tests;
+(4) Documentation steward update — CHANGELOG Phase 4 section, README Telegram demoted.
+812 Python unit tests. ruff clean.
 
-The most important work for Cycle 30 (Phase 4: Accessibility Hardening):
-1. **P4: web-accessibility-expert full audit** — heading structure, skip link, focus management after route changes; NVDA+Chrome and VoiceOver+Safari specific patterns
-2. **P4: SetupWizardScreen live region audit** — check if same VoiceOver live region bug exists in SetupWizardScreen (step progress announcements use live regions on Views)
-3. **P4: Verify axe-core CI run** — first run with sync API and local bundle; review any WCAG violations found by axe-core gate
+The most important work for Cycle 31 (Phase 4: Accessibility Hardening):
+1. **P4: Verify skip link in expo export** — build web export and confirm `dist/index.html` includes skip link from `public/index.html` template
+2. **P4: web-accessibility-expert audit** — focus management after state changes; axe-core gate results review; any 'serious' violations to OPEN_ISSUES.md
+3. **P4: Check axe-core CI gate results** — review violations found by Phase 4 CI gate on new build
