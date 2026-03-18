@@ -762,6 +762,21 @@ in Cycle 34 (which captured errors before `page.on("pageerror")` could register)
 **Verification**: CI run 23230759864 — ALL 33 Chromium web E2E tests PASS.
 **Status**: RESOLVED
 
+### ISSUE-042: Firefox browser binary not installed in e2e-web CI job
+**Severity**: HIGH (all 36 Firefox E2E tests errored with "Executable doesn't exist")
+**Category**: ci, e2e, web
+**Detected by**: Cycle 35 CI run 23230759864 Firefox job
+**Detected**: 2026-03-18
+**Resolved**: 2026-03-18 (Cycle 35)
+**Root cause**: The e2e-web CI job ran tests with both `--browser chromium` and
+`--browser firefox`, but only installed `playwright install chromium`. The Firefox
+job failed with `BrowserType.launch: Executable doesn't exist at
+/home/runner/.cache/ms-playwright/firefox-1509/firefox/firefox`.
+**Fix**: Added `playwright install firefox || true` and `playwright install-deps firefox || true`
+to the "Install Playwright Python bindings" step in `.github/workflows/ci.yml`.
+**Verification**: Next CI run will confirm Firefox tests pass.
+**Status**: RESOLVED (fix committed in wip 92ba1f6)
+
 ### ISSUE-040: WCAG 4.1.3 — aria-live regions conditionally rendered in MainScreen.tsx
 **Severity**: HIGH (now RESOLVED — was causing screen reader to miss first announcement)
 **Category**: a11y, wcag, mobile-web
