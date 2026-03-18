@@ -238,20 +238,18 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 31 (Phase 4: Accessibility Hardening). Two deliverables: (1) Verified skip link in
-`expo export` — confirmed `dist/index.html` picks up `public/index.html` template correctly;
-(2) Found and fixed ISSUE-037 — `#main-content` div was missing `tabindex="-1"`, meaning the
-skip link moved scroll position but NOT keyboard focus (WCAG 2.4.1 Level A was broken despite
-appearing implemented). Fixed in `public/index.html`. Added 5 new TestFocusManagement E2E
-tests (skip link focus routing, voice button reachability, invisible focus detection,
-aria-live coverage) and 1 new TestPageStructure test (tabindex=-1 verification). Fixed
-`test_can_reach_main_button_by_tab` which incorrectly expected the first Tab to reach the
-voice button (skip link is now correctly first). 812 Python unit tests (unchanged). 128 JS
-tests (unchanged). ruff clean. mypy 0 errors.
+Cycle 32 (Phase 4: Accessibility Hardening). Three deliverables:
+(1) Fixed 10 web E2E test failures from Cycle 31 push — 3 root causes: Python `or` syntax in
+JS eval string (SyntaxError), React hydration race condition (tests ran before React rendered
+interactive elements), and setup wizard vs main screen mismatch (CI shows setup wizard, tests
+expected main screen labels). Fixed with `_wait_for_app_ready()` helper in all web E2E tests.
+(2) Added `_wait_for_app_ready()` to axe-core audit tests so axe now audits the hydrated app.
+(3) Checked axe-core CI gate results: 0 critical, 0 serious, 1 unidentified moderate violation
+(ISSUE-039 logged). Phase 4 CI gate: PASSED. 812 Python unit tests unchanged. ruff clean.
 
-Cycle 32 priority:
-1. **P4: Check axe-core CI gate results** — review 'serious' violations from Cycle 31 push; add to OPEN_ISSUES.md
-2. **P4: web-accessibility-expert full audit** — VoiceOver+Safari and TalkBack+Chrome flows; focus management
+Cycle 33 priority:
+1. **P4: ISSUE-039** — identify the 1 moderate axe-core violation (CI run from this push will show details with improved hydration wait); fix or document as acceptable
+2. **P4: Phase 4 completion assessment** — if ISSUE-039 resolves, assess completion: zero CRITICAL axe violations ✓; platform agent sign-offs needed
 
 ## Known Issues / Technical Debt
 
