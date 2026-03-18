@@ -913,3 +913,20 @@ documentation, potentially requiring sighted assistance to configure the app.
 **Resolved in**: Cycle 41 — commit 3ef31e8. README.md updated with "Using with NVDA on
 Windows", "Using with VoiceOver on macOS", and "Using with a Braille Display" sections.
 All written in plain language with step-by-step keyboard instructions.
+
+### ISSUE-050: Node.js 20 GitHub Actions deprecation (June 2026 deadline)
+**Severity**: MEDIUM (becomes HIGH after June 2026)
+**Category**: ci, maintenance
+**Detected by**: CI annotations in Cycle 43 run 23235034866
+**Detected**: 2026-03-18
+**Description**: GitHub Actions is deprecating Node.js 20 runners effective June 2, 2026.
+All CI steps using actions/checkout@v4, actions/setup-python@v5, actions/setup-node@v4,
+and actions/upload-artifact@v4 will break after that date. The CI logs show this warning
+on every run. The fix is to bump all GitHub Actions to their v5+ versions that run
+on Node.js 24.
+**Impact**: CI will fail on June 2, 2026 if not addressed. Community contributors
+would be unable to run CI. Green CI is critical for the open-source community.
+**Proposed fix**: Bump actions/checkout@v4 → @v5, actions/setup-python@v5 → @v5 (already
+v5 but check), actions/setup-node@v4 → @v5, actions/upload-artifact@v4 → @v5 in all
+workflow files (.github/workflows/*.yml).
+**Status**: OPEN
