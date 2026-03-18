@@ -723,7 +723,7 @@ jobs:
                 `- Tests/coverage (Education site): ${{ needs.test-education.result }}`,
                 `- Security: ${{ needs.security.result }}`,
                 `- Web E2E (Playwright — Chromium/Firefox/WebKit): ${{ needs.e2e-web.result }}`,
-                `- Dorothy E2E (elder+newly-blind persona gate): ${{ needs.dorothy-e2e.result }}`,
+                `- Persona gate E2E (Dorothy+Jordan+Marcus): ${{ needs.dorothy-e2e.result }}`,
                 `- Phase 4 WCAG axe-core audit: ${{ needs.a11y-audit.result }}`,
                 `- Browser integration (BrowserTool + real Playwright): ${{ needs.integration-browser.result }}`,
                 '',
