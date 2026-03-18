@@ -302,11 +302,13 @@ Cycle 37 priority (Phase 5):
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 35.** Phase 4 (Accessibility Hardening) in progress.
-Key deliverables: ISSUE-041 resolved (react-dom version mismatch fixed; ALL 33 Chromium web
-E2E tests now pass in CI). ISSUE-042 resolved (Firefox binary added to CI install step).
+**Loop completed Cycle 36.** Phase 4 (Accessibility Hardening) is COMPLETE. Phase 5 (Polish & Community Ready) has begun.
 
-Most important for Cycle 36:
-1. **P4: ISSUE-039** — identify and fix the 1 moderate axe-core violation now that React mounts
-2. **P4: Phase 4 gate verification** — confirm Firefox E2E green after ci.yml fix deployed
-3. **P4: Platform sign-off** — Windows/macOS accessibility expert reviews still pending
+Key deliverables Cycle 36: ISSUE-039 resolved (0 axe violations confirmed); Phase 4 completion
+assessment done — all criteria met; Windows/macOS sign-off (ISSUE-043) documented; 6 stale GitHub
+CI issues closed (86-91); Phase 5 sprint items defined.
+
+Most important for Cycle 37:
+1. **P5: Dorothy test** — newly-blind-user + blind-elder-user review setup wizard; identify simplicity gaps
+2. **P5: Simplicity audit** — voice strings, installer steps, and responses for non-technical user appropriateness
+3. **P5: ROADMAP.md update** — mark Phase 4 complete; add Phase 5 milestones
