@@ -173,13 +173,16 @@ class TestFoodOrderingAccessibility:
         _skip_if_unavailable(web_app_available)
         page.goto(WEB_APP_URL)
         page.wait_for_load_state("networkidle")
+        # Wait for React to hydrate — aria-live attrs are rendered by React, not static HTML
+        _wait_for_app_ready(page)
 
         # Count polite live regions — there must be at least one for status updates
         polite_regions = page.query_selector_all('[aria-live="polite"]')
         assert len(polite_regions) > 0, (
             "No aria-live='polite' regions found on the main screen. "
             "When the assistant responds during food ordering, NVDA cannot "
-            "announce the restaurant options or confirmation prompts."
+            "announce the restaurant options or confirmation prompts. "
+            "Both MainScreen and SetupWizardScreen use accessibilityLiveRegion='polite'."
         )
 
     def test_no_assertive_live_region_for_status(self, page: Page, web_app_available: bool) -> None:
