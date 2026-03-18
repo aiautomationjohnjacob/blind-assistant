@@ -103,7 +103,7 @@ def _skip_if_unavailable(web_app_available: bool) -> None:
         )
 
 
-def _wait_for_app_ready(page: "Page") -> None:
+def _wait_for_app_ready(page: Page) -> None:
     """
     Wait for the React app to finish hydrating after networkidle.
 
