@@ -2038,3 +2038,48 @@ When iterating on test designs, unused imports accumulate. The `asyncio` and `in
 imports in test_dorothy_scenario.py were both from approaches that were refactored away.
 Running `python3 -m ruff check [file]` before committing catches these quickly.
 The wip() hook does not run ruff — always run it manually before the typed commit.
+
+## Cycle 39 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: Community launch preparation is not a checkbox — it is the bridge between a technically complete product and a product that actually has contributors. The CONTRIBUTING.md expansion addresses a real risk: technically solid projects fail to attract blind contributors because the documentation doesn't signal that blind people are welcome as contributors (not just as users). The braille display user callout, the Dorothy persona explanation, and the "there are no stupid questions" closing are not boilerplate — they create psychological safety for the contributors we most need. Good-first-issues #93 (deafblind user stories) and #95 (Windows NVDA README) are pure documentation work that blind contributors can do without writing a line of code. This is the right kind of community launch.
+
+**Code quality (code-reviewer)**: (1) No source code was changed this cycle — CONTRIBUTING.md, CHANGELOG.md, CYCLE_STATE.md, PRIORITY_STACK.md only. (2) Test count: 812 Python unit tests (unchanged), 136 JS tests (unchanged), 13 Dorothy E2E tests (unchanged). No count decrease. (3) The 5 good-first-issues are well-scoped — each has a clear file target, acceptance criteria, and notes on what NOT to do. Issue #94 (accessibility assertion in food ordering) is particularly good: it references the existing helper in test_dorothy_scenario.py and asks contributors to extract it, which is a real code improvement with a clear payoff. (4) Issue #96 (Dorothy E2E in CI) is correctly scoped — it asks contributors to check whether the tests mock Claude before wiring them into CI, which is the right question.
+
+**Security (security-specialist)**: No security implications in Cycle 39. Documentation and community changes only. One note: good-first-issue #95 (Windows NVDA README) asks contributors to improve setup instructions. Ensure that any contributor-added instructions do not suggest storing credentials in plain text files, environment variables, or clipboard — the README must consistently point to the keychain-based setup wizard. The current README correctly does this; watch that contributor PRs don't drift.
+
+**Accessibility (accessibility-reviewer)**: The CONTRIBUTING.md itself passes the Dorothy test. Instructions use plain language: "If GitHub is hard to navigate with your screen reader, tell us and we will help" is the right message — it doesn't assume GitHub is accessible, it offers support. The commit message format example uses the actual "API token → connection code" fix, which connects the abstract format to real project history. The "good-first-issue types" list includes "Add an accessibility assertion to an existing test" — this teaches contributors what accessibility testing looks like in practice.
+
+**User perspective (blind-user-tester)**: The braille display callout is overdue. Every contributing guide I've seen treats braille display users as an afterthought, if mentioned at all. Calling it out specifically — saying "you are the hardest to get right and we have the fewest testers" — is both honest and welcoming. Issue #93 (deafblind user stories) is the right first step. What I want to see next: a way for blind contributors to submit user stories through something other than GitHub's web interface, because GitHub with NVDA is workable but not smooth.
+
+**Ethics (ethics-advisor)**: The CONTRIBUTING.md expansion honors the "nothing about us without us" principle from CODE_OF_CONDUCT.md. Explicitly inviting braille display users, offering to help first-time GitHub users, and framing "setup confusion is our bug, not your mistake" all shift power toward blind contributors rather than requiring them to conform to sighted contributor norms. The Dorothy persona explanation also educates sighted contributors about why accessibility matters in concrete, human terms — not abstract WCAG compliance.
+
+**Goal adherence (goal-adherence-reviewer)**: Phase 5 completion criteria were: (1) Dorothy test passes — CONFIRMED (Cycle 38, 13 E2E tests). (2) GRANT_NARRATIVE.md exists — CONFIRMED (Cycle 37). (3) Community launch prep — CONFIRMED (Cycle 39, CONTRIBUTING.md + 5 good-first-issues). All Phase 5 criteria met. The project is now in maintenance mode with ongoing community-building. The PRIORITY_STACK is correctly ordered: WebKit E2E CI and Dorothy E2E CI are the two concrete technical items that would most strengthen the project's test coverage; Telegram integration is the longest-deferred P3 item.
+
+**Consensus recommendation for next cycle**: (1) Add WebKit (VoiceOver+Safari) E2E tests to CI — this is the highest-impact remaining test gap; already filed as GitHub issue #92. (2) Add Dorothy E2E tests to CI as a nightly job — filed as GitHub issue #96. (3) If a community contributor picks up either of these, support their PR with a thorough review.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) CONTRIBUTING.md comprehensively updated — blind contributor welcome, braille display callout, Dorothy persona explanation, JS test instructions, good-first-issue guide with concrete examples, commit format; (2) 5 GitHub good-first-issues created (#92-#96) with clear scopes, file targets, and acceptance criteria; (3) CHANGELOG.md v0.5.0 entry: all Cycles 37-39 Phase 5 work documented; (4) CYCLE_STATE.md and PRIORITY_STACK.md updated to reflect Phase 5 complete and Cycle 39 done
+- Attempted but failed: none
+- Confusion/loops: none — clean cycle with clear deliverables
+- New gaps: (1) GitHub issue creation depends on `gh` CLI being configured — if a future session lacks gh auth, this step will fail silently; (2) The CONTRIBUTING.md says "npm ci && npm test" for JS tests, but this assumes Node.js is installed — may need a note about Node.js version requirement; (3) No link from CONTRIBUTING.md to the education site tests (clients/education/src/__tests__/) — a contributor who wants to help the education site won't find the test pattern
+- Next cycle recommendation: (1) WebKit E2E tests (issue #92) — add WebKit to the Playwright CI job; (2) Dorothy E2E in CI (issue #96) — add dorothy-e2e job to ci.yml; (3) Consider adding Node.js version requirement to CONTRIBUTING.md prerequisites
+
+**PROCESS LESSON (good-first-issue quality)**:
+A good-first-issue is NOT just a small task. It is a task with:
+- A specific file to edit (not "somewhere in the codebase")
+- A concrete acceptance criterion (not "improve the test")
+- An explanation of WHY it matters (connects to a real user need)
+- A note about what NOT to do (prevents well-meaning mistakes)
+- A pointer to existing patterns to follow (reduces discovery time)
+
+Issues #92-#96 follow this pattern. Issue #94 (food ordering accessibility assertion)
+is the strongest — it names the helper to reference, explains the motivation (voice output
+quality), and scopes the test-only change to avoid confusing contributors into modifying src/.
+
+**COMMUNITY LESSON (blind contributor welcome language)**:
+Three specific changes made CONTRIBUTING.md more welcoming than typical open source guides:
+1. "You are the most important contributor here" — explicit priority inversion vs. typical
+   "all contributors welcome" boilerplate
+2. "Setup confusion is our bug, not your mistake" — removes shame from asking for help
+3. Braille display callout with "we are listening" — creates direct invitation for the
+   user group with the least representation in open source accessibility testing
