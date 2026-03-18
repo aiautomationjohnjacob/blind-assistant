@@ -602,6 +602,10 @@ class TestPageStructure:
         _skip_if_unavailable(web_app_available)
         page.goto(WEB_APP_URL)
         page.wait_for_load_state("networkidle")
+        # Wait for React to hydrate — role='heading' is set by React, not static HTML.
+        # Both MainScreen (title "Blind Assistant") and SetupWizardScreen (step header)
+        # use accessibilityRole='header', which react-native-web renders as role='heading'.
+        _wait_for_app_ready(page)
 
         heading_count = page.evaluate(
             """() => {
@@ -615,7 +619,8 @@ class TestPageStructure:
             "No headings found in the DOM (h1–h6 or role='heading'). "
             "NVDA users press 'H' to navigate headings — without any headings "
             "they must read the page linearly. "
-            "Ensure accessibilityRole='header' is present on a title Text component."
+            "Ensure accessibilityRole='header' is present on a title Text component. "
+            "Both MainScreen and SetupWizardScreen have Text with accessibilityRole='header'."
         )
 
     def test_heading_has_accessible_label(self, page: Page, web_app_available: bool) -> None:
