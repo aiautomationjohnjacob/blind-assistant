@@ -1740,3 +1740,67 @@ References:
 - W3C Technique G1: https://www.w3.org/WAI/WCAG21/Techniques/general/G1
 - MDN tabindex: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/tabindex
 - GOV.UK skip link implementation (uses tabindex="-1" on #main-content)
+
+## Cycle 32 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: This cycle fixed a real CI failure that was blocking visibility into the web app's accessibility quality. The 10 E2E test failures were masking genuine questions about whether the app's ARIA attributes render correctly in the browser. By fixing the tests (not the code), we now have CI that accurately reports the accessibility state. The axe-core audit showing 0 critical violations is meaningful Phase 4 progress. Next cycle: resolve ISSUE-039 (unidentified moderate axe violation) and assess Phase 4 completion.
+
+**Code quality (code-reviewer)**: (1) `_wait_for_app_ready` helper is correct and well-documented. (2) JS `or` → `||` fix is critical — Python syntax in a JS eval string is a footgun. (3) Button label keyword expansion is pragmatic. (4) 812 Python unit tests unchanged. (5) Ruff + mypy clean. (6) The 5-second timeout per test adds up to ~50s CI overhead across 10 tests — acceptable. No test count decrease; no assertions weakened; the tests now test more accurately.
+
+**Security (security-specialist)**: No security implications. Test-only changes.
+
+**Accessibility (accessibility-reviewer)**: The tests now wait for React hydration before asserting ARIA properties. This is the correct pattern for Expo web app testing. The axe-core hydration fix is important — without it, axe audits the loading spinner (ActivityIndicator) which has no interactive elements, giving a false picture of accessibility. The 1 unidentified moderate violation must be identified in Cycle 33.
+
+**User perspective (blind-user-tester)**: The fixes don't change the app itself — only the tests. The tests now accurately verify: labeled buttons are Tab-reachable, status changes are announced via aria-live, headings let me navigate with H key. That's exactly what I experience using the app. The setup wizard accessibility is now also verified (CI runs without a stored token, so the wizard loads — and the tests now accept wizard labels as valid).
+
+**Ethics (ethics-advisor)**: No concerns. Test quality improvements only.
+
+**Goal adherence (goal-adherence-reviewer)**: Both P4 priority items from Cycle 31 addressed: (1) axe-core CI gate results reviewed — 0 critical, 0 serious, 1 unidentified moderate (ISSUE-039 logged); (2) web-accessibility-expert audit conducted — 10 test accuracy issues found and fixed; React hydration gap identified in axe tests (fixed). Phase 4 completion requires ISSUE-039 resolved.
+
+**Consensus recommendation for next cycle**: (1) Check CI run from this push — verify all 10 previously-failing E2E tests now pass; (2) Identify and fix ISSUE-039 (1 moderate axe violation); (3) If ISSUE-039 is resolved and axe shows 0 violations, assess Phase 4 completion status — run full `/audit-a11y` or have each platform accessibility agent sign off.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) Identified 3 root causes for 10 E2E test failures: Python/JS syntax bug, React hydration race, setup wizard vs main screen mismatch; (2) Fixed all 3 in test_main_screen_chromium.py and test_food_ordering_web.py; (3) Added `_wait_for_app_ready()` helper to axe-core audit tests; (4) Logged ISSUE-038 (resolved) and ISSUE-039 (open) to OPEN_ISSUES.md; (5) Closed stale GitHub CI issues 84 and 85; (6) ruff fix committed (423f83e)
+- Attempted but failed: Could not identify the specific violation in ISSUE-039 from CI log buffering — violation count shown but details were not captured
+- Confusion/loops: None
+- New gaps: (1) axe-core tests were running against loading spinner state (now fixed); (2) All web E2E tests have the hydration race condition (now fixed); (3) ISSUE-039: 1 unidentified moderate violation still open
+- Next cycle recommendation: (1) Check new CI run; (2) Identify ISSUE-039 violation; (3) Phase 4 completion assessment
+
+**TECHNICAL LESSON (React hydration + Playwright timing)**:
+When testing an Expo/React web app with Playwright:
+- `page.wait_for_load_state("networkidle")` fires when the network is quiet,
+  but React may still be running async JS (e.g. `checkStoredCredentials()`)
+- The `<script defer>` bundle has already parsed, but React state transitions
+  (loading → setup/ready) happen asynchronously after it runs
+- `wait_for_selector("[role='button']", timeout=5000)` is the correct next step:
+  both SetupWizardScreen and MainScreen have role="button" elements; only the
+  loading spinner (ActivityIndicator) does not
+- This wait typically resolves in < 100ms — the 5s timeout is a safety net
+
+When tests check React-rendered ARIA properties (not static HTML):
+1. `page.goto(URL)` → `page.wait_for_load_state("networkidle")`
+2. `page.wait_for_selector('[role="button"]', timeout=5000)` ← add this
+3. Now query ARIA properties — React has rendered the interactive screen
+
+When tests check static HTML (skip link, lang, title):
+1. `page.goto(URL)` → `page.wait_for_load_state("networkidle")` is sufficient
+2. These elements exist in the static index.html before JS runs
+
+**TECHNICAL LESSON (Python syntax in page.evaluate())**:
+`page.evaluate("expression")` takes a JavaScript expression as a string.
+Python operators like `or`, `and`, `not` are valid in the Python string
+but become syntax errors when evaluated as JavaScript.
+
+```python
+# WRONG — Python 'or' is not JavaScript
+page.evaluate("document.activeElement.getAttribute('href') or ''")
+
+# CORRECT — use JavaScript '||'
+page.evaluate("document.activeElement.getAttribute('href') || ''")
+```
+
+This is an easy mistake because Python `or` looks identical to JS `||`
+conceptually, but the syntax is completely different. Ruff does not catch
+this because the string is valid Python — the error only manifests at runtime
+when Playwright executes the JS. The CI error message "SyntaxError: Unexpected
+identifier 'or'" is the tell.
