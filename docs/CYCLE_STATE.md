@@ -251,11 +251,11 @@ Cycle 23 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 21.** Phase 3 in progress. ROADMAP.md fully rewritten (Phase 1+2 checked
-off, Phase 3 current state, Phase 4+5 planned). v0.3.0 tag pushed → triggered e2e-android (AVD)
-and ios-e2e.yml (iOS Simulator) CI workflows. 713 unit tests unchanged. Ruff clean.
+**Loop completed Cycle 22.** Phase 3 in progress. VAD (ISSUE-002) + Playwright fallback
+(ISSUE-003) implemented. e2e-android.yml CI workflow created. iOS VoiceOver CI verified (6 PASSED).
+732 unit tests. Ruff clean. mypy 0 errors.
 
-The most important work for Cycle 22 (Phase 3: Blind User Testing):
-1. **P3: Verify Android/iOS CI results** — check v0.3.0 tag run; log pass/fail; update OPEN_ISSUES
-2. **P3: Voice Activity Detection (VAD)** — ISSUE-002; replace fixed-duration recording
-3. **P3: PIL fallback** — ISSUE-003; Playwright screenshot for headless environments
+The most important work for Cycle 23 (Phase 3: Blind User Testing):
+1. **P3: Verify Android TalkBack CI** — push v0.3.1 tag; confirm e2e-android.yml triggers and runs
+2. **P3: MCP memory server** — src/blind_assistant/memory/mcp_memory.py (context.py TODO line 49)
+3. **P3: Education website** — learn.blind-assistant.org scaffold (clients/education/)
