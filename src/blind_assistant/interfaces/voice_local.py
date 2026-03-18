@@ -11,6 +11,11 @@ Accessibility: Voice-only. No visual feedback. All states announced verbally.
 Per USER_STORIES.md:
 - Sarah: "I want to ask what's on my screen without picking up my phone"
 - Dorothy: Slow response, low technical confidence — confirm every step aloud
+
+Voice Activity Detection (VAD):
+By default, uses `transcribe_microphone_with_vad()` which stops recording when the user
+stops speaking. Falls back to `transcribe_microphone()` with fixed duration if webrtcvad
+is not installed. This resolves ISSUE-002 (elder users cut off at 8 seconds).
 """
 
 from __future__ import annotations
@@ -27,11 +32,12 @@ logger = logging.getLogger(__name__)
 # Wake word for activating the assistant
 DEFAULT_WAKE_WORD = "assistant"
 
-# How long to record each utterance (seconds)
+# Fallback recording duration if VAD (webrtcvad) is not available (seconds)
 DEFAULT_RECORD_DURATION = 8.0
 
-# Silence threshold — shorter responses for elder/slow users
-ELDER_RECORD_DURATION = 12.0
+# Whether to use Voice Activity Detection (VAD) for smart cutoff.
+# Set to False in config if webrtcvad causes issues on a specific platform.
+DEFAULT_USE_VAD = True
 
 
 class VoiceLocalInterface:
