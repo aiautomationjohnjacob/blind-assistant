@@ -834,3 +834,18 @@ all Phase 4 gates passed, which required reading logs and updating state documen
 No code changes were needed because Phase 4 was already done by Cycle 35.
 **Action**: No action required. Cycle 37 begins Phase 5 implementation.
 **Status**: CLOSED — expected behavior for a phase-transition assessment cycle
+
+### ISSUE-045: Missed jargon string in handleConfirmToken validation error
+**Severity**: LOW
+**Category**: accessibility, ux
+**Detected by**: accessibility-reviewer (Cycle 37 review panel)
+**Detected**: 2026-03-18
+**Description**: `handleConfirmToken` in SetupWizardScreen.tsx validates the connection
+code length. The error message says "API tokens are usually at least 32 characters. Please
+check and try again." This was not caught in the Cycle 37 language simplification sweep.
+The word "API tokens" is jargon that Dorothy (elder blind user) would not understand.
+**Impact**: Dorothy hears "API tokens" during error recovery — undoes the otherwise
+consistent "connection code" language in the rest of the setup wizard.
+**Proposed fix**: Change "API tokens are usually at least 32 characters" to
+"Connection codes are usually more than 30 characters long." Add 1 new test.
+**Status**: OPEN
