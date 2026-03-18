@@ -256,27 +256,27 @@ No active blockers. Phase 4 COMPLETE as of Cycle 36.
 
 ## Last Cycle Summary
 
-Cycle 42 (Accessibility testing — Marcus power user persona + DRY web fixture refactor).
+Cycle 43 (Telegram super-user channel + CI fix).
 
-(1) MARCUS SCENARIO TESTS: 31 tests in tests/accessibility/test_marcus_scenario.py covering
-the power user persona (born blind, software developer, NVDA expert). Tests verify: _trim_preamble()
-strips all 6 registered preambles in brief mode; standard mode (Dorothy) preserves preambles;
-financial disclosure present even in brief mode (non-negotiable safety); Second Brain jargon-free;
-error messages not suppressed in brief mode; braille_mode and verbosity independent.
+(1) CI FIX: ruff format violation in test_marcus_scenario.py (same pattern as Cycle 40
+ISSUE-046 with test_dorothy_scenario.py). Fixed before the main Telegram feature work.
+GitHub issue #99 closed.
 
-(2) DRY WEB_APP_AVAILABLE FIXTURE: web_app_available session fixture extracted from 4 web E2E
-test files into tests/e2e/platforms/web/conftest.py. http.client import removed from 4 files.
-28 lines of duplicate code eliminated. All 43 web E2E tests still collect and skip gracefully.
+(2) TELEGRAM INTEGRATION: --telegram flag added to main.py CLI. When passed, sets
+telegram_enabled=True AND api_server_enabled=True (so the bot always has a backend).
+This completes the P3 "Telegram integration" item — power users like Marcus can now
+run both the API server and Telegram bot concurrently with a single command:
+  python -m blind_assistant.main --api --telegram
 
-(3) CI: dorothy-e2e job renamed to "Persona scenario gate (Dorothy, Jordan, Marcus)". Step
-description updated. Artifact renamed. Now covers 60 persona gate tests (13 + 16 + 31).
+(3) FORBIDDEN_JARGON: confirmed already resolved in Cycle 41 (no duplicate in
+test_dorothy_scenario.py). P4 item closed as already done.
 
-Total tests: 842 Python unit + 30 E2E core + 47 accessibility + [web E2E: run in CI only] = 919.
+Total tests: 848 Python unit + 30 E2E core + 47 accessibility + [web E2E: run in CI only] = 925.
 
-Cycle 43 priorities:
-1. **P3: Telegram integration** — add `--telegram` flag to main.py; Telegram + API server concurrent
-2. **P3: Device simulation CI** — Android AVD + Playwright (complex infrastructure)
-3. **P4: Consolidate FORBIDDEN_JARGON** — remove duplicate list in test_dorothy_scenario.py
+Cycle 44 priorities:
+1. **P3: Device simulation CI** — Android AVD + Playwright (complex infrastructure)
+2. **P4: Node.js 24 migration** — Node.js 20 actions deprecated (forcing June 2026); update
+   actions/checkout, actions/setup-python, actions/setup-node, actions/upload-artifact to v5+
 
 ## Known Issues / Technical Debt
 
