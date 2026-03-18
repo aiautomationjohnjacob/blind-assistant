@@ -21,24 +21,33 @@ HOW THESE TESTS RUN:
     1. npm ci --legacy-peer-deps (in clients/mobile/)
     2. npx expo export --platform web (builds to clients/mobile/dist/)
     3. python -m http.server 19006 --directory clients/mobile/dist/ (background)
-    4. pip install playwright pytest pytest-asyncio pytest-playwright axe-playwright
+    4. pip install playwright pytest pytest-playwright
     5. playwright install chromium
     6. pytest tests/e2e/platforms/web/test_wcag_axe_audit.py --browser chromium
 
   Locally:
     cd clients/mobile && npx expo export -p web
     python3 -m http.server 19006 --directory dist/ &
-    pip install axe-playwright
     pytest tests/e2e/platforms/web/test_wcag_axe_audit.py --browser chromium
 
 SKIP BEHAVIOUR:
-  If playwright or axe_playwright are not importable → skips gracefully.
+  If playwright or pytest-playwright are not importable → skips gracefully.
   If the web server is not running → skips gracefully.
   This prevents failures in the Python unit test job.
 
 Per testing.md: E2E tests; only external APIs mocked.
 Per CLAUDE.md accessibility rules: WCAG 2.1 AA on web is non-negotiable.
 Phase 4 CI gate: zero CRITICAL axe-core violations before merge.
+
+AXE-CORE BUNDLED LOCALLY:
+  axe.min.js is committed to tests/e2e/platforms/web/axe.min.js (version 4.9.1).
+  This eliminates the CDN network dependency (Cycle 29: ISSUE-034 fix).
+  page.add_script_tag(path=...) is used instead of CDN URL injection.
+
+SYNC API NOTE:
+  These tests use the pytest-playwright sync Page fixture (playwright.sync_api.Page).
+  The sync API is the correct pattern for pytest-playwright — it avoids event loop
+  conflicts with pytest-asyncio's asyncio_mode="auto". Never use async def here.
 """
 
 from __future__ import annotations
@@ -46,36 +55,27 @@ from __future__ import annotations
 import http.client
 import json
 import os
-from typing import TYPE_CHECKING
+import pathlib
 
 import pytest
 
-if TYPE_CHECKING:
-    from playwright.async_api import Page
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Availability guards
-# ─────────────────────────────────────────────────────────────────────────────
-
+# Use sync API — pytest-playwright's 'page' fixture is synchronous.
+# Using async def with the sync page fixture causes RuntimeError (event loop conflict).
 try:
-    import pytest_playwright as _  # noqa: F401
+    from playwright.sync_api import Page
 
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
-
-try:
-    # axe-playwright Python package — used only to detect if it's installed.
-    # The actual axe-core injection uses page.evaluate (CDN), which does not
-    # require this package. AXE_AVAILABLE guards are kept for future use.
-    import axe_playwright_python  # type: ignore[import]  # noqa: F401
-
-    AXE_AVAILABLE = True
-except ImportError:
-    AXE_AVAILABLE = False
+    Page = object  # type: ignore[assignment,misc]  # placeholder for type hints
 
 # The URL where the Expo web bundle is served.
 WEB_APP_URL = os.environ.get("WEB_APP_URL", "http://localhost:19006")
+
+# Path to the bundled axe-core JS — eliminates CDN dependency.
+# This file is committed to the repo at tests/e2e/platforms/web/axe.min.js.
+_THIS_DIR = pathlib.Path(__file__).parent
+AXE_JS_PATH = _THIS_DIR / "axe.min.js"
 
 pytestmark = pytest.mark.web
 
@@ -103,13 +103,15 @@ def web_app_available() -> bool:
 
 
 def _skip_if_unavailable(web_app_available: bool) -> None:
-    """Skip this test if Playwright is not installed or the web server is not running.
-
-    axe-playwright-python is NOT required — axe-core is injected from CDN inside
-    each test's page.evaluate() call. AXE_AVAILABLE is kept for future use only.
-    """
+    """Skip this test if Playwright is not installed or the web server is not running."""
     if not PLAYWRIGHT_AVAILABLE:
-        pytest.skip("playwright not installed — install with: pip install playwright pytest-playwright")
+        pytest.skip(
+            "pytest-playwright is not installed. Web E2E tests run only in the 'e2e-web' CI job. "
+            "To run locally: pip install pytest pytest-playwright && playwright install chromium && "
+            "cd clients/mobile && npx expo export -p web && "
+            "python3 -m http.server 19006 --directory dist/ & "
+            "pytest tests/e2e/platforms/web/ --browser chromium"
+        )
     if not web_app_available:
         pytest.skip(
             f"Web app not running at {WEB_APP_URL}. "
@@ -118,9 +120,30 @@ def _skip_if_unavailable(web_app_available: bool) -> None:
         )
 
 
-# Note: axe-core is injected via CDN inside each test's page.evaluate() call.
-# This makes tests fully self-contained — no axe-playwright-python required at runtime.
-# AXE_AVAILABLE is kept for future explicit-package tests.
+def _inject_axe(page: Page) -> None:
+    """
+    Inject axe-core into the page from the local bundled file.
+
+    Uses page.add_script_tag(path=...) instead of CDN to avoid network
+    dependency in CI. axe.min.js is committed to the repo (Cycle 29 fix).
+    """
+    if AXE_JS_PATH.exists():
+        # Local bundle — no network required
+        page.add_script_tag(path=str(AXE_JS_PATH))
+    else:
+        # Fallback to CDN if local file is missing (should not happen in CI)
+        page.evaluate(
+            """async () => {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js';
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }"""
+        )
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # axe-core WCAG Audit Tests
@@ -131,12 +154,12 @@ class TestWCAGAxeAudit:
     """
     Phase 4 CI gate: zero CRITICAL axe-core violations allowed.
 
-    These tests run the axe-core engine via Playwright JavaScript evaluation.
-    axe-core is injected from a CDN and run against the rendered DOM.
+    These tests run the axe-core engine via Playwright's add_script_tag (local bundle).
+    axe-core is loaded from the committed axe.min.js file — no CDN required.
     The test fails if any violation with impact='critical' is found.
     """
 
-    async def test_no_critical_wcag_violations_main_screen(self, page: Page, web_app_available: bool) -> None:
+    def test_no_critical_wcag_violations_main_screen(self, page: Page, web_app_available: bool) -> None:
         """
         Phase 4 gate: the main screen must have zero CRITICAL axe violations.
 
@@ -151,36 +174,28 @@ class TestWCAGAxeAudit:
         help identify and fix the issue before merge.
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
-        # Inject axe-core from CDN and run the audit
-        # axe.run() with no selector audits the entire document
-        axe_result = await page.evaluate(
-            """async () => {
-                // Inject axe-core if not already loaded
-                if (!window.axe) {
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js';
-                        script.onload = resolve;
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    });
-                }
-                // Run axe against the full document with WCAG 2.1 AA rules
-                const results = await window.axe.run(document, {
+        # Inject axe-core from local bundle (no CDN dependency)
+        _inject_axe(page)
+
+        # Run axe against the full document with WCAG 2.1 AA rules
+        axe_result = page.evaluate(
+            """() => {
+                return window.axe.run(document, {
                     runOnly: {
                         type: 'tag',
                         values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice']
                     }
+                }).then(function(results) {
+                    return {
+                        violations: results.violations,
+                        passes: results.passes.length,
+                        incomplete: results.incomplete.length,
+                        inapplicable: results.inapplicable.length
+                    };
                 });
-                return {
-                    violations: results.violations,
-                    passes: results.passes.length,
-                    incomplete: results.incomplete.length,
-                    inapplicable: results.inapplicable.length
-                };
             }"""
         )
 
@@ -229,7 +244,7 @@ class TestWCAGAxeAudit:
             )
         )
 
-    async def test_no_critical_wcag_violations_contrast(self, page: Page, web_app_available: bool) -> None:
+    def test_no_critical_wcag_violations_contrast(self, page: Page, web_app_available: bool) -> None:
         """
         Specifically check colour-contrast violations (WCAG 2.1 SC 1.4.3).
 
@@ -239,27 +254,21 @@ class TestWCAGAxeAudit:
         but they make the app unusable for low-vision users in bright environments.
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
-        contrast_result = await page.evaluate(
-            """async () => {
-                if (!window.axe) {
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js';
-                        script.onload = resolve;
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    });
-                }
-                const results = await window.axe.run(document, {
+        _inject_axe(page)
+
+        contrast_result = page.evaluate(
+            """() => {
+                return window.axe.run(document, {
                     runOnly: { type: 'rule', values: ['color-contrast'] }
+                }).then(function(results) {
+                    return {
+                        violations: results.violations,
+                        passes: results.passes.length
+                    };
                 });
-                return {
-                    violations: results.violations,
-                    passes: results.passes.length
-                };
             }"""
         )
 
@@ -278,7 +287,7 @@ class TestWCAGAxeAudit:
             f"CRITICAL contrast violation(s) found: {[v.get('id') for v in critical_contrast]}"
         )
 
-    async def test_interactive_elements_have_names(self, page: Page, web_app_available: bool) -> None:
+    def test_interactive_elements_have_names(self, page: Page, web_app_available: bool) -> None:
         """
         All interactive elements must have accessible names (WCAG 4.1.2).
 
@@ -287,27 +296,21 @@ class TestWCAGAxeAudit:
         This dedicated test ensures buttons, links, and inputs are all named.
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
-        name_result = await page.evaluate(
-            """async () => {
-                if (!window.axe) {
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js';
-                        script.onload = resolve;
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    });
-                }
-                const results = await window.axe.run(document, {
+        _inject_axe(page)
+
+        name_result = page.evaluate(
+            """() => {
+                return window.axe.run(document, {
                     runOnly: {
                         type: 'rule',
                         values: ['button-name', 'link-name', 'label', 'input-image-alt']
                     }
+                }).then(function(results) {
+                    return { violations: results.violations };
                 });
-                return { violations: results.violations };
             }"""
         )
 
@@ -331,7 +334,7 @@ class TestWCAGAxeAudit:
             )
         )
 
-    async def test_no_invalid_aria_roles(self, page: Page, web_app_available: bool) -> None:
+    def test_no_invalid_aria_roles(self, page: Page, web_app_available: bool) -> None:
         """
         All ARIA roles must be valid WAI-ARIA roles (WCAG 4.1.2).
 
@@ -340,30 +343,26 @@ class TestWCAGAxeAudit:
         WAI-ARIA role. After the Platform.OS fix, this should return zero violations.
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
-        role_result = await page.evaluate(
-            """async () => {
-                if (!window.axe) {
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js';
-                        script.onload = resolve;
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    });
-                }
-                const results = await window.axe.run(document, {
+        _inject_axe(page)
+
+        role_result = page.evaluate(
+            """() => {
+                return window.axe.run(document, {
                     runOnly: { type: 'rule', values: ['aria-roles', 'aria-required-attr', 'aria-valid-attr'] }
+                }).then(function(results) {
+                    // Also check for role="text" specifically (not caught by axe, custom check)
+                    const textRoleElements = document.querySelectorAll('[role="text"]');
+                    return {
+                        violations: results.violations,
+                        invalidTextRoleCount: textRoleElements.length,
+                        invalidTextRoleHTML: Array.from(textRoleElements).slice(0,5).map(
+                            function(el) { return el.outerHTML.slice(0,100); }
+                        )
+                    };
                 });
-                // Also check for role="text" specifically (not caught by axe, custom check)
-                const textRoleElements = document.querySelectorAll('[role="text"]');
-                return {
-                    violations: results.violations,
-                    invalidTextRoleCount: textRoleElements.length,
-                    invalidTextRoleHTML: Array.from(textRoleElements).slice(0,5).map(el => el.outerHTML.slice(0,100))
-                };
             }"""
         )
 
