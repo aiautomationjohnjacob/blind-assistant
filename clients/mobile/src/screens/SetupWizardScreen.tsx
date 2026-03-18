@@ -270,9 +270,9 @@ export function SetupWizardScreen({
       <Text
         style={styles.stepTitle}
         accessibilityRole="header"
-        accessibilityLabel="Step 1: Enter your API token"
+        accessibilityLabel="Step 1: Enter your connection code"
       >
-        Enter API Token
+        Enter Connection Code
       </Text>
       {/* Phase 4 audit (Cycle 30): accessibilityLiveRegion added to match other steps.
           When VoiceOver navigates to this step, it must announce the instructions text.
@@ -285,15 +285,15 @@ export function SetupWizardScreen({
         accessibilityRole={Platform.OS === "web" ? undefined : "text"}
         accessibilityLiveRegion="polite"
       >
-        Type or paste your API token below.{"\n"}
-        The token is printed by the server on first startup.
+        Type or paste your connection code below.{"\n"}
+        Your computer showed this code when Blind Assistant started.
       </Text>
       <TextInput
         ref={inputRef}
         style={styles.textInput}
         value={tokenInput}
         onChangeText={setTokenInput}
-        placeholder="Paste your API token here"
+        placeholder="Paste your connection code here"
         placeholderTextColor={COLORS.secondaryText}
         autoCapitalize="none"
         autoCorrect={false}
@@ -302,10 +302,10 @@ export function SetupWizardScreen({
         secureTextEntry={false}
         returnKeyType="done"
         onSubmitEditing={handleConfirmToken}
-        accessibilityLabel="API token input field"
+        accessibilityLabel="Connection code input field"
         accessibilityHint={
-          "Enter the bearer token from your backend server. " +
-          "It is usually 32 or more characters long."
+          "Enter the connection code shown on your computer. " +
+          "It is usually more than 30 characters long."
         }
         // Guarantees TalkBack auto-focuses this field when the token step appears.
         // Without this, users may need extra swipes to locate the input.
