@@ -87,21 +87,23 @@ const COLORS = {
 const STEP_INSTRUCTIONS: Record<WizardStep, string> = {
   welcome:
     "Welcome to Blind Assistant. This is a one-time setup. " +
-    "You will need the API token from your backend server. " +
-    "The server prints the token when it starts for the first time. " +
+    "You will need a connection code from your computer. " +
+    "Your computer shows this code when you first start Blind Assistant on it. " +
+    "If you do not have the code yet, ask the person who set up your computer to read it to you. " +
     "When you are ready, tap the Continue button.",
   token:
-    "Please type or paste your API token into the text field. " +
-    "The token is a long string of letters and numbers. " +
-    "When you have entered it, tap the Confirm Token button.",
+    "Please type or paste your connection code into the field below. " +
+    "The code is a long string of letters and numbers — usually more than 30 characters. " +
+    "When you have entered it, tap the Confirm button.",
   confirm: "", // Generated dynamically based on token value
   saving: "Saving your settings. Please wait.",
   done:
-    "Setup complete. Blind Assistant is now connected to your server. " +
-    "Tap the Start button to begin.",
+    "Setup complete. Blind Assistant is now connected to your computer. " +
+    "Tap the Start button to begin talking to your assistant.",
   error:
-    "Something went wrong during setup. Please check your token and try again. " +
-    "Tap the Retry button to start over.",
+    "Something went wrong during setup. " +
+    "The connection code may be incorrect, or your computer may not be running Blind Assistant. " +
+    "Tap the Retry button to start over and enter the code again.",
 };
 
 // ─────────────────────────────────────────────────────────────
