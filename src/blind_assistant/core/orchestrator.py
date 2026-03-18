@@ -814,19 +814,13 @@ class Orchestrator:
 
         await update(WARNING_TEXT)
 
-        # Register a confirmation gate session so the ConfirmationGate can
-        # match the user's next response to this pending action.
-        session_key = f"clear_prefs_{context.session_id}"
-        self.confirmation_gate.register_session(session_key)
-        confirmed = await self.confirmation_gate.wait_for_response(session_key, timeout=60.0)
+        # wait_for_confirmation registers the session internally and blocks until
+        # the user says "confirm" / "yes" / "ok" or until the 60-second timeout.
+        # This is the same ConfirmationGate pattern used for food ordering and payments.
+        confirmed = await self.confirmation_gate.wait_for_confirmation(context, timeout=60)
 
         if not confirmed:
-            return {
-                "text": (
-                    "Preference clearing cancelled. "
-                    "Your settings are unchanged."
-                )
-            }
+            return {"text": ("Preference clearing cancelled. Your settings are unchanged.")}
 
         # Signal the APIServer to call MCPMemoryClient.clear_user_data().
         # The 'action' field on the returned Response is checked in _query().
