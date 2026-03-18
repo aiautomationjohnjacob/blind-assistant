@@ -220,8 +220,6 @@ class TestDeviceSimulationScreenshots:
                     btn.click()
                     # Wait briefly for next step
                     page.wait_for_timeout(2000)
-        except Exception:
-            pass
         path = _save_screenshot(page, "04_main_screen")
         assert path.exists(), f"Screenshot not saved: {path}"
 
