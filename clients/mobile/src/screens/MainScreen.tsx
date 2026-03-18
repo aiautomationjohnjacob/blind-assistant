@@ -274,9 +274,12 @@ export function MainScreen(): React.JSX.Element {
       </Text>
 
       {/* Status text — announced when it changes */}
+      {/* accessibilityRole="text" is valid on mobile but maps to non-ARIA role="text" on
+          react-native-web. On web, the <p> element is already semantically text — no role
+          needed. Platform.select omits the prop on web to keep the DOM clean. */}
       <Text
         style={styles.statusText}
-        accessibilityRole="text"
+        accessibilityRole={Platform.OS === "web" ? undefined : "text"}
         accessibilityLiveRegion="polite"
         accessibilityLabel={getStateLabel()}
       >
