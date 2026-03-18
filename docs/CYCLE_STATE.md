@@ -270,11 +270,14 @@ Cycle 30 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 28.** Phase 4 (Accessibility Hardening) in progress. ISSUE-033 fixed
-(role="text" DOM violation). Phase 4 axe-core WCAG CI gate established.
-121 JS tests (+4). 812 Python unit tests. Ruff clean. mypy 0 errors.
+**Loop completed Cycle 29.** Phase 4 (Accessibility Hardening) in progress. Three critical
+fixes: (1) 26 web E2E tests were silently failing — converted to sync playwright API, fixed
+CI pipefail, bundled axe-core locally (ISSUE-034, ISSUE-035 resolved); (2) iOS VoiceOver live
+region bug fixed — accessibilityLiveRegion moved from View to Text nodes in MainScreen.tsx
+(ISSUE-036 resolved); (3) VoiceOver rotor accessibilityActions added to main button.
+127 JS tests (+6). 812 Python unit tests. Ruff clean.
 
-The most important work for Cycle 29 (Phase 4: Accessibility Hardening):
-1. **P4: Check first a11y-audit CI run result** — verify axe-core gate passes; add any serious violations to OPEN_ISSUES.md
-2. **P4: Bundle axe-core locally** — eliminate CDN network dependency in a11y-audit job; use page.add_script_tag(path=tests/e2e/platforms/web/axe.min.js)
-3. **P4: iOS/Android Phase 4 accessibility audit** — TalkBack gesture coverage; VoiceOver rotor; react-native accessibility patterns
+The most important work for Cycle 30 (Phase 4: Accessibility Hardening):
+1. **P4: web-accessibility-expert full audit** — heading structure, skip link, focus management after route changes; NVDA+Chrome and VoiceOver+Safari specific patterns
+2. **P4: SetupWizardScreen live region audit** — check if same VoiceOver live region bug exists in SetupWizardScreen (step progress announcements use live regions on Views)
+3. **P4: Verify axe-core CI run** — first run with sync API and local bundle; review any WCAG violations found by axe-core gate
