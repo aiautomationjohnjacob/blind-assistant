@@ -597,4 +597,9 @@ This means the transcript and response containers are missing semantic roles on 
 on native mobile is unaffected (they handle `accessibilityRole="text"` correctly).
 **Proposed fix**: Use `Platform.select` to conditionally apply `accessibilityRole` only on
 native (undefined/omit on web), or use `aria-label` without role for the web rendering.
-**Status**: OPEN (Phase 4 target)
+**Status**: RESOLVED
+**Resolved in**: Cycle 28 — `Platform.OS === "web" ? undefined : "text"` pattern applied to
+all 10 occurrences of `accessibilityRole="text"` in MainScreen.tsx (3 cases) and
+SetupWizardScreen.tsx (7 cases). `Platform` import added to MainScreen.tsx. 4 new JS tests
+verify the web platform behavior. axe-core WCAG audit test added (test_wcag_axe_audit.py)
+with a dedicated test for `role="text"` in the DOM that would catch any regression.
