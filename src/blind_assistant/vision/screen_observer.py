@@ -117,11 +117,40 @@ class ScreenObserver:
         Capture screenshot in memory.
         Returns PNG bytes, or None on failure.
 
-        IMPORTANT: Never writes to disk. Uses Playwright for browser screenshots,
-        or Desktop Commander for native app screenshots.
+        IMPORTANT: Never writes to disk. Uses PIL ImageGrab for local displays,
+        or Playwright for headless/server environments (ISSUE-003).
+
+        Capture strategy (tried in order):
+        1. PIL ImageGrab — fast, works on local desktop (macOS, Windows, Linux with display)
+        2. Playwright headless Chromium — works on headless servers, cloud deployments,
+           and any environment where a display is not available
+        Falls back to None with a clear error message if both fail.
+        """
+        # Strategy 1: PIL ImageGrab (local display)
+        pil_bytes = await self._capture_with_pil(region)
+        if pil_bytes is not None:
+            return pil_bytes
+
+        # Strategy 2: Playwright (headless, ISSUE-003 fix)
+        logger.info("PIL screenshot failed — trying Playwright headless capture")
+        playwright_bytes = await self._capture_with_playwright(region)
+        if playwright_bytes is not None:
+            return playwright_bytes
+
+        logger.error(
+            "All screenshot methods failed. "
+            "On a local desktop: install Pillow (pip install pillow). "
+            "On a headless server: install playwright and run 'playwright install chromium'."
+        )
+        return None
+
+    async def _capture_with_pil(self, region: tuple | None = None) -> bytes | None:
+        """Capture the full screen (or a region) using PIL ImageGrab.
+
+        Returns PNG bytes on success, or None if PIL is unavailable or the
+        display cannot be accessed (e.g. headless server environments).
         """
         try:
-            # Use PIL/pillow for full-screen capture
             import io
 
             from PIL import ImageGrab
@@ -141,10 +170,53 @@ class ScreenObserver:
             return await loop.run_in_executor(None, _grab)
 
         except ImportError:
-            logger.error("PIL not installed. Install with: pip install pillow")
+            logger.debug("PIL not installed — falling back to Playwright")
             return None
         except Exception as e:
-            logger.error(f"Screenshot failed: {e}", exc_info=True)
+            # Common on headless servers: "Xlib.error.DisplayNameError" or "scrot: command not found"
+            logger.debug(f"PIL screenshot unavailable: {e}")
+            return None
+
+    async def _capture_with_playwright(self, region: tuple | None = None) -> bytes | None:
+        """Capture a screenshot using Playwright headless Chromium.
+
+        Used as a fallback when PIL ImageGrab is unavailable (e.g. headless servers,
+        cloud deployments, CI environments). Opens a blank page and screenshots it —
+        primarily useful for server-side screenshot capabilities or when the user
+        has a browser open via Playwright already.
+
+        Returns PNG bytes on success, or None if Playwright is unavailable.
+        """
+        try:
+            from playwright.async_api import async_playwright
+
+            async with async_playwright() as pw:
+                browser = await pw.chromium.launch(headless=True)
+                try:
+                    page = await browser.new_page()
+                    # Navigate to blank to ensure browser is ready
+                    await page.goto("about:blank")
+
+                    # Apply region clipping if requested
+                    clip = None
+                    if region:
+                        x, y, w, h = region
+                        clip = {"x": x, "y": y, "width": w, "height": h}
+
+                    screenshot_bytes: bytes = await page.screenshot(
+                        full_page=False,
+                        clip=clip,
+                        type="png",
+                    )
+                    return screenshot_bytes
+                finally:
+                    await browser.close()
+
+        except ImportError:
+            logger.debug("Playwright not installed — no headless fallback available")
+            return None
+        except Exception as e:
+            logger.error(f"Playwright screenshot failed: {e}", exc_info=True)
             return None
 
     async def _describe_with_claude(self, screenshot_bytes: bytes) -> str:
