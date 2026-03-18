@@ -139,8 +139,18 @@ class TestFoodOrderingAccessibility:
         # In CI, expo-secure-store returns null → setup wizard shows first.
         found_action_button = False
         ALL_KNOWN_BUTTON_KEYWORDS = (
-            "speak", "record", "start", "assistant", "tap",  # main screen
-            "continue", "confirm", "token", "next", "setup", "welcome", "save",  # setup wizard
+            "speak",
+            "record",
+            "start",
+            "assistant",
+            "tap",  # main screen
+            "continue",
+            "confirm",
+            "token",
+            "next",
+            "setup",
+            "welcome",
+            "save",  # setup wizard
             "skip",  # skip link
         )
         for _ in range(10):
