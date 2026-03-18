@@ -256,21 +256,24 @@ No active blockers. Phase 4 COMPLETE as of Cycle 36.
 
 ## Last Cycle Summary
 
-Cycle 44 (Node.js 24 GitHub Actions migration).
+Cycle 46 (Node.js 24 full migration completion + pytest-timeout).
 
-(1) GITHUB ACTIONS MIGRATION: Bumped actions/checkout v4→v5, actions/setup-node v4→v5,
-and actions/upload-artifact v4→v5 across all 5 workflow files (ci.yml, autonomous-cycle.yml,
-deploy-staging.yml, e2e-android.yml, ios-e2e.yml). Resolves ISSUE-050 — prevents CI breakage
-after GitHub's June 2, 2026 Node.js 20 runner deprecation. Note: actions/setup-python was
-already at v5 (Node.js 24 internally). actions/github-script@v7 is current latest. YAML
-validated with python3 yaml.safe_load().
+(1) GITHUB ACTIONS FULL MIGRATION: Discovered that Cycle 44's Node.js 24 migration was
+incomplete — upload-artifact@v5 and setup-python@v5 were still on Node.js 20 (confirmed
+by CI annotations in Cycle 45 run). Bumped all 4 action families to their latest Node.js 24
+versions: checkout v5→v6, setup-node v5→v6, setup-python v5→v6, upload-artifact v5→v7
+across all 5 workflow files. CI deprecation warnings now fully eliminated.
 
-Total tests: 925 (unchanged — no src/ or test files modified this cycle).
+(2) PYTEST-TIMEOUT: Added pytest-timeout to ci.yml and autonomous-cycle.yml Install test
+dependencies steps; added `--timeout=30` to pyproject.toml pytest addopts. 818 unit tests
+all pass within 30s ceiling. ISSUE-052 resolved. GitHub issue #101 (stale CI failure from
+intermediate wip commit) closed.
 
-Cycle 45 priorities:
-1. **P3: Device simulation CI** — the only remaining stack item; start with Playwright
-   screenshot artifacts as CI output (lightweight, no emulator required); document what
-   AVD + ADB would verify for Android TalkBack testing
+Total tests: 818 Python unit tests (unchanged — no src/ or test files modified this cycle).
+
+Cycle 47 priorities:
+1. **P5: Education site deployment** — deploy clients/education/ to learn.blind-assistant.org
+   via GitHub Pages (fully automatable; requires no external secrets unlike Netlify)
 
 ## Known Issues / Technical Debt
 
