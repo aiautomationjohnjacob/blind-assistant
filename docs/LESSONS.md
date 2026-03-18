@@ -2122,3 +2122,115 @@ Pattern to prevent lint failures:
 5. Then make the typed commit
 
 Steps 2-4 must ALL run before step 5. Step 3 is what the wip() hook skips.
+
+## Cycle 41 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: This cycle did exactly the right thing: it closed three
+concrete gaps for real users (Jordan, NVDA users, contributors) rather than deferring
+them. The Jordan scenario tests are the mission in code form — they give Jordan a seat
+at the automated test table, not just in the user stories document. Every future change
+that touches food ordering, Second Brain, or braille formatting must now prove it still
+works for Jordan. That is what "built with the blind community" means in practice. The
+README additions for NVDA and braille display users address a real barrier: a newly-blind
+Windows user who finds this project could not previously set it up independently with NVDA.
+Now they have step-by-step instructions written in plain language.
+
+**Code quality (code-reviewer)**: (1) The _format_for_braille() fix is the most important
+change: the original implementation only split on sentence boundaries, which is insufficient
+for a 40-cell display. Long sentences (46+ chars) would have appeared unsplit on Jordan's
+display. The new word-wrap implementation correctly enforces the 40-char limit. (2) The
+word-boundary matching in assert_no_jargon() was necessary — without it, the word "port"
+would match "important" as a false positive, hiding real coverage of the disclosure text.
+(3) The two visual-only language fixes ("Taking a look at" → "Reading", "Before we look at"
+→ "Before I search for") are real accessibility improvements, caught by the new shared helpers.
+(4) Test count: 858 total (812 unit + 16 Jordan + 13 Dorothy + other e2e = 858). No
+decrease. 3 new files: helpers.py, test_jordan_scenario.py. Dorothy test refactored (not
+new) — imports and local stubs converted to shared helpers.
+
+**Security (security-specialist)**: No security implications this cycle. Test-only changes
+except for two non-security string fixes in orchestrator.py. One positive note: the
+assert_no_jargon() helper now uses word-boundary matching, which means false positives
+(like "port" in "important") no longer mask jargon that DOES appear. The jargon list
+in helpers.py now includes "daemon", "terminal", "config", "environment variable",
+"webhook", "localhost", "port" — a comprehensive list beyond what Dorothy tests had.
+
+**Accessibility (accessibility-reviewer)**: The Jordan tests are structurally correct.
+braille_mode=True is set on JORDAN_CONTEXT, which causes _format_for_braille() to run
+on every response. The tests verify: (1) lines ≤ 40 chars, (2) no emoji, (3) content
+preserved. The financial disclosure test is particularly important: it verifies that
+Jordan's text output stream receives the disclosure before consent, not just that the
+disclosure is "spoken." For a DeafBlind user who cannot hear spoken warnings, this is
+the difference between informed consent and no consent. The README additions for NVDA
+and braille display are written in plain language appropriate for the audiences — no
+technical jargon in the setup steps.
+
+**User perspective (blind-user-tester)**: Having Jordan's scenario tests in CI means that
+every code change must now prove it doesn't break the DeafBlind experience. That's the
+right commitment. The braille formatter fix is significant — the old version would have
+sent lines like "Your note has been saved to your Second Brain." (46 chars) to Jordan's
+display, requiring horizontal scrolling on every response. The 40-char word wrap is what
+good braille UI looks like. The NVDA README section reads naturally — it says "Press
+Control+Alt+N to start NVDA" not "Enable NVDA via system accessibility settings."
+
+**Ethics (ethics-advisor)**: Jordan's tests verify that the financial disclosure reaches
+her via text, not only audio. This is direct implementation of the principle that
+consent must be accessible to the user in their modality. A disclosure spoken aloud
+only would have been technically present but practically inaccessible to a DeafBlind
+user — rendering consent meaningless. The word-boundary jargon checker also protects
+informed consent by ensuring "port" in "important" doesn't mask the real check.
+
+**Goal adherence (goal-adherence-reviewer)**: All three items addressed (issues #93,
+#94, #95) were on the open issues list and directly traceable to user needs in
+USER_STORIES.md. Jordan's stories (2.3, 4.4, 8.3, 9.2) now have automated test
+coverage. The CONTRIBUTING.md had pointed contributors to issue #93 as a good-first-issue
+— this cycle resolved it substantively rather than waiting for a contributor. That's
+appropriate: a real user (Jordan) needed this, not just a contributor task.
+
+**Consensus recommendation for next cycle**: (1) Device simulation CI (Android AVD + 
+Playwright) is the last P3 item. Consider whether this is feasible in a single session.
+(2) If CI is green and no community PRs need review, the Telegram integration could be
+a substantial feature for power users — add a `--telegram` mode to main.py that starts
+both the API server and Telegram bot. (3) Consider adding Marcus (power user) scenario
+tests as the next persona gap.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) Created tests/accessibility/helpers.py with 4 shared assertion helpers
+  and word-boundary jargon matching; (2) Created tests/accessibility/test_jordan_scenario.py
+  with 16 Jordan tests covering all 4 major story areas; (3) Fixed _format_for_braille() to
+  actually enforce 40-char line limit (was only sentence-splitting); (4) Fixed 2 visual-only
+  language strings in orchestrator.py; (5) Added Windows NVDA + VoiceOver + braille display
+  README sections; (6) Expanded dorothy-e2e CI job to include Jordan tests; (7) Closed
+  GitHub issues #93, #94, #95
+- Attempted but failed: none
+- Confusion/loops: (1) Initial Jordan tests used wrong method names (_save_note_to_vault,
+  _query_vault) — same mistake as Cycle 38 Dorothy tests; fixed by reading orchestrator.py
+  before writing tests; (2) "port" false positive in jargon checker — needed word-boundary
+  regex; (3) "look at" in orchestrator discovered by new helpers — required src/ fix
+- New gaps: (1) Marcus (power user) scenario tests still missing — no automated coverage
+  for speed/verbosity/brief mode patterns; (2) web_app_available fixture duplicated in 3
+  web E2E files — DRY refactor opportunity; (3) assert_no_jargon() jargon list now in
+  helpers.py but test_dorothy_scenario.py also has a local FORBIDDEN_JARGON list — should
+  be removed/unified in next documentation pass
+- Next cycle recommendation: (1) Marcus scenario tests (add power-user persona coverage);
+  (2) Telegram integration feature (`--telegram` flag activates bot alongside API server);
+  (3) Remove duplicate FORBIDDEN_JARGON list from test_dorothy_scenario.py
+
+**TECHNICAL LESSON (always grep method names before writing patch.object)**:
+Same lesson as Cycle 38 applies again: before patching orchestrator methods in tests,
+always grep the actual file first:
+  grep -n "def _handle_\|def _save\|def _query" src/blind_assistant/core/orchestrator.py
+The orchestrator does NOT have: _save_note_to_vault, _query_vault, _handle_remember
+The orchestrator DOES have: _handle_add_note, _handle_query_note, _handle_general_question
+All three require an `update: Callable` as the 3rd parameter. Patching VaultQuery methods
+directly (blind_assistant.second_brain.query.VaultQuery.add_note_from_voice) is cleaner
+than patching the orchestrator private helper.
+
+**TECHNICAL LESSON (word-boundary matching in jargon checkers)**:
+A naive substring check (`word in text.lower()`) will produce false positives:
+- "port" matches "important", "report", "support", "transport"
+- "api" matches "rapid", "capable"
+- "http" matches "https" in URL contexts
+Use `re.search(r'\b' + re.escape(word) + r'\b', text.lower())` for accurate word-boundary
+matching. This is now in helpers.py assert_no_jargon(). The Dorothy test also benefits
+retroactively since it delegates to the shared helper.
+
