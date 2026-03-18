@@ -200,7 +200,9 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P3: Android TalkBack CI bug fix** — ci.yml e2e-android job was structurally unreachable (ci.yml triggers on branches only, job condition was `startsWith(github.ref, 'refs/tags/v')`); fixed by creating e2e-android.yml (Cycle 22)
 - [x] **P3: Voice Activity Detection (ISSUE-002)** — transcribe_microphone_with_vad() + _record_with_vad_sync(); webrtcvad-wheels added to requirements.txt; VoiceLocalInterface uses VAD by default; fallback to fixed-duration when webrtcvad unavailable; +12 new tests (Cycle 22)
 - [x] **P3: PIL/Playwright screenshot fallback (ISSUE-003)** — _capture_with_pil() + _capture_with_playwright() strategy; headless Chromium fallback for servers; FloatRect for mypy; +9 new tests (Cycle 22)
-- [ ] **P3: Android TalkBack CI result** — verify e2e-android.yml fires on next release tag; document pass/fail
+- [x] **P3: Android TalkBack CI result** — v0.3.1 run 23223429212 FAILED (backslash-continuation bug in `script:` field); fixed in Cycle 23; v0.3.2 tag pushed (Cycle 23)
+- [x] **P3: MCP memory server** — MCPMemoryClient + context.py integration; 33 new tests; 765 Python unit tests (Cycle 23)
+- [x] **P3: Education website scaffold** — clients/education/ React site; AudioPlayer; 39 Jest accessibility tests; test-education CI job (Cycle 23)
 
 ## Blockers
 

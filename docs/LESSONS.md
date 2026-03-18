@@ -1225,3 +1225,51 @@ jobs:
   e2e-android-talkback:
     # No `if:` needed — the workflow trigger handles it
 ```
+
+---
+
+## Cycle 23 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: Three P3 items from the top of the priority stack were addressed this cycle: Android TalkBack CI fixed (was failing with a backslash-continuation YAML bug), MCP memory server implemented (user preferences now persist across sessions), and education site scaffolded (fifth client platform now exists). The MCP memory server is the most mission-impactful item — elder users (Dorothy) and newly-blind users (Alex) will no longer need to reconfigure verbosity and speech rate every session. The education site (learn.blind-assistant.org) unblocks a key independence pathway: blind users can now learn the app without needing sighted assistance.
+
+**Code quality (code-reviewer)**: mcp_memory.py: 33 tests, mypy clean, ruff clean, assert narrowing pattern correct for the private _*_mcp methods. Context.py properly delegates to MCPMemoryClient with TYPE_CHECKING guard for the circular import. Education site: 39 Jest accessibility tests verify WCAG properties at the component level. Test count increased 732 → 765 (+33 Python). No new src/ files without tests. No test count decrease.
+
+**Security (security-specialist)**: MCPMemoryClient stores user preferences (voice speed, verbosity, braille mode, timezone, common tasks, user name). PREF_USER_NAME could store PII — this is user-controlled and appropriate. Local fallback dict is in-memory only (no disk writes). MCP observations are JSON-encoded strings with controlled serialization/deserialization — no injection risk. No new security concerns.
+
+**Accessibility (accessibility-reviewer)**: Education site meets all required WCAG 2.1 AA properties: skip link first in DOM; h1 focus on route change; native `<audio>` for built-in screen reader keyboard controls; transcript shown by default (WCAG 1.2.1); progress bars always text+visual (never colour alone); all interactive labels unambiguous in list mode; 44×44px minimum touch targets in CSS. MCP memory persistence means speech rate and verbosity survive session restarts — reduces cognitive burden on elderly users.
+
+**User perspective (blind-user-tester)**: Persistent preferences are a daily-use improvement. Not having to say "slow down" every session is significant for elder users. The education site finally gives a voice-navigable way to learn the app — previously there was no audio-primary onboarding resource. The AudioPlayer with transcript-by-default is correct design — I can read the transcript in braille if audio isn't convenient.
+
+**Ethics (ethics-advisor)**: MCPMemoryClient's `clear_user_data()` requires explicit caller-level confirmation before invocation — appropriate. PREF_USER_NAME is optional and user-controlled. No autonomy concerns.
+
+**Goal adherence (goal-adherence-reviewer)**: All three top-of-stack P3 items addressed. Android CI failure diagnosed and fixed (was backslash-continuation bug in YAML). v0.3.2 tag pushed to trigger re-run. Education site scaffold matches architecture spec: pure React, clients/education/, WCAG 2.1 AA, audio-primary, zero-mouse. MCP memory matches INTEGRATION_MAP.md §2.2 spec.
+
+**Consensus recommendation for next cycle**: (1) Verify Android TalkBack CI on v0.3.2 tag — expect 6-8 PASSED (same pattern as iOS). (2) Wire MCPMemoryClient into api_server.py startup so user preferences are persisted via /profile endpoint. (3) Add npm install (generate package-lock.json) to education site so test-education CI job can run.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) v0.3.1 tag pushed (triggered Android CI — found backslash bug); (2) mcp_memory.py implemented (MCPMemoryClient with MCP + local fallback, 33 tests); (3) context.py updated to use MCPMemoryClient (TODO on line 49 resolved); (4) clients/education/ scaffolded (App.tsx, SiteHeader, SiteFooter, AudioPlayer, CourseCard, HomePage, CoursePage, LessonPage, NotFoundPage, global.css, 39 Jest tests); (5) test-education CI job added to ci.yml; (6) Android CI backslash-continuation bug fixed in e2e-android.yml; (7) v0.3.2 tag pushed to verify fix; (8) 765 Python unit tests (+33); ruff clean; mypy 0 errors
+- Attempted but failed: none — all planned items completed
+- Confusion/loops: Android CI failure was a YAML script field quirk — android-emulator-runner's `script:` does not support bash backslash line continuation. Single-line pytest command is the fix.
+- New gaps: (1) education site has no package-lock.json yet — test-education CI job uses `npm install` not `npm ci` (correct); (2) MCPMemoryClient not yet wired into api_server.py startup; (3) PREF_USER_NAME PII handling not documented
+- Next cycle recommendation: (1) Verify Android TalkBack CI v0.3.2 result; (2) Wire MCPMemoryClient into api_server.py /profile endpoint; (3) Generate education package-lock.json for reproducible CI installs
+
+**TECHNICAL LESSON (android-emulator-runner YAML script field)**:
+The `reactivecircus/android-emulator-runner@v2` action's `script:` field is a
+single-line shell command, not a full bash heredoc. Backslash-newline continuation
+does NOT work — the literal backslash is passed as a path argument to the next command.
+
+```yaml
+# WRONG — backslash-continuation fails silently
+script: |
+  pytest tests/path/ \
+    -m "android" \
+    -v
+# Pytest receives 'tests/path/' '\' '-m' 'android' '\' '-v' as separate args.
+# The backslash becomes a literal path — 'file or directory not found: \'
+
+# CORRECT — single line
+script: pytest tests/path/ -m "android" -v --tb=short 2>&1 | tee test.log
+```
+
+This also affects any other GitHub Action that takes a `script:` field and runs
+it via a subprocess launcher rather than through a full bash shell with `set -e`.
