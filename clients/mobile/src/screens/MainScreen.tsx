@@ -505,4 +505,17 @@ const styles = StyleSheet.create({
     color: COLORS.primaryText,
     lineHeight: 24,
   },
+  hiddenLiveRegion: {
+    // Visually hide the live region container when there is no content.
+    // We use opacity=0 (not display:none or height:0) to keep the element
+    // in the DOM and the accessibility tree so screen readers register the
+    // aria-live region BEFORE content is injected (WCAG 4.1.3 requirement).
+    // opacity=0 keeps the node in the layout flow but invisible.
+    opacity: 0,
+    // Collapse height so it does not take up visual space when empty.
+    // This is a UX choice only — the a11y tree still sees the node.
+    maxHeight: 0,
+    overflow: "hidden",
+    padding: 0,
+  },
 });
