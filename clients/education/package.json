@@ -53,5 +53,8 @@
       "react-app",
       "react-app/jest"
     ]
+  },
+  "overrides": {
+    "ajv": "^8.17.1"
   }
 }
