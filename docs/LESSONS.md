@@ -1441,3 +1441,58 @@ client.delete("/profile/preferences", json={"confirm": True}, headers=headers)
 # CORRECT — request() accepts json= for any HTTP method
 client.request("DELETE", "/profile/preferences", json={"confirm": True}, headers=headers)
 ```
+
+---
+
+## Cycle 27 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: Three concretely useful deliverables: CI repair (removed a lint blocker from Cycles 25-26), security documentation (closes the VALID_EXTRA_PREFS threat model gap), and voice clear preferences (genuine user autonomy — a blind user can say "clear my settings" and get their MCP data erased via spoken confirmation, without a REST client). These advance independence.
+
+**Code quality (code-reviewer)**: CI fix is clean — contextlib.suppress() merged into with blocks is idiomatic Python. `_handle_clear_preferences` follows the existing ConfirmationGate pattern from food ordering. `Response.action` is a clean signal mechanism. `_clear_preferences_for_user` mirrors `_delete_preferences` with correct graceful degradation. 812 unit tests (+14 from Cycle 26). No regressions. ruff clean; mypy 0 errors.
+
+**Security (security-specialist)**: Orchestrator-triggered preference clearing uses ConfirmationGate (spoken user confirmation) before setting the action flag — correct ordering. SECURITY_MODEL.md §10 accurately documents the VALID_EXTRA_PREFS disclosure as intentional and auth-gated. No new security concerns.
+
+**Accessibility (accessibility-reviewer)**: Voice trigger for clearing preferences is accessible by design — voice command, not visual element. WARNING_TEXT is spoken aloud via ConfirmationGate before any data changes. WCAG audit of education site and mobile app found no CRITICAL violations: `sr-only` CSS correctly defined in global.css, skip link in index.html, aria-live regions correct. One LOW finding: `accessibilityRole="text"` on Views in MainScreen maps to non-standard `role="text"` on web export — deferred to Phase 4 Playwright testing.
+
+**User perspective (blind-user-tester)**: Being able to say "clear my preferences" and hear a warning before settings are erased is exactly right. The ConfirmationGate warning mentioning "this cannot be undone" is appropriate. CI health restored.
+
+**Ethics (ethics-advisor)**: ConfirmationGate before preference clearing is implemented correctly. "This cannot be undone" warning is present and accurate. No new ethics concerns.
+
+**Goal adherence (goal-adherence-reviewer)**: All Cycle 27 priority items addressed: P0 CI fix, P4 SECURITY_MODEL VALID_EXTRA_PREFS documentation, P3 voice clear preferences. No scope drift. Phase 3 criteria nearly complete.
+
+**Consensus recommendation for next cycle**: (1) Formally transition to Phase 4 — update CYCLE_STATE.md; (2) Run Playwright WCAG accessibility audit on Expo web build via device-simulator; (3) Investigate `accessibilityRole="text"` on web export (react-native-web mapping).
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) P0 CI fix — test_main.py ruff violations (I001, SIM105/SIM117/S110) repaired with contextlib.suppress(); (2) P4 SECURITY_MODEL §10 added — VALID_EXTRA_PREFS documented as intentional disclosure; (3) P3 voice clear preferences — `clear_preferences` intent + orchestrator handler + APIServer dispatch + `Response.action` field; (4) 14 new tests: 6 orchestrator, 5 APIServer, 3 planner; 812 unit tests total; (5) WCAG code audit: no CRITICAL findings
+- Attempted but failed: none — all planned items completed
+- Confusion/loops: none — clean execution
+- New gaps: (1) `accessibilityRole="text"` on Views in MainScreen maps to non-ARIA `role="text"` on Expo web export — should be verified with Playwright in Phase 4; (2) E2E test for voice-clear-preferences full flow (needs running API server with MCP); (3) Phase 3 → Phase 4 formal transition needed
+- Next cycle recommendation: (1) Transition CYCLE_STATE.md to Phase 4; (2) Run Playwright WCAG audit on Expo web build; (3) Fix `role="text"` issue on MainScreen web export
+
+**TECHNICAL LESSON (ruff SIM117 — combining context managers)**:
+When ruff reports SIM117 on nested `with` statements, the fix is to combine them into
+a single `with` statement with multiple context managers. This includes combining
+`contextlib.suppress()` into the main `with` block rather than nesting it:
+
+```python
+# WRONG — SIM117 violation
+with some_patch():
+    with contextlib.suppress(SomeError):
+        do_something()
+
+# CORRECT — single with, contextlib.suppress as the last context manager
+with some_patch(), contextlib.suppress(SomeError):
+    do_something()
+
+# Also correct for multi-line with (parenthesized form)
+with (
+    some_patch(),
+    another_patch(),
+    contextlib.suppress(SomeError),
+):
+    do_something()
+```
+
+Note: `contextlib.suppress()` applied at this level will also suppress exceptions from
+the patch context managers. In test code this is acceptable since the test assertions
+come after the `with` block completes.
