@@ -89,13 +89,7 @@ jobs:
           profile: pixel_6
           # AVD name must match what tests/e2e/platforms/android/conftest.py expects
           avd-name: blind_assistant_test
-          script: |
-            # Run all TalkBack E2E tests
-            pytest tests/e2e/platforms/android/ \
-              -m "android" \
-              -v \
-              --tb=short \
-              2>&1 | tee android-talkback.log
+          script: pytest tests/e2e/platforms/android/ -m "android" -v --tb=short 2>&1 | tee android-talkback.log
 
       - name: Stop backend
         if: always() && steps.check_tests.outputs.exists == 'true'
