@@ -333,7 +333,11 @@ class TestWCAGAxeAudit:
         assert len(naming_violations) == 0, (
             f"PHASE 4 GATE FAILED: Interactive element(s) have no accessible name.\n"
             f"Screen readers cannot identify these elements. NVDA reads them as 'button'.\n"
-            f"Violations: {json.dumps([{'id': v.get('id'), 'nodes': len(v.get('nodes',[]))} for v in naming_violations], indent=2)}"
+            "Violations: "
+            + json.dumps(
+                [{"id": v.get("id"), "nodes": len(v.get("nodes", []))} for v in naming_violations],
+                indent=2,
+            )
         )
 
     async def test_no_invalid_aria_roles(
