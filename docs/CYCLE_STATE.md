@@ -256,26 +256,33 @@ No active blockers. Phase 4 COMPLETE as of Cycle 36.
 
 ## Last Cycle Summary
 
-Cycle 39 (Phase 5: Community Launch Prep — CONTRIBUTING.md + good-first-issues).
+Cycle 41 (Accessibility hardening — Jordan DeafBlind persona + shared helpers + README).
 
-(1) COMMUNITY LAUNCH PREP: CONTRIBUTING.md comprehensively updated. Added: explicit blind
-contributor welcome section at top, braille display user callout (the underrepresented persona
-with fewest testers), Dorothy persona explanation (who is she, why does she matter), JavaScript/
-React Native test instructions (npm ci && npm test), good-first-issue guide with concrete
-examples by type, commit message format with a real example from the project. Five GitHub issues
-created (#92-#96) as good-first-issues covering: WebKit E2E tests, deafblind user stories,
-food ordering accessibility assertion, Windows NVDA README improvements, Dorothy E2E CI job.
+(1) JORDAN SCENARIO TESTS: 16 tests in tests/accessibility/test_jordan_scenario.py covering
+the DeafBlind persona (braille display user). Tests verify: braille word-wrap at 40 chars,
+emoji stripping, Second Brain text-only mode, financial disclosure readable via braille,
+food ordering disclosure surfaced as text (not audio-only). All 16 pass. GitHub issue #93 CLOSED.
 
-(2) CHANGELOG.md updated: v0.5.0 entry created for Phase 5 with all Cycles 37-39 additions
-and the Cycle 38 jargon fix documented.
+(2) SHARED ACCESSIBILITY HELPERS: tests/accessibility/helpers.py created with 4 shared
+assertion functions: assert_no_jargon() (word-boundary matching), assert_no_visual_only_language(),
+assert_braille_friendly() (40-char enforcement), assert_financial_disclosure_present().
+test_dorothy_scenario.py refactored to use shared helpers. GitHub issue #94 CLOSED.
 
-(3) PHASE 5 COMPLETE: All Phase 5 criteria met — Dorothy scenario test passes (Cycle 38) AND
-GRANT_NARRATIVE.md exists (Cycle 37) AND community launch prep done (Cycle 39).
+(3) BRAILLE FORMATTER FIX: _format_for_braille() in orchestrator.py was only splitting on
+sentence boundaries, leaving 46+ char lines. Now word-wraps at 40 chars. Real accessibility fix.
 
-Cycle 40 priority (post-Phase 5 — maintenance and community):
-1. **P3: VoiceOver+Safari CI** — WebKit E2E tests (now also GitHub issue #92)
-2. **P3: Dorothy E2E in CI** — dorothy-e2e CI job (now also GitHub issue #96)
-3. **P3: Telegram integration** — secondary/super-user channel (voice-guided setup for power users)
+(4) VISUAL-ONLY LANGUAGE FIX: "Taking a look at your screen" → "Reading your screen now";
+"Before we look at ordering options" → "Before I search for ordering options". Found by new helpers.
+
+(5) WINDOWS/NVDA/BRAILLE README: Added step-by-step NVDA setup, VoiceOver on macOS setup,
+and braille display usage guide to README.md. GitHub issue #95 CLOSED.
+
+(6) CI: dorothy-e2e CI job expanded to include Jordan/accessibility tests (29 tests total).
+
+Cycle 42 priorities:
+1. **P3: Telegram integration** — add `--telegram` flag to main.py; Telegram + API server concurrent
+2. **P3: Marcus scenario tests** — power-user persona still has no E2E coverage
+3. **P3: Device simulation CI** — Android AVD + Playwright (complex infrastructure)
 
 ## Known Issues / Technical Debt
 
