@@ -81,17 +81,26 @@ VISUAL_ONLY_PHRASES: list[str] = [
 def assert_no_jargon(text: str, persona: str = "user") -> None:
     """Assert that a spoken or text response contains no technical jargon.
 
+    Uses word-boundary matching so that 'port' does not match 'important',
+    'http' does not match 'https' in a URL context, etc.
+
     Fails with a descriptive message naming the jargon word and the persona
     affected, so contributors can fix the right string in src/.
     """
+    import re
+
     text_lower = text.lower()
     for word in FORBIDDEN_JARGON:
-        assert word not in text_lower, (
-            f"{persona} accessibility FAILED: Response contains jargon '{word}' "
-            f"which would confuse a newly-blind or elderly user.\n"
-            f"Response was: {text!r}\n"
-            f"Fix: remove or replace this term in the src/ file that generates this response."
-        )
+        # Use word boundary (\b) to avoid false positives like
+        # "port" matching "important", "api" matching "rapid", etc.
+        pattern = r"\b" + re.escape(word) + r"\b"
+        if re.search(pattern, text_lower):
+            raise AssertionError(
+                f"{persona} accessibility FAILED: Response contains jargon '{word}' "
+                f"which would confuse a newly-blind or elderly user.\n"
+                f"Response was: {text!r}\n"
+                f"Fix: remove or replace this term in the src/ file that generates this response."
+            )
 
 
 def assert_no_visual_only_language(text: str, persona: str = "user") -> None:
