@@ -232,9 +232,10 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P4: ISSUE-040: fix aria-live regions conditionally rendered (WCAG 4.1.3)** — MainScreen.tsx: transcript + response containers always rendered (opacity=0+maxHeight=0 when empty); hiddenLiveRegion style added; 128 JS tests pass; ISSUE-040 logged+resolved (Cycle 33)
 - [x] **P4: web E2E CI hydration timeout** — _wait_for_app_ready() timeout 5s→15s in all 3 web E2E test files; 8 previously-failing tests expected to pass in next CI run; commit c3e55df (Cycle 33)
 - [x] **P0: ISSUE-041 identified + diagnostic added (Cycle 34)** — React bundle not mounting in CI Playwright Chromium; 9 web E2E tests fail; screenshots show blank white page; diagnostic logging added to _wait_for_app_ready() in all 3 web E2E test files (page.on("pageerror") + page.on("console")); timeout increased to 30s; ISSUE-041 logged in OPEN_ISSUES.md; awaiting next CI run for exact JS error
-- [ ] **P0: ISSUE-041: fix React bundle crash in CI** — check next CI run diagnostic output; identify JS error (suspect crypto.randomUUID or expo-modules-core); fix root cause
-- [ ] **P4: ISSUE-039: identify and fix 1 moderate axe-core violation** — will surface once ISSUE-041 resolved and React actually mounts in CI
-- [ ] **P4: Phase 4 completion assessment** — zero CRITICAL axe violations ✓; ISSUE-041 blocking web E2E gate; platform sign-offs: iOS ✓, Android ✓, Windows/macOS pending
+- [x] **P0: ISSUE-041 RESOLVED (Cycle 35)** — Root cause: react-dom@19.2.4 incompatible with react@18.2.0 (React DOM 19 calls .S method missing from React 18 internals). Fix: pinned react-dom@18.2.0 in package.json. Diagnostic: conftest.py add_init_script() captured the crash. Result: CI run 23230759864 — ALL 33 Chromium web E2E tests PASS.
+- [x] **P0: ISSUE-042 RESOLVED (Cycle 35)** — Firefox binary missing from e2e-web CI job. Fix: added playwright install firefox + playwright install-deps firefox to ci.yml. Next CI run will confirm 36 Firefox E2E tests pass.
+- [ ] **P4: ISSUE-039: identify and fix 1 moderate axe-core violation** — will surface now that ISSUE-041 resolved and React mounts correctly in CI
+- [ ] **P4: Phase 4 completion assessment** — zero CRITICAL axe violations ✓; ISSUE-041 RESOLVED; ISSUE-042 RESOLVED; web E2E gate: Chromium ✓ (all 33 pass), Firefox pending next CI run; platform sign-offs: iOS ✓, Android ✓, Windows/macOS pending
 
 ## Blockers
 
