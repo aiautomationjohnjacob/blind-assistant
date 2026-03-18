@@ -354,6 +354,18 @@ jobs:
             --screenshot on \
             -v 2>&1 | tee e2e-web-firefox.log
 
+      - name: Run web E2E accessibility tests (WebKit — VoiceOver+Safari)
+        # WebKit = Safari engine; this is the VoiceOver+Safari accessibility test suite.
+        # Addresses issue #92: add WebKit E2E tests for VoiceOver+Safari users.
+        # Uses continue-on-error: false so failures gate the CI job.
+        # set -o pipefail: pytest exit code propagates through | tee (was silently swallowed)
+        run: |
+          set -o pipefail
+          pytest tests/e2e/platforms/web/ \
+            --browser webkit \
+            --screenshot on \
+            -v 2>&1 | tee e2e-web-webkit.log
+
       - name: Stop web server
         if: always()
         run: kill $WEB_SERVER_PID 2>/dev/null || true
