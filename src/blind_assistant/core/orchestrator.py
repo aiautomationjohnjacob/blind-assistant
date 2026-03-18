@@ -1010,7 +1010,10 @@ class Orchestrator:
         if context.verbosity == "brief":
             text = self._trim_preamble(text)
 
-        return Response(text=text)
+        # Pass through any server-side action signalled by the handler.
+        # The APIServer inspects this field after routing and executes the action
+        # (e.g. "clear_preferences" → MCPMemoryClient.clear_user_data()).
+        return Response(text=text, action=result.get("action"))
 
     def _format_for_braille(self, text: str) -> str:
         """
