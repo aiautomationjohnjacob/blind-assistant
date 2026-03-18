@@ -256,27 +256,26 @@ No active blockers. Phase 4 COMPLETE as of Cycle 36.
 
 ## Last Cycle Summary
 
-Cycle 37 (Phase 5: Polish & Community Ready — language simplification + grant narrative).
+Cycle 39 (Phase 5: Community Launch Prep — CONTRIBUTING.md + good-first-issues).
 
-(1) DOROTHY TEST — LANGUAGE SIMPLIFICATION: All technical jargon removed from SetupWizardScreen
-and installer/install.py. "API token" → "connection code", "backend server" → "your computer",
-"passphrase" → "secret phrase". Welcome screen now mentions "ask to repeat" affordance. Error
-messages give actionable guidance. 6 new Dorothy test assertions; 134 JS tests pass.
+(1) COMMUNITY LAUNCH PREP: CONTRIBUTING.md comprehensively updated. Added: explicit blind
+contributor welcome section at top, braille display user callout (the underrepresented persona
+with fewest testers), Dorothy persona explanation (who is she, why does she matter), JavaScript/
+React Native test instructions (npm ci && npm test), good-first-issue guide with concrete
+examples by type, commit message format with a real example from the project. Five GitHub issues
+created (#92-#96) as good-first-issues covering: WebKit E2E tests, deafblind user stories,
+food ordering accessibility assertion, Windows NVDA README improvements, Dorothy E2E CI job.
 
-(2) GRANT_NARRATIVE.md created: full grant application document satisfying Phase 5 completion
-criterion. Covers problem (7M blind Americans), solution, impact metrics, 3 fundable milestones
-(Dorothy test, community launch, impact study), budget narrative, sustainability plan.
+(2) CHANGELOG.md updated: v0.5.0 entry created for Phase 5 with all Cycles 37-39 additions
+and the Cycle 38 jargon fix documented.
 
-(3) ROADMAP.md + CHANGELOG.md updated: Phase 3 ✅, Phase 4 ✅ (all deliverables), Phase 5 🔄.
-Test count table added. CHANGELOG Phase 5 section added; Phase 4 reclassified as [v0.4.0].
+(3) PHASE 5 COMPLETE: All Phase 5 criteria met — Dorothy scenario test passes (Cycle 38) AND
+GRANT_NARRATIVE.md exists (Cycle 37) AND community launch prep done (Cycle 39).
 
-(4) ONE MISSED JARGON STRING (identified in review): handleConfirmToken validation says
-"API tokens are usually at least 32 characters" — should say "connection codes". Fix in Cycle 38.
-
-Cycle 38 priority (Phase 5):
-1. **P5: Fix missed jargon** — handleConfirmToken validation "API tokens" → "connection codes" + test
-2. **P5: Full Dorothy scenario test** — complete flows (setup → food ordering → Second Brain note)
-3. **P5: Community launch prep** — CONTRIBUTING.md for blind contributors
+Cycle 40 priority (post-Phase 5 — maintenance and community):
+1. **P3: VoiceOver+Safari CI** — WebKit E2E tests (now also GitHub issue #92)
+2. **P3: Dorothy E2E in CI** — dorothy-e2e CI job (now also GitHub issue #96)
+3. **P3: Telegram integration** — secondary/super-user channel (voice-guided setup for power users)
 
 ## Known Issues / Technical Debt
 
