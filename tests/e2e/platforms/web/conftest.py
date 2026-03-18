@@ -20,7 +20,22 @@ happen before the listener is attached.
 
 from __future__ import annotations
 
+import http.client
+import os
+
 import pytest
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Shared web E2E constants
+#
+# These are used by all web E2E test files and by conftest fixtures.
+# Centralised here so the 4 test files don't each define their own copy.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# The URL where the Expo web bundle is served.
+# Overridable via WEB_APP_URL env var — used by deploy-staging.yml to test
+# against the real Netlify staging deploy instead of localhost.
+WEB_APP_URL: str = os.environ.get("WEB_APP_URL", "http://localhost:19006")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Detect whether pytest-playwright is available
