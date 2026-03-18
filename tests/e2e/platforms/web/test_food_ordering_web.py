@@ -23,25 +23,29 @@ pytest-playwright is not installed or the web server is not running.
 
 Per testing.md: E2E tests for Phase 3 "blind user testing" scenarios.
 Per CLAUDE.md accessibility rules: WCAG 2.1 AA on web is non-negotiable.
+
+SYNC API NOTE:
+  These tests use the pytest-playwright sync Page fixture (playwright.sync_api.Page).
+  The sync API is the correct pattern for pytest-playwright — it avoids event loop
+  conflicts with pytest-asyncio's asyncio_mode="auto". Never use async def here.
 """
 
 from __future__ import annotations
 
+import http.client
 import os
-from typing import TYPE_CHECKING
 
 import pytest
 
-if TYPE_CHECKING:
-    from playwright.async_api import Page
-
-# Skip gracefully if pytest-playwright is not installed
+# Use sync API — pytest-playwright's 'page' fixture is synchronous.
+# Using async def with the sync page fixture causes RuntimeError (event loop conflict).
 try:
-    import pytest_playwright as _  # noqa: F401
+    from playwright.sync_api import Page
 
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
+    Page = object  # type: ignore[assignment,misc]  # placeholder for type hints
 
 # Overridable via env var (used by deploy-staging.yml for Netlify staging tests)
 WEB_APP_URL = os.environ.get("WEB_APP_URL", "http://localhost:19006")
@@ -57,8 +61,6 @@ pytestmark = pytest.mark.web
 @pytest.fixture(scope="session")
 def web_app_available() -> bool:
     """Check if the web app server is running before any tests execute."""
-    import http.client
-
     try:
         conn = http.client.HTTPConnection("localhost", 19006, timeout=3)
         conn.request("GET", "/")
@@ -97,7 +99,7 @@ class TestFoodOrderingAccessibility:
     not the actual ordering logic (that is tested in tests/e2e/core/test_food_ordering.py).
     """
 
-    async def test_main_interaction_button_is_keyboard_reachable(self, page: Page, web_app_available: bool) -> None:
+    def test_main_interaction_button_is_keyboard_reachable(self, page: Page, web_app_available: bool) -> None:
         """
         The main press-to-talk button must be reachable via Tab key.
 
@@ -105,14 +107,14 @@ class TestFoodOrderingAccessibility:
         they cannot start the food ordering flow. WCAG 2.1 SC 2.1.1 (Keyboard).
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
         # Tab through all focusable elements and look for the main action button
         found_action_button = False
         for _ in range(10):
-            await page.keyboard.press("Tab")
-            focused_label = await page.evaluate(
+            page.keyboard.press("Tab")
+            focused_label = page.evaluate(
                 "document.activeElement.getAttribute('aria-label') || document.activeElement.textContent"
             )
             if focused_label:
@@ -127,7 +129,7 @@ class TestFoodOrderingAccessibility:
             "A blind NVDA user cannot start the food ordering flow."
         )
 
-    async def test_status_updates_use_polite_live_region(self, page: Page, web_app_available: bool) -> None:
+    def test_status_updates_use_polite_live_region(self, page: Page, web_app_available: bool) -> None:
         """
         The status/response area must use aria-live='polite'.
 
@@ -138,18 +140,18 @@ class TestFoodOrderingAccessibility:
         WCAG 2.1 SC 4.1.3 (Status Messages).
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
         # Count polite live regions — there must be at least one for status updates
-        polite_regions = await page.query_selector_all('[aria-live="polite"]')
+        polite_regions = page.query_selector_all('[aria-live="polite"]')
         assert len(polite_regions) > 0, (
             "No aria-live='polite' regions found on the main screen. "
             "When the assistant responds during food ordering, NVDA cannot "
             "announce the restaurant options or confirmation prompts."
         )
 
-    async def test_no_assertive_live_region_for_status(self, page: Page, web_app_available: bool) -> None:
+    def test_no_assertive_live_region_for_status(self, page: Page, web_app_available: bool) -> None:
         """
         Non-critical status updates must NOT use aria-live='assertive'.
 
@@ -161,15 +163,15 @@ class TestFoodOrderingAccessibility:
         WCAG 2.1 SC 4.1.3 (Status Messages).
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
-        assertive_regions = await page.query_selector_all('[aria-live="assertive"]')
+        assertive_regions = page.query_selector_all('[aria-live="assertive"]')
         # assertive is acceptable for error messages, but check they're not the
         # main response region (which would interrupt constantly during ordering)
         for region in assertive_regions:
-            role = await region.get_attribute("role")
-            aria_label = await region.get_attribute("aria-label") or ""
+            role = region.get_attribute("role")
+            aria_label = region.get_attribute("aria-label") or ""
             # 'alert' role implies assertive — acceptable for errors
             # but NOT for the main response area
             if role != "alert":
@@ -178,7 +180,7 @@ class TestFoodOrderingAccessibility:
                     f"label='{aria_label}'). This would interrupt NVDA during food ordering."
                 )
 
-    async def test_confirmation_prompt_area_is_announced(self, page: Page, web_app_available: bool) -> None:
+    def test_confirmation_prompt_area_is_announced(self, page: Page, web_app_available: bool) -> None:
         """
         The response area (where confirmations appear) must be in a live region.
 
@@ -190,20 +192,20 @@ class TestFoodOrderingAccessibility:
         WCAG 2.1 SC 4.1.3 (Status Messages).
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
         # The response/status area should be accessible via a live region
         # Check that the page has at least one live region in the DOM from the start
         # (live regions must exist BEFORE content is injected — CLAUDE.md rule)
-        live_regions = await page.query_selector_all('[aria-live="polite"], [aria-live="assertive"], [aria-live="off"]')
+        live_regions = page.query_selector_all('[aria-live="polite"], [aria-live="assertive"], [aria-live="off"]')
         assert len(live_regions) > 0, (
             "No aria-live regions found in the page DOM. "
             "Per CLAUDE.md: 'aria-live regions must exist in DOM before content is injected'. "
             "The confirmation prompts for food ordering will not be announced by NVDA."
         )
 
-    async def test_response_area_visible_to_screen_reader(self, page: Page, web_app_available: bool) -> None:
+    def test_response_area_visible_to_screen_reader(self, page: Page, web_app_available: bool) -> None:
         """
         The response area must NOT be hidden from screen readers.
 
@@ -213,11 +215,11 @@ class TestFoodOrderingAccessibility:
         WCAG 2.1 SC 1.3.1 (Info and Relationships).
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
         # Check that no aria-live region is hidden from AT
-        hidden_live_regions = await page.evaluate(
+        hidden_live_regions = page.evaluate(
             """() => {
                 const regions = document.querySelectorAll(
                     '[aria-live="polite"], [aria-live="assertive"]'
@@ -261,7 +263,7 @@ class TestRiskDisclosureAccessibility:
     - The text contains no visual-only language
     """
 
-    async def test_interactive_elements_have_accessible_names(self, page: Page, web_app_available: bool) -> None:
+    def test_interactive_elements_have_accessible_names(self, page: Page, web_app_available: bool) -> None:
         """
         All interactive elements (buttons, inputs) must have accessible names.
 
@@ -271,15 +273,15 @@ class TestRiskDisclosureAccessibility:
         WCAG 2.1 SC 4.1.2 (Name, Role, Value).
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
         # All buttons must have an accessible name
-        buttons = await page.query_selector_all('[role="button"]')
+        buttons = page.query_selector_all('[role="button"]')
         unlabelled = []
         for button in buttons:
-            label = await button.get_attribute("aria-label")
-            text = (await button.text_content() or "").strip()
+            label = button.get_attribute("aria-label")
+            text = (button.text_content() or "").strip()
             if not (label and len(label.strip()) > 2) and not (text and len(text) > 2):
                 unlabelled.append({"label": label, "text": text})
 
@@ -288,7 +290,7 @@ class TestRiskDisclosureAccessibility:
             "A blind user cannot identify confirmation buttons during risk disclosure."
         )
 
-    async def test_no_visual_only_instructions_in_page(self, page: Page, web_app_available: bool) -> None:
+    def test_no_visual_only_instructions_in_page(self, page: Page, web_app_available: bool) -> None:
         """
         Page text must not contain visual-only instructions like "click the button"
         or "see the confirmation at the top of the screen".
@@ -300,10 +302,10 @@ class TestRiskDisclosureAccessibility:
         reviewed by voice-interface-designer.
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
-        page_text = (await page.evaluate("document.body.innerText") or "").lower()
+        page_text = (page.evaluate("document.body.innerText") or "").lower()
 
         # Phrases that require vision to follow — not acceptable in a blind-first app
         visual_only_phrases = [
@@ -321,7 +323,7 @@ class TestRiskDisclosureAccessibility:
             "Blind users cannot follow these. Use action-neutral language."
         )
 
-    async def test_colour_not_sole_conveyor_of_information(self, page: Page, web_app_available: bool) -> None:
+    def test_colour_not_sole_conveyor_of_information(self, page: Page, web_app_available: bool) -> None:
         """
         Verify that interactive state is not conveyed by colour alone.
 
@@ -333,11 +335,11 @@ class TestRiskDisclosureAccessibility:
         ensuring the information is available without seeing colour.
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
         # All buttons must have text or aria-label (not just colour)
-        colour_only_buttons = await page.evaluate(
+        colour_only_buttons = page.evaluate(
             """() => {
                 const buttons = document.querySelectorAll(
                     'button, [role="button"]'
@@ -375,7 +377,7 @@ class TestFocusManagementOrderingFlow:
     break the conversational experience.
     """
 
-    async def test_initial_focus_is_logical(self, page: Page, web_app_available: bool) -> None:
+    def test_initial_focus_is_logical(self, page: Page, web_app_available: bool) -> None:
         """
         When the page loads, the first focusable element should be at the top
         of the logical reading order — not a random button in the middle.
@@ -383,14 +385,14 @@ class TestFocusManagementOrderingFlow:
         WCAG 2.1 SC 1.3.2 (Meaningful Sequence) and SC 2.4.3 (Focus Order).
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
         # Press Tab once and check that we land on a meaningful element
-        await page.keyboard.press("Tab")
-        element_tag = await page.evaluate("document.activeElement.tagName.toLowerCase()")
-        aria_role = await page.evaluate("document.activeElement.getAttribute('role') || ''")
-        aria_label = await page.evaluate("document.activeElement.getAttribute('aria-label') || ''")
+        page.keyboard.press("Tab")
+        element_tag = page.evaluate("document.activeElement.tagName.toLowerCase()")
+        aria_role = page.evaluate("document.activeElement.getAttribute('role') || ''")
+        aria_label = page.evaluate("document.activeElement.getAttribute('aria-label') || ''")
 
         # First tab stop should be an interactive element (button, input, link)
         interactive_tags = {"button", "input", "a", "select", "textarea"}
@@ -402,7 +404,7 @@ class TestFocusManagementOrderingFlow:
             "a meaningful interactive element (the main speak button)."
         )
 
-    async def test_escape_key_does_not_trap_focus(self, page: Page, web_app_available: bool) -> None:
+    def test_escape_key_does_not_trap_focus(self, page: Page, web_app_available: bool) -> None:
         """
         Pressing Escape should not trap focus or crash the app.
 
@@ -412,15 +414,15 @@ class TestFocusManagementOrderingFlow:
         WCAG 2.1 SC 2.1.2 (No Keyboard Trap).
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
         # Press Tab to focus something, then Escape
-        await page.keyboard.press("Tab")
-        await page.keyboard.press("Escape")
+        page.keyboard.press("Tab")
+        page.keyboard.press("Escape")
 
         # Verify the page is still interactive (not crashed or blank)
-        focusable_count = await page.evaluate(
+        focusable_count = page.evaluate(
             """() => {
                 const sel = 'button, [role="button"], a[href], input, '
                           + '[tabindex]:not([tabindex="-1"])';
@@ -433,7 +435,7 @@ class TestFocusManagementOrderingFlow:
             "A blind user pressing Escape to cancel an action would be stranded."
         )
 
-    async def test_enter_key_activates_main_button(self, page: Page, web_app_available: bool) -> None:
+    def test_enter_key_activates_main_button(self, page: Page, web_app_available: bool) -> None:
         """
         Pressing Enter when the main button is focused must activate it.
 
@@ -443,25 +445,25 @@ class TestFocusManagementOrderingFlow:
         WCAG 2.1 SC 2.1.1 (Keyboard).
         """
         _skip_if_unavailable(web_app_available)
-        await page.goto(WEB_APP_URL)
-        await page.wait_for_load_state("networkidle")
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
 
         # Find the main button and focus it
-        main_button = await page.query_selector('[role="button"]')
+        main_button = page.query_selector('[role="button"]')
         if main_button is None:
             pytest.skip("No button found on main screen — skipping Enter key test")
 
-        await main_button.focus()
-        button_label_before = await main_button.get_attribute("aria-label") or ""
+        main_button.focus()
+        button_label_before = main_button.get_attribute("aria-label") or ""
 
         # Press Enter to activate
-        await page.keyboard.press("Enter")
+        page.keyboard.press("Enter")
         # Give the app a moment to respond
-        await page.wait_for_timeout(500)
+        page.wait_for_timeout(500)
 
         # Verify something changed — either the label, the live region content,
         # or the DOM structure (indicating the app responded to the keypress)
-        live_region_content = await page.evaluate(
+        live_region_content = page.evaluate(
             """() => {
                 const regions = document.querySelectorAll(
                     '[aria-live="polite"], [aria-live="assertive"]'
@@ -476,12 +478,12 @@ class TestFocusManagementOrderingFlow:
 
         # We accept either: (1) live region has content, (2) button label changed,
         # (3) new element appeared. The important thing is Enter didn't do nothing.
-        button_label_after = await main_button.get_attribute("aria-label") or ""
+        button_label_after = main_button.get_attribute("aria-label") or ""
         state_changed = len(live_region_content) > 0 or button_label_after != button_label_before
 
         # Note: if the app requires microphone permission in a dialog, the dialog
         # itself is a valid response to Enter. We check the page still has focus.
-        page_has_focus = await page.evaluate("document.activeElement && document.activeElement !== document.body")
+        page_has_focus = page.evaluate("document.activeElement && document.activeElement !== document.body")
 
         assert state_changed or page_has_focus, (
             "Pressing Enter on the main button had no visible effect. "
