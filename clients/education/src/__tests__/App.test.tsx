@@ -319,6 +319,96 @@ describe('App routing', () => {
 });
 
 // ─────────────────────────────────────────────────────────────
+// AUDIO PLAYER — extended coverage for playback controls
+// ─────────────────────────────────────────────────────────────
+
+describe('AudioPlayer — extended coverage', () => {
+  function renderPlayer(transcript?: string) {
+    return renderWithRouter(
+      <AudioPlayer src="/test.mp3" title="Test Lesson" transcript={transcript} />
+    );
+  }
+
+  it('renders the audio element with aria-label matching title', () => {
+    renderPlayer();
+    const audio = document.querySelector('audio');
+    expect(audio).toHaveAttribute('aria-label', 'Test Lesson');
+  });
+
+  it('Play button has aria-pressed=false initially', () => {
+    renderPlayer();
+    expect(screen.getByRole('button', { name: /play/i })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('Rewind button has correct aria-label', () => {
+    renderPlayer();
+    expect(screen.getByRole('button', { name: /rewind 10 seconds/i })).toBeInTheDocument();
+  });
+
+  it('Skip forward button has correct aria-label', () => {
+    renderPlayer();
+    expect(screen.getByRole('button', { name: /skip forward 10 seconds/i })).toBeInTheDocument();
+  });
+
+  it('playback controls are in a toolbar landmark', () => {
+    renderPlayer();
+    expect(screen.getByRole('toolbar', { name: /playback controls/i })).toBeInTheDocument();
+  });
+
+  it('has an aria-live status region', () => {
+    renderPlayer();
+    expect(screen.getByRole('status')).toBeInTheDocument();
+  });
+
+  it('progress bar has correct aria role and attributes', () => {
+    renderPlayer();
+    const bar = screen.getByRole('progressbar');
+    expect(bar).toHaveAttribute('aria-valuenow', '0');
+    expect(bar).toHaveAttribute('aria-valuemin', '0');
+    expect(bar).toHaveAttribute('aria-valuemax', '100');
+  });
+
+  it('transcript toggle button has aria-expanded=true initially', () => {
+    renderPlayer('Hello world transcript');
+    expect(screen.getByRole('button', { name: /hide transcript/i })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+  });
+
+  it('clicking transcript toggle hides transcript and updates aria-expanded', () => {
+    renderPlayer('Hello world transcript');
+    const btn = screen.getByRole('button', { name: /hide transcript/i });
+    fireEvent.click(btn);
+    expect(screen.getByRole('button', { name: /show transcript/i })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+  });
+
+  it('transcript controls reference lesson-transcript id via aria-controls', () => {
+    renderPlayer('Some text');
+    const btn = screen.getByRole('button', { name: /hide transcript/i });
+    expect(btn).toHaveAttribute('aria-controls', 'lesson-transcript');
+  });
+
+  it('renders transcript text when provided', () => {
+    renderPlayer('This is the lesson transcript.');
+    expect(screen.getByText(/this is the lesson transcript/i)).toBeInTheDocument();
+  });
+
+  it('does not render transcript toggle when no transcript prop is given', () => {
+    renderPlayer();
+    expect(screen.queryByRole('button', { name: /transcript/i })).not.toBeInTheDocument();
+  });
+
+  it('section element has aria-label identifying the audio player', () => {
+    renderPlayer();
+    expect(screen.getByRole('region', { name: /audio player: test lesson/i })).toBeInTheDocument();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
 // SITE HEADER — landmark and navigation
 // ─────────────────────────────────────────────────────────────
 
