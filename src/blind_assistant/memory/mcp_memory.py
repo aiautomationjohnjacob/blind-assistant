@@ -238,6 +238,7 @@ class MCPMemoryClient:
 
     async def _get_all_from_mcp(self, user_id: str) -> dict[str, Any]:
         """Retrieve all preferences for a user from the MCP memory graph."""
+        assert self._mcp is not None  # only called when self._available is True
         try:
             result = await self._mcp.call_tool(
                 "mcp__memory__open_nodes",
