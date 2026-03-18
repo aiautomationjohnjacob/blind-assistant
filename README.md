@@ -45,9 +45,9 @@ The assistant will speak to you and guide you through everything.
 
 ### What You Will Need for Setup
 
-1. A Telegram account (free at telegram.org)
-2. A Claude API key (free tier available at console.anthropic.com)
-3. A passphrase you can remember (for protecting your personal notes)
+1. A Claude API key (free tier available at console.anthropic.com)
+2. A passphrase you can remember (for protecting your personal notes)
+3. (Optional, power users) A Telegram account — for remote access only; not required for primary use
 
 The setup wizard will tell you how to get each of these.
 
