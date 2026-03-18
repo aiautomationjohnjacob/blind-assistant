@@ -285,6 +285,7 @@ class MCPMemoryClient:
 
     async def _clear_user_from_mcp(self, user_id: str) -> None:
         """Delete the entire user entity from the MCP memory graph."""
+        assert self._mcp is not None  # only called when self._available is True
         try:
             await self._mcp.call_tool(
                 "mcp__memory__delete_entities",
