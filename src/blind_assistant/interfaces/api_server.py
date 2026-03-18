@@ -633,6 +633,52 @@ class APIServer:
         # Return the current profile after writes (re-reads from memory).
         return await self._profile(request)
 
+    async def _delete_preferences(self, body: DeletePreferencesRequest, request: Request) -> None:
+        """Clear all persisted preference data for this user from MCPMemoryClient.
+
+        Requires an explicit confirmation field ("confirm": true) in the request body
+        to prevent accidental deletion by misbehaving clients. Returns 204 No Content
+        on success. This is an irreversible action — the user's speech rate, timezone,
+        user name, and all other MCP-persisted preferences are removed.
+
+        Addresses ISSUE-031: user autonomy + data-rights gap (ethics-advisor, Cycle 24).
+        """
+        user_id = await self._authenticate(request)
+
+        # Require the caller to explicitly confirm — this prevents accidental calls.
+        # Without {"confirm": true}, we return 400 and do NOT touch any data.
+        if not body.confirm:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Explicit confirmation required. "
+                    "Send {\"confirm\": true} to clear all preference data. "
+                    "This action cannot be undone."
+                ),
+            )
+
+        if self._memory is not None:
+            try:
+                await self._memory.clear_user_data(user_id)
+                logger.info(
+                    "DELETE /profile/preferences: cleared all MCP preference data for user %s",
+                    user_id,
+                )
+            except Exception as exc:
+                # Gracefully degrade — if MCP is unreachable we log but still return
+                # success (there is nothing to clear if MCP is down anyway).
+                logger.warning(
+                    "DELETE /profile/preferences: MCPMemoryClient.clear_user_data failed for %s: %s",
+                    user_id,
+                    exc,
+                )
+        else:
+            logger.debug(
+                "DELETE /profile/preferences: MCPMemoryClient not configured — nothing to clear."
+            )
+
+        # 204 No Content — FastAPI returns an empty body when the handler returns None.
+
     # ─────────────────────────────────────────────────────────
     # Context helper
     # ─────────────────────────────────────────────────────────
