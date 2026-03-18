@@ -304,13 +304,14 @@ Cycle 38 priority (Phase 5):
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 36.** Phase 4 (Accessibility Hardening) is COMPLETE. Phase 5 (Polish & Community Ready) has begun.
+**Loop completed Cycle 37.** Phase 5 (Polish & Community Ready) is IN PROGRESS.
 
-Key deliverables Cycle 36: ISSUE-039 resolved (0 axe violations confirmed); Phase 4 completion
-assessment done — all criteria met; Windows/macOS sign-off (ISSUE-043) documented; 6 stale GitHub
-CI issues closed (86-91); Phase 5 sprint items defined.
+Key deliverables Cycle 37: (1) Dorothy test language simplification — "API token" → "connection code"
+throughout SetupWizardScreen + installer; 6 new Dorothy test assertions; 134 JS tests pass.
+(2) GRANT_NARRATIVE.md created — full grant application document per Phase 5 completion criterion.
+(3) ROADMAP.md + CHANGELOG.md updated — Phase 3+4 marked COMPLETE; Phase 5 milestones defined.
 
-Most important for Cycle 37:
-1. **P5: Dorothy test** — newly-blind-user + blind-elder-user review setup wizard; identify simplicity gaps
-2. **P5: Simplicity audit** — voice strings, installer steps, and responses for non-technical user appropriateness
-3. **P5: ROADMAP.md update** — mark Phase 4 complete; add Phase 5 milestones
+Most important for Cycle 38:
+1. **P5: Fix missed jargon** — handleConfirmToken validation "API tokens are usually at least 32 characters" → "connection codes" + add test
+2. **P5: Full Dorothy scenario test** — complete flows (setup → food ordering → Second Brain note); find remaining gaps
+3. **P5: Community launch prep** — CONTRIBUTING.md for blind contributors; good-first-issues identified
