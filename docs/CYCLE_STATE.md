@@ -249,11 +249,11 @@ Cycle 24 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 22.** Phase 3 in progress. VAD (ISSUE-002) + Playwright fallback
-(ISSUE-003) implemented. e2e-android.yml CI workflow created. iOS VoiceOver CI verified (6 PASSED).
-732 unit tests. Ruff clean. mypy 0 errors.
+**Loop completed Cycle 23.** Phase 3 in progress. MCP memory server (mcp_memory.py) implemented.
+Education site (clients/education/) scaffolded with 39 Jest accessibility tests. Android TalkBack CI
+backslash-continuation bug fixed; v0.3.2 tag pushed to verify. 765 Python unit tests. Ruff clean. mypy 0 errors.
 
-The most important work for Cycle 23 (Phase 3: Blind User Testing):
-1. **P3: Verify Android TalkBack CI** — push v0.3.1 tag; confirm e2e-android.yml triggers and runs
-2. **P3: MCP memory server** — src/blind_assistant/memory/mcp_memory.py (context.py TODO line 49)
-3. **P3: Education website** — learn.blind-assistant.org scaffold (clients/education/)
+The most important work for Cycle 24 (Phase 3: Blind User Testing):
+1. **P3: Verify Android TalkBack CI v0.3.2** — confirm e2e-android.yml run passes; document in OPEN_ISSUES.md
+2. **P3: Wire MCPMemoryClient into api_server.py** — /profile endpoint persists preferences
+3. **P3: Education site package-lock.json** — run npm install in clients/education/ for reproducible CI
