@@ -2083,3 +2083,42 @@ Three specific changes made CONTRIBUTING.md more welcoming than typical open sou
 2. "Setup confusion is our bug, not your mistake" — removes shame from asking for help
 3. Braille display callout with "we are listening" — creates direct invitation for the
    user group with the least representation in open source accessibility testing
+
+## Cycle 40 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: Three CI improvements in one cycle: fixing the lint blocker, adding WebKit tests, and elevating Dorothy E2E to a dedicated CI gate. The Dorothy gate is mission-critical maintenance — it guarantees that every future code change must still let Dorothy order food, save notes, and get help without jargon, automatically on every push. The WebKit gate protects VoiceOver+Safari users — Apple is the dominant platform for blind Americans. This cycle did exactly what post-launch projects should do: close the gaps in automated protection, not ship new features prematurely.
+
+**Code quality (code-reviewer)**: (1) WebKit test file mirrors the structure of test_main_screen_chromium.py — consistent, readable. (2) The `web_app_available` fixture is now duplicated in three test files (chromium, webkit, food_ordering_web); a future refactor could extract it to conftest.py — not a bug, just technical debt to note. (3) Test count: 842 Python tests unchanged + 7 new WebKit tests (gracefully skip locally). No test count decrease. (4) Dorothy E2E is now a dedicated CI job — more visible in CI dashboard, easier to diagnose if it fails. (5) ci.yml YAML validated as syntactically correct.
+
+**Security (security-specialist)**: No security implications this cycle. CI configuration and test files only. One process note: the lint failure (ISSUE-046) was introduced because the wip() auto-commit captured test_dorothy_scenario.py before ruff format ran. The wip hook captures intermediate state, not final state. The lesson: always run `ruff format` manually before the typed commit, not just `ruff check`.
+
+**Accessibility (accessibility-reviewer)**: The 7 WebKit tests directly protect VoiceOver+Safari users: (1) aria-live region existence check prevents live region injection race (critical for VoiceOver); (2) no role='text' regression guard protects ISSUE-033 fix; (3) tabindex='-1' skip link target check (ISSUE-037 pattern, Safari-specific requirement); (4) lang attribute check (VoiceOver pronunciation engine). These are the right tests for the right browser.
+
+**User perspective (blind-user-tester)**: The Dorothy E2E CI gate matters most. It means when a contributor adds a new feature, the CI will catch if their change accidentally introduces jargon in error messages, or removes the financial risk disclosure from food ordering. That's real protection for users like Dorothy. The WebKit tests matter for VoiceOver on iPhone and Mac — the most common platform for blind users in my community.
+
+**Ethics (ethics-advisor)**: The Dorothy gate tests verify that error states give Dorothy a path forward (not a dead end). Automating this check on every CI run means no future change can silently remove this protection. This is the autonomy principle encoded in the CI pipeline.
+
+**Goal adherence (goal-adherence-reviewer)**: Both addressed items (WebKit E2E #92 and Dorothy CI #96) were in the Cycle 39 consensus recommendations — exactly what was asked for. The lint fix unblocked CI for contributors. No scope drift. The two remaining P3 items (device simulation CI, Telegram integration) are correctly deprioritized — they require more infrastructure than a CI configuration change.
+
+**Consensus recommendation for next cycle**: (1) Consider device simulation CI (AVD emulator + Playwright) — the last P3 CI gap. (2) If a community contributor submits a PR for any of the remaining good-first-issues (#93 deafblind user stories, #94 accessibility assertion, #95 Windows README), review and merge it. (3) If no CI failures, consider exploring the Telegram integration (long-deferred P3).
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) Fixed P0 lint failure (ruff format on test_dorothy_scenario.py); CI unblocked; issues #97/#98 closed; (2) Added WebKit (VoiceOver+Safari) to e2e-web CI job — install webkit + --browser webkit run; (3) Created test_main_screen_webkit.py with 7 VoiceOver+Safari-specific tests; (4) Added dedicated dorothy-e2e CI job; notify-failure updated; (5) Closed GitHub issues #92 and #96; (6) All state docs updated (CYCLE_STATE, PRIORITY_STACK, OPEN_ISSUES)
+- Attempted but failed: none
+- Confusion/loops: brief confusion — the wip() auto-hook had already committed most changes before I ran git add; only the ruff-reformatted version of test_main_screen_webkit.py needed a final commit
+- New gaps: (1) web_app_available fixture is now duplicated in 3 web E2E test files — a conftest.py extraction would DRY this up; (2) The CONTRIBUTING.md says "npm ci && npm test" for JS tests but doesn't mention Node.js version requirement; (3) No tests in tests/e2e/platforms/desktop/ yet — only stubs
+- Next cycle recommendation: (1) Device simulation CI (AVD emulator + Playwright) — last P3 CI gap; (2) Watch for community contributor PRs on good-first-issues; (3) If CI is green and community is quiet, explore Telegram integration as a P3 long-deferred feature
+
+**PROCESS LESSON (always run ruff format before the typed commit, not just ruff check)**:
+The wip() auto-hook commits intermediate state. It does NOT run ruff format.
+When you create a new file and the wip() hook captures it, the file may have
+formatting issues that ruff check misses but ruff format --check catches.
+
+Pattern to prevent lint failures:
+1. Create/edit files
+2. `python3 -m ruff check src/ tests/`   ← catches lint errors
+3. `python3 -m ruff format src/ tests/`  ← fixes formatting (does NOT just check)
+4. `python3 -m ruff format --check ...`  ← verifies format is now clean
+5. Then make the typed commit
+
+Steps 2-4 must ALL run before step 5. Step 3 is what the wip() hook skips.
