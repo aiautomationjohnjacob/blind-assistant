@@ -58,7 +58,10 @@ On headless servers or Telegram webhook deployments, this fails silently.
 **Impact**: "What's on my screen?" command unavailable in cloud/server mode.
 **Proposed fix**: Add Playwright screenshot as primary capture; fall back to PIL for
 local mode. Handle ImportError with clear user message.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 22 — _capture_screenshot() refactored into _capture_with_pil()
+(tries PIL first, catches DisplayError gracefully) + _capture_with_playwright() (headless
+Chromium fallback). FloatRect used for mypy-safe clip parameter. 9 new unit tests.
 
 ---
 
