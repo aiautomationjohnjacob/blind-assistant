@@ -210,6 +210,9 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P3: MCPMemoryClient wired into main.py** — production API server now creates MCPMemoryClient on startup and injects it into APIServer; graceful degradation if MCPMemoryClient raises; 3 new tests in test_main.py (Cycle 25)
 - [x] **P3: Android TalkBack CI v0.3.2 verified** — run 23223747818 PASSED (Cycle 25)
 - [x] **P3: ISSUE-031 resolved** — DELETE /profile/preferences endpoint added; confirm=true required; calls MCPMemoryClient.clear_user_data(); returns 204; graceful MCP degradation; CORS updated for DELETE; 8 new unit tests; 798 Python unit tests total (Cycle 26)
+- [x] **P0: CI fix (ISSUE-032)** — test_main.py ruff violations (I001, SIM105/SIM117/S110) repaired with contextlib.suppress(); CI lint was failing since Cycle 25 (Cycle 27)
+- [x] **P4: SECURITY_MODEL §10** — VALID_EXTRA_PREFS 422 documented as intentional information disclosure; threat model classification INFORMATIONAL; no fix required (Cycle 27)
+- [x] **P3: Voice clear preferences** — `clear_preferences` intent added to planner; `_handle_clear_preferences` handler in orchestrator with ConfirmationGate; `Response.action` field added; APIServer `_query` dispatches `_clear_preferences_for_user()` on confirmed action; 14 new unit tests; 812 Python unit tests total (Cycle 27)
 
 ## Blockers
 
