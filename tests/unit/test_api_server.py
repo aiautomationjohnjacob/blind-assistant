@@ -731,6 +731,113 @@ def test_api_server_memory_client_defaults_to_none():
     assert server._memory is None
 
 
+# ─────────────────────────────────────────────────────────────
+# PUT /profile — extra key allowlist (ISSUE-030)
+# ─────────────────────────────────────────────────────────────
+
+
+def test_put_profile_rejects_unknown_extra_key_with_422():
+    """PUT /profile returns 422 when extra contains an unknown key (ISSUE-030)."""
+    mem = _make_mock_memory()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put(
+            "/profile",
+            json={"extra": {"is_admin": True}},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 422
+    # Error detail must name the rejected key
+    assert "is_admin" in resp.json()["detail"]
+
+
+def test_put_profile_rejects_multiple_unknown_extra_keys_with_422():
+    """PUT /profile lists all unknown keys in the 422 response detail."""
+    mem = _make_mock_memory()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put(
+            "/profile",
+            json={"extra": {"payment_method": "visa", "credit_score": 750}},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 422
+    detail = resp.json()["detail"]
+    assert "payment_method" in detail
+    assert "credit_score" in detail
+
+
+def test_put_profile_rejects_unknown_key_does_not_write_to_memory():
+    """PUT /profile with unknown extra key never calls MCPMemoryClient.set_preference."""
+    mem = _make_mock_memory()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        client.put(
+            "/profile",
+            json={"extra": {"is_admin": True}},
+            headers=VALID_HEADERS,
+        )
+    # Validation fires before any write — set_preference must not have been called
+    mem.set_preference.assert_not_called()
+
+
+def test_put_profile_accepts_all_valid_extra_keys():
+    """PUT /profile accepts every key in VALID_EXTRA_PREFS without error."""
+    # Use one valid key at a time to keep the test focused
+    for key in VALID_EXTRA_PREFS:
+        mem = _make_mock_memory({key: "test-value"})
+        with _make_server_with_memory(memory_client=mem) as (_, client):
+            resp = client.put(
+                "/profile",
+                json={"extra": {key: "test-value"}},
+                headers=VALID_HEADERS,
+            )
+        assert resp.status_code == 200, f"Expected 200 for valid key '{key}', got {resp.status_code}"
+
+
+def test_put_profile_rejects_mix_of_valid_and_invalid_extra_keys():
+    """PUT /profile returns 422 when ANY extra key is invalid, even with valid ones present."""
+    mem = _make_mock_memory()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put(
+            "/profile",
+            # "timezone" is valid; "hacker_field" is not
+            json={"extra": {"timezone": "Europe/London", "hacker_field": "pwned"}},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 422
+    assert "hacker_field" in resp.json()["detail"]
+    # Valid key must NOT have been written (all-or-nothing validation)
+    mem.set_preference.assert_not_called()
+
+
+def test_put_profile_empty_extra_dict_is_accepted():
+    """PUT /profile with empty extra dict returns 200 without calling set_preference for extra."""
+    mem = _make_mock_memory()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put(
+            "/profile",
+            json={"extra": {}},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 200
+
+
+def test_put_profile_null_extra_is_accepted():
+    """PUT /profile with extra=null (omitted) is a no-op on extra prefs — returns 200."""
+    mem = _make_mock_memory()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put(
+            "/profile",
+            json={"verbosity": "detailed"},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 200
+
+
+def test_valid_extra_prefs_is_a_frozenset():
+    """VALID_EXTRA_PREFS is a frozenset so it cannot be mutated at runtime."""
+    assert isinstance(VALID_EXTRA_PREFS, frozenset)
+    assert len(VALID_EXTRA_PREFS) >= 4, "Expected at least 4 allowlisted preference keys"
+
+
 def test_rate_limit_middleware_default_window_is_60_seconds():
     """RateLimitMiddleware uses a 60-second sliding window by default."""
     middleware = RateLimitMiddleware(app=None)  # type: ignore[arg-type]
