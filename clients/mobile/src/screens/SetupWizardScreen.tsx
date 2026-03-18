@@ -404,8 +404,8 @@ export function SetupWizardScreen({
         accessibilityRole={Platform.OS === "web" ? undefined : "text"}
         accessibilityLiveRegion="polite"
       >
-        Blind Assistant is now connected to your server.{"\n\n"}
-        Tap Start to begin.
+        Blind Assistant is now connected to your computer.{"\n\n"}
+        Tap Start to begin talking to your assistant.
       </Text>
       <Pressable
         style={styles.button}
