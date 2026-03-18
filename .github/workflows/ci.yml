@@ -540,6 +540,7 @@ jobs:
                 `- Type check: ${{ needs.typecheck.result }}`,
                 `- Tests/coverage (Python): ${{ needs.test.result }}`,
                 `- Tests/coverage (JS — clients/mobile/): ${{ needs.test-js.result }}`,
+                `- Tests/coverage (Education site): ${{ needs.test-education.result }}`,
                 `- Security: ${{ needs.security.result }}`,
                 `- Web E2E (Playwright): ${{ needs.e2e-web.result }}`,
                 `- Browser integration (BrowserTool + real Playwright): ${{ needs.integration-browser.result }}`,
