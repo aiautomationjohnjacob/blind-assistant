@@ -136,15 +136,16 @@ Format: [Semantic Versioning](https://semver.org/). Types: `Added`, `Changed`, `
 
 ---
 
-## Test Coverage (Phase 3 — current)
+## Test Coverage (Phase 4 — current)
 
-- **641 Python unit tests** passing (all modules)
+- **812 Python unit tests** passing (all modules)
 - **25 platform E2E tests** (Android TalkBack + iOS VoiceOver — run on release tags)
-- **22 web E2E tests** (Playwright, Chromium + Firefox)
-- **117 JS tests** (Jest + jest-expo)
+- **26 web E2E tests** (Playwright, Chromium + Firefox — sync API, axe-core bundled locally)
+- **128 JS tests** (Jest + jest-expo — mobile app) + **75 JS tests** (react-scripts — education site)
 - **11 integration tests** (Playwright browser — skip locally, run in CI)
 - **Security modules**: 100% line and branch coverage
 - **Overall backend**: ≥80% coverage enforced in CI
+- **WCAG CI gate**: axe-core 4.9.1 audit runs on every push; fails on CRITICAL violations
 
 ---
 
