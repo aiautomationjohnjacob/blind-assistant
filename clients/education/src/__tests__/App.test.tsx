@@ -322,6 +322,26 @@ describe('App routing', () => {
 // AUDIO PLAYER — extended coverage for playback controls
 // ─────────────────────────────────────────────────────────────
 
+// jsdom does not implement HTMLMediaElement.play/pause — mock them so we can
+// test the component's event handler logic without real audio playback.
+beforeAll(() => {
+  Object.defineProperty(window.HTMLMediaElement.prototype, 'play', {
+    configurable: true,
+    value: jest.fn().mockResolvedValue(undefined),
+  });
+  Object.defineProperty(window.HTMLMediaElement.prototype, 'pause', {
+    configurable: true,
+    value: jest.fn(),
+  });
+  // Make paused start as true (not playing)
+  Object.defineProperty(window.HTMLMediaElement.prototype, 'paused', {
+    configurable: true,
+    get() {
+      return !this._isPlaying;
+    },
+  });
+});
+
 describe('AudioPlayer — extended coverage', () => {
   function renderPlayer(transcript?: string) {
     return renderWithRouter(
