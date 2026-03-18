@@ -201,6 +201,7 @@ class MCPMemoryClient:
 
     async def _set_in_mcp(self, user_id: str, key: str, value: Any) -> None:
         """Write a single preference to the MCP memory graph."""
+        assert self._mcp is not None  # only called when self._available is True
         entity = self._entity_name(user_id)
         observation = f"{key}={json.dumps(value)}"
 
