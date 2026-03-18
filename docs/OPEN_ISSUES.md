@@ -866,3 +866,50 @@ consistent "connection code" language in the rest of the setup wizard.
 (1) empty guard: "Please enter your API token" → "Please enter your connection code"
 (2) too-short guard: "API tokens are usually..." → "Connection codes are usually..."
 2 new regression tests added (SetupWizardScreen.test.tsx); 136 JS tests total.
+
+### ISSUE-047: Jordan (DeafBlind) persona has no automated E2E scenario tests
+**Severity**: MEDIUM
+**Category**: accessibility, testing
+**Detected by**: Cycle 41 gap scan (GitHub good-first-issue #93)
+**Detected**: 2026-03-18
+**Description**: Jordan's user stories (2.3, 4.4, 8.3, 9.2) describe braille display
+requirements, text-only mode, and financial disclosure via text — but none of these
+were covered by automated tests. The only tested personas were Dorothy and Alex.
+**Impact**: Any code change touching _format_for_braille(), output_mode, or food ordering
+could silently break the DeafBlind experience with no CI catch.
+**Proposed fix**: Implement Jordan scenario tests in tests/accessibility/.
+**Status**: RESOLVED
+**Resolved in**: Cycle 41 — commit 3ef31e8. 16 Jordan tests in
+tests/accessibility/test_jordan_scenario.py. _format_for_braille() fixed to word-wrap at
+40 chars. Visual-only language fixed in orchestrator. All run in dorothy-e2e CI job.
+
+### ISSUE-048: Shared accessibility helpers duplicated across test files
+**Severity**: LOW
+**Category**: testing, code quality
+**Detected by**: Cycle 41 gap scan (GitHub good-first-issue #94)
+**Detected**: 2026-03-18
+**Description**: assert_no_jargon and assert_no_visual_only_language were private helpers
+in test_dorothy_scenario.py. Any new persona test would need to duplicate them. Also,
+the substring jargon check produced false positives ("port" matching "important").
+**Impact**: Contributors adding new persona tests would duplicate the logic incorrectly.
+**Proposed fix**: Extract to tests/accessibility/helpers.py with word-boundary matching.
+**Status**: RESOLVED
+**Resolved in**: Cycle 41 — commit 3ef31e8. helpers.py created with 4 shared assertion
+functions using re.search with word boundaries. test_dorothy_scenario.py imports from helpers.
+
+### ISSUE-049: README has no setup instructions for Windows NVDA or braille display users
+**Severity**: MEDIUM
+**Category**: accessibility, documentation
+**Detected by**: Cycle 41 gap scan (GitHub good-first-issue #95)
+**Detected**: 2026-03-18
+**Description**: README.md had only generic setup instructions. A newly-blind Windows user
+with NVDA, or a DeafBlind user with a braille display, could not find platform-specific
+setup guidance. The "Using with NVDA on Windows" use case is the NVDA community's most
+common entry point.
+**Impact**: Windows screen reader users and braille display users faced a gap in setup
+documentation, potentially requiring sighted assistance to configure the app.
+**Proposed fix**: Add dedicated sections for NVDA, VoiceOver on macOS, and braille display.
+**Status**: RESOLVED
+**Resolved in**: Cycle 41 — commit 3ef31e8. README.md updated with "Using with NVDA on
+Windows", "Using with VoiceOver on macOS", and "Using with a Braille Display" sections.
+All written in plain language with step-by-step keyboard instructions.
