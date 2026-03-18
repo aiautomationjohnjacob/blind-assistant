@@ -228,10 +228,13 @@ class TestFoodOrderingAccessibility:
         _skip_if_unavailable(web_app_available)
         page.goto(WEB_APP_URL)
         page.wait_for_load_state("networkidle")
+        # Wait for React to hydrate — live regions are set by React, not static HTML.
+        # Per CLAUDE.md: 'aria-live regions must exist in DOM before content is injected'.
+        # Both MainScreen.statusText and SetupWizardScreen step instructions have
+        # accessibilityLiveRegion='polite' which renders as aria-live='polite' in the DOM.
+        _wait_for_app_ready(page)
 
         # The response/status area should be accessible via a live region
-        # Check that the page has at least one live region in the DOM from the start
-        # (live regions must exist BEFORE content is injected — CLAUDE.md rule)
         live_regions = page.query_selector_all('[aria-live="polite"], [aria-live="assertive"], [aria-live="off"]')
         assert len(live_regions) > 0, (
             "No aria-live regions found in the page DOM. "
