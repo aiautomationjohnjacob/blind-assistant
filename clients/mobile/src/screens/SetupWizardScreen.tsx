@@ -333,16 +333,16 @@ export function SetupWizardScreen({
       <Text
         style={styles.stepTitle}
         accessibilityRole="header"
-        accessibilityLabel="Step 2: Confirm your token"
+        accessibilityLabel="Step 2: Confirm your connection code"
       >
-        Confirm Token
+        Confirm Code
       </Text>
       <Text
         style={styles.instructions}
         accessibilityRole={Platform.OS === "web" ? undefined : "text"}
         accessibilityLiveRegion="polite"
       >
-        Your token:{"\n"}
+        Your connection code:{"\n"}
         Starts with: {tokenInput.trim().slice(0, 4)}{"\n"}
         Ends with: {tokenInput.trim().slice(-4)}{"\n"}
         Length: {tokenInput.trim().length} characters{"\n\n"}
