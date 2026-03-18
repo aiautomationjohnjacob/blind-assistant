@@ -124,16 +124,12 @@ def _wait_for_app_ready(page: Page) -> None:
     # Both SetupWizardScreen and MainScreen have role="button" elements.
     # ActivityIndicator (loading state) does NOT have role="button", so this
     # correctly waits until the loading spinner transitions to the real screen.
-    try:
+    with contextlib.suppress(Exception):
         page.wait_for_selector(
             '[role="button"], input[aria-label]',
             timeout=5000,
             state="attached",
         )
-    except Exception:
-        # If no interactive element appears in 5 seconds, let the test
-        # proceed and fail with a meaningful assertion message.
-        pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
