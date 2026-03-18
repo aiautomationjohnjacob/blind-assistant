@@ -497,11 +497,13 @@ class TestDorothyGeneralInteraction:
         async def update_cb(msg: str) -> None:
             pass
 
+        _alex_response = (
+            "I can help you read that document. "
+            "Hold your phone over it and say 'describe this'."
+        )
         with patch(
             "blind_assistant.core.orchestrator.Orchestrator._handle_general_question",
-            new=AsyncMock(
-                return_value={"text": "I can help you read that document. Hold your phone over it and say 'describe this'."}
-            ),
+            new=AsyncMock(return_value={"text": _alex_response}),
         ):
             result = await orc._handle_general_question(
                 _make_intent("general"),
