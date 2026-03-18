@@ -340,6 +340,7 @@ class APIServer:
         app.post("/task", response_model=TaskResponse)(self._task)
         app.get("/profile", response_model=ProfileResponse)(self._profile)
         app.put("/profile", response_model=ProfileResponse)(self._update_profile)
+        app.delete("/profile/preferences", status_code=204)(self._delete_preferences)
 
         # Global error handler: never expose internal details to clients
         @app.exception_handler(Exception)
