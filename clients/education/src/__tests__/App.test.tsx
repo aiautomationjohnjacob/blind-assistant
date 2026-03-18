@@ -16,13 +16,13 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import App from '../src/App';
-import SiteHeader from '../src/components/SiteHeader';
-import SiteFooter from '../src/components/SiteFooter';
-import CourseCard, { Course } from '../src/components/CourseCard';
-import AudioPlayer from '../src/components/AudioPlayer';
-import HomePage from '../src/pages/HomePage';
-import NotFoundPage from '../src/pages/NotFoundPage';
+import App from '../App';
+import SiteHeader from '../components/SiteHeader';
+import SiteFooter from '../components/SiteFooter';
+import CourseCard, { Course } from '../components/CourseCard';
+import AudioPlayer from '../components/AudioPlayer';
+import HomePage from '../pages/HomePage';
+import NotFoundPage from '../pages/NotFoundPage';
 
 // ─────────────────────────────────────────────────────────────
 // HELPERS
