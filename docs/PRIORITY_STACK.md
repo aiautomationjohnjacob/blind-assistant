@@ -20,9 +20,9 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P3 | Verify Android TalkBack CI: push v0.3.1 tag; confirm e2e-android.yml fires and 8 tests pass | Cycle 22 | 2026-03-18 |
-| P3 | MCP memory server integration (cross-session user preferences) — src/blind_assistant/memory/mcp_memory.py | INTEGRATION_MAP.md | 2026-03-17 |
-| P3 | Education website (learn.blind-assistant.org): audio-primary; NVDA+Chrome; zero mouse | education-website-designer | 2026-03-17 |
+| P3 | Verify Android TalkBack CI v0.3.2: confirm e2e-android.yml run passes; single-line pytest fix applied | Cycle 23 | 2026-03-18 |
+| P3 | Wire MCPMemoryClient into api_server.py: /profile GET/PUT endpoints should persist preferences via MCPMemoryClient; test-engineer needed | Cycle 23 | 2026-03-18 |
+| P3 | Education site package-lock.json: run `npm install` in clients/education/ so test-education CI uses reproducible installs | Cycle 23 | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
