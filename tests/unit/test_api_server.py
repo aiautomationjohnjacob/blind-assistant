@@ -26,7 +26,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi.testclient import TestClient
 
 from blind_assistant.core.orchestrator import Response, UserContext
-from blind_assistant.interfaces.api_server import APIServer, RateLimitMiddleware
+from blind_assistant.interfaces.api_server import APIServer, RateLimitMiddleware, VALID_EXTRA_PREFS
 
 # ─────────────────────────────────────────────────────────────
 # Helpers / fixtures
