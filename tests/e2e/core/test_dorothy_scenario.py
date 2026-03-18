@@ -36,7 +36,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from blind_assistant.core.confirmation import ConfirmationGate
-from blind_assistant.core.orchestrator import Orchestrator, Response, UserContext
+from blind_assistant.core.orchestrator import Orchestrator, UserContext
 from blind_assistant.security.disclosure import FINANCIAL_RISK_DISCLOSURE
 from blind_assistant.tools.browser import BrowserTool, PageState
 
