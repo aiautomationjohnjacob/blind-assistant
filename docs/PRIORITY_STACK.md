@@ -31,7 +31,13 @@
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
 | P4 | Netlify staging activation: configure NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID secrets so community members can test https://staging.blind-assistant.org with real NVDA+Chrome, TalkBack+Chrome, VoiceOver+Safari | cycle 45 review | 2026-03-18 |
-| P5 | Education site deployment: deploy clients/education/ to learn.blind-assistant.org; document as a community touchpoint for blind contributors who prefer reading course material to browsing GitHub | cycle 45 creative | 2026-03-18 |
+| P5 | Activate GitHub Pages in repository settings: Settings → Pages → Source → GitHub Actions; this is the one manual step to make learn.blind-assistant.org live after deploy-education.yml is merged | cycle 47 | 2026-03-18 |
+
+## Completed Items (Cycle 47 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Education site deployment (P5): deploy-education.yml created; BrowserRouter→HashRouter; homepage="." in package.json; CNAME for learn.blind-assistant.org; 75 Jest tests pass; ISSUE-053 resolved | 2026-03-18 | 47 |
 
 ## Completed Items (Cycle 46 additions)
 
