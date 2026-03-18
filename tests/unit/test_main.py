@@ -16,7 +16,6 @@ import asyncio
 import contextlib
 from unittest.mock import AsyncMock, MagicMock, patch
 
-
 # ─────────────────────────────────────────────────────────────
 # Helpers
 # ─────────────────────────────────────────────────────────────
@@ -58,9 +57,9 @@ def test_start_services_passes_memory_client_to_api_server():
         patch("blind_assistant.interfaces.telegram_bot.TelegramBot"),
         patch("blind_assistant.interfaces.api_server.APIServer", FakeAPIServer),
         patch("blind_assistant.memory.mcp_memory.MCPMemoryClient", return_value=fake_memory),
+        contextlib.suppress(asyncio.CancelledError, Exception),
     ):
-        with contextlib.suppress(asyncio.CancelledError, Exception):
-            asyncio.run(start_services(config))
+        asyncio.run(start_services(config))
 
     # The injected memory_client must be our fake instance
     assert captured.get("memory_client") is fake_memory
@@ -90,9 +89,9 @@ def test_start_services_continues_when_mcp_memory_raises():
             "blind_assistant.memory.mcp_memory.MCPMemoryClient",
             side_effect=RuntimeError("MCP unavailable"),
         ),
+        contextlib.suppress(asyncio.CancelledError, Exception),
     ):
-        with contextlib.suppress(asyncio.CancelledError, Exception):
-            asyncio.run(start_services(config))
+        asyncio.run(start_services(config))
 
     # When MCPMemoryClient fails, APIServer must still be created with memory_client=None
     assert "memory_client" in captured
@@ -119,9 +118,9 @@ def test_start_services_does_not_create_mcp_when_api_disabled():
         patch("blind_assistant.interfaces.voice_local.VoiceLocalInterface", FakeVoice),
         patch("blind_assistant.interfaces.telegram_bot.TelegramBot"),
         patch("blind_assistant.memory.mcp_memory.MCPMemoryClient", mcp_constructor),
+        contextlib.suppress(asyncio.CancelledError, Exception),
     ):
-        with contextlib.suppress(asyncio.CancelledError, Exception):
-            asyncio.run(start_services(config))
+        asyncio.run(start_services(config))
 
     # MCPMemoryClient must NOT have been instantiated when API server is off
     mcp_constructor.assert_not_called()
