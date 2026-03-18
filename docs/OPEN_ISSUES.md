@@ -568,4 +568,33 @@ autonomy and privacy gap, and a concern for GDPR/data-rights compliance in cloud
 bearer token auth, (2) require an explicit confirmation body field ("confirm": true) to prevent
 accidental deletion, (3) call MCPMemoryClient.clear_user_data(user_id), (4) return 204 No Content.
 Add unit tests for: happy path (204 returned), missing confirmation (400), auth failure (401).
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 26 — DELETE /profile/preferences endpoint added; requires confirm=true; calls MCPMemoryClient.clear_user_data(); 204 No Content; graceful degradation; CORS updated; 8 unit tests.
+**Client UX resolved**: Cycle 27 — voice clear preferences via orchestrator `clear_preferences` intent + ConfirmationGate + APIServer action dispatch; 14 new tests.
+
+### ISSUE-032: CI lint failure — test_main.py ruff violations (I001, SIM105/SIM117/S110)
+**Severity**: HIGH (CI blocking)
+**Category**: ci, testing
+**Detected by**: orchestrator (Cycle 27 gap scan — gh run list)
+**Detected**: 2026-03-18
+**Description**: test_main.py introduced in Cycle 25 contained 7 ruff violations: unsorted
+imports (I001), try-except-pass patterns (SIM105/S110), and nested with statements (SIM117).
+CI lint job was failing since Cycle 25 commit ad5fc3e.
+**Impact**: CI lint job failing on every push since Cycle 25 (2 full cycles with broken lint).
+**Status**: RESOLVED
+**Resolved in**: Cycle 27 — test_main.py fixed using contextlib.suppress() merged into with
+blocks; imports sorted; all 3 tests still pass; 0 ruff errors.
+
+### ISSUE-033: `accessibilityRole="text"` on Views maps to non-ARIA role on web
+**Severity**: LOW
+**Category**: a11y, web
+**Detected by**: orchestrator WCAG code audit (Cycle 27)
+**Detected**: 2026-03-18
+**Description**: In MainScreen.tsx, View components use `accessibilityRole="text"`. On
+Expo web export, react-native-web maps this to `role="text"` which is NOT a valid ARIA role.
+This means the transcript and response containers are missing semantic roles on web.
+**Impact**: NVDA/VoiceOver on web may not correctly announce these regions. TalkBack/VoiceOver
+on native mobile is unaffected (they handle `accessibilityRole="text"` correctly).
+**Proposed fix**: Use `Platform.select` to conditionally apply `accessibilityRole` only on
+native (undefined/omit on web), or use `aria-label` without role for the web rendering.
+**Status**: OPEN (Phase 4 target)
