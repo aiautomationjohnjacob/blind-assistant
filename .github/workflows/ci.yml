@@ -382,6 +382,76 @@ jobs:
           retention-days: 14
 
   # ──────────────────────────────────────────────────────────
+  # JOB 6c: Dorothy Scenario E2E tests (Phase 5 gate tests)
+  # Tests the complete user flow as experienced by Dorothy (elder) and Alex (newly blind).
+  # These tests exercise: food ordering w/ risk disclosure, Second Brain save/query,
+  # general questions — all via direct orchestrator handler calls with patched Claude.
+  # No device, browser, or external API needed. Runs on every push.
+  # Addresses issue #96: add Dorothy E2E tests to CI.
+  # ──────────────────────────────────────────────────────────
+  dorothy-e2e:
+    name: "E2E — Dorothy scenario (elder + newly-blind persona gate)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            ffmpeg \
+            libportaudio2 libportaudiocpp0 portaudio19-dev \
+            tesseract-ocr \
+            libasound2-dev
+
+      - name: Install test dependencies
+        run: |
+          pip install \
+            pytest \
+            pytest-asyncio \
+            pytest-cov \
+            pytest-mock \
+            respx \
+            httpx \
+            keyring \
+            cryptography
+
+      - name: Install project dependencies
+        # openai-whisper uses legacy setup.py with pkg_resources — --no-build-isolation required.
+        run: |
+          pip install setuptools
+          pip install -r requirements.txt --no-build-isolation
+
+      - name: Install project (editable)
+        run: pip install -e . 2>/dev/null || pip install -e . --no-build-isolation 2>/dev/null || true
+
+      - name: Run Dorothy scenario E2E tests
+        # These 13 tests cover Dorothy (elder) + Alex (newly-blind) across all core flows:
+        # food ordering with risk disclosure, Second Brain save/query, general questions,
+        # installer language (no jargon), financial disclosure plain-language check.
+        # Passes when every test confirms: no jargon, no dead ends, actionable guidance.
+        # set -o pipefail: pytest exit code propagates through | tee (was silently swallowed)
+        run: |
+          set -o pipefail
+          pytest tests/e2e/core/test_dorothy_scenario.py \
+            -v \
+            --tb=short \
+            2>&1 | tee dorothy-e2e.log
+
+      - name: Upload Dorothy E2E log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dorothy-e2e-log-${{ github.run_number }}
+          path: dorothy-e2e.log
+          retention-days: 14
+
+  # ──────────────────────────────────────────────────────────
   # JOB 6: Android E2E tests (emulator) — release tags only
   # Running AVD emulators is slow (~10 min boot) and expensive.
   # Only runs on version tags (v*.*.*) to gate releases.
