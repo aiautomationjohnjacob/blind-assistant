@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "learn.blind-assistant.org — audio-primary accessible course platform for blind users",
   "private": true,
+  "homepage": ".",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
