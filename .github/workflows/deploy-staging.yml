@@ -43,9 +43,9 @@ jobs:
       name: staging
       url: ${{ steps.deploy.outputs.deploy_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: npm
@@ -114,7 +114,7 @@ jobs:
 
       - name: Upload staging E2E screenshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: staging-e2e-screenshots-${{ github.run_number }}
           path: |

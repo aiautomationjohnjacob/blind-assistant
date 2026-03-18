@@ -18,7 +18,7 @@ jobs:
     name: Lint & format (ruff)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -41,7 +41,7 @@ jobs:
     name: Type check (mypy)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -69,7 +69,7 @@ jobs:
     name: Tests & coverage (≥80%)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -134,7 +134,7 @@ jobs:
 
       - name: Upload coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage-report-${{ github.run_number }}
           path: |
@@ -149,7 +149,7 @@ jobs:
     name: Security audit (pip-audit + bandit)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -197,7 +197,7 @@ jobs:
 
       - name: Upload security report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: security-report-${{ github.run_number }}
           path: bandit-output.txt
@@ -216,9 +216,9 @@ jobs:
       run:
         working-directory: clients/mobile
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: npm
@@ -235,7 +235,7 @@ jobs:
 
       - name: Upload JS coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: js-coverage-report-${{ github.run_number }}
           path: clients/mobile/coverage/
@@ -252,9 +252,9 @@ jobs:
       run:
         working-directory: clients/education
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: npm
@@ -272,7 +272,7 @@ jobs:
 
       - name: Upload education coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: education-coverage-report-${{ github.run_number }}
           path: clients/education/coverage/
@@ -287,10 +287,10 @@ jobs:
     name: E2E — Web (Playwright accessibility audit)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # ── Node.js — needed to build the Expo web bundle ──────────────────────
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
@@ -372,7 +372,7 @@ jobs:
 
       - name: Upload E2E screenshots and logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: web-e2e-screenshots-${{ github.run_number }}
           path: |
@@ -393,7 +393,7 @@ jobs:
     name: "E2E — Persona scenario gate (Dorothy, Jordan, Marcus)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -456,7 +456,7 @@ jobs:
 
       - name: Upload persona gate E2E log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: persona-gate-e2e-log-${{ github.run_number }}
           path: dorothy-e2e.log
@@ -474,7 +474,7 @@ jobs:
     # Only run on release tags (too slow for every push)
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Check if Android E2E tests exist
         id: check_tests
@@ -537,7 +537,7 @@ jobs:
 
       - name: Upload Android screenshots
         if: always() && steps.check_tests.outputs.exists == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: android-e2e-screenshots-${{ github.run_number }}
           path: |
@@ -555,7 +555,7 @@ jobs:
     name: Browser integration tests (BrowserTool + real Playwright)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -604,7 +604,7 @@ jobs:
 
       - name: Upload browser test log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: integration-browser-log-${{ github.run_number }}
           path: integration-browser.log
@@ -627,10 +627,10 @@ jobs:
     name: "Phase 4: WCAG axe-core audit (web)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # ── Node.js — build the Expo web bundle ────────────────
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
@@ -683,7 +683,7 @@ jobs:
 
       - name: Upload audit log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: a11y-audit-${{ github.run_number }}
           path: |

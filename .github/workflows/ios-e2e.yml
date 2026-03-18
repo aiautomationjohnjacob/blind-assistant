@@ -16,7 +16,7 @@ jobs:
     runs-on: macos-14  # Xcode 15, Apple Silicon, iOS 17 simulator available
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Check if iOS E2E tests exist
         id: check_tests
@@ -46,7 +46,7 @@ jobs:
 
       - name: Set up Node.js
         if: steps.check_tests.outputs.exists == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: npm
@@ -150,7 +150,7 @@ jobs:
 
       - name: Upload iOS screenshots and logs
         if: always() && steps.check_tests.outputs.exists == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ios-voiceover-screenshots-${{ github.run_number }}
           path: |
