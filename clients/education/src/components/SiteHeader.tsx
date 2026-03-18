@@ -60,10 +60,11 @@ export default function SiteHeader(): React.ReactElement {
             role="list"
           >
             <li>
+              {/* NavLink automatically adds aria-current="page" when active
+                  in React Router v6. The style callback changes appearance. */}
               <NavLink
                 to="/"
                 end
-                aria-current={({ isActive }) => (isActive ? 'page' : undefined)}
                 style={({ isActive }) => ({
                   color: isActive ? '#93c5fd' : '#60a5fa',
                   fontWeight: isActive ? 700 : 400,
