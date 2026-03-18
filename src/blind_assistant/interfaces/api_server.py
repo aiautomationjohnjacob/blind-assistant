@@ -18,8 +18,10 @@ Endpoints:
   POST /remember   — add a voice note to the Second Brain
   POST /describe   — trigger a screen description (desktop only)
   POST /task       — execute a real-world task (order food, book travel, etc.)
-  GET  /profile    — return the user's preferences and config
-  GET  /health     — server health check; no auth required
+  GET    /profile               — return the user's preferences and config
+  PUT    /profile               — update user preferences
+  DELETE /profile/preferences   — clear all persisted MCP preference data (requires confirm=true)
+  GET    /health                — server health check; no auth required
 """
 
 import base64
