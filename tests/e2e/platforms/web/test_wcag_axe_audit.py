@@ -118,18 +118,9 @@ def _skip_if_unavailable(web_app_available: bool) -> None:
         )
 
 
-def _run_axe_via_playwright(page: Page) -> dict:  # type: ignore[return]
-    """
-    Inject axe-core via CDN and run the accessibility audit.
-    Returns the axe results dict with 'violations', 'passes', 'incomplete', etc.
-
-    We inject axe from a CDN because axe-playwright-python's async API varies
-    across package versions. Injecting directly via page.evaluate() is the most
-    stable approach and does not require installing the axe-playwright package.
-    This makes the test fully self-contained — only playwright is required.
-    """
-    # filled in test body via page.evaluate
-
+# Note: axe-core is injected via CDN inside each test's page.evaluate() call.
+# This makes tests fully self-contained — no axe-playwright-python required at runtime.
+# AXE_AVAILABLE is kept for future explicit-package tests.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # axe-core WCAG Audit Tests
