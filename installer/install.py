@@ -445,13 +445,13 @@ class VoiceInstaller:
             vault_key.store_in_keychain()
             self._speak(
                 "Your personal knowledge base is ready. "
-                "Your vault key has been saved to your system keychain. "
-                "You won't need to enter your passphrase each time."
+                "Your computer will remember your secret phrase for you — "
+                "you won't need to enter it every time."
             )
         except Exception:
             self._speak(
                 "Your personal knowledge base is ready. "
-                "You'll be asked for your passphrase when you start a new session."
+                "You'll be asked for your secret phrase when you start a new session."
             )
 
         return True
