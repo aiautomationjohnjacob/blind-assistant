@@ -217,16 +217,16 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 25 (Phase 3 — ISSUE-030 allowlist, MCPMemoryClient production wiring, Android CI verified). VALID_EXTRA_PREFS
-frozenset added to api_server.py; PUT /profile now rejects unknown extra keys with 422 and logs at WARNING before
-any write; 8 new allowlist tests. MCPMemoryClient wired into main.py start_services() production startup with
-graceful degradation; 3 new tests in test_main.py. Android TalkBack CI v0.3.2 confirmed passing (run 23223747818).
-790 Python unit tests total (was 779). Ruff clean. mypy 0 errors.
+Cycle 26 (Phase 3 — ISSUE-031 resolved). DELETE /profile/preferences added to api_server.py; requires
+confirm=true body; calls MCPMemoryClient.clear_user_data(); returns 204 No Content; graceful degradation
+if MCP unreachable; CORS updated to allow DELETE method; 8 new unit tests. Phase 3 completion assessment:
+Android TalkBack CI ✓, iOS VoiceOver CI ✓, Web E2E CI ✓ — criteria nearly met. 798 Python unit tests
+total (was 790). Ruff clean. mypy 0 errors.
 
-Cycle 26 priority:
-1. **P3: DELETE /profile/preferences** — ethics gap from Cycle 24 review; users must be able to clear MCP preference data; requires confirmation flow before execution
-2. **P3: Phase 3 completion assessment** — review all Phase 3 sprint items; identify which are done vs. still open; determine Phase 4 readiness
-3. **P4: Document VALID_EXTRA_PREFS 422 as intentional disclosure in threat model** — low risk, but should be documented
+Cycle 27 priority:
+1. **P4: Begin Phase 4 Accessibility Hardening** — run web-accessibility-expert WCAG 2.1 AA audit on clients/web/; call /audit-a11y skill; identify CRITICAL findings
+2. **P4: Document VALID_EXTRA_PREFS 422 as intentional disclosure in SECURITY_MODEL.md** — security-specialist recommended (Cycles 25+26)
+3. **P3: Client-side UX for clear preferences** — add voice-accessible trigger in mobile/web client so users can say "clear my preferences"
 
 ## Known Issues / Technical Debt
 
