@@ -317,9 +317,9 @@ export function SetupWizardScreen({
         disabled={!tokenInput.trim()}
         accessibilityRole="button"
         accessibilityLabel={
-          tokenInput.trim() ? "Confirm token" : "Confirm token — disabled, please enter a token first"
+          tokenInput.trim() ? "Confirm code" : "Confirm code — disabled, please enter your connection code first"
         }
-        accessibilityHint="Reviews your token before saving."
+        accessibilityHint="Reviews your connection code before saving."
         accessibilityState={{ disabled: !tokenInput.trim() }}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
