@@ -237,11 +237,7 @@ def _record_with_vad_sync(
 
                 # Stop if: we've heard speech AND we've reached silence threshold
                 # AND we've recorded at least the minimum duration
-                if (
-                    speech_started
-                    and consecutive_silent >= silence_frames
-                    and frame_idx >= min_frames
-                ):
+                if speech_started and consecutive_silent >= silence_frames and frame_idx >= min_frames:
                     logger.debug(
                         f"VAD: stopped after {frame_idx + 1} frames "
                         f"({(frame_idx + 1) * frame_duration_ms}ms), "

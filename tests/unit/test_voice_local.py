@@ -585,9 +585,7 @@ class TestVADIntegration:
             patch("blind_assistant.voice.tts.speak_locally", new=AsyncMock()),
             patch(
                 "blind_assistant.core.orchestrator.Orchestrator.handle_message",
-                new=AsyncMock(
-                    return_value=Response(text="Sunny", spoken_text=None, follow_up_prompt=None)
-                ),
+                new=AsyncMock(return_value=Response(text="Sunny", spoken_text=None, follow_up_prompt=None)),
             ),
         ):
             # Should call VAD twice: once for wake word, once for actual request
