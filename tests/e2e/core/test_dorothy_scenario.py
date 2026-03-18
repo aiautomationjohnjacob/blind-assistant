@@ -164,8 +164,6 @@ class TestDorothyFoodOrdering:
 
     def _make_orc_with_browser(self, config: dict) -> tuple[Orchestrator, MagicMock, ConfirmationGate]:
         """Build orchestrator with mocked browser, following test_food_ordering.py pattern."""
-        from blind_assistant.core.planner import Intent
-
         gate = ConfirmationGate()
         orc = Orchestrator(config)
         orc.confirmation_gate = gate
