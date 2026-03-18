@@ -14,16 +14,25 @@
 5. **P4 — IMPROVEMENT**: Enhancement that improves the product meaningfully
 6. **P5 — CREATIVE**: New idea or integration opportunity worth exploring
 
-## Current Stack (Phase 3 — Blind User Testing)
+## Current Stack (Phase 3 → Phase 4 transition)
 
-**Phase 3 goal**: All 5 blind user personas can complete core life-assistant tasks on at least 3 of 5 client platforms.
+**Phase 3 nearly complete**: Android TalkBack CI ✓, iOS VoiceOver CI ✓, Web E2E CI ✓. Beginning Phase 4 planning.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P3 | ISSUE-031: DELETE /profile/preferences endpoint with confirmation flow — exposes MCPMemoryClient.clear_user_data(); required for user autonomy + future GDPR compliance | ethics-advisor (Cycle 24), Cycle 25 self-assessment | 2026-03-18 |
-| P3 | Phase 3 completion assessment — review all sprint items; identify remaining open items; determine Phase 4 readiness | Cycle 25 self-assessment | 2026-03-18 |
+| P4 | Web WCAG 2.1 AA audit — call web-accessibility-expert; identify CRITICAL findings; begin Phase 4 Accessibility Hardening sprint | Cycle 26 review panel | 2026-03-18 |
+| P4 | Document VALID_EXTRA_PREFS 422 as intentional information disclosure in SECURITY_MODEL.md — security-specialist recommended Cycles 25+26 | security-specialist | 2026-03-18 |
+| P3 | Client-side voice trigger for "clear my preferences" — UX for DELETE /profile/preferences; user should be able to say "clear my settings" and get spoken confirmation prompt | Cycle 26 self-assessment | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
+
+## Completed Items (Cycle 26 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| ISSUE-031: DELETE /profile/preferences endpoint; confirm=true required; MCPMemoryClient.clear_user_data() exposed; 204 No Content; graceful degradation; CORS updated; 8 new unit tests | 2026-03-18 | 26 |
+| Phase 3 completion assessment: Android TalkBack CI ✓, iOS VoiceOver CI ✓, Web E2E CI ✓ — device screenshot artifacts deferred to release CI (expected) | 2026-03-18 | 26 |
+| 798 Python unit tests total (+8 from Cycle 26); ruff clean; mypy 0 errors | 2026-03-18 | 26 |
 
 ## Completed Items (Cycle 25 additions)
 
