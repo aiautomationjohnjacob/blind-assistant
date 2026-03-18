@@ -366,10 +366,6 @@ jobs:
             --screenshot on \
             -v 2>&1 | tee e2e-web-webkit.log
 
-      - name: Stop web server
-        if: always()
-        run: kill $WEB_SERVER_PID 2>/dev/null || true
-
       - name: Run device simulation screenshot tests
         # Takes named screenshots of key UI states across all three browsers.
         # Output goes to device-sim-screenshots/{browser}/*.png.
@@ -380,6 +376,7 @@ jobs:
         # set -o pipefail: pytest exit code propagates through | tee.
         # continue-on-error: screenshots are best-effort; a viewport or timing
         # quirk should not block CI — functional tests above are the gate.
+        # NOTE: runs BEFORE "Stop web server" so localhost:19006 is still up.
         continue-on-error: true
         run: |
           set -o pipefail
