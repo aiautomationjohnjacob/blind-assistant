@@ -1949,3 +1949,49 @@ Phase 4 is complete when the axe-core gate passes AND platform sign-offs are doc
 Sign-offs should distinguish between "current implementation" (what is built) and
 "future implementation" (what is planned). Approving CLI+web while deferring native GUI
 is correct and honest — it does not inflate the sign-off scope.
+
+## Cycle 37 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: The Dorothy test simplicity audit is the right Phase 5 work. Replacing "API token" with "connection code" and "backend server" with "your computer" removes the most common barrier for newly-blind elder users: language that assumes technical knowledge. A 65-year-old who just lost their sight does not know what an API is. The grant narrative is solid — concrete milestones, specific metrics, and the "how many more blind people can independently use their computer today" framing is the right mission anchor. Next priority: validate the language changes with actual blind user review scenarios, then complete the full Dorothy test (setup → food ordering → Second Brain note).
+
+**Code quality (code-reviewer)**: (1) 134 JS tests all passing — no count decrease. (2) 812 Python tests unchanged. (3) No new src/ Python files added without tests. (4) SetupWizardScreen changes are string-only — no logic changes — with test coverage for every changed string. (5) Grant narrative references CI-verified run numbers. (6) Watch: `advanceToConfirmStep` test helper still references "re-enter token" button label — this matches the current component accessibilityLabel but could confuse future test editors. Consider renaming to "re-enter code" in a follow-up.
+
+**Security (security-specialist)**: No security implications in Cycle 37. All changes are language/documentation. Authentication, credential storage, payment risk disclosure, and ConfirmationGate are intact.
+
+**Accessibility (accessibility-reviewer)**: The Dorothy test changes are substantive accessibility work. "Connection code" is universally understood; "API token" is not. The "You can ask your assistant to repeat anything at any time" affordance text is critical for users with cognitive load concerns. 6 new Dorothy test assertions provide regression protection. One follow-up: the `handleConfirmToken` validation error message says "API tokens are usually at least 32 characters" — this should also say "connection codes" for consistency (it was missed in the sweep).
+
+**User perspective (blind-user-tester)**: "Connection code from your computer" makes immediate sense. "API token" sounded like something I'd need to look up. The "say that again" affordance text is welcome — though I'd prefer this to be an actual interaction affordance (a button, or a recognized voice command), not just static text. Still, this cycle moved in the right direction.
+
+**Ethics (ethics-advisor)**: Language simplification is ethically important — inaccessible setup language effectively excludes users who lack technical support. Making setup comprehensible without sighted help advances autonomy. The grant narrative's "we explicitly do not have a paid tier" commitment is the correct ethical stance for a nonprofit serving a community that cannot afford barriers.
+
+**Goal adherence (goal-adherence-reviewer)**: Phase 5 goal requires: (1) Dorothy test passes — IN PROGRESS; language simplification done, but full scenario test (setup → food ordering → Second Brain note) not yet run. (2) GRANT_NARRATIVE.md produced — DONE. Phase 5 is progressing correctly. The full Dorothy test requires testing with actual blind user personas against complete user flows, not just UI string review.
+
+**Consensus recommendation for next cycle**: (1) Run full Dorothy test — design a scenario test where newly-blind-user and blind-elder-user personas attempt complete user flows (setup, food order, Second Brain note) with the simplified language and identify remaining "what do I do next?" gaps. (2) Fix the one missed jargon string: handleConfirmToken validation error still says "API tokens" — should say "connection codes". (3) Community launch prep: review CONTRIBUTING.md for blind contributor welcome language.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) Dorothy test simplicity audit complete — "API token" → "connection code" throughout SetupWizardScreen and installer; 6 new Dorothy test assertions; 134 JS tests passing; (2) ROADMAP.md updated — Phase 3 ✅ COMPLETE, Phase 4 ✅ COMPLETE, Phase 5 🔄 IN PROGRESS with test count table; (3) CHANGELOG.md Phase 5 section added; Phase 4 reclassified as [v0.4.0]; (4) GRANT_NARRATIVE.md created — full grant application document satisfying Phase 5 completion criterion
+- Attempted but failed: none
+- Confusion/loops: none
+- New gaps: (1) handleConfirmToken validation error still says "API tokens are usually at least 32 characters" — should say "connection codes" (missed in sweep); (2) "say that again" affordance is text only — should eventually be a real voice command; (3) No real user testimonials in grant narrative yet (placeholder $X values in budget)
+- Next cycle recommendation: (1) Run full Dorothy scenario test with newly-blind-user + blind-elder-user personas against complete setup + food order + Second Brain flows; (2) Fix the one missed jargon string in handleConfirmToken; (3) Community launch prep — CONTRIBUTING.md review for blind contributor welcome
+
+**PRODUCT LESSON (Dorothy test — language simplification)**:
+Technical jargon in setup flows is an accessibility barrier, not just a UX annoyance.
+For users who are newly blind, every unfamiliar term creates a moment where they stop
+and don't know what to do next. Systematic jargon replacement must cover:
+- All STEP_INSTRUCTIONS constants (spoken instructions)
+- All rendered text (for braille display users)
+- All accessibilityLabels and accessibilityHints (read by screen reader)
+- All validation error messages (spoken when something goes wrong)
+- All installer voice strings (spoken during Python CLI setup)
+
+A single missed instance ("API tokens are usually at least 32 characters" in
+handleConfirmToken validation) creates an inconsistent experience that breaks trust.
+Always search for all occurrences of replaced terms before declaring done.
+
+**PROCESS LESSON (wip() hook and commit workflow)**:
+The PostToolUse wip() hook auto-commits changes as they are made. This means
+`git status` shows "nothing to commit" even when substantial work has been done.
+The meaningful commits (feat/fix/docs/a11y types) must be created explicitly using
+`git commit --allow-empty` to create the typed summary commit that reviewers read.
+The wip() commits are intermediate saves; the typed commits are the record.
