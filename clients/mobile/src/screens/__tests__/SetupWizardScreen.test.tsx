@@ -388,3 +388,81 @@ describe("SetupWizardScreen — done step", () => {
     });
   });
 });
+
+// ─────────────────────────────────────────────────────────────
+// Tests: Dorothy test (Cycle 37 — non-technical language)
+// ─────────────────────────────────────────────────────────────
+
+describe("SetupWizardScreen — Dorothy test (plain language)", () => {
+  // Dorothy (blind-elder-user, 65+, low tech confidence) should never hear
+  // the words "API", "backend", "server", "token", or "keychain" in the
+  // spoken instructions. These are replaced with plain English equivalents.
+
+  it("welcome spoken instruction says 'connection code' not 'API token'", async () => {
+    renderWizard();
+    await waitFor(() => {
+      expect(Speech.speak).toHaveBeenCalledWith(
+        expect.stringMatching(/connection code/i),
+        expect.any(Object)
+      );
+    });
+    // Must NOT say 'API token' — too technical for newly-blind elder user
+    const calls = (Speech.speak as jest.Mock).mock.calls;
+    const welcomeCall = calls.find(([text]: [string]) =>
+      /welcome to blind assistant/i.test(text)
+    );
+    expect(welcomeCall).toBeTruthy();
+    expect(welcomeCall[0]).not.toMatch(/api token/i);
+    expect(welcomeCall[0]).not.toMatch(/backend server/i);
+  });
+
+  it("welcome instruction mentions 'your computer' not 'server'", async () => {
+    renderWizard();
+    await waitFor(() => {
+      const calls = (Speech.speak as jest.Mock).mock.calls;
+      const welcomeCall = calls.find(([text]: [string]) =>
+        /welcome to blind assistant/i.test(text)
+      );
+      expect(welcomeCall).toBeTruthy();
+      expect(welcomeCall[0]).toMatch(/your computer/i);
+    });
+  });
+
+  it("welcome screen display text says 'connection code' not 'API token'", () => {
+    renderWizard();
+    // On-screen text must also be plain language for braille display users
+    expect(screen.queryByText(/api token/i)).toBeNull();
+    expect(screen.getByText(/connection code/i)).toBeTruthy();
+  });
+
+  it("welcome instruction mentions ability to ask for repetition", async () => {
+    renderWizard();
+    // Dorothy needs reassurance she can ask for help — welcome screen must
+    // mention this affordance so she doesn't feel lost if she misses something.
+    expect(screen.getByText(/ask your assistant to repeat/i)).toBeTruthy();
+  });
+
+  it("code entry step header says 'Connection Code' not 'API Token'", async () => {
+    await advanceToTokenStep();
+    const header = screen.getByRole("header", { name: /enter your connection code/i });
+    expect(header).toBeTruthy();
+  });
+
+  it("error message gives actionable guidance, not just 'check your token'", async () => {
+    (SecureStorageMod.saveBearerToken as jest.Mock).mockRejectedValueOnce(
+      new Error("Keychain unavailable")
+    );
+    await advanceToConfirmStep("valid-long-token-value");
+    fireEvent.press(screen.getByRole("button", { name: /save token and complete setup/i }));
+    await waitFor(() => {
+      const calls = (Speech.speak as jest.Mock).mock.calls;
+      // Error instruction must explain what to do, not just say something went wrong
+      const errorCall = calls.find(([text]: [string]) =>
+        /could not save/i.test(text)
+      );
+      expect(errorCall).toBeTruthy();
+      // Must mention what user should do next (tap Retry)
+      expect(errorCall[0]).toMatch(/tap retry/i);
+    });
+  });
+});
