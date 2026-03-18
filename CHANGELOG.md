@@ -6,9 +6,21 @@ Format: [Semantic Versioning](https://semver.org/). Types: `Added`, `Changed`, `
 
 ---
 
-## [Unreleased] — Phase 5: Polish & Community Ready
+## [v0.5.0] — Phase 5: Polish & Community Ready ✅ COMPLETE (Cycles 37–39)
 
 ### Added
+- **Community launch preparation** (Cycle 39): CONTRIBUTING.md expanded with explicit blind
+  contributor welcome section, braille display user callout, Dorothy persona explanation,
+  JavaScript/React Native test instructions (`npm test`), good-first-issue guide with
+  concrete examples, and structured commit message format. Five good-first-issues created
+  on GitHub (issues #92–#96) covering: WebKit E2E tests, deafblind user stories,
+  accessibility assertions in food ordering tests, Windows screen reader README improvements,
+  and Dorothy scenario CI job.
+- **Dorothy E2E scenario tests** (Cycle 38): `tests/e2e/core/test_dorothy_scenario.py` —
+  13 E2E tests covering Dorothy (elder) + Alex (newly-blind) personas across all core flows:
+  food ordering with financial risk disclosure, Second Brain note save/query, general questions,
+  installer voice language, vault-unavailable error recovery. These tests are the Phase 5 gate.
+  136 JS tests (was 134, +2 regression tests for jargon fixes).
 - **Plain-language setup wizard** (Cycle 37, a11y): Dorothy test (Phase 5 gate) —
   all technical jargon removed from SetupWizardScreen and installer/install.py. "API token"
   replaced with "connection code", "backend server" with "your computer", "passphrase" with
@@ -17,6 +29,14 @@ Format: [Semantic Versioning](https://semver.org/). Types: `Added`, `Changed`, `
   users who fear missing spoken instructions. Error messages now give actionable guidance
   ("tap Retry to try again") rather than blaming the user for a bad token.
   6 new Dorothy test assertions in SetupWizardScreen.test.tsx (134 JS tests total).
+- **GRANT_NARRATIVE.md** (Cycle 37): Full grant application document — problem statement
+  (7 million blind Americans), solution, impact metrics (812 Python unit tests, 136 JS tests,
+  0 WCAG violations), 3 fundable milestones, budget narrative, sustainability plan.
+
+### Fixed
+- **Missed jargon string** (Cycle 38, a11y): `handleConfirmToken` validation error messages
+  in SetupWizardScreen said "API tokens are usually at least 32 characters" — replaced with
+  "Connection codes are usually at least 32 characters". 2 new regression tests.
 
 ---
 
