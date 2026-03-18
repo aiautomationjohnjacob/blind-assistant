@@ -210,21 +210,17 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 22 (Phase 3 — VAD + Playwright fallback + Android CI fix). iOS VoiceOver CI verified: run
-23222358997, 6 PASSED, 2 SKIPPED (backend not reachable in simulator — expected). Android TalkBack
-CI structural bug fixed: ci.yml only triggers on branches (not tags), so the `if: startsWith(
-github.ref, 'refs/tags/v')` condition in the e2e-android job was unreachable; created
-e2e-android.yml (mirrors ios-e2e.yml) so Android tests will run on next release tag. Voice Activity
-Detection (ISSUE-002) implemented: transcribe_microphone_with_vad() uses webrtcvad to stop recording
-when user stops speaking; fallback to fixed-duration when webrtcvad unavailable; VoiceLocalInterface
-uses VAD by default. Playwright screenshot fallback (ISSUE-003) implemented: _capture_with_pil() +
-_capture_with_playwright() strategy in ScreenObserver._capture_screenshot(). 732 unit tests (+19).
-Ruff clean. mypy 0 errors.
+Cycle 23 (Phase 3 — MCP memory + education site + Android CI fix). MCP memory server implemented:
+MCPMemoryClient in mcp_memory.py with MCP server + local fallback; context.py TODO resolved;
+765 Python unit tests (+33). Education site (clients/education/) scaffolded: pure React, audio-primary,
+WCAG 2.1 AA, AudioPlayer with native <audio> + transcript-by-default, 39 Jest accessibility tests,
+test-education CI job added. Android TalkBack CI v0.3.1 run 23223429212 FAILED: backslash-continuation
+bug in `script:` field of android-emulator-runner action; fixed to single-line pytest; v0.3.2 tag pushed.
 
-Cycle 23 priority:
-1. **P3: Verify Android TalkBack CI** — push v0.3.1 tag; confirm e2e-android.yml fires; document pass/fail
-2. **P3: MCP memory server** — implement src/blind_assistant/memory/mcp_memory.py (context.py TODO)
-3. **P3: Education website scaffold** — learn.blind-assistant.org React audio-primary site
+Cycle 24 priority:
+1. **P3: Verify Android TalkBack CI v0.3.2** — confirm e2e-android.yml triggers and 6-8 tests pass
+2. **P3: Wire MCPMemoryClient into api_server.py** — /profile endpoint should persist preferences via MCPMemoryClient
+3. **P3: Education site npm install** — generate package-lock.json in clients/education/ for reproducible CI
 
 ## Known Issues / Technical Debt
 
