@@ -255,11 +255,10 @@ Cycle 27 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 25.** Phase 3 in progress. ISSUE-030 resolved (PUT /profile allowlist).
-MCPMemoryClient wired into main.py production startup. Android TalkBack CI v0.3.2 verified passing.
-790 Python unit tests. Ruff clean. mypy 0 errors.
+**Loop completed Cycle 26.** Phase 3 in progress (nearly complete). ISSUE-031 resolved (DELETE /profile/preferences).
+798 Python unit tests. Ruff clean. mypy 0 errors.
 
-The most important work for Cycle 26 (Phase 3: Blind User Testing):
-1. **P3: DELETE /profile/preferences** — ethics gap; users must be able to clear MCP preference data; requires confirmation flow
-2. **P3: Phase 3 completion assessment** — review all sprint items; determine Phase 4 readiness
-3. **P4: Document VALID_EXTRA_PREFS 422 as intentional disclosure in threat model (security-specialist)**
+The most important work for Cycle 27 (beginning Phase 4: Accessibility Hardening):
+1. **P4: Web WCAG 2.1 AA audit** — call web-accessibility-expert; identify CRITICAL findings; begin Phase 4 sprint
+2. **P4: Document VALID_EXTRA_PREFS 422 disclosure in SECURITY_MODEL.md** — security-specialist recommendation
+3. **P3: Client-side voice trigger for "clear my preferences"** — completes ISSUE-031 client-side UX gap
