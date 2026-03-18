@@ -102,6 +102,39 @@ def _skip_if_unavailable(web_app_available: bool) -> None:
         )
 
 
+def _wait_for_app_ready(page: "Page") -> None:
+    """
+    Wait for the React app to finish hydrating after networkidle.
+
+    The Expo web bundle loads via a deferred <script> tag, then React runs
+    checkStoredCredentials() asynchronously. Even after networkidle, there is
+    a JS task queue hop before React updates state from "loading" to "setup"
+    or "ready" and renders the actual screen components.
+
+    This helper waits for either a role="button" (setup wizard or main screen)
+    or an <input> (setup wizard token field) to appear — indicating that React
+    has finished rendering the initial screen. Without this wait, tests race
+    against the JS hydration and fail with "No elements found".
+
+    Called after page.wait_for_load_state("networkidle") in tests that check
+    React-rendered ARIA properties (not the static HTML structure).
+    """
+    # Wait up to 5 seconds for at least one React-rendered interactive element.
+    # Both SetupWizardScreen and MainScreen have role="button" elements.
+    # ActivityIndicator (loading state) does NOT have role="button", so this
+    # correctly waits until the loading spinner transitions to the real screen.
+    try:
+        page.wait_for_selector(
+            '[role="button"], input[aria-label]',
+            timeout=5000,
+            state="attached",
+        )
+    except Exception:
+        # If no interactive element appears in 5 seconds, let the test
+        # proceed and fail with a meaningful assertion message.
+        pass
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Keyboard Navigation Tests (NVDA+Chrome pattern)
 # ─────────────────────────────────────────────────────────────────────────────
