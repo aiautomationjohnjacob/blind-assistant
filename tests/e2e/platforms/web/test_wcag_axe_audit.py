@@ -195,6 +195,7 @@ class TestWCAGAxeAudit:
         page.wait_for_load_state("networkidle")
 
         # Inject axe-core from local bundle (no CDN dependency)
+        _wait_for_app_ready(page)
         _inject_axe(page)
 
         # Run axe against the full document with WCAG 2.1 AA rules
@@ -274,6 +275,7 @@ class TestWCAGAxeAudit:
         page.goto(WEB_APP_URL)
         page.wait_for_load_state("networkidle")
 
+        _wait_for_app_ready(page)
         _inject_axe(page)
 
         contrast_result = page.evaluate(
@@ -316,6 +318,7 @@ class TestWCAGAxeAudit:
         page.goto(WEB_APP_URL)
         page.wait_for_load_state("networkidle")
 
+        _wait_for_app_ready(page)
         _inject_axe(page)
 
         name_result = page.evaluate(
@@ -363,6 +366,7 @@ class TestWCAGAxeAudit:
         page.goto(WEB_APP_URL)
         page.wait_for_load_state("networkidle")
 
+        _wait_for_app_ready(page)
         _inject_axe(page)
 
         role_result = page.evaluate(
