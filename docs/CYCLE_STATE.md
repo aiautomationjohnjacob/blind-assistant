@@ -70,9 +70,9 @@ New wiring in run-cycle:
 Phase 0: Foundation Setup         ✅ COMPLETE (agent network, GitHub, MCPs)
 Phase 1: Discovery & Architecture  ✅ COMPLETE (all deliverables done, Cycle 1)
 Phase 2: Core Build Sprint         ✅ COMPLETE (Cycles 2-10)
-Phase 3: Blind User Testing        🔄 IN PROGRESS (Cycle 11+)
-Phase 4: Accessibility Hardening   ⏳ Pending
-Phase 5: Polish & Community Ready  ⏳ Pending
+Phase 3: Blind User Testing        ✅ COMPLETE (Cycle 27)
+Phase 4: Accessibility Hardening   ✅ COMPLETE (Cycle 36)
+Phase 5: Polish & Community Ready  🔄 IN PROGRESS (Cycle 36+)
 ```
 
 ## What Happens in Each Phase
