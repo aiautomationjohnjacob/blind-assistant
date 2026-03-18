@@ -60,13 +60,34 @@ WEB_APP_URL = os.environ.get("WEB_APP_URL", "http://localhost:19006")
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers
 #
-# NOTE: web_app_available fixture and _skip_if_unavailable helper are defined
-# in conftest.py (DRY: shared across all 4 web E2E test files).
+# NOTE: web_app_available fixture is defined in conftest.py (DRY: shared
+# across all 4 web E2E test files). _skip_if_unavailable is also in conftest.py
+# but re-implemented here to use the local PLAYWRIGHT_AVAILABLE flag which is
+# set from the playwright.sync_api import (not the pytest_playwright package).
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Re-export _skip_if_unavailable from conftest for use in this file's test methods.
-# conftest.py provides the session-scoped web_app_available fixture automatically.
-from tests.e2e.platforms.web.conftest import _skip_if_unavailable  # noqa: E402
+
+def _skip_if_unavailable(web_app_available: bool) -> None:
+    """Raise pytest.skip if the web app or Playwright is not available.
+
+    NOTE: web_app_available is injected from the session fixture in conftest.py.
+    This helper exists in each web E2E file so it can reference the local
+    PLAYWRIGHT_AVAILABLE flag which checks playwright.sync_api availability.
+    """
+    if not PLAYWRIGHT_AVAILABLE:
+        pytest.skip(
+            "pytest-playwright is not installed. Web E2E tests run only in the 'e2e-web' CI job. "
+            "To run locally: pip install pytest pytest-playwright && playwright install chromium && "
+            "cd clients/mobile && npx expo export -p web && "
+            "python3 -m http.server 19006 --directory dist/ & "
+            "pytest tests/e2e/platforms/web/ --browser chromium"
+        )
+    if not web_app_available:
+        pytest.skip(
+            f"Web app not running at {WEB_APP_URL}. "
+            "Run: cd clients/mobile && npx expo export -p web && "
+            "python3 -m http.server 19006 --directory dist/"
+        )
 
 
 def _wait_for_app_ready(page: Page) -> None:
