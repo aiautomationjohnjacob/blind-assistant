@@ -275,8 +275,6 @@ def test_main_telegram_flag_sets_telegram_enabled_in_config():
 
 def test_main_telegram_flag_also_forces_api_server_enabled():
     """main() --telegram flag implicitly enables api_server_enabled so bot has a backend."""
-    import sys  # noqa: F401
-
     from blind_assistant.main import main
 
     captured_config: dict = {}
