@@ -820,3 +820,17 @@ deferred to Phase 5 or the native desktop implementation phase.
 **Cycle 36**: windows-accessibility-expert + macos-accessibility-expert sign-off: CLI and
 web layers meet the Phase 4 criteria. No NVDA-breaking patterns found in installer or
 voice strings. Web WCAG 2.1 AA confirmed by axe-core audit (0 violations in CI).
+
+### ISSUE-044: Cycle 36 no product output (documentation/assessment cycle — expected)
+**Severity**: INFORMATIONAL (not a real issue — no-progress check triggered but expected)
+**Category**: process
+**Detected by**: no-progress check STEP 6 (Cycle 36)
+**Detected**: 2026-03-18
+**Description**: Cycle 36 changed only meta-docs (CYCLE_STATE.md, LESSONS.md,
+OPEN_ISSUES.md, PRIORITY_STACK.md). No src/, tests/, or client files changed.
+This triggers the no-progress guardrail. However, this was intentional: Cycle 36
+was a Phase 4 completion assessment cycle. The CI result (run 23231203014) confirmed
+all Phase 4 gates passed, which required reading logs and updating state documents.
+No code changes were needed because Phase 4 was already done by Cycle 35.
+**Action**: No action required. Cycle 37 begins Phase 5 implementation.
+**Status**: CLOSED — expected behavior for a phase-transition assessment cycle
