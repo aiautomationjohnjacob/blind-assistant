@@ -271,9 +271,16 @@ export function SetupWizardScreen({
       >
         Enter API Token
       </Text>
+      {/* Phase 4 audit (Cycle 30): accessibilityLiveRegion added to match other steps.
+          When VoiceOver navigates to this step, it must announce the instructions text.
+          Without a live region, VoiceOver only announces this Text if the user swipes
+          to it — it does not auto-announce when content appears due to step transition.
+          The speak() call fires announceForAccessibility, but a live region on the Text
+          ensures VoiceOver also announces it as a polite update in Browse mode. */}
       <Text
         style={styles.instructions}
         accessibilityRole={Platform.OS === "web" ? undefined : "text"}
+        accessibilityLiveRegion="polite"
       >
         Type or paste your API token below.{"\n"}
         The token is printed by the server on first startup.
