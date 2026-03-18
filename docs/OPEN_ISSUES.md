@@ -640,3 +640,28 @@ If CDN is unreachable, all 4 axe-core tests fail with a network error rather tha
 **Resolved in**: Cycle 29 — axe.min.js (4.9.1, 555KB) committed to
 tests/e2e/platforms/web/axe.min.js; _inject_axe() helper uses add_script_tag(path=...);
 CDN injection removed. Local file fallback to CDN if file missing (should never happen).
+
+### ISSUE-036: accessibilityLiveRegion on View ignored by iOS VoiceOver; no accessibilityActions for rotor
+**Severity**: HIGH (iOS VoiceOver users never hear transcript/response announced)
+**Category**: a11y, ios, accessibility
+**Detected by**: android-accessibility-expert + ios-accessibility-expert (Cycle 29 Phase 4 audit)
+**Detected**: 2026-03-18
+**Description**: (1) MainScreen.tsx used accessibilityLiveRegion="polite" on View containers
+(transcriptContainer, responseContainer). On iOS/VoiceOver, live region events only fire when
+content changes inside a Text node — a View wrapper with accessibilityLiveRegion is silently
+ignored by VoiceOver. This meant VoiceOver users never heard "You said: ..." or "Assistant
+replied: ..." when those containers appeared. On Android/TalkBack, both View and Text support
+live regions, so this was iOS-only silent failure. (2) The press-to-talk button had no
+accessibilityActions — VoiceOver's "Actions" rotor item and TalkBack's Actions menu (swipe-
+up-then-right) were empty, giving no semantic context about what the button does.
+**Impact**: (1) iOS/VoiceOver users missed all transcript and response announcements — the core
+voice loop produced no audible feedback without proactive navigation. (2) VoiceOver rotor
+"Actions" item for the main button was empty — power users relying on rotor navigation lost
+context. TalkBack Actions menu was also empty.
+**Proposed fix**: (1) Move accessibilityLiveRegion from View to inner Text node; add
+accessibilityLabel to the Text. (2) Add accessibilityActions=[{name:"activate", label:...}]
+and onAccessibilityAction handler to the button.
+**Status**: RESOLVED
+**Resolved in**: Cycle 29 — MainScreen.tsx updated: live region moved to Text nodes inside
+transcriptContainer and responseContainer; accessibilityActions + onAccessibilityAction added
+to Pressable button; 6 new JS tests verifying Phase 4 patterns; 127 JS tests total.
