@@ -113,15 +113,21 @@ class VoiceLocalInterface:
 
     async def _listen_and_respond(self) -> None:
         """One listen-transcribe-respond cycle."""
-        from blind_assistant.voice.stt import transcribe_microphone
+        from blind_assistant.voice.stt import transcribe_microphone, transcribe_microphone_with_vad
         from blind_assistant.voice.tts import speak_locally
 
         # Narrow Optional type — _listen_and_respond only called from start() after context is set
         assert self._context is not None, "VoiceLocalInterface.start() must be called before _listen_and_respond()"
 
-        # Record a fixed-duration utterance
-        # Future: add voice activity detection (VAD) for smarter cutoff
-        transcript = await transcribe_microphone(duration_seconds=self._record_duration)
+        # Use VAD for smart cutoff if available; fall back to fixed-duration (ISSUE-002 fix).
+        # VAD automatically stops recording when the user stops speaking, preventing elder
+        # users from being cut off and power users from waiting out the full duration.
+        if self._use_vad:
+            transcript = await transcribe_microphone_with_vad(
+                fallback_duration=self._record_duration,
+            )
+        else:
+            transcript = await transcribe_microphone(duration_seconds=self._record_duration)
 
         if not transcript or not transcript.strip():
             # Silence or background noise — just loop
