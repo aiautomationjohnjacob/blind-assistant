@@ -30,6 +30,14 @@
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P4 | Consolidate FORBIDDEN_JARGON: remove duplicate list in test_dorothy_scenario.py; both files should use helpers.py | code-reviewer (Cycle 41) | 2026-03-18 |
 
+## Completed Items (Cycle 42 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Marcus (power user) scenario tests: 31 tests in tests/accessibility/test_marcus_scenario.py — preamble trimming (6 preambles parametrized), brief mode in _format_response(), Second Brain jargon-free, financial disclosure survives brief mode, no dependency patterns | 2026-03-18 | 42 |
+| DRY web_app_available fixture: extracted from 4 web E2E test files to tests/e2e/platforms/web/conftest.py; http.client import removed from 4 files | 2026-03-18 | 42 |
+| CI dorothy-e2e job renamed to "Persona scenario gate (Dorothy, Jordan, Marcus)"; step description updated; artifact renamed | 2026-03-18 | 42 |
+
 ## Completed Items (Cycle 41 additions)
 
 | Item | Completed | Cycle # |
