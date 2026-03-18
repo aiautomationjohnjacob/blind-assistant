@@ -316,7 +316,6 @@ jobs:
         run: |
           pip install playwright pytest pytest-playwright
           playwright install chromium || true
-          playwright install chromium-linux-minimal || true
           playwright install-deps chromium || true
 
       - name: Start web server (serve Expo dist/)
