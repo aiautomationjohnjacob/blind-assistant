@@ -324,34 +324,51 @@ export function MainScreen(): React.JSX.Element {
       </Pressable>
 
       {/* Last transcript — shown for braille display users to verify STT */}
-      {/* Same Platform.select pattern: View + accessibilityRole="text" works on mobile but
-          produces invalid role="text" on web. On web, aria-label + aria-live are sufficient. */}
+      {/* Phase 4 fix (ISSUE-036): accessibilityLiveRegion moved from View to the inner Text.
+          On iOS/VoiceOver, live regions only fire when content changes inside a Text node —
+          a View wrapper with accessibilityLiveRegion is silently ignored by VoiceOver.
+          On Android/TalkBack, both View and Text support live regions, but Text is safer.
+          The View uses accessibilityElementsHidden=false (default) and no live region;
+          the accessible name and live announcement come from the inner Text node. */}
       {lastTranscript ? (
         <View
           style={styles.transcriptContainer}
           accessibilityRole={Platform.OS === "web" ? undefined : "text"}
           accessibilityLabel={`You said: ${lastTranscript}`}
-          accessibilityLiveRegion="polite"
         >
           <Text style={styles.transcriptLabel} accessibilityElementsHidden importantForAccessibility="no">
             You said:
           </Text>
-          <Text style={styles.transcriptText}>{lastTranscript}</Text>
+          {/* accessibilityLiveRegion on Text — iOS VoiceOver announces this node when it changes */}
+          <Text
+            style={styles.transcriptText}
+            accessibilityLiveRegion="polite"
+            accessibilityLabel={`You said: ${lastTranscript}`}
+          >
+            {lastTranscript}
+          </Text>
         </View>
       ) : null}
 
       {/* Last response — shown as text for braille display users */}
+      {/* Same Phase 4 fix: accessibilityLiveRegion on the inner Text, not the View wrapper. */}
       {lastResponse ? (
         <View
           style={styles.responseContainer}
           accessibilityRole={Platform.OS === "web" ? undefined : "text"}
           accessibilityLabel={`Assistant replied: ${lastResponse}`}
-          accessibilityLiveRegion="polite"
         >
           <Text style={styles.responseLabel} accessibilityElementsHidden importantForAccessibility="no">
             Assistant:
           </Text>
-          <Text style={styles.responseText}>{lastResponse}</Text>
+          {/* accessibilityLiveRegion on Text — iOS VoiceOver announces this node when it changes */}
+          <Text
+            style={styles.responseText}
+            accessibilityLiveRegion="polite"
+            accessibilityLabel={`Assistant replied: ${lastResponse}`}
+          >
+            {lastResponse}
+          </Text>
         </View>
       ) : null}
 
