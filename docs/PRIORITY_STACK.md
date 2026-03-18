@@ -16,16 +16,23 @@
 
 ## Current Stack (Phase 4 — Accessibility Hardening)
 
-**Phase 4 in progress**: ISSUE-033 fixed (role="text"); axe-core CI gate established. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
+**Phase 4 in progress**: ISSUE-033 fixed (role="text"); axe-core CI gate now working with sync playwright API; VoiceOver live region bug fixed; accessibilityActions added. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P4 | Check first a11y-audit CI run result — verify axe-core gate passes; add any 'serious' violations to OPEN_ISSUES.md for tracking | Cycle 28 review panel | 2026-03-18 |
-| P4 | Bundle axe-core locally — add axe.min.js to tests/e2e/platforms/web/; use page.add_script_tag(path=...); eliminates CDN dependency (network failure risk in CI) | code-reviewer (Cycle 28) | 2026-03-18 |
-| P4 | iOS/Android Phase 4 accessibility — TalkBack gesture coverage audit; VoiceOver rotor support review; react-native a11y patterns audit | accessibility-reviewer | 2026-03-18 |
 | P4 | web-accessibility-expert full audit — NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome flows; heading structure; skip link; focus management after route changes | web-accessibility-expert | 2026-03-18 |
+| P4 | SetupWizardScreen live region audit — check for same VoiceOver live region bug (accessibilityLiveRegion on View vs Text) in SetupWizardScreen.tsx | ios-accessibility-expert (Cycle 29) | 2026-03-18 |
+| P4 | Verify new CI run — first run with sync API and local axe bundle; review WCAG violations; add 'serious' violations to OPEN_ISSUES.md | Cycle 29 review panel | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
+
+## Completed Items (Cycle 29 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| ISSUE-034: All 26 web E2E tests converted from async to sync playwright API; CI pipefail fixed; ISSUE-034 resolved | 2026-03-18 | 29 |
+| ISSUE-035: axe-core bundled locally (axe.min.js, 555KB); CDN dependency eliminated; _inject_axe() uses add_script_tag(path=...); ISSUE-035 resolved | 2026-03-18 | 29 |
+| ISSUE-036: VoiceOver live region moved from View to Text in MainScreen.tsx (transcript+response); accessibilityActions added to Pressable button; +6 JS tests; 127 JS total | 2026-03-18 | 29 |
 
 ## Completed Items (Cycle 28 additions)
 
