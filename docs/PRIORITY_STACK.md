@@ -16,13 +16,13 @@
 
 ## Current Stack (Phase 4 — Accessibility Hardening)
 
-**Phase 4 in progress**: ISSUE-033 fixed (role="text"); axe-core CI gate now working with sync playwright API; VoiceOver live region bug fixed; accessibilityActions added. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
+**Phase 4 in progress**: Skip link (WCAG 2.4.1) added; main landmark added; SetupWizardScreen token step live region fixed; axe-core CI gate active with sync API and local bundle. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P4 | web-accessibility-expert full audit — NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome flows; heading structure; skip link; focus management after route changes | web-accessibility-expert | 2026-03-18 |
-| P4 | SetupWizardScreen live region audit — check for same VoiceOver live region bug (accessibilityLiveRegion on View vs Text) in SetupWizardScreen.tsx | ios-accessibility-expert (Cycle 29) | 2026-03-18 |
-| P4 | Verify new CI run — first run with sync API and local axe bundle; review WCAG violations; add 'serious' violations to OPEN_ISSUES.md | Cycle 29 review panel | 2026-03-18 |
+| P4 | Verify skip link in expo export — build web export and confirm `dist/index.html` includes the skip link from `public/index.html` template | Cycle 30 | 2026-03-17 |
+| P4 | web-accessibility-expert audit — focus management after state changes; axe-core gate results; any 'serious' violations to OPEN_ISSUES.md | web-accessibility-expert | 2026-03-17 |
+| P4 | Check axe-core CI gate results — review violations found by Phase 4 CI gate on new build with skip link template | Cycle 30 | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
