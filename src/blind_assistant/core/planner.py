@@ -79,6 +79,7 @@ Intent types:
 - query_note: User wants to recall something from their notes
 - smart_home: User wants to control a smart home device
 - search_web: User wants to search the web
+- clear_preferences: User wants to clear/reset their saved settings or preferences
 - general_question: User has a general question (no tools needed)
 
 Respond with JSON only:
