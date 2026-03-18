@@ -1009,23 +1009,60 @@ class Orchestrator:
         # (e.g. "clear_preferences" → MCPMemoryClient.clear_user_data()).
         return Response(text=text, action=result.get("action"))
 
-    def _format_for_braille(self, text: str) -> str:
+    def _format_for_braille(self, text: str, max_line_length: int = 40) -> str:
         """
-        Format text for a 40-cell braille display.
-        Break at sentence boundaries; avoid emoji and special chars.
+        Format text for a 40-cell refreshable braille display.
+
+        A braille display shows one line of cells at a time. Users navigate
+        forward/backward through lines using the panning keys. Lines that are
+        longer than the display width require horizontal scrolling, which is
+        disorienting and slow for DeafBlind users.
+
+        This method:
+        1. Strips emoji (cannot be rendered on braille hardware)
+        2. Strips extra whitespace
+        3. Wraps text at word boundaries so no line exceeds max_line_length chars
         """
         import re
 
-        # Remove emoji
+        # Remove emoji — braille displays cannot render Unicode emoji
         emoji_pattern = re.compile(
             "[\U0001f600-\U0001f64f\U0001f300-\U0001f5ff\U0001f680-\U0001f6ff\U0001f1e0-\U0001f1ff]+",
             flags=re.UNICODE,
         )
         text = emoji_pattern.sub("", text)
 
-        # Break into sentences for navigable chunks
-        sentences = re.split(r"(?<=[.!?])\s+", text)
-        return "\n".join(sentences)
+        # Collapse multiple blank lines and strip leading/trailing whitespace
+        text = re.sub(r"\n{3,}", "\n\n", text).strip()
+
+        # Word-wrap each paragraph independently so logical breaks are preserved
+        paragraphs = text.split("\n")
+        wrapped_paragraphs: list[str] = []
+        for paragraph in paragraphs:
+            paragraph = paragraph.strip()
+            if not paragraph:
+                # Preserve blank lines between paragraphs
+                wrapped_paragraphs.append("")
+                continue
+            # Word-wrap the paragraph at max_line_length characters
+            words = paragraph.split()
+            lines: list[str] = []
+            current_line = ""
+            for word in words:
+                # If adding the word would exceed the display width, start a new line
+                candidate = f"{current_line} {word}".strip() if current_line else word
+                if len(candidate) <= max_line_length:
+                    current_line = candidate
+                else:
+                    if current_line:
+                        lines.append(current_line)
+                    # A single word longer than max_line_length must go on its own line
+                    current_line = word
+            if current_line:
+                lines.append(current_line)
+            wrapped_paragraphs.append("\n".join(lines))
+
+        return "\n".join(wrapped_paragraphs)
 
     def _trim_preamble(self, text: str) -> str:
         """Remove common AI preambles for brief mode."""
