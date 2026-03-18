@@ -255,27 +255,27 @@ No active blockers. Phase 4 COMPLETE as of Cycle 36.
 
 ## Last Cycle Summary
 
-Cycle 36 (Phase 4: Accessibility Hardening → COMPLETE; Phase 5: begins).
+Cycle 37 (Phase 5: Polish & Community Ready — language simplification + grant narrative).
 
-(1) ISSUE-039 RESOLVED: The earlier "1 moderate violation" was axe-core auditing the loading
-spinner (blank page), not the real React app. CI run 23231203014 confirms: 0 critical, 0 serious,
-0 moderate, 0 minor violations against the hydrated Expo web export. 36 Chromium + 36 Firefox
-E2E tests ALL PASS. 4 axe-core audit tests ALL PASS.
+(1) DOROTHY TEST — LANGUAGE SIMPLIFICATION: All technical jargon removed from SetupWizardScreen
+and installer/install.py. "API token" → "connection code", "backend server" → "your computer",
+"passphrase" → "secret phrase". Welcome screen now mentions "ask to repeat" affordance. Error
+messages give actionable guidance. 6 new Dorothy test assertions; 134 JS tests pass.
 
-(2) PHASE 4 COMPLETE: All completion criteria met — zero critical axe violations ✓, iOS VoiceOver ✓,
-Android TalkBack ✓, Windows/macOS sign-off ✓ (CLI + web; native GUI deferred), security sign-off ✓,
-ethics sign-off ✓.
+(2) GRANT_NARRATIVE.md created: full grant application document satisfying Phase 5 completion
+criterion. Covers problem (7M blind Americans), solution, impact metrics, 3 fundable milestones
+(Dorothy test, community launch, impact study), budget narrative, sustainability plan.
 
-(3) Windows/macOS accessibility sign-off (ISSUE-043): CLI + web layer approved. Installer uses
-NVDA-safe console I/O; no problematic patterns. Web app WCAG 2.1 AA confirmed by axe-core.
-Native desktop GUI (Electron/Tauri) audit deferred to when that component is built.
+(3) ROADMAP.md + CHANGELOG.md updated: Phase 3 ✅, Phase 4 ✅ (all deliverables), Phase 5 🔄.
+Test count table added. CHANGELOG Phase 5 section added; Phase 4 reclassified as [v0.4.0].
 
-(4) Closed 6 stale GitHub CI failure issues (86-91). CI is clean.
+(4) ONE MISSED JARGON STRING (identified in review): handleConfirmToken validation says
+"API tokens are usually at least 32 characters" — should say "connection codes". Fix in Cycle 38.
 
-Cycle 37 priority (Phase 5):
-1. **P5: Dorothy test design** — newly-blind-user + blind-elder-user review setup wizard + main screen
-2. **P5: Simplicity audit** — identify confusing language, missing affordances for non-technical users
-3. **P5: ROADMAP.md update** — mark Phase 4 complete; describe Phase 5 goals
+Cycle 38 priority (Phase 5):
+1. **P5: Fix missed jargon** — handleConfirmToken validation "API tokens" → "connection codes" + test
+2. **P5: Full Dorothy scenario test** — complete flows (setup → food ordering → Second Brain note)
+3. **P5: Community launch prep** — CONTRIBUTING.md for blind contributors
 
 ## Known Issues / Technical Debt
 
