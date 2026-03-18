@@ -213,17 +213,17 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 23 (Phase 3 — MCP memory + education site + Android CI fix). MCP memory server implemented:
-MCPMemoryClient in mcp_memory.py with MCP server + local fallback; context.py TODO resolved;
-765 Python unit tests (+33). Education site (clients/education/) scaffolded: pure React, audio-primary,
-WCAG 2.1 AA, AudioPlayer with native <audio> + transcript-by-default, 39 Jest accessibility tests,
-test-education CI job added. Android TalkBack CI v0.3.1 run 23223429212 FAILED: backslash-continuation
-bug in `script:` field of android-emulator-runner action; fixed to single-line pytest; v0.3.2 tag pushed.
+Cycle 24 (Phase 3 — MCPMemoryClient in /profile, education site tests fixed, CI repaired). MCPMemoryClient
+wired into GET/PUT /profile: preferences (verbosity, speech_rate, braille_mode, output_mode, extras) persist
+via MCP memory store; 14 new Python tests; 779 total unit tests. Education site: tests moved to src/__tests__/,
+@testing-library/dom installed, 41 new Jest tests, NavLink aria-current fixed, coverage 82.7%;
+npm ci --legacy-peer-deps in CI. CI failure fixed: test_record_with_vad_sync now uses patch.dict(sys.modules,
+{'webrtcvad': None}) to correctly simulate missing C-extension.
 
-Cycle 24 priority:
-1. **P3: Verify Android TalkBack CI v0.3.2** — confirm e2e-android.yml triggers and 6-8 tests pass
-2. **P3: Wire MCPMemoryClient into api_server.py** — /profile endpoint should persist preferences via MCPMemoryClient
-3. **P3: Education site npm install** — generate package-lock.json in clients/education/ for reproducible CI
+Cycle 25 priority:
+1. **P3: ISSUE-030** — Add PUT /profile allowlist for extra keys (MEDIUM security gap); 422 on unknown keys
+2. **P3: Wire MCPMemoryClient into main.py startup** — production server doesn't create/pass one yet
+3. **P3: Verify Android TalkBack CI v0.3.2** — check if e2e-android.yml run passed for v0.3.2 tag
 
 ## Known Issues / Technical Debt
 
