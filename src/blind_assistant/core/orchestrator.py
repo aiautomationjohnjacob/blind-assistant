@@ -350,7 +350,7 @@ class Orchestrator:
         # Step 2: Financial risk disclosure — MANDATORY before any payment discussion.
         # Uses the full confirm_financial_details_collection flow which speaks the
         # disclosure and waits for explicit acknowledgment before proceeding.
-        await update("Before we look at ordering options, I need to share some important information.")
+        await update("Before I search for ordering options, I need to share some important information.")
         user_acknowledged = await self.confirmation_gate.confirm_financial_details_collection(
             context=context,
             response_callback=update,
