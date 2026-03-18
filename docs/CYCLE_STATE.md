@@ -282,21 +282,15 @@ Cycle 34 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 32.** Phase 4 (Accessibility Hardening) in progress.
-Key deliverables: (1) Fixed 10 web E2E test failures — Python/JS syntax bug (or vs ||),
-React hydration race (added _wait_for_app_ready() helper), setup wizard vs main screen
-mismatch (expanded label keyword lists). All web E2E tests now use _wait_for_app_ready().
-(2) Added _wait_for_app_ready() to axe-core audit tests so axe audits the hydrated app.
-(3) Axe-core CI gate results reviewed: 0 critical, 0 serious, 1 unidentified moderate
-violation (ISSUE-039 logged). GitHub CI issues 84 and 85 closed. 812 Python unit tests
-unchanged. ruff clean. mypy 0 errors.
+**Loop completed Cycle 33.** Phase 4 (Accessibility Hardening) in progress.
+Key deliverables: (1) Fixed WCAG 4.1.3 violation — aria-live regions were conditionally
+rendered in MainScreen.tsx; now always in DOM (hiddenLiveRegion style hides them visually
+when empty). This was ISSUE-040 — logged and resolved in same cycle. (2) Increased
+_wait_for_app_ready() timeout 5s→15s in all web E2E test files; 8 tests were racing
+against loading spinner. CI run c3e55df in progress to verify.
 
-Most important for Cycle 33:
-1. **P4: ISSUE-039** — check the new CI run from this push (axe now waits for hydration);
-   identify the 1 moderate violation and fix or document it
-2. **P4: Phase 4 completion assessment** — once ISSUE-039 is resolved, run `/audit-a11y`
-   or get platform agent sign-offs to determine if Phase 4 is complete
-
-The most important work for Cycle 32 (Phase 4: Accessibility Hardening):
-1. **P4: Check axe-core CI gate results** — review 'serious' violations from Cycle 31 push; add any new violations to OPEN_ISSUES.md
-2. **P4: web-accessibility-expert full audit** — VoiceOver+Safari and TalkBack+Chrome flows; focus management after app state changes
+Most important for Cycle 34:
+1. **P4: Check CI run c3e55df** — verify web E2E tests now pass (8 previously failing);
+   identify ISSUE-039 axe violation from output (should now be visible with 15s hydration)
+2. **P4: Phase 4 completion assessment** — if ISSUE-039 is moderate-only (not critical/serious),
+   Phase 4 is complete; transition to Phase 5 (Polish & Community Ready)
