@@ -294,15 +294,11 @@ Cycle 36 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 34.** Phase 4 (Accessibility Hardening) in progress.
-Key deliverable: ISSUE-041 identified (React bundle not mounting in CI Playwright Chromium)
-and diagnostic logging added to all 3 web E2E test files. Next CI run will print the
-exact JS crash error via page.on("pageerror") / page.on("console") output.
+**Loop completed Cycle 35.** Phase 4 (Accessibility Hardening) in progress.
+Key deliverables: ISSUE-041 resolved (react-dom version mismatch fixed; ALL 33 Chromium web
+E2E tests now pass in CI). ISSUE-042 resolved (Firefox binary added to CI install step).
 
-Most important for Cycle 35:
-1. **P0: ISSUE-041 fix** — push changes, check CI diagnostic output, identify JS crash, fix it
-   - Likely suspects: `crypto.randomUUID` on http: origin; expo-modules-core initialization
-   - If crypto: add polyfill to public/index.html or catch in app.tsx
-   - If other: follow the diagnostic output to the root cause
-2. **P4: ISSUE-039** — the 1 moderate axe violation; will surface after React mounts in CI
-3. **P4: Phase 4 assessment** — iOS ✓, Android ✓, web blocked by ISSUE-041; Windows/macOS pending
+Most important for Cycle 36:
+1. **P4: ISSUE-039** — identify and fix the 1 moderate axe-core violation now that React mounts
+2. **P4: Phase 4 gate verification** — confirm Firefox E2E green after ci.yml fix deployed
+3. **P4: Platform sign-off** — Windows/macOS accessibility expert reviews still pending
