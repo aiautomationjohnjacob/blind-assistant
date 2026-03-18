@@ -218,10 +218,11 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P4: ISSUE-033 fix** — `accessibilityRole="text"` → `Platform.OS === "web" ? undefined : "text"` across 10 occurrences in MainScreen.tsx (3) + SetupWizardScreen.tsx (7); Platform import added; 4 new JS tests (Cycle 28)
 - [x] **P4: axe-core WCAG CI gate** — `a11y-audit` job in ci.yml; builds Expo web, serves on :19006, runs test_wcag_axe_audit.py; fails on CRITICAL violations; audit log uploaded as artifact; added to notify-failure (Cycle 28)
 - [x] **P4: test_wcag_axe_audit.py** — 4 axe-core E2E tests: critical WCAG full audit, colour-contrast, element naming, ARIA role validity + role="text" DOM check; skips gracefully without playwright/web server (Cycle 28)
-- [ ] **P4: Bundle axe-core locally** — eliminate CDN dependency; add axe.min.js to test assets; use page.add_script_tag(path=...)
-- [ ] **P4: Check first a11y-audit CI run result** — verify gate passes; add any 'serious' violations to OPEN_ISSUES.md
-- [ ] **P4: iOS/Android Phase 4 accessibility** — TalkBack gesture coverage; VoiceOver rotor support review; react-native a11y patterns audit
+- [x] **P4: Bundle axe-core locally** — axe.min.js (4.9.1, 555KB) committed; page.add_script_tag(path=...); CDN dependency eliminated; ISSUE-035 resolved (Cycle 29)
+- [x] **P4: Check first a11y-audit CI run result** — ALL 26 web E2E tests were silently failing (async/sync mismatch + pipefail); fixed with sync playwright API; ISSUE-034 resolved (Cycle 29)
+- [x] **P4: iOS/Android Phase 4 accessibility** — VoiceOver live region bug fixed (View→Text); accessibilityActions added for rotor; ISSUE-036 resolved; +6 JS tests; 127 JS total (Cycle 29)
 - [ ] **P4: web-accessibility-expert full audit** — NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome flows; heading structure; skip link; focus management after route changes
+- [ ] **P4: SetupWizardScreen live region audit** — check for same VoiceOver live region bug in SetupWizardScreen (progress/step announcements)
 
 ## Blockers
 
