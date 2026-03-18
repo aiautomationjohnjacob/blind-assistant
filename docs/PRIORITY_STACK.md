@@ -16,15 +16,24 @@
 
 ## Current Stack (Phase 4 — Accessibility Hardening)
 
-**Phase 4 in progress**: Skip link (WCAG 2.4.1) added; main landmark added; SetupWizardScreen token step live region fixed; axe-core CI gate active with sync API and local bundle. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
+**Phase 4 in progress**: Skip link (WCAG 2.4.1) added + tabindex="-1" fix (ISSUE-037); main landmark added; SetupWizardScreen token step live region fixed; axe-core CI gate active; 5 new TestFocusManagement E2E tests. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P4 | Verify skip link in expo export — build web export and confirm `dist/index.html` includes the skip link from `public/index.html` template | Cycle 30 | 2026-03-17 |
-| P4 | web-accessibility-expert audit — focus management after state changes; axe-core gate results; any 'serious' violations to OPEN_ISSUES.md | web-accessibility-expert | 2026-03-17 |
-| P4 | Check axe-core CI gate results — review violations found by Phase 4 CI gate on new build with skip link template | Cycle 30 | 2026-03-17 |
+| P4 | Check axe-core CI gate results — review 'serious' violations from Cycle 31 push; add any new violations to OPEN_ISSUES.md | Cycle 31 | 2026-03-17 |
+| P4 | web-accessibility-expert full audit — VoiceOver+Safari and TalkBack+Chrome flows; focus management after app state changes (beyond keyboard navigation) | web-accessibility-expert | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
+
+## Completed Items (Cycle 31 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Verify skip link in expo export: confirmed `dist/index.html` includes skip link + main landmark from `public/index.html` template | 2026-03-17 | 31 |
+| ISSUE-037: tabindex="-1" added to #main-content in public/index.html; skip link now actually routes keyboard focus (not just scroll); dist rebuilt | 2026-03-17 | 31 |
+| 5 new TestFocusManagement E2E tests: skip link focus routing, voice button reachability, invisible focus, aria-live coverage (Cycle 31) | 2026-03-17 | 31 |
+| 1 new TestPageStructure test: test_skip_link_target_has_tabindex_minus_one (Cycle 31) | 2026-03-17 | 31 |
+| test_can_reach_main_button_by_tab corrected — fixed assertion for skip link Tab order (Cycle 31) | 2026-03-17 | 31 |
 
 ## Completed Items (Cycle 30 additions)
 
