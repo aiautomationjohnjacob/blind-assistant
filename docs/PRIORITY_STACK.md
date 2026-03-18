@@ -34,6 +34,16 @@
 | CONTRIBUTING.md: added ROADMAP.md link alongside FEATURE_PRIORITY.md under "Find something to work on" | 2026-03-17 | 21 |
 | v0.3.0 release tag pushed: triggers e2e-android (AVD) + ios-e2e.yml (macOS Simulator) CI workflows | 2026-03-17 | 21 |
 
+## Completed Items (Cycle 22 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| iOS VoiceOver CI verified: run 23222358997, 6 PASSED, 2 SKIPPED (backend not reachable — expected) | 2026-03-18 | 22 |
+| Android TalkBack CI structural bug fixed: e2e-android.yml created (was unreachable in ci.yml) | 2026-03-18 | 22 |
+| Voice Activity Detection (ISSUE-002): transcribe_microphone_with_vad() + _record_with_vad_sync(); webrtcvad-wheels; +12 tests | 2026-03-18 | 22 |
+| PIL/Playwright screenshot fallback (ISSUE-003): _capture_with_pil() + _capture_with_playwright() in ScreenObserver; +9 tests | 2026-03-18 | 22 |
+| 732 Python unit tests total (+19 from Cycle 22); ruff clean; mypy 0 errors | 2026-03-18 | 22 |
+
 ## Completed Items (Cycle 20 additions)
 
 | Item | Completed | Cycle # |
