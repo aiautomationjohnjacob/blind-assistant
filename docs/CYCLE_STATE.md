@@ -256,33 +256,27 @@ No active blockers. Phase 4 COMPLETE as of Cycle 36.
 
 ## Last Cycle Summary
 
-Cycle 41 (Accessibility hardening — Jordan DeafBlind persona + shared helpers + README).
+Cycle 42 (Accessibility testing — Marcus power user persona + DRY web fixture refactor).
 
-(1) JORDAN SCENARIO TESTS: 16 tests in tests/accessibility/test_jordan_scenario.py covering
-the DeafBlind persona (braille display user). Tests verify: braille word-wrap at 40 chars,
-emoji stripping, Second Brain text-only mode, financial disclosure readable via braille,
-food ordering disclosure surfaced as text (not audio-only). All 16 pass. GitHub issue #93 CLOSED.
+(1) MARCUS SCENARIO TESTS: 31 tests in tests/accessibility/test_marcus_scenario.py covering
+the power user persona (born blind, software developer, NVDA expert). Tests verify: _trim_preamble()
+strips all 6 registered preambles in brief mode; standard mode (Dorothy) preserves preambles;
+financial disclosure present even in brief mode (non-negotiable safety); Second Brain jargon-free;
+error messages not suppressed in brief mode; braille_mode and verbosity independent.
 
-(2) SHARED ACCESSIBILITY HELPERS: tests/accessibility/helpers.py created with 4 shared
-assertion functions: assert_no_jargon() (word-boundary matching), assert_no_visual_only_language(),
-assert_braille_friendly() (40-char enforcement), assert_financial_disclosure_present().
-test_dorothy_scenario.py refactored to use shared helpers. GitHub issue #94 CLOSED.
+(2) DRY WEB_APP_AVAILABLE FIXTURE: web_app_available session fixture extracted from 4 web E2E
+test files into tests/e2e/platforms/web/conftest.py. http.client import removed from 4 files.
+28 lines of duplicate code eliminated. All 43 web E2E tests still collect and skip gracefully.
 
-(3) BRAILLE FORMATTER FIX: _format_for_braille() in orchestrator.py was only splitting on
-sentence boundaries, leaving 46+ char lines. Now word-wraps at 40 chars. Real accessibility fix.
+(3) CI: dorothy-e2e job renamed to "Persona scenario gate (Dorothy, Jordan, Marcus)". Step
+description updated. Artifact renamed. Now covers 60 persona gate tests (13 + 16 + 31).
 
-(4) VISUAL-ONLY LANGUAGE FIX: "Taking a look at your screen" → "Reading your screen now";
-"Before we look at ordering options" → "Before I search for ordering options". Found by new helpers.
+Total tests: 842 Python unit + 30 E2E core + 47 accessibility + [web E2E: run in CI only] = 919.
 
-(5) WINDOWS/NVDA/BRAILLE README: Added step-by-step NVDA setup, VoiceOver on macOS setup,
-and braille display usage guide to README.md. GitHub issue #95 CLOSED.
-
-(6) CI: dorothy-e2e CI job expanded to include Jordan/accessibility tests (29 tests total).
-
-Cycle 42 priorities:
+Cycle 43 priorities:
 1. **P3: Telegram integration** — add `--telegram` flag to main.py; Telegram + API server concurrent
-2. **P3: Marcus scenario tests** — power-user persona still has no E2E coverage
-3. **P3: Device simulation CI** — Android AVD + Playwright (complex infrastructure)
+2. **P3: Device simulation CI** — Android AVD + Playwright (complex infrastructure)
+3. **P4: Consolidate FORBIDDEN_JARGON** — remove duplicate list in test_dorothy_scenario.py
 
 ## Known Issues / Technical Debt
 
