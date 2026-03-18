@@ -29,7 +29,6 @@ import pytest
 
 from blind_assistant.core.confirmation import ConfirmationGate
 from blind_assistant.core.orchestrator import Orchestrator, UserContext
-from blind_assistant.security.disclosure import FINANCIAL_RISK_DISCLOSURE
 from blind_assistant.tools.browser import BrowserTool, PageState
 from tests.accessibility.helpers import (
     assert_financial_disclosure_present,
