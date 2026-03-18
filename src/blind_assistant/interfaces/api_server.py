@@ -36,6 +36,25 @@ from starlette.middleware.base import BaseHTTPMiddleware
 logger = logging.getLogger(__name__)
 
 # ─────────────────────────────────────────────────────────────
+# Allowlist for extra preference keys (ISSUE-030)
+# ─────────────────────────────────────────────────────────────
+
+# Only these keys may appear in ProfileUpdateRequest.extra.
+# Unknown keys are rejected with HTTP 422 to prevent arbitrary MCP pollution.
+# Add new keys here when legitimate clients need to persist additional preferences.
+# Audit: rejected keys are logged at WARNING level for security review.
+VALID_EXTRA_PREFS: frozenset[str] = frozenset(
+    {
+        "timezone",  # IANA timezone string (e.g. "America/New_York")
+        "user_name",  # Preferred name the assistant uses when greeting the user
+        "common_tasks",  # Comma-separated list of frequently-requested tasks
+        "language",  # BCP-47 language tag for UI language (e.g. "en", "es")
+        "tts_voice_id",  # ElevenLabs voice ID override
+        "screen_reader",  # Primary screen reader ("nvda", "jaws", "voiceover", "talkback")
+    }
+)
+
+# ─────────────────────────────────────────────────────────────
 # Rate limiting middleware
 # ─────────────────────────────────────────────────────────────
 
