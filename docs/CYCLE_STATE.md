@@ -252,11 +252,10 @@ Cycle 25 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 23.** Phase 3 in progress. MCP memory server (mcp_memory.py) implemented.
-Education site (clients/education/) scaffolded with 39 Jest accessibility tests. Android TalkBack CI
-backslash-continuation bug fixed; v0.3.2 tag pushed to verify. 765 Python unit tests. Ruff clean. mypy 0 errors.
+**Loop completed Cycle 24.** Phase 3 in progress. MCPMemoryClient now wired into GET/PUT /profile.
+Education site tests in CI (75 Jest tests, 82.7% coverage). 779 Python unit tests. Ruff clean. mypy 0 errors.
 
-The most important work for Cycle 24 (Phase 3: Blind User Testing):
-1. **P3: Verify Android TalkBack CI v0.3.2** — confirm e2e-android.yml run passes; document in OPEN_ISSUES.md
-2. **P3: Wire MCPMemoryClient into api_server.py** — /profile endpoint persists preferences
-3. **P3: Education site package-lock.json** — run npm install in clients/education/ for reproducible CI
+The most important work for Cycle 25 (Phase 3: Blind User Testing):
+1. **P3: ISSUE-030** — Add PUT /profile allowlist for extra keys; 422 on unknown keys (MEDIUM security)
+2. **P3: Wire MCPMemoryClient into main.py startup** — production server not yet creating MCPMemoryClient
+3. **P3: Verify Android TalkBack CI v0.3.2** — check if e2e-android.yml run passed for v0.3.2 tag
