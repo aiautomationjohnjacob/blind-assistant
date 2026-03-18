@@ -243,11 +243,12 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P5: Dorothy test — language simplification (Cycle 37)** — "API token" → "connection code", "backend server" → "your computer", "passphrase" → "secret phrase" throughout SetupWizardScreen + installer/install.py; welcome screen adds "ask to repeat anything" affordance; error messages give actionable guidance; 6 new Dorothy test assertions; 134 JS tests all passing; GRANT_NARRATIVE.md created
 - [x] **P5: ROADMAP.md + CHANGELOG.md update (Cycle 37)** — Phase 3+4 marked COMPLETE; Phase 5 IN PROGRESS with test count table; CHANGELOG Phase 5 section + [v0.4.0] Phase 4 entry
 - [x] **P5: Grant narrative (Cycle 37)** — GRANT_NARRATIVE.md: problem statement, 7M blind Americans metric, impact table, 812 Python + 134 JS tests, 3 fundable milestones, budget narrative, sustainability plan
-- [ ] **P5: Full Dorothy scenario test** — personas attempt complete flows (setup → food ordering → Second Brain note); identify remaining "what do I do next?" gaps
-- [ ] **P5: Fix missed jargon string** — handleConfirmToken validation error says "API tokens are usually at least 32 characters" → "connection codes" (identified in Cycle 37 review)
-- [ ] **P5: Simplicity audit of orchestrator voice strings** — review AI response language for jargon-free, patient tone
-- [ ] **P5: Community launch prep** — open-source-steward reviews CONTRIBUTING.md, good-first-issues, README for first-time contributor UX; ensure blind contributors feel especially welcome
-- [ ] **P5: VoiceOver+Safari CI** — add WebKit E2E tests for Safari/VoiceOver (separate from Chromium/Firefox)
+- [x] **P5: Full Dorothy scenario test (Cycle 38)** — 13 E2E tests in test_dorothy_scenario.py: Dorothy (elder) + Alex (newly-blind) across food ordering with disclosure, Second Brain note, general questions, installer language, vault-unavailable recovery
+- [x] **P5: Fix missed jargon string (Cycle 38)** — handleConfirmToken empty + too-short guards: "API tokens" → "connection codes"; 2 regression tests; ISSUE-045 resolved; 136 JS tests
+- [x] **P5: Community launch prep (Cycle 39)** — CONTRIBUTING.md expanded: blind contributor welcome section, braille display callout, Dorothy persona explanation, JS test instructions, good-first-issue guide, commit format; 5 GitHub issues created (#92-#96); CHANGELOG v0.5.0 entry added
+- [ ] **P5 (future): VoiceOver+Safari CI** — add WebKit E2E tests for Safari/VoiceOver (ISSUE #92 now a good-first-issue)
+- [ ] **P5 (future): Dorothy E2E in CI** — dorothy-e2e CI job (ISSUE #96 now a good-first-issue)
+- [ ] **P5 (future): Simplicity audit of orchestrator voice strings** — review AI response language for jargon-free tone
 
 ## Blockers
 
