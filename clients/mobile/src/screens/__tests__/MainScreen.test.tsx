@@ -552,3 +552,140 @@ describe("MainScreen — web platform accessibilityRole fix (ISSUE-033)", () => 
     expect(header.props.accessibilityRole).toBe("header");
   });
 });
+
+// ─────────────────────────────────────────────────────────────
+// Tests: Phase 4 — iOS/Android accessibility hardening (ISSUE-036)
+// ─────────────────────────────────────────────────────────────
+//
+// Phase 4 accessibility hardening targets:
+//
+// 1. VoiceOver rotor (accessibilityActions): VoiceOver's "Actions" rotor item shows
+//    custom actions on the focused element. We expose an "activate" action on the button
+//    so VoiceOver users know what the button does from the Actions rotor menu.
+//
+// 2. TalkBack gesture coverage (onAccessibilityAction): TalkBack's "Actions" node
+//    (swipe-up-then-right) also uses accessibilityActions. The onAccessibilityAction
+//    handler must correctly call handleButtonPress when the "activate" action fires.
+//
+// 3. Live region on Text vs View (iOS VoiceOver fix): accessibilityLiveRegion on a View
+//    is silently ignored by iOS VoiceOver. The live region must be on the inner Text node
+//    that actually changes, not its View container. This fix ensures VoiceOver announces
+//    both transcript and response updates when they appear.
+
+describe("MainScreen — Phase 4 iOS/Android accessibility (ISSUE-036)", () => {
+  // ── VoiceOver Rotor / TalkBack Actions ─────────────────────────────────────
+
+  it("main button exposes an accessibilityActions array (rotor/actions support)", () => {
+    // VoiceOver: Actions rotor item lists these. TalkBack: Actions menu (swipe-up-then-right).
+    // Both screen readers require onAccessibilityAction handler to be present.
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+    // accessibilityActions must be defined and contain at least one action
+    expect(button.props.accessibilityActions).toBeDefined();
+    expect(Array.isArray(button.props.accessibilityActions)).toBe(true);
+    expect(button.props.accessibilityActions.length).toBeGreaterThan(0);
+  });
+
+  it("idle state button action is labeled 'Start speaking'", () => {
+    // In idle state, the action label describes what will happen next.
+    // VoiceOver reads: "Speak to assistant. Button. Actions available: Start speaking."
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+    const actions = button.props.accessibilityActions as Array<{ name: string; label: string }>;
+    const activateAction = actions.find((a) => a.name === "activate");
+    expect(activateAction).toBeDefined();
+    expect(activateAction?.label).toBe("Start speaking");
+  });
+
+  it("onAccessibilityAction handler exists on the button", () => {
+    // TalkBack's Actions menu fires onAccessibilityAction when a user selects an action.
+    // Without this handler, the Actions menu entry does nothing — silent failure.
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+    expect(button.props.onAccessibilityAction).toBeDefined();
+    expect(typeof button.props.onAccessibilityAction).toBe("function");
+  });
+
+  // ── iOS VoiceOver live region fix (Text not View) ──────────────────────────
+
+  it("transcript Text node has accessibilityLiveRegion='polite' after transcription", async () => {
+    // Phase 4 fix: live region moved to Text (not View) for iOS VoiceOver compatibility.
+    // VoiceOver only fires live region events when content changes inside a Text node.
+    // A View wrapper with accessibilityLiveRegion is ignored on iOS.
+    mockTranscribe.mockResolvedValue({ text: "order food", language: "en", session_id: "test" });
+    mockQuery.mockResolvedValue({
+      text: "I can help with that.",
+      spoken_text: "I can help with that.",
+      session_id: "test",
+    });
+
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+
+    // Start recording, stop to trigger transcription
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
+
+    await waitFor(() => {
+      // After transcription, "You said:" text should appear
+      expect(screen.getByText("order food")).toBeTruthy();
+    });
+
+    // The transcript text node must carry the live region attribute
+    // React Native Testing Library uses the 'accessibilityLiveRegion' prop directly
+    const transcriptNode = screen.getByText("order food");
+    expect(transcriptNode.props.accessibilityLiveRegion).toBe("polite");
+  });
+
+  it("response Text node has accessibilityLiveRegion='polite' after AI response", async () => {
+    // Same fix for the response container: the inner Text node must carry the live region.
+    mockTranscribe.mockResolvedValue({ text: "what time is it?", language: "en", session_id: "t" });
+    mockQuery.mockResolvedValue({
+      text: "It is 3 PM.",
+      spoken_text: "It is 3 PM.",
+      session_id: "test",
+    });
+
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
+
+    await waitFor(() => {
+      expect(screen.getByText("It is 3 PM.")).toBeTruthy();
+    });
+
+    // The response Text node must carry the live region for iOS VoiceOver
+    const responseNode = screen.getByText("It is 3 PM.");
+    expect(responseNode.props.accessibilityLiveRegion).toBe("polite");
+  });
+
+  it("transcript Text node has accessibilityLabel including 'You said'", async () => {
+    // The inner Text that has the live region should also have a descriptive label
+    // so VoiceOver announces 'You said: order food' not just 'order food'.
+    mockTranscribe.mockResolvedValue({ text: "call my doctor", language: "en", session_id: "t" });
+    mockQuery.mockResolvedValue({
+      text: "Calling your doctor now.",
+      spoken_text: "Calling your doctor now.",
+      session_id: "test",
+    });
+
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+
+    fireEvent.press(button);
+    await waitFor(() => { expect(mockStartRecording).toHaveBeenCalled(); });
+    fireEvent.press(button);
+
+    await waitFor(() => {
+      expect(screen.getByText("call my doctor")).toBeTruthy();
+    });
+
+    const transcriptNode = screen.getByText("call my doctor");
+    // Label should include context prefix for VoiceOver announcement
+    expect(transcriptNode.props.accessibilityLabel).toMatch(/you said/i);
+  });
+});
