@@ -407,18 +407,18 @@ class VoiceInstaller:
         response = self._wait_for_input()
 
         if not self._check_ready(response):
-            self._speak("Take your time. Say ready when you have a passphrase in mind.")
+            self._speak("Take your time. Say ready when you have a secret phrase in mind.")
             self._wait_for_input()
 
         self._speak(
-            "Please say or type your passphrase now. "
-            "I will remember it only for this session — I won't store the passphrase itself."
+            "Please say or type your secret phrase now. "
+            "I will use it to protect your notes — I won't keep the phrase itself."
         )
-        passphrase = self._wait_for_input("Your vault passphrase:")
+        passphrase = self._wait_for_input("Your secret phrase:")
 
         if len(passphrase) < 4:
-            self._speak("Please choose a passphrase with at least 4 words or characters.")
-            passphrase = self._wait_for_input("Your vault passphrase:")
+            self._speak("Please choose a secret phrase with at least 4 words or characters.")
+            passphrase = self._wait_for_input("Your secret phrase:")
 
         # Create the vault
         from pathlib import Path
