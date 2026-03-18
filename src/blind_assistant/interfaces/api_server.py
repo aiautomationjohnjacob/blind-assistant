@@ -684,6 +684,34 @@ class APIServer:
 
         # 204 No Content — FastAPI returns an empty body when the handler returns None.
 
+    async def _clear_preferences_for_user(self, user_id: str) -> None:
+        """
+        Clear all MCP-persisted preference data for the given user.
+
+        Called internally by _query() when the orchestrator returns
+        response.action == "clear_preferences" (voice-triggered clear).
+        Unlike DELETE /profile/preferences, no explicit confirm body is needed
+        because the orchestrator already collected spoken confirmation via
+        ConfirmationGate before setting the action flag.
+
+        Gracefully degrades if MCPMemoryClient is unavailable.
+        """
+        if self._memory is not None:
+            try:
+                await self._memory.clear_user_data(user_id)
+                logger.info(
+                    "Voice-triggered clear_preferences: cleared MCP data for user %s",
+                    user_id,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Voice-triggered clear_preferences: MCPMemoryClient.clear_user_data failed for %s: %s",
+                    user_id,
+                    exc,
+                )
+        else:
+            logger.debug("Voice-triggered clear_preferences: MCPMemoryClient not configured — nothing to clear.")
+
     # ─────────────────────────────────────────────────────────
     # Context helper
     # ─────────────────────────────────────────────────────────
