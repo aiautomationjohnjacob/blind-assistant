@@ -430,7 +430,7 @@ jobs:
       - name: Install project (editable)
         run: pip install -e . 2>/dev/null || pip install -e . --no-build-isolation 2>/dev/null || true
 
-      - name: Run persona gate tests (Dorothy + Jordan + accessibility helpers)
+      - name: Run persona gate tests (Dorothy + Jordan + Marcus + accessibility helpers)
         # Dorothy scenario (13 tests): Dorothy (elder) + Alex (newly-blind) across all core flows:
         # food ordering with risk disclosure, Second Brain save/query, general questions,
         # installer language (no jargon), financial disclosure plain-language check.
@@ -438,6 +438,11 @@ jobs:
         # Jordan scenario (16 tests): DeafBlind (braille-display) user across all core flows:
         # braille formatting (≤40 chars, no emoji), Second Brain text-only, financial disclosure
         # readable via braille, food order disclosure surfaced as text.
+        #
+        # Marcus scenario (31 tests): power user (brief mode) across all core flows:
+        # _trim_preamble() strips "Certainly!" / "Of course!" in brief verbosity mode,
+        # financial disclosure STILL present even in brief mode, Second Brain jargon-free,
+        # error messages not suppressed, braille mode independent of brief mode.
         #
         # Passes when every test confirms: no jargon, no dead ends, actionable guidance,
         # braille-friendly formatting, no visual-only language.
