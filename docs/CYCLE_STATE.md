@@ -235,18 +235,20 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 29 (Phase 4: Accessibility Hardening). Three deliverables: (1) Web E2E fix — all 26
-tests were silently failing due to async/sync playwright mismatch + CI pipefail bug; converted
-3 test files to sync API, added set -o pipefail, bundled axe-core locally (555KB, no CDN);
-ISSUE-034 + ISSUE-035 resolved; (2) iOS/Android Phase 4 audit — found VoiceOver live region
-bug (accessibilityLiveRegion on View silently ignored by iOS); fixed by moving to Text nodes;
-added accessibilityActions for VoiceOver rotor and TalkBack Actions menu; ISSUE-036 resolved;
-6 new JS tests. (3) 127 JS tests total (+6). 812 Python unit tests (unchanged). ruff clean.
+Cycle 30 (Phase 4: Accessibility Hardening). Four deliverables: (1) Skip link + main landmark
+— created `clients/mobile/public/index.html` as custom Expo HTML template; skip-to-main-content
+link is now the first focusable element (WCAG 2.4.1 Level A); `<div role="main">` wraps React
+root for NVDA D-key landmark navigation; (2) SetupWizardScreen live region audit — token entry
+step was missing `accessibilityLiveRegion="polite"` on instructions Text; fixed; 1 new JS test;
+128 JS total (+1); (3) 5 new web E2E structural tests (TestPageStructure) — skip link first
+focusable, target exists, main landmark, heading structure, heading labels; (4) Documentation
+steward — CHANGELOG updated with Phase 4 section; README Telegram demoted to optional; test
+counts updated to current. 812 Python unit tests (unchanged). ruff clean.
 
-Cycle 30 priority:
-1. **P4: web-accessibility-expert full audit** — heading structure, skip link, focus management after route changes; NVDA+Chrome, VoiceOver+Safari patterns
-2. **P4: SetupWizardScreen live region audit** — check for same VoiceOver live region bug in SetupWizardScreen (progress/step announcements)
-3. **P4: Verify new CI run** — confirm axe-core tests now pass with sync API; review any WCAG violations found
+Cycle 31 priority:
+1. **P4: Verify skip link in expo export** — build web and confirm `dist/index.html` has skip link from `public/index.html` template
+2. **P4: web-accessibility-expert audit** — focus management after state changes; axe-core gate results review
+3. **P4: Check axe-core CI gate results** — review any 'serious' violations; add to OPEN_ISSUES.md
 
 ## Known Issues / Technical Debt
 
