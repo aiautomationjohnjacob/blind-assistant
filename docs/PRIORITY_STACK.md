@@ -26,6 +26,14 @@
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
+## Completed Items (Cycle 23 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| MCP memory server: MCPMemoryClient in mcp_memory.py; context.py TODO resolved; 33 new tests; 765 Python unit tests | 2026-03-18 | 23 |
+| Education website scaffold: clients/education/ React site; AudioPlayer; CourseCard; 5 pages; WCAG 2.1 AA; 39 Jest tests; test-education CI | 2026-03-18 | 23 |
+| Android TalkBack CI backslash bug fixed: e2e-android.yml script field now single-line pytest; v0.3.2 tag pushed | 2026-03-18 | 23 |
+
 ## Completed Items (Cycle 21 additions)
 
 | Item | Completed | Cycle # |
