@@ -849,7 +849,7 @@ def test_delete_preferences_returns_204_on_happy_path():
     mem = _make_mock_memory()
     mem.clear_user_data = AsyncMock()
     with _make_server_with_memory(memory_client=mem) as (_, client):
-        resp = client.delete("/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
+        resp = client.request("DELETE", "/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
     assert resp.status_code == 204
 
 
@@ -899,7 +899,7 @@ def test_delete_preferences_returns_204_when_no_memory_client():
     If MCP is not configured there is nothing to clear, so we succeed silently.
     """
     with _make_server_with_memory(memory_client=None) as (_, client):
-        resp = client.delete("/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
+        resp = client.request("DELETE", "/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
     assert resp.status_code == 204
 
 
@@ -912,7 +912,7 @@ def test_delete_preferences_returns_204_when_memory_client_raises():
     mem = _make_mock_memory()
     mem.clear_user_data = AsyncMock(side_effect=RuntimeError("MCP unreachable"))
     with _make_server_with_memory(memory_client=mem) as (_, client):
-        resp = client.delete("/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
+        resp = client.request("DELETE", "/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
     assert resp.status_code == 204
 
 
