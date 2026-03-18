@@ -16,12 +16,13 @@
 
 ## Current Stack (Phase 4 — Accessibility Hardening)
 
-**Phase 4 in progress**: ISSUE-040 (aria-live conditional rendering) resolved Cycle 33. CI run c3e55df in progress to verify 8 web E2E tests + ISSUE-039 violation identity. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
+**Phase 4 in progress**: ISSUE-040 (aria-live conditional rendering) resolved Cycle 33. ISSUE-041 (React bundle not mounting in CI) identified Cycle 34. Diagnostic logging added to all 3 web E2E test files. Next CI run will expose the exact JS crash error. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P4 | ISSUE-039: check CI run c3e55df — 15s hydration wait should now surface violation ID in axe output; if moderate-only, document as acceptable; if serious, fix | Cycle 33 | 2026-03-18 |
-| P4 | Phase 4 completion assessment — 0 critical axe violations ✓; ISSUE-040 resolved ✓; ISSUE-039 pending CI c3e55df; Windows/macOS formal sign-off pending | Cycle 33 | 2026-03-18 |
+| P0 | ISSUE-041: React bundle not mounting in CI Playwright Chromium — 9 web E2E tests fail; diagnostic logging added; check next CI run output and fix root cause JS crash | Cycle 34 | 2026-03-18 |
+| P4 | ISSUE-039: identify the 1 moderate axe violation from CI — likely not visible on blank page; will surface once ISSUE-041 resolved and React actually mounts | Cycle 33 | 2026-03-18 |
+| P4 | Phase 4 completion assessment — 0 critical axe violations ✓; ISSUE-040 resolved ✓; ISSUE-041 blocking web E2E gate; Windows/macOS formal sign-off pending | Cycle 33 | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
