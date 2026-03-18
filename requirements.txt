@@ -23,6 +23,7 @@ pyttsx3==2.90                   # Local TTS fallback (no internet required)
 sounddevice==0.4.6              # Microphone recording
 scipy==1.12.0                   # Audio file handling
 numpy==1.26.4                   # Audio data processing
+webrtcvad-wheels==2.0.14        # Voice Activity Detection (ISSUE-002); pre-built wheels
 
 # Browser Control
 playwright==1.41.0              # Web browser automation
