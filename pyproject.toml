@@ -102,7 +102,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["S101", "S106", "S105", "T20"]
+"tests/**/*.py" = ["S101", "S106", "S105", "S108", "T20"]
 "installer/**/*.py" = ["T20"]  # installer uses print() intentionally
 "src/blind_assistant/vision/screen_observer.py" = ["E501"]  # long prompt string constants
 
