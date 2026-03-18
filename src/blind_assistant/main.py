@@ -54,8 +54,7 @@ async def start_services(config: dict) -> None:
             logger.info("MCPMemoryClient initialised — user preferences will persist.")
         except Exception as exc:
             logger.warning(
-                "MCPMemoryClient could not be initialised (%s) — "
-                "profile preferences will be session-only.",
+                "MCPMemoryClient could not be initialised (%s) — profile preferences will be session-only.",
                 exc,
             )
 

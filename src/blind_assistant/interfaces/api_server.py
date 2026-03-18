@@ -589,8 +589,7 @@ class APIServer:
                 raise HTTPException(
                     status_code=422,
                     detail=(
-                        f"Unknown preference key(s): {sorted(unknown_keys)}. "
-                        f"Allowed keys: {sorted(VALID_EXTRA_PREFS)}."
+                        f"Unknown preference key(s): {sorted(unknown_keys)}. Allowed keys: {sorted(VALID_EXTRA_PREFS)}."
                     ),
                 )
 
