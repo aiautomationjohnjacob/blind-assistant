@@ -20,13 +20,20 @@
 **Phase 5 COMPLETE (Cycle 38)**: Dorothy language simplification done (136 JS tests); GRANT_NARRATIVE.md created; 13 Dorothy E2E scenario tests passing; ISSUE-045 resolved.
 **Phase 5 gate PASSED**: Dorothy scenario tests (setup → food ordering → Second Brain note → general questions) all green; no jargon; no dead ends.
 **Community launch prep COMPLETE (Cycle 39)**: CONTRIBUTING.md expanded with blind contributor welcome, braille display callout, Dorothy persona explanation, JS test instructions, good-first-issue guide, commit format; 5 GitHub good-first-issues created (#92-#96); CHANGELOG v0.5.0 complete.
+**CI hardening COMPLETE (Cycle 40)**: lint fix (issue #97/#98); WebKit E2E CI (issue #92); Dorothy E2E CI job (issue #96); 842 Python tests + 7 new WebKit tests.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P3 | VoiceOver+Safari CI: add WebKit E2E tests — now also GitHub issue #92 (good-first-issue) | accessibility | 2026-03-18 |
-| P3 | Dorothy E2E in CI: dorothy-e2e CI job — now also GitHub issue #96 (good-first-issue) | e2e-tester | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
+
+## Completed Items (Cycle 40 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| ISSUE-046 RESOLVED: ruff format lint failure (test_dorothy_scenario.py) fixed; CI unblocked (issues #97, #98 closed) | 2026-03-18 | 40 |
+| WebKit E2E CI (issue #92 RESOLVED): webkit added to e2e-web CI job (install + --browser webkit run); test_main_screen_webkit.py with 7 VoiceOver+Safari tests | 2026-03-18 | 40 |
+| Dorothy E2E CI job (issue #96 RESOLVED): dedicated 'dorothy-e2e' job in ci.yml runs 13 Dorothy/Alex scenario tests on every push; included in notify-failure gate | 2026-03-18 | 40 |
 
 ## Completed Items (Cycle 39 additions)
 
