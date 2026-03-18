@@ -323,7 +323,7 @@ export function SetupWizardScreen({
         accessibilityState={{ disabled: !tokenInput.trim() }}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Text style={styles.buttonText}>Confirm Token</Text>
+        <Text style={styles.buttonText}>Confirm</Text>
       </Pressable>
     </View>
   );
