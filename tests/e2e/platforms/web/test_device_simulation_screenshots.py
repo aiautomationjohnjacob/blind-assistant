@@ -50,6 +50,7 @@ Addresses: P3 — Device simulation CI (PRIORITY_STACK.md)
 
 from __future__ import annotations
 
+import contextlib
 import os
 import pathlib
 
