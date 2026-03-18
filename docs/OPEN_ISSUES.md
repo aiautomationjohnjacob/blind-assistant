@@ -665,3 +665,33 @@ and onAccessibilityAction handler to the button.
 **Resolved in**: Cycle 29 — MainScreen.tsx updated: live region moved to Text nodes inside
 transcriptContainer and responseContainer; accessibilityActions + onAccessibilityAction added
 to Pressable button; 6 new JS tests verifying Phase 4 patterns; 127 JS tests total.
+
+### ISSUE-037: Skip link target #main-content missing tabindex="-1" — focus routing broken
+**Severity**: HIGH (skip link was decorative — WCAG 2.4.1 not actually implemented)
+**Category**: a11y, web, wcag
+**Detected by**: web-accessibility-expert audit + orchestrator (Cycle 31)
+**Detected**: 2026-03-17
+**Description**: The skip link (`<a href="#main-content">`) was added in Cycle 30 to implement
+WCAG 2.4.1 Bypass Blocks. However, `<div id="main-content" role="main">` was missing
+`tabindex="-1"`. Without this attribute, browser anchor navigation (`#fragment`) scrolls
+the viewport to the element but does NOT move keyboard focus — the keyboard user remains
+at the skip link in the tab order. This meant NVDA/VoiceOver users who activated the skip
+link heard it "work" (the scroll position changed) but their keyboard focus was still at
+the top of the page, not in the main content. The skip link was functionally a no-op for
+screen reader users.
+
+Additionally, `test_can_reach_main_button_by_tab` was checking that the first Tab press
+focused an element with "speak"/"assistant"/"record" in its label — but since the skip link
+was added in Cycle 30, the first Tab correctly lands on the skip link. The test assertion
+was silently wrong (would have failed in CI once the Playwright system deps issue is resolved).
+**Impact**: Every NVDA+Chrome and VoiceOver+Safari user who tried to use the skip link got
+no benefit. The skip link appeared to work (browser scroll) but keyboard focus was not moved.
+WCAG 2.4.1 Level A requirement was not actually met despite the visual implementation.
+**Proposed fix**: Add `tabindex="-1"` to `<div id="main-content">` in `public/index.html`.
+Fix `test_can_reach_main_button_by_tab` to accept skip link as valid first-Tab focus target.
+**Status**: RESOLVED
+**Resolved in**: Cycle 31 — `tabindex="-1"` added to `#main-content` div in
+`clients/mobile/public/index.html`; `dist/index.html` rebuilt and verified;
+`test_can_reach_main_button_by_tab` corrected; 5 new TestFocusManagement tests added +
+1 new TestPageStructure test (test_skip_link_target_has_tabindex_minus_one);
+commit 61730d4.

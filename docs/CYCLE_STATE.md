@@ -225,9 +225,10 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P4: SetupWizardScreen token step live region** — `accessibilityLiveRegion="polite"` added to token entry instructions Text; matches pattern from all other steps; 1 new JS test; 128 JS total (Cycle 30)
 - [x] **P4: Web structure E2E tests** — 5 new tests in `TestPageStructure`: skip link first focusable, skip link target exists, main landmark, heading structure, heading labels (Cycle 30)
 - [x] **Documentation steward (Cycle 30)** — CHANGELOG updated with Phase 4 section (Cycles 28-30); README "What You Will Need" corrects Telegram to optional; test counts updated to current (812 Python, 128 JS, 75 education)
-- [ ] **P4: Verify skip link in expo export** — run `expo export --platform web` and confirm `dist/index.html` includes the skip link from `public/index.html`
-- [ ] **P4: web-accessibility-expert full audit** — NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome flows; focus management after state changes; review axe-core gate results
-- [ ] **P4: Check axe-core CI gate results** — first run after sync API fix; review any 'serious' violations found; add to OPEN_ISSUES.md
+- [x] **P4: Verify skip link in expo export** — confirmed `dist/index.html` includes skip link + main landmark from `public/index.html` template (Cycle 31)
+- [x] **P4: ISSUE-037 fix: tabindex="-1" on #main-content** — skip link was non-functional (moves scroll not focus); fixed in public/index.html; 5 new TestFocusManagement E2E tests + 1 TestPageStructure test; test_can_reach_main_button_by_tab corrected; ruff clean; 812 Python + 128 JS all passing (Cycle 31)
+- [ ] **P4: Check axe-core CI gate results** — review any 'serious' violations found in CI run from Cycle 31 push; add to OPEN_ISSUES.md
+- [ ] **P4: web-accessibility-expert full audit** — VoiceOver+Safari and TalkBack+Chrome flows; focus management after state changes (beyond keyboard)
 
 ## Blockers
 
