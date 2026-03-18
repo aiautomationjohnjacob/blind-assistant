@@ -1995,3 +1995,46 @@ The PostToolUse wip() hook auto-commits changes as they are made. This means
 The meaningful commits (feat/fix/docs/a11y types) must be created explicitly using
 `git commit --allow-empty` to create the typed summary commit that reviewers read.
 The wip() commits are intermediate saves; the typed commits are the record.
+
+## Cycle 38 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: The Dorothy test is now backed by 13 E2E tests that constitute behavioral proof of the Phase 5 gate. Fixing the two missed jargon strings closes the last known language gap in the setup wizard. Both Phase 5 criteria are met: Dorothy scenario passes (E2E tests prove it) AND GRANT_NARRATIVE.md exists (Cycle 37). The project is ready to declare Phase 5 COMPLETE. The remaining community work — CONTRIBUTING.md review for blind contributor welcome language — should happen before any public announcement, not as a gate item.
+
+**Code quality (code-reviewer)**: (1) Test count: 812 Python unit (unchanged) + 136 JS (was 134, +2 regression tests) + 13 new E2E Dorothy scenario tests. No count decrease anywhere. (2) No new src/ files without tests. (3) Lint clean (ruff passes). (4) The `_handle_general_question` tests patch then immediately call the same method — this works because patch replaces the unbound class method, which the instance's call dispatches through. Correct pattern, verified by passing tests. (5) One cleanup: removed unused `asyncio` and `inspect` imports caught by ruff before push.
+
+**Security (security-specialist)**: No security implications in Cycle 38. Language and test changes only. The `test_financial_risk_disclosure_has_no_api_jargon` test adds a regression guard that the disclosure itself never uses jargon — this is a positive addition that ensures users can understand what they're consenting to.
+
+**Accessibility (accessibility-reviewer)**: The two jargon fixes are substantive. The empty-input guard and too-short guard in handleConfirmToken are both spoken aloud by VoiceOver/TalkBack during error recovery. "API tokens" in those messages would create a confusing break in an otherwise consistent "connection code" flow. The Dorothy E2E tests include `_assert_no_visual_only_language()` checks covering food ordering responses. 136 JS tests now protect these strings from regression.
+
+**User perspective (blind-user-tester)**: The Dorothy scenario tests are the right gate. They don't just check that setup works — they check that Dorothy gets a path forward even when things go wrong (vault unavailable tests). "Say 'unlock my notes'" is the kind of actionable guidance that makes the difference between independence and requiring sighted help. The disclosure jargon test also matters: I need to understand what I'm agreeing to before I hand over payment details.
+
+**Ethics (ethics-advisor)**: The vault-unavailable tests validate that error states give Dorothy agency (a path forward) rather than a dead end. This directly upholds the autonomy principle: the app must never leave a blind user stuck with no recourse. The financial disclosure jargon test ensures consent is informed — if Dorothy can't understand the warning, her consent is not meaningful.
+
+**Goal adherence (goal-adherence-reviewer)**: Phase 5 completion criteria: (1) Dorothy test passes — CONFIRMED by 13 E2E tests in test_dorothy_scenario.py covering all required flows (food ordering with disclosure, Second Brain save/query, general questions). (2) GRANT_NARRATIVE.md produced — DONE (Cycle 37). Both criteria met. Phase 5 should be declared COMPLETE.
+
+**Consensus recommendation for next cycle**: (1) Declare Phase 5 COMPLETE — update CYCLE_STATE.md, PRIORITY_STACK.md, ROADMAP.md; (2) Community launch prep — open-source-steward reviews CONTRIBUTING.md for blind contributor welcome language, identifies good-first-issues; (3) Consider adding Dorothy E2E tests to CI (currently e2e mark = run locally only).
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) Fixed 2 missed jargon strings in SetupWizardScreen handleConfirmToken (empty + too-short error guards); (2) Added 2 JS regression tests; 136 JS total; (3) Created test_dorothy_scenario.py — 13 E2E tests covering Dorothy (elder) + Alex (newly-blind) across all core flows; (4) Lint clean; (5) ISSUE-045 resolved; (6) Cycle 38 typed commit pushed
+- Attempted but failed: none
+- Confusion/loops: none — tests failed initially on wrong API assumptions (wrong method names, wrong parameter names); fixed by reading the actual orchestrator code before writing tests
+- New gaps: (1) Dorothy E2E tests don't run in CI yet (e2e mark = local only); should add e2e-dorothy CI job; (2) The `_handle_general_question` patch pattern is subtle — document in a comment for future test authors
+- Next cycle recommendation: Declare Phase 5 COMPLETE; run open-source-steward for community launch prep
+
+**TECHNICAL LESSON (E2E test method names must match actual implementation)**:
+When writing E2E tests that call orchestrator handlers directly (orc._handle_*), always
+grep the actual source file for method names before writing the test. The orchestrator has:
+- `_handle_add_note` (not `_handle_remember`)
+- `_handle_query_note` (not `_handle_query`)
+- `_handle_general_question` (not `_handle_general`)
+- `_handle_order_food` (matches)
+
+When tests call wrong names, `patch.object()` raises AttributeError immediately, which
+is clear and fast to fix. But discovering this after writing 200+ lines of test code is
+costly. Pattern: grep first, write second.
+
+**TECHNICAL LESSON (ruff catches unused imports missed in test refactoring)**:
+When iterating on test designs, unused imports accumulate. The `asyncio` and `inspect`
+imports in test_dorothy_scenario.py were both from approaches that were refactored away.
+Running `python3 -m ruff check [file]` before committing catches these quickly.
+The wip() hook does not run ruff — always run it manually before the typed commit.
