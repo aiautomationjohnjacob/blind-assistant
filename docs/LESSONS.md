@@ -1127,3 +1127,48 @@ This pattern avoids: (1) duplicating code into a shared module, (2) triggering A
 session fixtures at import time, (3) adding a skip marker to the unit test file.
 Wrap the entire import block in a try/except and use pytest.skip(allow_module_level=True)
 so CI handles missing optional deps gracefully.
+
+---
+
+## Cycle 21 Review — 2026-03-17
+
+**Strategy (nonprofit-ceo)**: Cycle 21 addresses a real contributor onboarding gap: ROADMAP.md was frozen in Phase 1 language while the project is in Phase 3. Any volunteer arriving at the repo would have seen "Phase 1 in progress" and been confused about whether this project is even alive. The rewrite shows 16 completed Phase 3 items, a clear list of remaining work, and a tech stack table — this is a fundable-looking project now. Pushing the v0.3.0 release tag is the right milestone marker: it signals to the community that Android TalkBack + iOS VoiceOver E2E infrastructure is complete and being validated.
+
+**Code quality (code-reviewer)**: No src/ changes this cycle — documentation-only. Test count held at 713 unit tests (unchanged). ROADMAP.md is factually accurate and internally consistent with CYCLE_STATE.md and PRIORITY_STACK.md. The CONTRIBUTING.md link addition is minimal and correct. No test regressions. The gap scan revealed the test file path-matching script used wrong path conventions (tests/unit/core/ vs tests/unit/test_orchestrator.py flat layout) — this is a false-positive issue in the scan script, not a real gap.
+
+**Security (security-specialist)**: No security-sensitive changes. ROADMAP.md does not expose exploitable information. The tech stack table accurately describes the security architecture (AES-256-GCM, OS keychain) which is appropriate for a public-facing roadmap. No concerns.
+
+**Accessibility (accessibility-reviewer)**: ROADMAP.md uses plain language, no jargon. The phase structure with emoji status indicators (✅ COMPLETE, 🔄 IN PROGRESS) provides visual scanning aid; screen readers will read these as "checkmark" and "arrows" which is meaningful. The "What We Will NOT Build" section prevents wasted contributor effort on inaccessible approaches. CONTRIBUTING.md addition of ROADMAP.md link is appropriate — contributors can now find current sprint status without hunting through docs/.
+
+**User perspective (blind-user-tester)**: The updated ROADMAP.md shows I can already do food ordering by voice. The Phase 3 "remaining" list shows VAD is still missing — that's the most important UX gap from my perspective. Being cut off at 8 seconds mid-sentence is frustrating. But this cycle correctly prioritized getting the Android/iOS CI validation triggered. The v0.3.0 tag is a meaningful milestone even if I can't experience it directly.
+
+**Ethics (ethics-advisor)**: ROADMAP.md section "What We Will NOT Build" explicitly states "Anything that requires sighted setup — this is a hard constraint, always." This kind of public commitment is ethically valuable — it creates accountability. No new concerns.
+
+**Goal adherence (goal-adherence-reviewer)**: Cycle 21 directly addressed the top P3 priority-stack item (ROADMAP.md update). The v0.3.0 tag addressed the next two P3 items (Android TalkBack + iOS VoiceOver CI trigger). Three priority stack items advanced in one cycle. The ROADMAP.md now accurately reflects USER_STORIES.md and FEATURE_PRIORITY.md priorities. No requirement drift detected.
+
+**Consensus recommendation for next cycle**: (1) Verify Android/iOS CI results from v0.3.0 tag — check the run and log pass/fail in OPEN_ISSUES.md. (2) Start Voice Activity Detection (ISSUE-002) — this is the highest-impact UX improvement for actual blind users and has been on the backlog since Cycle 2.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) ROADMAP.md rewritten from Phase-1-stale to current Phase 3 state; (2) CONTRIBUTING.md updated with ROADMAP.md link; (3) v0.3.0 release tag pushed, triggering e2e-android AVD + ios-e2e.yml macOS CI workflows; (4) CYCLE_STATE.md, PRIORITY_STACK.md updated; (5) 713 unit tests confirmed passing; (6) all state documents consistent
+- Attempted but failed: none — all planned items completed
+- Confusion/loops: The gap scan showed false-positive "no test" results because the scan script expected tests/unit/core/test_orchestrator.py but the actual file is tests/unit/test_orchestrator.py (flat layout). Not a real gap — just a script path-matching issue.
+- New gaps: iOS E2E workflow references `npx expo run:ios --device` which may need adjustment for CI Expo bare workflow; will become clear when v0.3.0 CI runs complete
+- Next cycle recommendation: (1) Verify v0.3.0 Android/iOS CI results; (2) Implement Voice Activity Detection (ISSUE-002) in voice_local.py with silero-vad or webrtcvad
+
+**PROCESS LESSON (gap scan path matching)**:
+The standard gap scan command `find src/ -name "*.py" | grep -v test` followed by path
+transformation to `tests/unit/${dir}/test_${base}.py` produces false positives when the
+test layout does NOT mirror src/ subdirectories (our tests/unit/ uses a flat layout for
+most files). The correct check is to search for the test file by name anywhere under
+tests/unit/, not at a mirrored path:
+
+```bash
+# Correct gap scan for our flat test layout:
+find src/ -name "*.py" | grep -v __pycache__ | while read f; do
+  base=$(basename "$f" .py)
+  found=$(find tests/unit/ -name "test_${base}.py" 2>/dev/null | head -1)
+  [ -z "$found" ] && echo "NO TEST: $f"
+done
+```
+
+This avoids the false-positive flood that occurred when checking mirrored paths.
