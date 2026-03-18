@@ -260,10 +260,11 @@ Cycle 29 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 27.** Phase 4 (Accessibility Hardening) beginning. Voice clear preferences implemented.
-812 Python unit tests (+14). Ruff clean. mypy 0 errors. All Phase 3 items complete.
+**Loop completed Cycle 28.** Phase 4 (Accessibility Hardening) in progress. ISSUE-033 fixed
+(role="text" DOM violation). Phase 4 axe-core WCAG CI gate established.
+121 JS tests (+4). 812 Python unit tests. Ruff clean. mypy 0 errors.
 
-The most important work for Cycle 28 (Phase 4: Accessibility Hardening):
-1. **P4: Playwright WCAG audit on Expo web build** — device-simulator agent; real browser accessibility testing
-2. **P4: Fix `accessibilityRole="text"` on web export** — react-native-web non-ARIA role mapping
-3. **P4: Establish Phase 4 CI gate** — a11y audit in CI; zero CRITICAL WCAG violations required for merge
+The most important work for Cycle 29 (Phase 4: Accessibility Hardening):
+1. **P4: Check first a11y-audit CI run result** — verify axe-core gate passes; add any serious violations to OPEN_ISSUES.md
+2. **P4: Bundle axe-core locally** — eliminate CDN network dependency in a11y-audit job; use page.add_script_tag(path=tests/e2e/platforms/web/axe.min.js)
+3. **P4: iOS/Android Phase 4 accessibility audit** — TalkBack gesture coverage; VoiceOver rotor; react-native accessibility patterns
