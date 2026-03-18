@@ -23,6 +23,8 @@ import CourseCard, { Course } from '../components/CourseCard';
 import AudioPlayer from '../components/AudioPlayer';
 import HomePage from '../pages/HomePage';
 import NotFoundPage from '../pages/NotFoundPage';
+import CoursePage from '../pages/CoursePage';
+import LessonPage from '../pages/LessonPage';
 
 // ─────────────────────────────────────────────────────────────
 // HELPERS
