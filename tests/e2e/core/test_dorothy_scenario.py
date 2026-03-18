@@ -126,23 +126,13 @@ def _make_intent(intent_type: str, **params) -> MagicMock:
 
 
 def _assert_no_jargon(text: str, persona: str = "Dorothy") -> None:
-    """Assert response contains no technical jargon that would confuse a newly-blind user."""
-    text_lower = text.lower()
-    for word in FORBIDDEN_JARGON:
-        assert word not in text_lower, (
-            f"{persona} test FAILED: Response contains jargon '{word}' which would confuse "
-            f"a newly-blind or elderly user. Response was: {text!r}"
-        )
+    """Assert response contains no technical jargon (delegates to shared helper)."""
+    assert_no_jargon(text, persona=persona)
 
 
 def _assert_no_visual_only_language(text: str, persona: str = "Dorothy") -> None:
-    """Assert response contains no visual-only language (unusable by blind users)."""
-    visual_only = ["click here", "you can see", "as shown", "in the image", "shown below"]
-    text_lower = text.lower()
-    for phrase in visual_only:
-        assert phrase not in text_lower, (
-            f"{persona} test FAILED: Response uses visual-only language '{phrase}'. Response: {text!r}"
-        )
+    """Assert response contains no visual-only language (delegates to shared helper)."""
+    assert_no_visual_only_language(text, persona=persona)
 
 
 # ─────────────────────────────────────────────────────────────
