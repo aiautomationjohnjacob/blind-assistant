@@ -79,7 +79,8 @@ The development environment is fully accessible:
 
 ### 1. Find something to work on
 - Browse issues labeled [`good-first-issue`](../../issues?q=label%3Agood-first-issue)
-- Check [`docs/FEATURE_PRIORITY.md`](docs/FEATURE_PRIORITY.md) for planned features
+- Check [`ROADMAP.md`](ROADMAP.md) for current phase and upcoming features
+- Check [`docs/FEATURE_PRIORITY.md`](docs/FEATURE_PRIORITY.md) for the full prioritized feature list
 - Have an idea? Open a Feature Request issue first to discuss before building
 
 ### 2. Create a branch
