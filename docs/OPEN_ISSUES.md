@@ -543,4 +543,7 @@ privilege escalation if MCP key names are not namespaced per user.
 **Proposed fix**: Define a VALID_EXTRA_PREFS set in api_server.py (e.g. {'timezone',
 'user_name', 'common_tasks'}) and return HTTP 422 with a clear error message if any
 key in body.extra is not in that set. Add tests for the allowlist and rejection path.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 25 — VALID_EXTRA_PREFS frozenset added to api_server.py (commit 373a1cd);
+all-or-nothing validation fires before any write; 422 returned with rejected key names + allowed list;
+audit log at WARNING level; 8 new tests in test_api_server.py.
