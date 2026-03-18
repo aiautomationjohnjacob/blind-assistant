@@ -495,3 +495,60 @@ describe("MainScreen — button state", () => {
     });
   });
 });
+
+// ─────────────────────────────────────────────────────────────
+// Tests: Web platform ARIA role fix (Phase 4 — ISSUE-033)
+// ─────────────────────────────────────────────────────────────
+//
+// react-native-web maps accessibilityRole="text" → role="text" in the DOM.
+// "text" is not a valid WAI-ARIA role. On web, it confuses assistive technologies
+// (NVDA, JAWS, VoiceOver/macOS) that validate roles against the ARIA spec.
+// Fix: use Platform.OS === "web" ? undefined : "text" so that on web the element
+// carries no explicit role (the native HTML element semantics are sufficient).
+//
+// These tests mock Platform.OS to "web" to simulate the web export environment
+// and verify that status/transcript/response containers emit no invalid roles.
+
+describe("MainScreen — web platform accessibilityRole fix (ISSUE-033)", () => {
+  let originalPlatformOS: string;
+
+  beforeAll(() => {
+    // Save original platform and switch to web
+    const { Platform } = require("react-native");
+    originalPlatformOS = Platform.OS;
+    Platform.OS = "web";
+  });
+
+  afterAll(() => {
+    // Restore original platform after these tests
+    const { Platform } = require("react-native");
+    Platform.OS = originalPlatformOS;
+  });
+
+  it("status text has no accessibilityRole on web (avoids invalid role='text')", () => {
+    render(<MainScreen />);
+    // The status text is identified by its label
+    const statusText = screen.getByLabelText(/ready\. tap to speak/i);
+    // On web, accessibilityRole should be undefined (not "text")
+    expect(statusText.props.accessibilityRole).toBeUndefined();
+  });
+
+  it("main container still renders on web platform", () => {
+    render(<MainScreen />);
+    expect(screen.getByLabelText(/blind assistant main screen/i)).toBeTruthy();
+  });
+
+  it("button still has role=button on web platform", () => {
+    render(<MainScreen />);
+    const button = screen.getByRole("button");
+    expect(button).toBeTruthy();
+    expect(button.props.accessibilityRole).toBe("button");
+  });
+
+  it("title still has role=header on web platform", () => {
+    render(<MainScreen />);
+    const header = screen.getByRole("header");
+    expect(header).toBeTruthy();
+    expect(header.props.accessibilityRole).toBe("header");
+  });
+});
