@@ -236,20 +236,20 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 30 (Phase 4: Accessibility Hardening). Four deliverables: (1) Skip link + main landmark
-— created `clients/mobile/public/index.html` as custom Expo HTML template; skip-to-main-content
-link is now the first focusable element (WCAG 2.4.1 Level A); `<div role="main">` wraps React
-root for NVDA D-key landmark navigation; (2) SetupWizardScreen live region audit — token entry
-step was missing `accessibilityLiveRegion="polite"` on instructions Text; fixed; 1 new JS test;
-128 JS total (+1); (3) 5 new web E2E structural tests (TestPageStructure) — skip link first
-focusable, target exists, main landmark, heading structure, heading labels; (4) Documentation
-steward — CHANGELOG updated with Phase 4 section; README Telegram demoted to optional; test
-counts updated to current. 812 Python unit tests (unchanged). ruff clean.
+Cycle 31 (Phase 4: Accessibility Hardening). Two deliverables: (1) Verified skip link in
+`expo export` — confirmed `dist/index.html` picks up `public/index.html` template correctly;
+(2) Found and fixed ISSUE-037 — `#main-content` div was missing `tabindex="-1"`, meaning the
+skip link moved scroll position but NOT keyboard focus (WCAG 2.4.1 Level A was broken despite
+appearing implemented). Fixed in `public/index.html`. Added 5 new TestFocusManagement E2E
+tests (skip link focus routing, voice button reachability, invisible focus detection,
+aria-live coverage) and 1 new TestPageStructure test (tabindex=-1 verification). Fixed
+`test_can_reach_main_button_by_tab` which incorrectly expected the first Tab to reach the
+voice button (skip link is now correctly first). 812 Python unit tests (unchanged). 128 JS
+tests (unchanged). ruff clean. mypy 0 errors.
 
-Cycle 31 priority:
-1. **P4: Verify skip link in expo export** — build web and confirm `dist/index.html` has skip link from `public/index.html` template
-2. **P4: web-accessibility-expert audit** — focus management after state changes; axe-core gate results review
-3. **P4: Check axe-core CI gate results** — review any 'serious' violations; add to OPEN_ISSUES.md
+Cycle 32 priority:
+1. **P4: Check axe-core CI gate results** — review 'serious' violations from Cycle 31 push; add to OPEN_ISSUES.md
+2. **P4: web-accessibility-expert full audit** — VoiceOver+Safari and TalkBack+Chrome flows; focus management
 
 ## Known Issues / Technical Debt
 
