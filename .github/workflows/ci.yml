@@ -370,6 +370,39 @@ jobs:
         if: always()
         run: kill $WEB_SERVER_PID 2>/dev/null || true
 
+      - name: Run device simulation screenshot tests
+        # Takes named screenshots of key UI states across all three browsers.
+        # Output goes to device-sim-screenshots/{browser}/*.png.
+        # These are visual evidence artifacts for accessibility reviewers —
+        # NOT functional tests. They capture: initial load, app-ready state,
+        # setup wizard, main screen, mobile viewport (375x812), tablet (768x1024).
+        # Addresses P3: Device simulation CI (PRIORITY_STACK.md, Cycle 45).
+        # set -o pipefail: pytest exit code propagates through | tee.
+        # continue-on-error: screenshots are best-effort; a viewport or timing
+        # quirk should not block CI — functional tests above are the gate.
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          pytest tests/e2e/platforms/web/test_device_simulation_screenshots.py \
+            --browser chromium \
+            --screenshot always \
+            -v 2>&1 | tee e2e-device-sim-chromium.log
+          # Repeat for Firefox (NVDA+Firefox) and WebKit (VoiceOver+Safari)
+          pytest tests/e2e/platforms/web/test_device_simulation_screenshots.py \
+            --browser firefox \
+            --screenshot always \
+            -v 2>&1 | tee e2e-device-sim-firefox.log || true
+          pytest tests/e2e/platforms/web/test_device_simulation_screenshots.py \
+            --browser webkit \
+            --screenshot always \
+            -v 2>&1 | tee e2e-device-sim-webkit.log || true
+          echo "Device simulation screenshots saved to device-sim-screenshots/"
+          ls -la device-sim-screenshots/ 2>/dev/null || echo "No screenshots dir found"
+
+      - name: Stop web server
+        if: always()
+        run: kill $WEB_SERVER_PID 2>/dev/null || true
+
       - name: Upload E2E screenshots and logs
         if: always()
         uses: actions/upload-artifact@v5
@@ -380,6 +413,23 @@ jobs:
             e2e-web-*.log
             screenshots/
           retention-days: 14
+
+      - name: Upload device simulation screenshots
+        # Named screenshots of key UI states: initial load, app-ready, setup wizard,
+        # main screen, mobile viewport, tablet viewport — across Chromium/Firefox/WebKit.
+        # Reviewers: find these in the 'device-sim-screenshots-N' CI artifact.
+        # NVDA+Chrome → device-sim-screenshots/chromium/
+        # NVDA+Firefox → device-sim-screenshots/firefox/
+        # VoiceOver+Safari (WebKit) → device-sim-screenshots/webkit/
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: device-sim-screenshots-${{ github.run_number }}
+          path: |
+            device-sim-screenshots/
+            e2e-device-sim-*.log
+          retention-days: 30
+          if-no-files-found: ignore
 
   # ──────────────────────────────────────────────────────────
   # JOB 6c: Dorothy Scenario E2E tests (Phase 5 gate tests)
