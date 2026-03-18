@@ -551,8 +551,9 @@ jobs:
           cache: pip
 
       - name: Install Playwright + pytest
+        # pytest-asyncio NOT installed — tests use sync playwright API (no event loop conflict)
         run: |
-          pip install playwright pytest pytest-asyncio pytest-playwright
+          pip install playwright pytest pytest-playwright
           playwright install chromium || true
           playwright install-deps chromium || true
 
@@ -565,9 +566,11 @@ jobs:
           curl -f http://localhost:19006/ -o /dev/null --silent && echo "Server up" || echo "Server may not be ready yet"
 
       - name: Run WCAG axe-core accessibility audit
-        # axe-core is injected via CDN inside the test — no extra pip install needed.
+        # axe-core is loaded from local bundle (tests/e2e/platforms/web/axe.min.js) — no CDN.
         # The test fails CI if any 'critical' WCAG violation is found (Phase 4 gate).
+        # set -o pipefail: pytest exit code propagates through | tee (was silently swallowed)
         run: |
+          set -o pipefail
           pytest tests/e2e/platforms/web/test_wcag_axe_audit.py \
             --browser chromium \
             -v \
