@@ -246,6 +246,7 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P5: Full Dorothy scenario test (Cycle 38)** — 13 E2E tests in test_dorothy_scenario.py: Dorothy (elder) + Alex (newly-blind) across food ordering with disclosure, Second Brain note, general questions, installer language, vault-unavailable recovery
 - [x] **P5: Fix missed jargon string (Cycle 38)** — handleConfirmToken empty + too-short guards: "API tokens" → "connection codes"; 2 regression tests; ISSUE-045 resolved; 136 JS tests
 - [x] **P5: Community launch prep (Cycle 39)** — CONTRIBUTING.md expanded: blind contributor welcome section, braille display callout, Dorothy persona explanation, JS test instructions, good-first-issue guide, commit format; 5 GitHub issues created (#92-#96); CHANGELOG v0.5.0 entry added
+- [x] **P5: Education site deployment (Cycle 47)** — deploy-education.yml; HashRouter; homepage="."; CNAME for learn.blind-assistant.org; 75 Jest tests pass; ISSUE-053 resolved
 - [ ] **P5 (future): VoiceOver+Safari CI** — add WebKit E2E tests for Safari/VoiceOver (ISSUE #92 now a good-first-issue)
 - [ ] **P5 (future): Dorothy E2E in CI** — dorothy-e2e CI job (ISSUE #96 now a good-first-issue)
 - [ ] **P5 (future): Simplicity audit of orchestrator voice strings** — review AI response language for jargon-free tone
