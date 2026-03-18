@@ -603,3 +603,40 @@ all 10 occurrences of `accessibilityRole="text"` in MainScreen.tsx (3 cases) and
 SetupWizardScreen.tsx (7 cases). `Platform` import added to MainScreen.tsx. 4 new JS tests
 verify the web platform behavior. axe-core WCAG audit test added (test_wcag_axe_audit.py)
 with a dedicated test for `role="text"` in the DOM that would catch any regression.
+
+### ISSUE-034: Web E2E tests using async API with sync pytest-playwright fixture (all 26 tests failing silently)
+**Severity**: HIGH (CI false green)
+**Category**: ci, testing, a11y
+**Detected by**: orchestrator (Cycle 29 — CI run 23226422133 log analysis)
+**Detected**: 2026-03-18
+**Description**: All 26 web E2E tests (test_main_screen_chromium.py, test_food_ordering_web.py,
+test_wcag_axe_audit.py) used `async def` with `await page.goto()` but pytest-playwright's
+`page` fixture is synchronous. With asyncio_mode="auto", pytest-asyncio wraps the test in
+a coroutine, then pytest-playwright tries to call `Runner.run()` from within the running
+event loop — causing `RuntimeError: Runner.run() cannot be called from a running event loop`.
+The CI `| tee` pipeline also swallowed the pytest exit code (pipefail not set), so the jobs
+showed as "success" despite 4/26 tests actually failing.
+**Impact**: (1) All 26 web E2E tests were silently failing — the Phase 4 WCAG axe-core gate
+was not actually running. (2) The pipefail bug meant any future CI failures in these jobs
+would also show as green.
+**Proposed fix**: (1) Convert all web E2E tests from `async def` to sync `def`, remove all
+`await`, use `playwright.sync_api.Page`. (2) Add `set -o pipefail` to CI shell steps.
+**Status**: RESOLVED
+**Resolved in**: Cycle 29 — all 3 web E2E test files rewritten to sync API; `set -o pipefail`
+added to e2e-web and a11y-audit CI steps; axe-core bundled locally (axe.min.js committed);
+`page.add_script_tag(path=...)` replaces CDN injection; pytest-asyncio removed from CI
+a11y-audit and e2e-web pip install commands.
+
+### ISSUE-035: axe-core injected from CDN — network dependency in CI
+**Severity**: MEDIUM
+**Category**: ci, testing
+**Detected by**: code-reviewer (Cycle 28 review)
+**Detected**: 2026-03-18
+**Description**: test_wcag_axe_audit.py injected axe-core from cdnjs.cloudflare.com CDN.
+If CDN is unreachable, all 4 axe-core tests fail with a network error rather than graceful skip.
+**Impact**: Flaky CI when CDN has outages; supply chain concern (CDN content could change).
+**Proposed fix**: Bundle axe.min.js locally in the repo; use page.add_script_tag(path=...).
+**Status**: RESOLVED
+**Resolved in**: Cycle 29 — axe.min.js (4.9.1, 555KB) committed to
+tests/e2e/platforms/web/axe.min.js; _inject_axe() helper uses add_script_tag(path=...);
+CDN injection removed. Local file fallback to CDN if file missing (should never happen).
