@@ -28,11 +28,20 @@
 **Device simulation CI COMPLETE (Cycle 45)**: Playwright screenshot tests (7 tests); named device-sim-screenshots/{browser}/ artifact in CI; Netlify deploy skips gracefully without secrets; Marcus test hang fixed (wait_for_confirmation mock missing).
 **Node.js 24 full migration COMPLETE (Cycle 46)**: upload-artifact v5→v7, setup-python v5→v6, checkout v5→v6, setup-node v5→v6 across all 5 workflow files; ISSUE-052 resolved (pytest-timeout=30s in pyproject.toml + ci.yml + autonomous-cycle.yml).
 **Education site deployment COMPLETE (Cycle 47)**: deploy-education.yml created; HashRouter for GitHub Pages compatibility; 75 Jest tests pass; ISSUE-053 resolved; one manual step: enable GitHub Pages in repo settings.
+**Education site CI fix COMPLETE (Cycle 49)**: postinstall script patches ajv@6 into 5 affected packages; build verified locally; ISSUE-055 resolved.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
+| P3 | Migrate education site from react-scripts to Vite: eliminate ongoing ajv@6/v8 conflict patches; Vite has no react-scripts dependency tree; faster builds; modern tooling; ensures no future Cycle-48/49-style CI regressions | cycle 49 review | 2026-03-18 |
 | P4 | Netlify staging activation: configure NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID secrets so community members can test https://staging.blind-assistant.org with real NVDA+Chrome, TalkBack+Chrome, VoiceOver+Safari | cycle 45 review | 2026-03-18 |
 | P5 | Activate GitHub Pages in repository settings: Settings → Pages → Source → GitHub Actions; this is the one manual step to make learn.blind-assistant.org live after deploy-education.yml is merged | cycle 47 | 2026-03-18 |
+| P5 | Phase 6 creative exploration: identify next highest-impact feature for blind user independence (Story 8.4 timed progress updates, Story 6.1 travel research, or a new gap not yet identified) | cycle 49 review | 2026-03-18 |
+
+## Completed Items (Cycle 49 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| CI fix P0 (ISSUE-055): education site deploy still failing after Cycle 48 ajv@8 override — root cause: npm nested overrides ignored with --legacy-peer-deps; fix: scripts/patch-fork-ts-checker.js postinstall script installs ajv@^6 inside fork-ts-checker-webpack-plugin, file-loader, babel-loader, eslint, @eslint/eslintrc; build verified locally; 75 JS tests pass | 2026-03-18 | 49 |
 
 ## Completed Items (Cycle 48 additions)
 
