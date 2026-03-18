@@ -65,17 +65,14 @@ except ImportError:
     PLAYWRIGHT_AVAILABLE = False
 
 try:
-    from axe_playwright_python.sync_playwright import Axe as _Axe  # type: ignore[import]
+    # axe-playwright Python package — used only to detect if it's installed.
+    # The actual axe-core injection uses page.evaluate (CDN), which does not
+    # require this package. AXE_AVAILABLE guards are kept for future use.
+    import axe_playwright_python  # type: ignore[import]  # noqa: F401
 
     AXE_AVAILABLE = True
 except ImportError:
-    try:
-        # axe-playwright Python package has two common module names
-        import axe_playwright_python  # type: ignore[import]  # noqa: F401
-
-        AXE_AVAILABLE = True
-    except ImportError:
-        AXE_AVAILABLE = False
+    AXE_AVAILABLE = False
 
 # The URL where the Expo web bundle is served.
 WEB_APP_URL = os.environ.get("WEB_APP_URL", "http://localhost:19006")
@@ -121,7 +118,7 @@ def _skip_if_unavailable(web_app_available: bool) -> None:
         )
 
 
-def _run_axe_via_playwright(page: "Page") -> dict:  # type: ignore[return]
+def _run_axe_via_playwright(page: Page) -> dict:  # type: ignore[return]
     """
     Inject axe-core via CDN and run the accessibility audit.
     Returns the axe results dict with 'violations', 'passes', 'incomplete', etc.
@@ -131,7 +128,7 @@ def _run_axe_via_playwright(page: "Page") -> dict:  # type: ignore[return]
     stable approach and does not require installing the axe-playwright package.
     This makes the test fully self-contained — only playwright is required.
     """
-    pass  # filled in test body via page.evaluate
+    # filled in test body via page.evaluate
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -149,7 +146,7 @@ class TestWCAGAxeAudit:
     """
 
     async def test_no_critical_wcag_violations_main_screen(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         Phase 4 gate: the main screen must have zero CRITICAL axe violations.
@@ -233,7 +230,7 @@ class TestWCAGAxeAudit:
         )
 
     async def test_no_critical_wcag_violations_contrast(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         Specifically check colour-contrast violations (WCAG 2.1 SC 1.4.3).
@@ -287,7 +284,7 @@ class TestWCAGAxeAudit:
         )
 
     async def test_interactive_elements_have_names(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         All interactive elements must have accessible names (WCAG 4.1.2).
@@ -324,7 +321,7 @@ class TestWCAGAxeAudit:
         naming_violations = name_result.get("violations", [])
 
         if naming_violations:
-            print(f"\nNaming violations found:")
+            print("\nNaming violations found:")
             for v in naming_violations:
                 print(f"  [{v.get('impact','?').upper()}] {v.get('id','?')}: {v.get('description','?')}")
                 for node in v.get("nodes", [])[:3]:
@@ -338,7 +335,7 @@ class TestWCAGAxeAudit:
         )
 
     async def test_no_invalid_aria_roles(
-        self, page: "Page", web_app_available: bool
+        self, page: Page, web_app_available: bool
     ) -> None:
         """
         All ARIA roles must be valid WAI-ARIA roles (WCAG 4.1.2).
@@ -395,7 +392,7 @@ class TestWCAGAxeAudit:
 
         # Check for other ARIA role violations
         if aria_violations:
-            print(f"\nARIA violations found:")
+            print("\nARIA violations found:")
             for v in aria_violations:
                 print(f"  [{v.get('impact','?').upper()}] {v.get('id','?')}: {v.get('description','?')}")
 
