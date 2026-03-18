@@ -848,4 +848,8 @@ The word "API tokens" is jargon that Dorothy (elder blind user) would not unders
 consistent "connection code" language in the rest of the setup wizard.
 **Proposed fix**: Change "API tokens are usually at least 32 characters" to
 "Connection codes are usually more than 30 characters long." Add 1 new test.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 38 — commit 948781f. Both jargon strings fixed:
+(1) empty guard: "Please enter your API token" → "Please enter your connection code"
+(2) too-short guard: "API tokens are usually..." → "Connection codes are usually..."
+2 new regression tests added (SetupWizardScreen.test.tsx); 136 JS tests total.
