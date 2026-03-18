@@ -147,9 +147,7 @@ class TestMainScreenKeyboardNavigation:
             page.wait_for_load_state("networkidle")
             page.keyboard.press("Tab")
             focused_label = page.evaluate("document.activeElement.getAttribute('aria-label')")
-        assert focused_label is not None, (
-            "Could not find main button by Tab — no aria-label on focused element"
-        )
+        assert focused_label is not None, "Could not find main button by Tab — no aria-label on focused element"
         lower = focused_label.lower()
         assert "speak" in lower or "assistant" in lower or "record" in lower or "skip" in lower, (
             f"Keyboard focus did not reach the voice button or skip link. "
@@ -400,18 +398,11 @@ class TestPageStructure:
         # Tab from page load — first focus must land on skip link
         page.keyboard.press("Tab")
         focused_tag = page.evaluate("document.activeElement.tagName.toLowerCase()")
-        focused_href = page.evaluate(
-            "document.activeElement.getAttribute('href') || ''"
-        )
+        focused_href = page.evaluate("document.activeElement.getAttribute('href') || ''")
         focused_text = (page.evaluate("document.activeElement.textContent") or "").lower()
 
-        is_skip_link = (
-            focused_tag == "a"
-            and (
-                "main" in focused_href.lower()
-                or "skip" in focused_text
-                or "main" in focused_text
-            )
+        is_skip_link = focused_tag == "a" and (
+            "main" in focused_href.lower() or "skip" in focused_text or "main" in focused_text
         )
         assert is_skip_link, (
             f"First Tab press did not focus a skip link. "
@@ -454,9 +445,7 @@ class TestPageStructure:
 
         # Extract the anchor ID from the href (e.g. '#main-content' → 'main-content')
         target_id = skip_link_href.lstrip("#")
-        target_exists = page.evaluate(
-            f"document.getElementById('{target_id}') !== null"
-        )
+        target_exists = page.evaluate(f"document.getElementById('{target_id}') !== null")
         assert target_exists, (
             f"Skip link href='{skip_link_href}' targets id='{target_id}' "
             "but no element with that ID exists in the DOM. "
@@ -689,9 +678,7 @@ class TestFocusManagement:
         button_found = False
         for _ in range(10):
             page.keyboard.press("Tab")
-            focused_label = page.evaluate(
-                "document.activeElement.getAttribute('aria-label') || ''"
-            )
+            focused_label = page.evaluate("document.activeElement.getAttribute('aria-label') || ''")
             lower = focused_label.lower()
             if "speak" in lower or "assistant" in lower or "record" in lower or "stop" in lower:
                 button_found = True
