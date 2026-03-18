@@ -867,7 +867,7 @@ def test_delete_preferences_returns_400_when_confirm_false():
     mem = _make_mock_memory()
     mem.clear_user_data = AsyncMock()
     with _make_server_with_memory(memory_client=mem) as (_, client):
-        resp = client.delete("/profile/preferences", json={"confirm": False}, headers=VALID_HEADERS)
+        resp = client.request("DELETE", "/profile/preferences", json={"confirm": False}, headers=VALID_HEADERS)
     assert resp.status_code == 400
     # Must not have deleted anything
     mem.clear_user_data.assert_not_called()
@@ -919,7 +919,7 @@ def test_delete_preferences_returns_204_when_memory_client_raises():
 def test_delete_preferences_400_detail_mentions_confirmation():
     """The 400 error message explains that confirm=true is required."""
     with _make_server_with_memory() as (_, client):
-        resp = client.delete("/profile/preferences", json={"confirm": False}, headers=VALID_HEADERS)
+        resp = client.request("DELETE", "/profile/preferences", json={"confirm": False}, headers=VALID_HEADERS)
     detail = resp.json()["detail"].lower()
     assert "confirm" in detail
 
