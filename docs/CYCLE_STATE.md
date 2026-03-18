@@ -305,22 +305,15 @@ Cycle 43 priorities:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 41.** Phase 5 (Polish & Community Ready) is COMPLETE.
+**Loop completed Cycle 42.** Phase 5 (Polish & Community Ready) is COMPLETE.
 
-Key deliverables Cycle 41: (1) Jordan (DeafBlind) scenario tests — 16 tests in
-tests/accessibility/test_jordan_scenario.py covering braille formatting, Second Brain text-only,
-financial disclosure via text, food ordering. (2) Shared accessibility helpers extracted to
-tests/accessibility/helpers.py. (3) _format_for_braille() fixed to word-wrap at 40 chars.
-(4) 2 visual-only language strings fixed in orchestrator. (5) Windows NVDA + VoiceOver + braille
-display README sections added. (6) GitHub issues #93/#94/#95 closed.
+Key deliverables Cycle 42: (1) Marcus (power user) scenario tests — 31 tests in
+tests/accessibility/test_marcus_scenario.py covering brief mode pipeline, preamble trimming,
+financial disclosure survives brief mode, independence from braille mode. (2) web_app_available
+fixture extracted from 4 web E2E test files to conftest.py (DRY). (3) CI persona gate job
+renamed to cover all 3 personas (Dorothy + Jordan + Marcus, 60 tests total).
 
 Next cycle priorities: (1) Telegram integration (`--telegram` flag, concurrent API server + bot);
-(2) Marcus (power user) scenario tests; (3) Consolidate FORBIDDEN_JARGON list (currently duplicated
-in helpers.py and test_dorothy_scenario.py).
+(2) Device simulation CI; (3) Consolidate FORBIDDEN_JARGON list.
 Phase 5 is fully complete — all criteria met (Dorothy scenario tests ✓, GRANT_NARRATIVE.md ✓,
 community launch prep ✓).
-
-Most important for Cycle 40:
-1. **P3: VoiceOver+Safari CI** — WebKit E2E tests (GitHub issue #92 created as good-first-issue)
-2. **P3: Dorothy E2E in CI** — dorothy-e2e CI job (GitHub issue #96 created as good-first-issue)
-3. **P3: Telegram integration** — secondary/super-user channel; voice-guided Telegram setup for power users
