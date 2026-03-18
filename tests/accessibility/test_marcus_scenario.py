@@ -617,7 +617,10 @@ class TestMarcusNoDependencyPatterns:
         config = {"vault_path": "/tmp/marcus_vault", "voice": {"prompt_timeout_seconds": 5}}
         orc = Orchestrator(config)
 
-        error_text = "I couldn't access your notes vault. Say 'unlock my notes' and provide your passphrase to try again."
+        error_text = (
+            "I couldn't access your notes vault. "
+            "Say 'unlock my notes' and provide your passphrase to try again."
+        )
         result = {"text": error_text}
 
         response = orc._format_response(result, MARCUS_CONTEXT)
