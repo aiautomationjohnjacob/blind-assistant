@@ -546,10 +546,7 @@ class TestDorothySetupLanguage:
         installer_path = os.path.normpath(installer_path)
         spec = importlib.util.spec_from_file_location("install", installer_path)
         assert spec is not None, f"Cannot find installer at {installer_path}"
-        install_module = importlib.util.module_from_spec(spec)
-        source_code = inspect.getsource(type(install_module))  # falls back below
-
-        # Simpler: read the source file directly
+        # Read the source file directly — installer is not a proper Python package
         with open(installer_path) as f:
             source_code = f.read()
 
