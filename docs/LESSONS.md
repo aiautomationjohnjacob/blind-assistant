@@ -2365,3 +2365,38 @@ _handle_order_food calls confirmation_gate in two distinct ways:
 Tests must mock BOTH. Mocking only wait_for_response causes 60s blocks because
 wait_for_confirmation reads from an asyncio.Queue that no one fills.
 Pattern: always mock wait_for_confirmation alongside wait_for_response in food-order tests.
+
+## Cycle 46 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: Two consecutive infrastructure cycles (44 and 46) both improved CI reliability — this is the right investment at community launch stage. A broken CI gate is a contributor blocker. With both Node.js 24 migration and pytest-timeout now complete, CI is clean and reliable. The remaining P4 (Netlify staging) requires a sighted developer with a Netlify account — it is not automatable by the loop. Next: education site deployment (P5) is fully automatable.
+
+**Code quality (code-reviewer)**: Clean mechanical change. All 5 workflow files bumped consistently. The `--timeout=30` ceiling is appropriate — 818 unit tests complete in 39s total (47ms average), well within the 30s per-test limit. No src/ files modified. No test count change. Test count: 818 (up from 818 — unchanged). No regressions.
+
+**Security (security-specialist)**: Newer action versions are net positive for security (runner security patches). pytest-timeout is test-only, no runtime exposure. No credential changes.
+
+**Accessibility (accessibility-reviewer)**: No user-facing changes. CI reliability indirectly supports accessibility by ensuring fixes reach users faster.
+
+**User perspective (blind-user-tester)**: Invisible to users today. CI reliability means future NVDA/TalkBack fixes land faster and with more confidence.
+
+**Ethics (ethics-advisor)**: No autonomy or consent concerns.
+
+**Goal adherence (goal-adherence-reviewer)**: Both P4 items from Cycle 45 PRIORITY_STACK addressed. ISSUE-052 resolved. GitHub issue #101 closed. Cycle 44 Node.js 24 migration gap (upload-artifact@v5 and setup-python@v5 still on Node.js 20) discovered and fixed.
+
+**Consensus recommendation for next cycle**: Education site deployment (P5) — deploy clients/education/ to learn.blind-assistant.org via GitHub Pages. This is fully automatable, requires no external sighted-developer setup, and creates a new community touchpoint for blind contributors who prefer course material to GitHub browsing.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) Discovered incomplete Node.js 24 migration from Cycle 44 (upload-artifact@v5 and setup-python@v5 still on Node.js 20); bumped all 4 action families to latest (checkout@v6, setup-node@v6, setup-python@v6, upload-artifact@v7); (2) Added pytest-timeout to CI install steps and pyproject.toml (--timeout=30); 818 tests pass; (3) Closed GitHub issue #101 (stale CI failure from wip commit); (4) ISSUE-052 marked RESOLVED
+- Attempted but failed: none
+- Confusion/loops: The Cycle 44 LESSONS.md entry incorrectly stated "setup-python@v5 was already using Node.js 24 internally" — this was wrong; the CI annotations from Cycle 45 proved it was still on Node.js 20. Updated lesson below.
+- New gaps: Netlify staging (P4) requires sighted developer action — not automatable; education site deployment (P5) is next
+- Next cycle recommendation: Education site deployment (P5) via GitHub Pages
+
+**TECHNICAL LESSON CORRECTION (setup-python@v5 was NOT on Node.js 24)**:
+The Cycle 44 lesson said "setup-python@v5 IS already using Node.js 24 internally." This was
+incorrect. The CI annotations from Cycle 45 explicitly listed `actions/setup-python@v5` as
+running on Node.js 20. The correct versions for Node.js 24 are:
+  - actions/checkout@v6 (Node.js 24)
+  - actions/setup-node@v6 (Node.js 24)
+  - actions/setup-python@v6 (Node.js 24, released 2025-09)
+  - actions/upload-artifact@v7 (Node.js 24, released 2025-12)
+Always verify by checking the CI annotations, not by assumption.
