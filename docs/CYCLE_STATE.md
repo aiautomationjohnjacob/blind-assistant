@@ -206,6 +206,9 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P3: MCPMemoryClient in /profile** — GET/PUT /profile now reads/writes preferences via MCPMemoryClient; 14 new Python tests; ProfileUpdateRequest added; PUT /profile with allowable fields (Cycle 24)
 - [x] **P3: Education site test fix** — tests moved to src/__tests__/, imports corrected, 41 new Jest tests, coverage 82.7%; npm ci --legacy-peer-deps in CI; NavLink aria-current fixed (Cycle 24)
 - [x] **P0: CI fix (test_record_with_vad_sync)** — patch.dict(sys.modules, {'webrtcvad': None}) correctly simulates missing C-extension; CI was failing because pop() doesn't prevent re-import of installed .so (Cycle 24)
+- [x] **P3: ISSUE-030 resolved** — VALID_EXTRA_PREFS frozenset in api_server.py; PUT /profile returns 422 on unknown extra keys; all-or-nothing validation (no write on rejection); audit log at WARNING; 8 new allowlist tests in test_api_server.py (Cycle 25)
+- [x] **P3: MCPMemoryClient wired into main.py** — production API server now creates MCPMemoryClient on startup and injects it into APIServer; graceful degradation if MCPMemoryClient raises; 3 new tests in test_main.py (Cycle 25)
+- [x] **P3: Android TalkBack CI v0.3.2 verified** — run 23223747818 PASSED (Cycle 25)
 
 ## Blockers
 
@@ -213,17 +216,16 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 24 (Phase 3 — MCPMemoryClient in /profile, education site tests fixed, CI repaired). MCPMemoryClient
-wired into GET/PUT /profile: preferences (verbosity, speech_rate, braille_mode, output_mode, extras) persist
-via MCP memory store; 14 new Python tests; 779 total unit tests. Education site: tests moved to src/__tests__/,
-@testing-library/dom installed, 41 new Jest tests, NavLink aria-current fixed, coverage 82.7%;
-npm ci --legacy-peer-deps in CI. CI failure fixed: test_record_with_vad_sync now uses patch.dict(sys.modules,
-{'webrtcvad': None}) to correctly simulate missing C-extension.
+Cycle 25 (Phase 3 — ISSUE-030 allowlist, MCPMemoryClient production wiring, Android CI verified). VALID_EXTRA_PREFS
+frozenset added to api_server.py; PUT /profile now rejects unknown extra keys with 422 and logs at WARNING before
+any write; 8 new allowlist tests. MCPMemoryClient wired into main.py start_services() production startup with
+graceful degradation; 3 new tests in test_main.py. Android TalkBack CI v0.3.2 confirmed passing (run 23223747818).
+790 Python unit tests total (was 779). Ruff clean. mypy 0 errors.
 
-Cycle 25 priority:
-1. **P3: ISSUE-030** — Add PUT /profile allowlist for extra keys (MEDIUM security gap); 422 on unknown keys
-2. **P3: Wire MCPMemoryClient into main.py startup** — production server doesn't create/pass one yet
-3. **P3: Verify Android TalkBack CI v0.3.2** — check if e2e-android.yml run passed for v0.3.2 tag
+Cycle 26 priority:
+1. **P3: DELETE /profile/preferences** — ethics gap from Cycle 24 review; users must be able to clear MCP preference data; requires confirmation flow before execution
+2. **P3: Phase 3 completion assessment** — review all Phase 3 sprint items; identify which are done vs. still open; determine Phase 4 readiness
+3. **P4: Document VALID_EXTRA_PREFS 422 as intentional disclosure in threat model** — low risk, but should be documented
 
 ## Known Issues / Technical Debt
 
