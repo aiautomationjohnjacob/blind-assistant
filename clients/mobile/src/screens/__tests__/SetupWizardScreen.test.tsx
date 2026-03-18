@@ -147,6 +147,17 @@ describe("SetupWizardScreen — accessibility", () => {
     expect(input.props.accessibilityHint).toMatch(/bearer token/i);
   });
 
+  it("token entry instructions Text has accessibilityLiveRegion polite", async () => {
+    // Phase 4 audit (Cycle 30): the instructions Text on the token step must have
+    // accessibilityLiveRegion="polite" so VoiceOver announces the step content when
+    // the screen transitions from welcome → token. Without the live region, VoiceOver
+    // only announces if the user swipes to the element — it does not auto-announce.
+    await advanceToTokenStep();
+    // The instructions text is identified by its content substring
+    const instructionsText = screen.getByText(/type or paste your api token/i);
+    expect(instructionsText.props.accessibilityLiveRegion).toBe("polite");
+  });
+
   it("confirm step header has accessibilityRole=header", async () => {
     await advanceToConfirmStep();
     // Will have changed to the Confirm Token header
