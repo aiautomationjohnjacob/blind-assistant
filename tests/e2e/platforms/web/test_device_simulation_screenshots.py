@@ -177,13 +177,12 @@ class TestDeviceSimulationScreenshots:
         page.wait_for_load_state("networkidle")
         _wait_for_app_ready(page)
         # The setup wizard is shown on first load when no credentials are stored.
-        # If we see a text input, we are on the setup wizard — take the screenshot.
+        # Check if a text input is visible (setup wizard) vs a speak button (main screen).
+        # contextlib.suppress: if the selector times out, input_visible stays False.
         input_visible = False
-        try:
+        with contextlib.suppress(Exception):
             page.wait_for_selector("input", timeout=5000, state="visible")
             input_visible = True
-        except Exception:
-            pass
         # Save regardless — if it's the main screen we still capture that state.
         state_name = "03_setup_wizard" if input_visible else "03_main_screen_no_setup"
         path = _save_screenshot(page, state_name)
@@ -208,7 +207,8 @@ class TestDeviceSimulationScreenshots:
         # Attempt to reach the main screen by simulating the token setup flow.
         # If we are already on the main screen (button with speak-related text), capture.
         # If we are on the setup wizard, try to proceed.
-        try:
+        # contextlib.suppress: query/click errors are non-fatal — we still capture.
+        with contextlib.suppress(Exception):
             # Check if there's a text input (setup wizard)
             input_el = page.query_selector("input")
             if input_el:
