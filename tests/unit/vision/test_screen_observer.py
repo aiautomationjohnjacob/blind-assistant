@@ -385,7 +385,6 @@ async def test_capture_with_playwright_returns_none_when_not_installed():
 @pytest.mark.asyncio
 async def test_capture_with_playwright_returns_bytes_on_success():
     """_capture_with_playwright returns PNG bytes from headless Chromium (ISSUE-003 fix)."""
-    obs = _make_observer()
     fake_png = b"PLAYWRIGHT_CHROMIUM_PNG"
 
     # Mock the full Playwright async context manager chain
