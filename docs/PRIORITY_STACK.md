@@ -20,9 +20,8 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P3 | Create ROADMAP.md with Phase 3-5 milestones — CONTRIBUTING.md references it (broken link) | Cycle 20 doc audit | 2026-03-17 |
-| P3 | Android TalkBack device test: trigger release tag to run AVD CI job (e2e-android); verify 8 TalkBack tests pass on real emulator | Phase 3 sprint | 2026-03-17 |
-| P3 | iOS VoiceOver device test: trigger release tag on macOS runner (ios-e2e.yml); verify 9 VoiceOver tests pass on iOS Simulator | Founder scope expansion | 2026-03-17 |
+| P3 | Verify Android TalkBack CI result: check v0.3.0 tag e2e-android AVD run; document pass/fail | Cycle 21 | 2026-03-17 |
+| P3 | Verify iOS VoiceOver CI result: check v0.3.0 tag ios-e2e.yml macOS run; document pass/fail | Cycle 21 | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Education website (learn.blind-assistant.org): audio-primary; NVDA+Chrome; zero mouse | education-website-designer | 2026-03-17 |
 | P3 | Voice Activity Detection (VAD) for voice_local.py (replaces fixed recording duration) | ISSUE-002 | 2026-03-17 |
