@@ -220,16 +220,18 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 27 (Phase 3→4 transition). Three deliverables: (1) P0 CI fix — test_main.py ruff violations
-repaired; CI lint was failing since Cycle 25; (2) SECURITY_MODEL §10 added — VALID_EXTRA_PREFS 422
-documented as intentional information disclosure, no fix required; (3) Voice clear preferences —
-`clear_preferences` intent + ConfirmationGate handler + APIServer action dispatch; 14 new tests.
-812 Python unit tests total (+14). ruff clean; mypy 0 errors. Phase 3 complete → Phase 4 beginning.
+Cycle 28 (Phase 4: Accessibility Hardening). Three deliverables: (1) ISSUE-033 fixed —
+`accessibilityRole="text"` → `Platform.OS === "web" ? undefined : "text"` pattern applied to
+10 occurrences across MainScreen.tsx (3) and SetupWizardScreen.tsx (7); 4 new JS tests verify
+web platform behavior; (2) Phase 4 axe-core WCAG CI gate — `a11y-audit` job added to ci.yml,
+test_wcag_axe_audit.py with 4 audit tests; fails on any CRITICAL violation; (3) 4 stale GitHub
+CI failure issues closed (80-83). 121 JS tests total (+4). 812 Python unit tests (unchanged).
+ruff clean; mypy 0 errors.
 
-Cycle 28 priority:
-1. **P4: Playwright WCAG audit on Expo web build** — device-simulator agent; run real a11y tests against built web app; identify and fix CRITICAL WCAG violations
-2. **P4: Investigate `accessibilityRole="text"` on web** — react-native-web mapping to non-ARIA role; may need to use platform-specific code for web rendering
-3. **P4: Begin Phase 4 Accessibility Hardening sprint** — call /audit-a11y on web client; establish Phase 4 CI gate
+Cycle 29 priority:
+1. **P4: Check first a11y-audit CI run result** — verify axe-core gate passes; if serious violations found, add to OPEN_ISSUES.md
+2. **P4: Bundle axe-core locally** — eliminate CDN dependency in CI; add axe.min.js to test assets; use page.add_script_tag(path=...)
+3. **P4: iOS/Android Phase 4** — TalkBack gesture coverage audit (swipe navigation patterns); VoiceOver rotor support review; react-native-paper a11y gaps
 
 ## Known Issues / Technical Debt
 
