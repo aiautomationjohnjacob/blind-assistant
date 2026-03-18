@@ -278,15 +278,16 @@ Cycle 32 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 30.** Phase 4 (Accessibility Hardening) in progress. Four deliverables:
-(1) Skip link added — `clients/mobile/public/index.html` custom Expo HTML template with
-WCAG 2.4.1 skip-to-main-content link and `<div role="main">` landmark wrapper;
-(2) SetupWizardScreen token step live region fixed — `accessibilityLiveRegion="polite"` added
-to instructions Text; 1 new JS test; 128 JS total; (3) 5 new web E2E structural tests;
-(4) Documentation steward update — CHANGELOG Phase 4 section, README Telegram demoted.
-812 Python unit tests. ruff clean.
+**Loop completed Cycle 31.** Phase 4 (Accessibility Hardening) in progress. Two deliverables:
+(1) Verified skip link in `expo export` — `dist/index.html` confirmed includes skip link +
+main landmark from `public/index.html` template (Expo public/ folder works correctly);
+(2) ISSUE-037 found and fixed — `#main-content` div was missing `tabindex="-1"`, which
+meant the skip link moved scroll position but NOT keyboard focus (WCAG 2.4.1 Level A was
+broken despite appearing implemented). Fixed in `public/index.html`. 5 new TestFocusManagement
+E2E tests added. 1 new TestPageStructure test added (tabindex=-1 verification).
+`test_can_reach_main_button_by_tab` corrected (was asserting first Tab reaches voice button,
+now correctly handles skip link as first focusable). 812 Python. 128 JS. ruff clean.
 
-The most important work for Cycle 31 (Phase 4: Accessibility Hardening):
-1. **P4: Verify skip link in expo export** — build web export and confirm `dist/index.html` includes skip link from `public/index.html` template
-2. **P4: web-accessibility-expert audit** — focus management after state changes; axe-core gate results review; any 'serious' violations to OPEN_ISSUES.md
-3. **P4: Check axe-core CI gate results** — review violations found by Phase 4 CI gate on new build
+The most important work for Cycle 32 (Phase 4: Accessibility Hardening):
+1. **P4: Check axe-core CI gate results** — review 'serious' violations from Cycle 31 push; add any new violations to OPEN_ISSUES.md
+2. **P4: web-accessibility-expert full audit** — VoiceOver+Safari and TalkBack+Chrome flows; focus management after app state changes
