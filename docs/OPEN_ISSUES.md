@@ -933,3 +933,39 @@ workflow files (.github/workflows/*.yml).
 **Resolved in**: Cycle 44 — commit 64dddf7. actions/checkout v4→v5, actions/setup-node v4→v5,
 actions/upload-artifact v4→v5 across all 5 workflow files. setup-python was already @v5.
 YAML validated locally. No src/ or test files changed.
+
+### ISSUE-051: Netlify staging never deployed — no community URL for real-device testing
+**Severity**: MEDIUM
+**Category**: ci, community, accessibility
+**Detected by**: Cycle 45 creative exploration
+**Detected**: 2026-03-18
+**Description**: The deploy-staging.yml workflow builds the Expo web app on every push but
+the Netlify deploy step has always failed because NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID
+secrets are not configured. Cycle 45 fixed the workflow to skip gracefully, but the
+underlying gap remains: there is no live staging URL at https://staging.blind-assistant.org
+(or any public URL) where community members can test with their actual screen readers.
+**Impact**: Community NVDA+Chrome, TalkBack+Chrome, VoiceOver+Safari testing requires
+running the app locally. This blocks blind contributors who cannot easily set up a dev
+environment from participating in accessibility testing.
+**Proposed fix**: (1) Set up Netlify project and configure NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID
+as GitHub repository secrets (requires a sighted developer with Netlify account); (2) Add
+the staging URL to CONTRIBUTING.md and README.md; (3) Update the NVDA+Chrome E2E test
+runner to optionally point at the staging URL for real-device validation.
+**Status**: OPEN
+
+### ISSUE-052: pytest-timeout not configured — 60s blocking tests fail silently in CI
+**Severity**: LOW
+**Category**: testing, ci
+**Detected by**: Cycle 45 Marcus test hang investigation
+**Detected**: 2026-03-18
+**Description**: The ConfirmationGate uses DEFAULT_TIMEOUT=60 seconds for asyncio.wait_for.
+When tests mock wait_for_response but forget to mock wait_for_confirmation, the asyncio queue
+blocks for 60s before TimeoutError — which then gets swallowed by contextlib.suppress(Exception).
+The test appears to "pass" (or at least complete) but takes 60s instead of 0.1s. This was
+discovered in Cycle 45 (Marcus food-ordering tests). There is no pytest-timeout configured
+to flag tests that take more than N seconds as failures.
+**Impact**: Slow tests mask mock setup bugs. CI can take 10x longer without warning.
+**Proposed fix**: (1) Add pytest-timeout to requirements (test deps); (2) Configure a 10-second
+asyncio timeout in pyproject.toml (asyncio_mode="auto" supports asyncio_default_test_loop_scope);
+(3) Lower DEFAULT_TIMEOUT for test environments via a config toggle.
+**Status**: OPEN
