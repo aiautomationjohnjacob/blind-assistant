@@ -516,7 +516,7 @@ jobs:
   # ──────────────────────────────────────────────────────────
   notify-failure:
     name: Create issue on main branch failure
-    needs: [lint, typecheck, test, test-js, security, e2e-web, integration-browser]
+    needs: [lint, typecheck, test, test-js, test-education, security, e2e-web, integration-browser]
     if: failure() && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
