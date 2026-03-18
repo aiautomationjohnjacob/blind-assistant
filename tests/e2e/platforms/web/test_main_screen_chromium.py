@@ -720,7 +720,7 @@ class TestFocusManagement:
         page.wait_for_load_state("networkidle")
 
         invisible_focused = []
-        for i in range(15):
+        for _i in range(15):
             page.keyboard.press("Tab")
             result = page.evaluate(
                 """() => {
