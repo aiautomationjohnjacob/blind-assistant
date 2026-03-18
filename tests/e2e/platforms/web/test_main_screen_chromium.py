@@ -58,49 +58,15 @@ except ImportError:
 WEB_APP_URL = os.environ.get("WEB_APP_URL", "http://localhost:19006")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Fixtures
-# ─────────────────────────────────────────────────────────────────────────────
-
-
-@pytest.fixture(scope="session")
-def web_app_available() -> bool:
-    """
-    Check if the web app server is running before any tests execute.
-    Avoids confusing connection-refused errors in test output.
-    Returns True if the server responds, False otherwise.
-    """
-    try:
-        # Use http.client directly — WEB_APP_URL is always http://localhost:19006
-        # (no dynamic scheme from user input), so S310 does not apply here.
-        conn = http.client.HTTPConnection("localhost", 19006, timeout=3)
-        conn.request("GET", "/")
-        resp = conn.getresponse()
-        return resp.status == 200
-    except (TimeoutError, http.client.HTTPException, OSError):
-        return False
-
-
-# ─────────────────────────────────────────────────────────────────────────────
 # Helpers
+#
+# NOTE: web_app_available fixture and _skip_if_unavailable helper are defined
+# in conftest.py (DRY: shared across all 4 web E2E test files).
 # ─────────────────────────────────────────────────────────────────────────────
 
-
-def _skip_if_unavailable(web_app_available: bool) -> None:
-    """Raise pytest.skip if the web app or Playwright is not available."""
-    if not PLAYWRIGHT_AVAILABLE:
-        pytest.skip(
-            "pytest-playwright is not installed. Web E2E tests run only in the 'e2e-web' CI job. "
-            "To run locally: pip install pytest pytest-playwright && playwright install chromium && "
-            "cd clients/mobile && npx expo export -p web && "
-            "python3 -m http.server 19006 --directory dist/ & "
-            "pytest tests/e2e/platforms/web/ --browser chromium"
-        )
-    if not web_app_available:
-        pytest.skip(
-            f"Web app not running at {WEB_APP_URL}. "
-            "Run: cd clients/mobile && npx expo export -p web && "
-            "python3 -m http.server 19006 --directory dist/"
-        )
+# Re-export _skip_if_unavailable from conftest for use in this file's test methods.
+# conftest.py provides the session-scoped web_app_available fixture automatically.
+from tests.e2e.platforms.web.conftest import _skip_if_unavailable  # noqa: E402
 
 
 def _wait_for_app_ready(page: Page) -> None:
