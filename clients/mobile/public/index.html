@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="%LANG_ISO_CODE%">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Blind Assistant — an AI assistant built for blind and visually impaired users. Voice-first, screen-reader compatible, WCAG 2.1 AA." />
+    <title>%WEB_TITLE%</title>
+
+    <!--
+      Blind Assistant Web App — Accessibility-first HTML template.
+
+      WCAG 2.1 AA requirements addressed here:
+      - 2.4.1 Bypass Blocks: skip link is the first focusable element
+      - 3.1.1 Language of Page: lang attribute set from app.config.ts web.lang
+      - 4.1.1 Parsing: valid DOCTYPE, no duplicate IDs
+
+      Skip link implementation:
+        Hidden by default (positioned off-screen).
+        Becomes visible on :focus — keyboard users see it when they Tab to it.
+        Activating it moves focus to #main-content, skipping the status bar.
+        This is the same pattern used by GOV.UK and GitHub.
+
+      Per CLAUDE.md accessibility rules:
+        "No `outline: none` without a visible focus replacement"
+        The skip link uses a visible :focus style (see inline styles below).
+    -->
+
+    <!-- The `react-native-web` recommended style reset -->
+    <style id="expo-reset">
+      /* These styles make the body full-height */
+      html,
+      body {
+        height: 100%;
+      }
+      /* These styles disable body scrolling if you are using <ScrollView> */
+      body {
+        overflow: hidden;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+
+      /* ── Skip link ──────────────────────────────────────────────────────
+         Visually hidden until focused (keyboard user tabs to it first).
+         On focus: appears in top-left corner with high-contrast styling.
+         WCAG 2.4.1: the skip link must be VISIBLE when focused — not just
+         present in the DOM. We use left:-9999px (off-screen) rather than
+         display:none or visibility:hidden, which would remove it from the
+         tab order entirely.
+      ────────────────────────────────────────────────────────────────────── */
+      .skip-to-main {
+        position: absolute;
+        left: -9999px;
+        top: 8px;
+        z-index: 9999;
+        padding: 10px 20px;
+        background: #0d0d1a;
+        color: #e8f0fe;
+        font-size: 1rem;
+        font-weight: 600;
+        border: 3px solid #4f8ef7;
+        border-radius: 4px;
+        text-decoration: none;
+        /* Visible focus outline — never suppress outline without replacement */
+        outline: 3px solid #4f8ef7;
+        outline-offset: 2px;
+      }
+      .skip-to-main:focus {
+        left: 8px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!--
+      Skip link — WCAG 2.4.1 Bypass Blocks (Level A).
+      Must be the FIRST focusable element on the page.
+      NVDA + Chrome: Tab → "Skip to main content" link announced.
+      VoiceOver + Safari: Tab or VO+Tab → link announced.
+      Activating it moves focus to #main-content (the React root).
+    -->
+    <a href="#main-content" class="skip-to-main">
+      Skip to main content
+    </a>
+
+    <!-- Use static rendering with Expo Router to support running without JavaScript. -->
+    <noscript>
+      <p style="padding: 2rem; color: #e8f0fe; background: #0d0d1a; font-family: sans-serif;">
+        Blind Assistant requires JavaScript. Please enable JavaScript in your
+        browser settings and refresh the page.
+      </p>
+    </noscript>
+
+    <!--
+      Main content region — the React app renders here.
+      id="main-content" is the target of the skip link above.
+      role="main" makes this a 'main' landmark — screen readers can jump
+      to it using the landmark navigation shortcut (NVDA: Q, VoiceOver: VO+CMD+M).
+    -->
+    <div id="main-content" role="main">
+      <div id="root"></div>
+    </div>
+  </body>
+</html>
