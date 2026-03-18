@@ -242,7 +242,42 @@ jobs:
           retention-days: 14
 
   # ──────────────────────────────────────────────────────────
-  # JOB 6: Web E2E tests (Playwright — all browsers)
+  # JOB 6a: Education site tests (React — clients/education/)
+  # Audio-primary WCAG 2.1 AA site for learn.blind-assistant.org
+  # ──────────────────────────────────────────────────────────
+  test-education:
+    name: Education site tests (clients/education/)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: clients/education
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: clients/education/package-lock.json
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run Jest accessibility tests
+        run: npm test -- --watchAll=false --ci
+        env:
+          CI: true
+
+      - name: Upload education coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: education-coverage-report-${{ github.run_number }}
+          path: clients/education/coverage/
+          retention-days: 14
+
+  # ──────────────────────────────────────────────────────────
+  # JOB 6b: Web E2E tests (Playwright — all browsers)
   # Runs on every push; no device hardware needed.
   # Skipped if tests/e2e/web/ doesn't exist yet.
   # ──────────────────────────────────────────────────────────
