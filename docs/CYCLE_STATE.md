@@ -240,11 +240,13 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 **PHASE 4 COMPLETE** — WCAG 2.1 AA on web confirmed; all platform accessibility sign-offs done (Cycle 36).
 
 ## Phase 5 Sprint Items (Polish & Community Ready)
-- [ ] **P5: Dorothy test design** — newly-blind-user + blind-elder-user review setup wizard + main screen for simplicity gaps
-- [ ] **P5: Simplicity audit of voice strings** — audit installer + voice responses for non-technical language; no jargon; patient tone
-- [ ] **P5: ROADMAP.md + CHANGELOG.md update** — mark Phase 4 complete; describe Phase 5 goals; update test counts
-- [ ] **P5: Grant narrative** — grant-writer produces GRANT_NARRATIVE.md (Phase 5 completion criterion)
-- [ ] **P5: Community launch prep** — open-source-steward reviews CONTRIBUTING.md, good-first-issues, README for first-time contributor UX
+- [x] **P5: Dorothy test — language simplification (Cycle 37)** — "API token" → "connection code", "backend server" → "your computer", "passphrase" → "secret phrase" throughout SetupWizardScreen + installer/install.py; welcome screen adds "ask to repeat anything" affordance; error messages give actionable guidance; 6 new Dorothy test assertions; 134 JS tests all passing; GRANT_NARRATIVE.md created
+- [x] **P5: ROADMAP.md + CHANGELOG.md update (Cycle 37)** — Phase 3+4 marked COMPLETE; Phase 5 IN PROGRESS with test count table; CHANGELOG Phase 5 section + [v0.4.0] Phase 4 entry
+- [x] **P5: Grant narrative (Cycle 37)** — GRANT_NARRATIVE.md: problem statement, 7M blind Americans metric, impact table, 812 Python + 134 JS tests, 3 fundable milestones, budget narrative, sustainability plan
+- [ ] **P5: Full Dorothy scenario test** — personas attempt complete flows (setup → food ordering → Second Brain note); identify remaining "what do I do next?" gaps
+- [ ] **P5: Fix missed jargon string** — handleConfirmToken validation error says "API tokens are usually at least 32 characters" → "connection codes" (identified in Cycle 37 review)
+- [ ] **P5: Simplicity audit of orchestrator voice strings** — review AI response language for jargon-free, patient tone
+- [ ] **P5: Community launch prep** — open-source-steward reviews CONTRIBUTING.md, good-first-issues, README for first-time contributor UX; ensure blind contributors feel especially welcome
 - [ ] **P5: VoiceOver+Safari CI** — add WebKit E2E tests for Safari/VoiceOver (separate from Chromium/Firefox)
 
 ## Blockers
