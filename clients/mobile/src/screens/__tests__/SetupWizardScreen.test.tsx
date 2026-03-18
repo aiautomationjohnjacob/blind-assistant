@@ -470,8 +470,14 @@ describe("SetupWizardScreen — Dorothy test (plain language)", () => {
   it("empty code error says 'connection code' not 'API token'", async () => {
     // Regression for Cycle 38: handleConfirmToken empty-input error was missed
     // in the Cycle 37 jargon sweep — still said 'API token'.
+    // The button is disabled for truly empty input (handleConfirmToken is a
+    // defensive guard). Use whitespace-only input to trigger the guard path
+    // while still keeping the button enabled via the test form.
     await advanceToTokenStep();
-    // Leave input empty — press confirm
+    // Enter whitespace — trimmed to empty, button enabled, but handleConfirmToken
+    // guard fires because trimmed.length === 0.
+    const input = screen.getByLabelText(/connection code input field/i);
+    fireEvent.changeText(input, "   ");
     fireEvent.press(screen.getByRole("button", { name: /confirm code/i }));
     await waitFor(() => {
       const calls = (Speech.speak as jest.Mock).mock.calls;
