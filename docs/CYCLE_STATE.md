@@ -208,33 +208,21 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 19 (Phase 3 — Android TalkBack + iOS VoiceOver E2E tests). ADBClient wrapper + 8 TalkBack
-E2E tests (launch/crash, unlabelled elements, 44dp touch target, focusable speak button, risk
-disclosure flow, confirmation prompt, screenshot). SimctlClient wrapper + 9 VoiceOver tests (launch,
-double-tap hint regression, visual-only language, risk disclosure, live region, screenshot). CI path
-bug fixed (tests/e2e/android/ -> tests/e2e/platforms/android/). ios-e2e.yml macOS workflow created.
-android/ios marks registered in pyproject.toml. ISSUE-029 Netlify operator docs in README.md.
-641 unit tests unchanged. Ruff clean.
+Cycle 22 (Phase 3 — VAD + Playwright fallback + Android CI fix). iOS VoiceOver CI verified: run
+23222358997, 6 PASSED, 2 SKIPPED (backend not reachable in simulator — expected). Android TalkBack
+CI structural bug fixed: ci.yml only triggers on branches (not tags), so the `if: startsWith(
+github.ref, 'refs/tags/v')` condition in the e2e-android job was unreachable; created
+e2e-android.yml (mirrors ios-e2e.yml) so Android tests will run on next release tag. Voice Activity
+Detection (ISSUE-002) implemented: transcribe_microphone_with_vad() uses webrtcvad to stop recording
+when user stops speaking; fallback to fixed-duration when webrtcvad unavailable; VoiceLocalInterface
+uses VAD by default. Playwright screenshot fallback (ISSUE-003) implemented: _capture_with_pil() +
+_capture_with_playwright() strategy in ScreenObserver._capture_screenshot(). 732 unit tests (+19).
+Ruff clean. mypy 0 errors.
 
-Cycle 20 (Phase 3 — documentation-steward run + platform helper unit tests). CHANGELOG.md updated
-through Cycle 19 (was frozen at Cycle 10 — 9 cycles out of date). CONTRIBUTING.md setup steps
-corrected: removed broken .env.example reference, added OS keychain instructions, fixed ROADMAP.md
-link to docs/FEATURE_PRIORITY.md. 8 missing public docstrings added (configure_logging, main,
-is_unlocked, get_key, and 4 inner callback functions). 72 new device-free unit tests for
-_parse_content_descriptions, _parse_bounds, _has_visual_only_language, _has_double_tap_hint
-via importlib dynamic import pattern. 641 → 713 Python unit tests. Ruff clean.
-
-Cycle 21 (Phase 3 — ROADMAP.md rewrite + release tag triggering). ROADMAP.md rewritten from
-Phase-1-incomplete stale state to current: Phases 1+2 checked off, Phase 3 current with 16
-completed items + remaining items listed, Phase 4+5 milestones defined, tech stack table added.
-CONTRIBUTING.md updated to link ROADMAP.md alongside FEATURE_PRIORITY.md. v0.3.0 release tag
-pushed to trigger e2e-android (AVD) and ios-e2e.yml (iOS Simulator) CI workflows. 713 Python
-unit tests unchanged. Ruff clean.
-
-Cycle 22 priority:
-1. **P3: Verify Android/iOS CI results** — check v0.3.0 tag CI run; document pass/fail
-2. **P3: Voice Activity Detection (VAD)** — ISSUE-002; replace fixed 8s recording in voice_local.py
-3. **P3: PIL/Playwright fallback** — ISSUE-003; headless server screenshot capability
+Cycle 23 priority:
+1. **P3: Verify Android TalkBack CI** — push v0.3.1 tag; confirm e2e-android.yml fires; document pass/fail
+2. **P3: MCP memory server** — implement src/blind_assistant/memory/mcp_memory.py (context.py TODO)
+3. **P3: Education website scaffold** — learn.blind-assistant.org React audio-primary site
 
 ## Known Issues / Technical Debt
 
