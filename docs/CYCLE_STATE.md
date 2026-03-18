@@ -307,15 +307,18 @@ Cycle 48 priorities:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 46.** Phase 5 (Polish & Community Ready) is COMPLETE.
+**Loop completed Cycle 47.** Phase 5 (Polish & Community Ready) is COMPLETE.
 
-Key deliverables Cycle 46: (1) Completed Node.js 24 GitHub Actions migration — bumped
-upload-artifact v5→v7, setup-python v5→v6, checkout v5→v6, setup-node v5→v6 across all
-5 workflow files; (2) Added pytest-timeout (30s ceiling) to CI and pyproject.toml; 818 tests
-pass; ISSUE-052 resolved; GitHub issue #101 closed.
+Key deliverables Cycle 47: (1) Created deploy-education.yml — GitHub Pages deployment for
+clients/education/ on every push to main; (2) Switched BrowserRouter→HashRouter in
+index.tsx for GitHub Pages compatibility; (3) Added homepage="." to package.json; (4) CNAME
+for learn.blind-assistant.org written in workflow; 75 education tests pass; ISSUE-053 resolved.
 
-Next cycle priorities: Education site deployment (P5) — deploy clients/education/ to
-learn.blind-assistant.org via GitHub Pages. Fully automatable. Netlify staging (P4) requires
-a sighted developer with a Netlify account and cannot be automated by the loop.
-Phase 5 is fully complete — all criteria met (Dorothy/Jordan/Marcus scenario tests ✓,
-GRANT_NARRATIVE.md ✓, community launch prep ✓, Node.js 24 full migration ✓, pytest-timeout ✓).
+One manual step required: Repository Settings → Pages → Source → GitHub Actions. Once
+enabled, learn.blind-assistant.org becomes live on next push.
+
+Next cycle priorities:
+1. GitHub Pages activation reminder (document as community ask — can be done by any contributor
+   with write access to the repository settings)
+2. Netlify staging (P4) — requires sighted developer with Netlify account (not automatable)
+3. Consider a P5 creative cycle: evaluate new user story opportunities now that all phases are complete
