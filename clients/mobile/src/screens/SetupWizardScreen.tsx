@@ -242,7 +242,7 @@ export function SetupWizardScreen({
       </Text>
       <Text
         style={styles.instructions}
-        accessibilityRole="text"
+        accessibilityRole={Platform.OS === "web" ? undefined : "text"}
         accessibilityLiveRegion="polite"
       >
         This is a one-time setup.{"\n\n"}
@@ -273,7 +273,7 @@ export function SetupWizardScreen({
       </Text>
       <Text
         style={styles.instructions}
-        accessibilityRole="text"
+        accessibilityRole={Platform.OS === "web" ? undefined : "text"}
       >
         Type or paste your API token below.{"\n"}
         The token is printed by the server on first startup.
@@ -329,7 +329,7 @@ export function SetupWizardScreen({
       </Text>
       <Text
         style={styles.instructions}
-        accessibilityRole="text"
+        accessibilityRole={Platform.OS === "web" ? undefined : "text"}
         accessibilityLiveRegion="polite"
       >
         Your token:{"\n"}
@@ -372,7 +372,7 @@ export function SetupWizardScreen({
       />
       <Text
         style={styles.instructions}
-        accessibilityRole="text"
+        accessibilityRole={Platform.OS === "web" ? undefined : "text"}
         accessibilityLiveRegion="polite"
       >
         Saving your settings…
@@ -391,7 +391,7 @@ export function SetupWizardScreen({
       </Text>
       <Text
         style={styles.instructions}
-        accessibilityRole="text"
+        accessibilityRole={Platform.OS === "web" ? undefined : "text"}
         accessibilityLiveRegion="polite"
       >
         Blind Assistant is now connected to your server.{"\n\n"}
@@ -421,7 +421,7 @@ export function SetupWizardScreen({
       </Text>
       <Text
         style={[styles.instructions, styles.errorText]}
-        accessibilityRole="text"
+        accessibilityRole={Platform.OS === "web" ? undefined : "text"}
         accessibilityLiveRegion="assertive"
       >
         {errorMessage || "Something went wrong. Please try again."}
@@ -469,7 +469,7 @@ export function SetupWizardScreen({
         {/* Progress indicator — announced as text, not color */}
         <Text
           style={styles.progressText}
-          accessibilityRole="text"
+          accessibilityRole={Platform.OS === "web" ? undefined : "text"}
           accessibilityLiveRegion="polite"
           accessibilityLabel={`Setup step: ${step}`}
           importantForAccessibility="yes"
