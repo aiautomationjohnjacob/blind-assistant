@@ -19,11 +19,12 @@
 **Phase 4 COMPLETE (Cycle 36)**: 0 axe violations (CI run 23231203014); 36 Chromium + 36 Firefox E2E all pass; iOS/Android sign-off done; Windows/macOS CLI+web sign-off done (ISSUE-043).
 **Phase 5 COMPLETE (Cycle 38)**: Dorothy language simplification done (136 JS tests); GRANT_NARRATIVE.md created; 13 Dorothy E2E scenario tests passing; ISSUE-045 resolved.
 **Phase 5 gate PASSED**: Dorothy scenario tests (setup → food ordering → Second Brain note → general questions) all green; no jargon; no dead ends.
+**Community launch prep COMPLETE (Cycle 39)**: CONTRIBUTING.md expanded with blind contributor welcome, braille display callout, Dorothy persona explanation, JS test instructions, good-first-issue guide, commit format; 5 GitHub good-first-issues created (#92-#96); CHANGELOG v0.5.0 complete.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P2 | Community launch prep: open-source-steward reviews CONTRIBUTING.md, identifies good-first-issues, ensures blind contributors feel especially welcomed | community | 2026-03-18 |
-| P3 | VoiceOver+Safari CI: add WebKit E2E tests — Playwright WebKit is not real Safari + VoiceOver, but provides closer coverage than Chromium alone | accessibility | 2026-03-18 |
+| P3 | VoiceOver+Safari CI: add WebKit E2E tests — now also GitHub issue #92 (good-first-issue) | accessibility | 2026-03-18 |
+| P3 | Dorothy E2E in CI: dorothy-e2e CI job — now also GitHub issue #96 (good-first-issue) | e2e-tester | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
