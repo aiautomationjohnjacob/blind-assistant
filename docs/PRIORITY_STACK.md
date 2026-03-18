@@ -24,11 +24,17 @@
 **Jordan DeafBlind scenario COMPLETE (Cycle 41)**: 16 Jordan tests; braille formatter fix; shared accessibility helpers; NVDA/braille README; issues #93/#94/#95 closed; 858 tests total.
 **Marcus power user scenario COMPLETE (Cycle 42)**: 31 Marcus tests; brief mode pipeline verified; financial disclosure survives brief mode; DRY web_app_available fixture; CI renamed to persona gate; 919 tests total.
 **Telegram integration COMPLETE (Cycle 43)**: --telegram CLI flag; api_server_enabled forced; 6 new tests in test_main.py (9 total); ruff CI fix; 925 tests total.
+**Node.js 24 migration COMPLETE (Cycle 44)**: checkout/setup-node/upload-artifact v4→v5 across all 5 workflow files; ISSUE-050 resolved; June 2026 deadline met.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
-| P4 | Node.js 24 migration: update actions/checkout, actions/setup-python, actions/setup-node, actions/upload-artifact from v4→v5+ to avoid Node.js 20 deprecation (deadline June 2026) | CI annotation Cycle 43 | 2026-03-18 |
+
+## Completed Items (Cycle 44 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Node.js 24 migration (P4): bumped actions/checkout, actions/setup-node, actions/upload-artifact from v4→v5 in all 5 workflow files; ISSUE-050 resolved; YAML validated | 2026-03-18 | 44 |
 
 ## Completed Items (Cycle 43 additions)
 
