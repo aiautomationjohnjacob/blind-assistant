@@ -282,11 +282,11 @@ describe("SetupWizardScreen — confirm step", () => {
     expect(screen.getByText(new RegExp(`${TEST_TOKEN.length} characters`))).toBeTruthy();
   });
 
-  it("Re-enter button goes back to token step", async () => {
+  it("Re-enter button goes back to code entry step", async () => {
     await advanceToConfirmStep(TEST_TOKEN);
     fireEvent.press(screen.getByRole("button", { name: /re-enter token/i }));
     await waitFor(() => {
-      expect(screen.getByLabelText(/api token input field/i)).toBeTruthy();
+      expect(screen.getByLabelText(/connection code input field/i)).toBeTruthy();
     });
   });
 
