@@ -16,14 +16,21 @@
 
 ## Current Stack (Phase 4 — Accessibility Hardening)
 
-**Phase 4 in progress**: Skip link (WCAG 2.4.1) + tabindex="-1" fix; main landmark; SetupWizardScreen live regions; axe-core CI gate (0 critical, 0 serious); React hydration wait added to all web E2E tests + axe audit. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
+**Phase 4 in progress**: ISSUE-040 (aria-live conditional rendering) resolved Cycle 33. CI run c3e55df in progress to verify 8 web E2E tests + ISSUE-039 violation identity. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P4 | ISSUE-039: identify and fix 1 moderate axe-core violation found in CI run 23227996919 — check new CI run from Cycle 32 push (axe now waits for React hydration before running) | Cycle 32 | 2026-03-18 |
-| P4 | Phase 4 completion assessment — 0 critical axe violations ✓; resolve ISSUE-039 first; then get platform agent sign-offs (ios-accessibility-expert, android-accessibility-expert, web-accessibility-expert, windows-accessibility-expert, macos-accessibility-expert) | Cycle 32 | 2026-03-18 |
+| P4 | ISSUE-039: check CI run c3e55df — 15s hydration wait should now surface violation ID in axe output; if moderate-only, document as acceptable; if serious, fix | Cycle 33 | 2026-03-18 |
+| P4 | Phase 4 completion assessment — 0 critical axe violations ✓; ISSUE-040 resolved ✓; ISSUE-039 pending CI c3e55df; Windows/macOS formal sign-off pending | Cycle 33 | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
+
+## Completed Items (Cycle 33 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| ISSUE-040: MainScreen.tsx aria-live regions always rendered (WCAG 4.1.3 fix); hiddenLiveRegion style; 128 JS tests pass | 2026-03-18 | 33 |
+| _wait_for_app_ready() timeout 5s→15s in test_main_screen_chromium.py, test_food_ordering_web.py, test_wcag_axe_audit.py; expected to fix 8 CI test failures | 2026-03-18 | 33 |
 
 ## Completed Items (Cycle 32 additions)
 
