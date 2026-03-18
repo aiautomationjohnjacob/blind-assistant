@@ -26,6 +26,7 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "-ra",  # show summary of all non-passing tests
+    "--timeout=30",  # pytest-timeout: fail any test that blocks for >30s (catches un-mocked asyncio queues)
 ]
 filterwarnings = [
     # asyncio.wait_for cancels Queue.get() coroutines on timeout; those coroutines
