@@ -230,18 +230,18 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 28 (Phase 4: Accessibility Hardening). Three deliverables: (1) ISSUE-033 fixed —
-`accessibilityRole="text"` → `Platform.OS === "web" ? undefined : "text"` pattern applied to
-10 occurrences across MainScreen.tsx (3) and SetupWizardScreen.tsx (7); 4 new JS tests verify
-web platform behavior; (2) Phase 4 axe-core WCAG CI gate — `a11y-audit` job added to ci.yml,
-test_wcag_axe_audit.py with 4 audit tests; fails on any CRITICAL violation; (3) 4 stale GitHub
-CI failure issues closed (80-83). 121 JS tests total (+4). 812 Python unit tests (unchanged).
-ruff clean; mypy 0 errors.
+Cycle 29 (Phase 4: Accessibility Hardening). Three deliverables: (1) Web E2E fix — all 26
+tests were silently failing due to async/sync playwright mismatch + CI pipefail bug; converted
+3 test files to sync API, added set -o pipefail, bundled axe-core locally (555KB, no CDN);
+ISSUE-034 + ISSUE-035 resolved; (2) iOS/Android Phase 4 audit — found VoiceOver live region
+bug (accessibilityLiveRegion on View silently ignored by iOS); fixed by moving to Text nodes;
+added accessibilityActions for VoiceOver rotor and TalkBack Actions menu; ISSUE-036 resolved;
+6 new JS tests. (3) 127 JS tests total (+6). 812 Python unit tests (unchanged). ruff clean.
 
-Cycle 29 priority:
-1. **P4: Check first a11y-audit CI run result** — verify axe-core gate passes; if serious violations found, add to OPEN_ISSUES.md
-2. **P4: Bundle axe-core locally** — eliminate CDN dependency in CI; add axe.min.js to test assets; use page.add_script_tag(path=...)
-3. **P4: iOS/Android Phase 4** — TalkBack gesture coverage audit (swipe navigation patterns); VoiceOver rotor support review; react-native-paper a11y gaps
+Cycle 30 priority:
+1. **P4: web-accessibility-expert full audit** — heading structure, skip link, focus management after route changes; NVDA+Chrome, VoiceOver+Safari patterns
+2. **P4: SetupWizardScreen live region audit** — check for same VoiceOver live region bug in SetupWizardScreen (progress/step announcements)
+3. **P4: Verify new CI run** — confirm axe-core tests now pass with sync API; review any WCAG violations found
 
 ## Known Issues / Technical Debt
 
