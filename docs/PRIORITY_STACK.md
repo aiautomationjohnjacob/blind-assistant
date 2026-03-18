@@ -14,15 +14,19 @@
 5. **P4 — IMPROVEMENT**: Enhancement that improves the product meaningfully
 6. **P5 — CREATIVE**: New idea or integration opportunity worth exploring
 
-## Current Stack (Phase 4 — Accessibility Hardening)
+## Current Stack (Phase 5 — Polish & Community Ready)
 
-**Phase 4 in progress**: ISSUE-040 (aria-live conditional rendering) resolved Cycle 33. ISSUE-041 (React bundle not mounting in CI) identified Cycle 34. Diagnostic logging added to all 3 web E2E test files. Next CI run will expose the exact JS crash error. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
+**Phase 4 COMPLETE (Cycle 36)**: 0 axe violations (CI run 23231203014); 36 Chromium + 36 Firefox E2E all pass; iOS/Android sign-off done; Windows/macOS CLI+web sign-off done (ISSUE-043).
+**Phase 5 goal**: Dorothy persona test — newly-blind elder user completes setup and uses app without sighted help; grant-writer produces GRANT_NARRATIVE.md.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P0 | ISSUE-041: React bundle not mounting in CI Playwright Chromium — 9 web E2E tests fail; diagnostic logging added; check next CI run output and fix root cause JS crash | Cycle 34 | 2026-03-18 |
-| P4 | ISSUE-039: identify the 1 moderate axe violation from CI — likely not visible on blank page; will surface once ISSUE-041 resolved and React actually mounts | Cycle 33 | 2026-03-18 |
-| P4 | Phase 4 completion assessment — 0 critical axe violations ✓; ISSUE-040 resolved ✓; ISSUE-041 blocking web E2E gate; Windows/macOS formal sign-off pending | Cycle 33 | 2026-03-18 |
+| P2 | Dorothy test: newly-blind-user + blind-elder-user persona review of setup wizard and main screen — identify simplicity gaps, confusing language, missing affordances | Phase 5 gate | 2026-03-18 |
+| P2 | Simplicity audit of voice strings — review installer + voice responses for jargon-free, patient language appropriate for non-technical newly-blind users | Phase 5 gate | 2026-03-18 |
+| P2 | ROADMAP.md + CHANGELOG.md update — mark Phase 4 complete; add Phase 5 milestones with Dorothy test as gate; update test counts (812 Python, 128 JS, 36+36 E2E) | documentation | 2026-03-18 |
+| P2 | Grant narrative: grant-writer produces GRANT_NARRATIVE.md (Phase 5 completion criterion per CLAUDE.md) | Phase 5 gate | 2026-03-18 |
+| P3 | Community launch prep: open-source-steward reviews CONTRIBUTING.md, identifies good-first-issues, ensures blind contributors feel welcomed | community | 2026-03-18 |
+| P3 | VoiceOver+Safari CI: add WebKit E2E tests — Playwright WebKit is not real Safari + VoiceOver, but provides closer coverage than Chromium alone | accessibility | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
