@@ -331,3 +331,208 @@ class TestSetupWizardARIA:
             f"{unlabelled_inputs} input element(s) have no accessible name. "
             "NVDA users cannot tell what these fields are for."
         )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Structure and Navigation Tests (WCAG 2.4 Navigable)
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class TestPageStructure:
+    """
+    Verify the page structure enables efficient navigation.
+
+    Screen readers expose page structure to the user via:
+    - Skip links (Tab → skip to content)
+    - Landmark regions (NVDA: D key, VoiceOver: VO+CMD+M)
+    - Heading hierarchy (NVDA: H key, VoiceOver: VO+CMD+H)
+
+    These tests verify that each structural element is present and correct.
+    WCAG 2.1 SC 2.4.1 (Bypass Blocks), 2.4.6 (Headings and Labels),
+    1.3.1 (Info and Relationships), 1.3.6 (Identify Purpose).
+    """
+
+    def test_skip_link_is_first_focusable_element(self, page: Page, web_app_available: bool) -> None:
+        """
+        A skip-to-main-content link must be the FIRST focusable element on the page.
+
+        WCAG 2.4.1 Bypass Blocks (Level A): a mechanism must be available to
+        skip blocks of content repeated on every page. For a single-page app,
+        the repeated element is the status bar / navigation chrome; the main
+        content is the voice button and response area.
+
+        NVDA+Chrome: Tab from address bar → skip link announced as 'Skip to
+        main content, link'. Activating it moves focus to #main-content.
+        VoiceOver+Safari: same behaviour via Tab or VO+Tab.
+
+        This test simulates that flow: Tab once from page load → the first
+        focused element must be the skip link (href contains 'main').
+        """
+        _skip_if_unavailable(web_app_available)
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
+
+        # Tab from page load — first focus must land on skip link
+        page.keyboard.press("Tab")
+        focused_tag = page.evaluate("document.activeElement.tagName.toLowerCase()")
+        focused_href = page.evaluate(
+            "document.activeElement.getAttribute('href') || ''"
+        )
+        focused_text = (page.evaluate("document.activeElement.textContent") or "").lower()
+
+        is_skip_link = (
+            focused_tag == "a"
+            and (
+                "main" in focused_href.lower()
+                or "skip" in focused_text
+                or "main" in focused_text
+            )
+        )
+        assert is_skip_link, (
+            f"First Tab press did not focus a skip link. "
+            f"Got: tag='{focused_tag}', href='{focused_href}', text='{focused_text}'. "
+            "WCAG 2.4.1: the first Tab from any page must reach a skip link. "
+            "Fix: add clients/mobile/public/index.html with a skip link as the "
+            "first element in <body> before the React root."
+        )
+
+    def test_skip_link_target_exists(self, page: Page, web_app_available: bool) -> None:
+        """
+        The skip link's href target (#main-content) must exist in the DOM.
+
+        A skip link pointing to a non-existent anchor is a broken link —
+        activating it does nothing, which defeats its purpose entirely.
+        WCAG 2.4.1: the mechanism must actually work.
+        """
+        _skip_if_unavailable(web_app_available)
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
+
+        # Find the skip link (first <a> with href containing 'main')
+        skip_link_href = page.evaluate(
+            """() => {
+                // Find first link with href containing 'main' or text containing 'skip'
+                const links = document.querySelectorAll('a[href]');
+                for (const link of links) {
+                    const href = link.getAttribute('href') || '';
+                    const text = (link.textContent || '').toLowerCase();
+                    if (href.includes('main') || text.includes('skip')) {
+                        return href;
+                    }
+                }
+                return null;
+            }"""
+        )
+
+        if skip_link_href is None:
+            pytest.skip("No skip link found — covered by test_skip_link_is_first_focusable_element")
+
+        # Extract the anchor ID from the href (e.g. '#main-content' → 'main-content')
+        target_id = skip_link_href.lstrip("#")
+        target_exists = page.evaluate(
+            f"document.getElementById('{target_id}') !== null"
+        )
+        assert target_exists, (
+            f"Skip link href='{skip_link_href}' targets id='{target_id}' "
+            "but no element with that ID exists in the DOM. "
+            "The skip link is broken — fix the template HTML or add the target element."
+        )
+
+    def test_main_landmark_is_present(self, page: Page, web_app_available: bool) -> None:
+        """
+        The page must have a 'main' landmark region.
+
+        NVDA users press 'D' to cycle through landmark regions. Without a main
+        landmark, there is no way to jump directly to the content. VoiceOver
+        uses VO+CMD+M for landmarks. Both require a <main> element or
+        role='main' to identify the primary content area.
+
+        WCAG 1.3.6 Identify Purpose (Level AAA — but strongly recommended AA).
+        Screen reader usability depends on landmarks even at AA.
+        """
+        _skip_if_unavailable(web_app_available)
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
+
+        main_count = page.evaluate(
+            """() => {
+                // Count both <main> elements and role='main' attributes
+                const mains = document.querySelectorAll('main, [role="main"]');
+                return mains.length;
+            }"""
+        )
+        assert main_count >= 1, (
+            "No 'main' landmark found in the DOM. "
+            "NVDA users press 'D' to jump to landmarks — without 'main' they "
+            "must Tab through every element to reach the voice button. "
+            "Fix: wrap the React root in <div role='main'> in public/index.html."
+        )
+
+    def test_page_has_heading_structure(self, page: Page, web_app_available: bool) -> None:
+        """
+        The page must have at least one heading (h1–h6 or role='heading').
+
+        NVDA users press 'H' to jump between headings. Without any headings,
+        the user must read the entire page linearly. A heading provides an
+        anchor point and identifies the page's primary subject.
+
+        For a React Native Web app, headings come from react-native-web
+        mapping accessibilityRole='header' → role='heading' on a <div>.
+        The heading must also have an appropriate aria-level (defaults to 2
+        in react-native-web; we rely on it being announced as a heading).
+
+        WCAG 2.4.6 Headings and Labels (Level AA).
+        """
+        _skip_if_unavailable(web_app_available)
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
+
+        heading_count = page.evaluate(
+            """() => {
+                const headings = document.querySelectorAll(
+                    'h1, h2, h3, h4, h5, h6, [role="heading"]'
+                );
+                return headings.length;
+            }"""
+        )
+        assert heading_count >= 1, (
+            "No headings found in the DOM (h1–h6 or role='heading'). "
+            "NVDA users press 'H' to navigate headings — without any headings "
+            "they must read the page linearly. "
+            "Ensure accessibilityRole='header' is present on a title Text component."
+        )
+
+    def test_heading_has_accessible_label(self, page: Page, web_app_available: bool) -> None:
+        """
+        Headings produced by react-native-web (role='heading') must have an
+        aria-label or non-empty text content so NVDA announces them meaningfully.
+
+        react-native-web maps accessibilityRole='header' → <div role='heading'>.
+        The aria-label from accessibilityLabel is forwarded to aria-label on the div.
+        An empty heading would be announced as 'heading' with no context.
+        """
+        _skip_if_unavailable(web_app_available)
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
+
+        heading_issues = page.evaluate(
+            """() => {
+                const headings = document.querySelectorAll(
+                    'h1, h2, h3, h4, h5, h6, [role="heading"]'
+                );
+                const issues = [];
+                for (const h of headings) {
+                    const label = h.getAttribute('aria-label') || '';
+                    const text = (h.textContent || '').trim();
+                    if (!label && !text) {
+                        issues.push(h.outerHTML.slice(0, 100));
+                    }
+                }
+                return issues;
+            }"""
+        )
+        assert len(heading_issues) == 0, (
+            f"{len(heading_issues)} heading(s) have no text or aria-label: "
+            f"{heading_issues}. An empty heading is announced as 'heading' "
+            "with no context — completely useless to a screen reader user."
+        )
