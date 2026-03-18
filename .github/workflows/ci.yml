@@ -430,15 +430,21 @@ jobs:
       - name: Install project (editable)
         run: pip install -e . 2>/dev/null || pip install -e . --no-build-isolation 2>/dev/null || true
 
-      - name: Run Dorothy scenario E2E tests
-        # These 13 tests cover Dorothy (elder) + Alex (newly-blind) across all core flows:
+      - name: Run persona gate tests (Dorothy + Jordan + accessibility helpers)
+        # Dorothy scenario (13 tests): Dorothy (elder) + Alex (newly-blind) across all core flows:
         # food ordering with risk disclosure, Second Brain save/query, general questions,
         # installer language (no jargon), financial disclosure plain-language check.
-        # Passes when every test confirms: no jargon, no dead ends, actionable guidance.
+        #
+        # Jordan scenario (16 tests): DeafBlind (braille-display) user across all core flows:
+        # braille formatting (≤40 chars, no emoji), Second Brain text-only, financial disclosure
+        # readable via braille, food order disclosure surfaced as text.
+        #
+        # Passes when every test confirms: no jargon, no dead ends, actionable guidance,
+        # braille-friendly formatting, no visual-only language.
         # set -o pipefail: pytest exit code propagates through | tee (was silently swallowed)
         run: |
           set -o pipefail
-          pytest tests/e2e/core/test_dorothy_scenario.py \
+          pytest tests/e2e/core/test_dorothy_scenario.py tests/accessibility/ \
             -v \
             --tb=short \
             2>&1 | tee dorothy-e2e.log

@@ -34,17 +34,15 @@ import re
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from tests.accessibility.helpers import (
+    assert_no_jargon,
+    assert_no_visual_only_language,
+)
 
 from blind_assistant.core.confirmation import ConfirmationGate
 from blind_assistant.core.orchestrator import Orchestrator, UserContext
 from blind_assistant.security.disclosure import FINANCIAL_RISK_DISCLOSURE
 from blind_assistant.tools.browser import BrowserTool, PageState
-from tests.accessibility.helpers import (
-    FORBIDDEN_JARGON,
-    assert_financial_disclosure_present,
-    assert_no_jargon,
-    assert_no_visual_only_language,
-)
 
 pytestmark = pytest.mark.e2e
 
