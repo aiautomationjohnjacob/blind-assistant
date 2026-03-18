@@ -67,6 +67,10 @@ class Response:
     follow_up_prompt: str | None = None  # What to ask the user next
     requires_confirmation: bool = False
     confirmation_action: str | None = None
+    # Server-side action to execute after returning this response.
+    # The APIServer checks this field and executes the named side-effect.
+    # Currently supported: "clear_preferences" — clears all MCP preference data.
+    action: str | None = None
 
 
 class Orchestrator:
