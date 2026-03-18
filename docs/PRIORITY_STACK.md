@@ -20,13 +20,10 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P3 | Verify Android TalkBack CI result: check v0.3.0 tag e2e-android AVD run; document pass/fail | Cycle 21 | 2026-03-17 |
-| P3 | Verify iOS VoiceOver CI result: check v0.3.0 tag ios-e2e.yml macOS run; document pass/fail | Cycle 21 | 2026-03-17 |
-| P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
+| P3 | Verify Android TalkBack CI: push v0.3.1 tag; confirm e2e-android.yml fires and 8 tests pass | Cycle 22 | 2026-03-18 |
+| P3 | MCP memory server integration (cross-session user preferences) — src/blind_assistant/memory/mcp_memory.py | INTEGRATION_MAP.md | 2026-03-17 |
 | P3 | Education website (learn.blind-assistant.org): audio-primary; NVDA+Chrome; zero mouse | education-website-designer | 2026-03-17 |
-| P3 | Voice Activity Detection (VAD) for voice_local.py (replaces fixed recording duration) | ISSUE-002 | 2026-03-17 |
-| P3 | PIL ImageGrab Playwright fallback for headless/server environments | ISSUE-003 | 2026-03-17 |
-| P3 | MCP memory server integration (cross-session user preferences) | INTEGRATION_MAP.md | 2026-03-17 |
+| P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
 ## Completed Items (Cycle 21 additions)
