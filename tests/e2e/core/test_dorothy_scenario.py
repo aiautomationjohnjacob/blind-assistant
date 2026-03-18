@@ -31,7 +31,6 @@ Per docs/PRIORITY_STACK.md Phase 5 gate:
 from __future__ import annotations
 
 import asyncio
-import inspect
 import re
 from unittest.mock import AsyncMock, MagicMock, patch
 
