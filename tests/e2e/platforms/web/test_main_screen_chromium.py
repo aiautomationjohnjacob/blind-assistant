@@ -37,7 +37,6 @@ SYNC API NOTE:
 from __future__ import annotations
 
 import contextlib
-import http.client
 import os
 
 import pytest
