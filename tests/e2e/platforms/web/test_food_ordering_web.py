@@ -84,6 +84,27 @@ def _skip_if_unavailable(web_app_available: bool) -> None:
         )
 
 
+def _wait_for_app_ready(page: Page) -> None:
+    """
+    Wait for the React app to finish hydrating after networkidle.
+
+    The Expo web bundle loads via a deferred <script> tag. After networkidle,
+    React still needs to run checkStoredCredentials() and update state.
+    The loading spinner (ActivityIndicator) renders without role="button".
+    We wait for the first role="button" or input to appear — confirming that
+    React has transitioned to either SetupWizardScreen or MainScreen.
+
+    In CI, expo-secure-store returns null → setup wizard shows. In production,
+    a stored token would skip to the main screen. Both screens are valid.
+    """
+    with contextlib.suppress(Exception):
+        page.wait_for_selector(
+            '[role="button"], input[aria-label]',
+            timeout=5000,
+            state="attached",
+        )
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Phase 3 Test Scenario: Food Ordering Accessibility
 # ─────────────────────────────────────────────────────────────────────────────
