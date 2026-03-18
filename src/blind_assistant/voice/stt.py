@@ -185,9 +185,9 @@ def _record_with_vad_sync(
     """
     try:
         import webrtcvad
-    except ImportError:
+    except ImportError as e:
         # webrtcvad not installed — caller should fall back to fixed-duration
-        raise ImportError("webrtcvad not installed")
+        raise ImportError("webrtcvad not installed") from e
 
     try:
         import numpy as np
