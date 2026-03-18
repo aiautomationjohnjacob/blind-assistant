@@ -14,18 +14,15 @@
 5. **P4 — IMPROVEMENT**: Enhancement that improves the product meaningfully
 6. **P5 — CREATIVE**: New idea or integration opportunity worth exploring
 
-## Current Stack (Phase 5 — Polish & Community Ready)
+## Current Stack (Phase 5 COMPLETE — Community Launch Ready)
 
 **Phase 4 COMPLETE (Cycle 36)**: 0 axe violations (CI run 23231203014); 36 Chromium + 36 Firefox E2E all pass; iOS/Android sign-off done; Windows/macOS CLI+web sign-off done (ISSUE-043).
-**Phase 5 (Cycle 37)**: Dorothy language simplification done (134 JS tests); GRANT_NARRATIVE.md created; ROADMAP+CHANGELOG updated.
-**Phase 5 remaining gate**: Dorothy full scenario test (setup → food ordering → Second Brain note without sighted help).
+**Phase 5 COMPLETE (Cycle 38)**: Dorothy language simplification done (136 JS tests); GRANT_NARRATIVE.md created; 13 Dorothy E2E scenario tests passing; ISSUE-045 resolved.
+**Phase 5 gate PASSED**: Dorothy scenario tests (setup → food ordering → Second Brain note → general questions) all green; no jargon; no dead ends.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P2 | Fix missed jargon string: handleConfirmToken validation says "API tokens are usually at least 32 characters" — should say "connection codes"; add 1 test | Cycle 37 review | 2026-03-18 |
-| P2 | Full Dorothy scenario test — newly-blind-user + blind-elder-user personas attempt complete flows (setup → food ordering → Second Brain note); identify remaining "what do I do next?" gaps | Phase 5 gate | 2026-03-18 |
-| P2 | Simplicity audit of orchestrator voice strings — review AI response language in orchestrator.py for jargon-free, patient tone appropriate for non-technical users | Phase 5 gate | 2026-03-18 |
-| P3 | Community launch prep: open-source-steward reviews CONTRIBUTING.md, identifies good-first-issues, ensures blind contributors feel especially welcomed | community | 2026-03-18 |
+| P2 | Community launch prep: open-source-steward reviews CONTRIBUTING.md, identifies good-first-issues, ensures blind contributors feel especially welcomed | community | 2026-03-18 |
 | P3 | VoiceOver+Safari CI: add WebKit E2E tests — Playwright WebKit is not real Safari + VoiceOver, but provides closer coverage than Chromium alone | accessibility | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
