@@ -210,31 +210,31 @@ describe("SetupWizardScreen — welcome step", () => {
 // Tests: Token Entry Step
 // ─────────────────────────────────────────────────────────────
 
-describe("SetupWizardScreen — token entry step", () => {
-  it("renders the token input field", async () => {
+describe("SetupWizardScreen — code entry step", () => {
+  it("renders the connection code input field", async () => {
     await advanceToTokenStep();
-    expect(screen.getByLabelText(/api token input field/i)).toBeTruthy();
+    expect(screen.getByLabelText(/connection code input field/i)).toBeTruthy();
   });
 
-  it("Confirm Token button is disabled when input is empty", async () => {
+  it("Confirm button is disabled when input is empty", async () => {
     await advanceToTokenStep();
-    const button = screen.getByRole("button", { name: /confirm token/i });
+    const button = screen.getByRole("button", { name: /confirm code — disabled/i });
     expect(button.props.accessibilityState?.disabled).toBe(true);
   });
 
-  it("Confirm Token button becomes enabled when token is entered", async () => {
+  it("Confirm button becomes enabled when code is entered", async () => {
     await advanceToTokenStep();
-    const input = screen.getByLabelText(/api token input field/i);
-    fireEvent.changeText(input, "a-valid-token-string");
-    const button = screen.getByRole("button", { name: /confirm token/i });
+    const input = screen.getByLabelText(/connection code input field/i);
+    fireEvent.changeText(input, "a-valid-code-string");
+    const button = screen.getByRole("button", { name: /confirm code$/i });
     expect(button.props.accessibilityState?.disabled).toBeFalsy();
   });
 
-  it("speaks an error when token is too short (< 8 chars)", async () => {
+  it("speaks an error when code is too short (< 8 chars)", async () => {
     await advanceToTokenStep();
-    const input = screen.getByLabelText(/api token input field/i);
+    const input = screen.getByLabelText(/connection code input field/i);
     fireEvent.changeText(input, "short");
-    fireEvent.press(screen.getByRole("button", { name: /confirm token/i }));
+    fireEvent.press(screen.getByRole("button", { name: /confirm code/i }));
     await waitFor(() => {
       expect(Speech.speak).toHaveBeenCalledWith(
         expect.stringMatching(/too short/i),
@@ -243,16 +243,16 @@ describe("SetupWizardScreen — token entry step", () => {
     });
   });
 
-  it("does not advance when token is too short", async () => {
+  it("does not advance when code is too short", async () => {
     await advanceToTokenStep();
-    const input = screen.getByLabelText(/api token input field/i);
+    const input = screen.getByLabelText(/connection code input field/i);
     fireEvent.changeText(input, "tiny");
-    fireEvent.press(screen.getByRole("button", { name: /confirm token/i }));
-    // Should still be on token step
-    expect(screen.getByLabelText(/api token input field/i)).toBeTruthy();
+    fireEvent.press(screen.getByRole("button", { name: /confirm code/i }));
+    // Should still be on code entry step
+    expect(screen.getByLabelText(/connection code input field/i)).toBeTruthy();
   });
 
-  it("advances to confirm step with a valid token", async () => {
+  it("advances to confirm step with a valid code", async () => {
     await advanceToConfirmStep();
     // Confirm step has "Re-enter" and "Confirm" buttons
     expect(screen.getByRole("button", { name: /re-enter token/i })).toBeTruthy();
