@@ -90,10 +90,14 @@ else:
         context.add_init_script() achieves this: the script is injected into
         every new page created by this context, before navigation begins.
         """
-        # Type: ignore because `context` comes from pytest-playwright's fixture
-        # and is playwright.sync_api.BrowserContext, typed as `object` here to
-        # avoid import issues when pytest-playwright is not installed.
-        getattr(context, "add_init_script")(
+        # We annotate context as object to avoid importing BrowserContext when
+        # pytest-playwright is not installed (the else-branch only runs when it is).
+        # Cast to access the method without triggering ruff B009.
+        from playwright.sync_api import BrowserContext
+
+        ctx = context  # type: ignore[assignment]
+        assert isinstance(ctx, BrowserContext)
+        ctx.add_init_script(
             """
             // ISSUE-041 diagnostic: capture all uncaught JS errors at page init time.
             // Stored in window.__webE2EErrors for read-back by _wait_for_app_ready.
