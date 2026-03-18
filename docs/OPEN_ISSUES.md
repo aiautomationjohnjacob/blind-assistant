@@ -41,7 +41,12 @@ cut off; fast users waste time waiting.
 **Impact**: Dorothy (elder) cut off; Marcus (power user) slowed.
 **Proposed fix**: Implement Voice Activity Detection (silero-vad or webrtcvad).
 Fall back to fixed duration if VAD unavailable.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 22 — transcribe_microphone_with_vad() added to stt.py using
+webrtcvad (30ms frames, 600ms silence threshold). _record_with_vad_sync() handles
+frame-by-frame recording. VoiceLocalInterface defaults to VAD (use_vad=True). Falls back
+to fixed-duration when webrtcvad not installed. webrtcvad-wheels==2.0.14 in requirements.txt.
+12 new unit tests.
 
 ### ISSUE-003: PIL ImageGrab fails on headless servers
 **Severity**: MEDIUM
