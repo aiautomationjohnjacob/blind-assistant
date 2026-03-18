@@ -788,6 +788,57 @@ class Orchestrator:
             response_callback=update,
         )
 
+    async def _handle_clear_preferences(
+        self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
+    ) -> dict:
+        """
+        Handle a 'clear my preferences' voice command.
+
+        Asks the user for spoken confirmation before clearing any data.
+        On confirmation, returns a response with action='clear_preferences' so
+        the APIServer can call MCPMemoryClient.clear_user_data() after routing.
+
+        This uses the same ConfirmationGate pattern as high-stakes actions
+        (food ordering, payments) — mandatory per ETHICS_REQUIREMENTS.md:
+        data deletion requires explicit informed consent.
+        """
+        assert self.confirmation_gate is not None, "ConfirmationGate not initialized"
+
+        WARNING_TEXT = (
+            "You asked me to clear all your saved preferences. "
+            "This will reset your speech rate, timezone, and any other settings "
+            "you have stored with me. "
+            "This cannot be undone. "
+            "Say 'confirm' to clear your preferences, or 'cancel' to keep them."
+        )
+
+        await update(WARNING_TEXT)
+
+        # Register a confirmation gate session so the ConfirmationGate can
+        # match the user's next response to this pending action.
+        session_key = f"clear_prefs_{context.session_id}"
+        self.confirmation_gate.register_session(session_key)
+        confirmed = await self.confirmation_gate.wait_for_response(session_key, timeout=60.0)
+
+        if not confirmed:
+            return {
+                "text": (
+                    "Preference clearing cancelled. "
+                    "Your settings are unchanged."
+                )
+            }
+
+        # Signal the APIServer to call MCPMemoryClient.clear_user_data().
+        # The 'action' field on the returned Response is checked in _query().
+        return {
+            "text": (
+                "Your preferences have been cleared. "
+                "I have reset your speech rate, timezone, and other settings. "
+                "You can set them again at any time."
+            ),
+            "action": "clear_preferences",
+        }
+
     async def _handle_high_stakes_stub(
         self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
     ) -> dict:
