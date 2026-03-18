@@ -78,22 +78,22 @@ function renderWizard() {
   );
 }
 
-/** Advance from welcome to token entry. */
+/** Advance from welcome to connection code entry. */
 async function advanceToTokenStep() {
   renderWizard();
   const continueButton = screen.getByRole("button", { name: /continue/i });
   fireEvent.press(continueButton);
-  await waitFor(() => screen.getByLabelText(/enter your api token/i));
+  await waitFor(() => screen.getByLabelText(/enter your connection code/i));
 }
 
-/** Advance to confirm step with a valid token. */
+/** Advance to confirm step with a valid connection code. */
 async function advanceToConfirmStep(token = "abcdefgh12345678") {
   await advanceToTokenStep();
-  const input = screen.getByLabelText(/api token input field/i);
+  const input = screen.getByLabelText(/connection code input field/i);
   fireEvent.changeText(input, token);
-  const confirmButton = screen.getByRole("button", { name: /confirm token/i });
+  const confirmButton = screen.getByRole("button", { name: /confirm code/i });
   fireEvent.press(confirmButton);
-  await waitFor(() => screen.getByLabelText(/confirm your token/i));
+  await waitFor(() => screen.getByLabelText(/confirm your connection code/i));
 }
 
 // ─────────────────────────────────────────────────────────────
