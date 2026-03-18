@@ -324,10 +324,12 @@ export function MainScreen(): React.JSX.Element {
       </Pressable>
 
       {/* Last transcript — shown for braille display users to verify STT */}
+      {/* Same Platform.select pattern: View + accessibilityRole="text" works on mobile but
+          produces invalid role="text" on web. On web, aria-label + aria-live are sufficient. */}
       {lastTranscript ? (
         <View
           style={styles.transcriptContainer}
-          accessibilityRole="text"
+          accessibilityRole={Platform.OS === "web" ? undefined : "text"}
           accessibilityLabel={`You said: ${lastTranscript}`}
           accessibilityLiveRegion="polite"
         >
