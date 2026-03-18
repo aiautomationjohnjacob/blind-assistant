@@ -251,11 +251,15 @@ class APIServer:
     state internally via UserContext objects keyed by session_id.
     """
 
-    def __init__(self, orchestrator, config: dict) -> None:
+    def __init__(self, orchestrator, config: dict, memory_client=None) -> None:
         self.orchestrator = orchestrator
         self.config = config
         self._app: FastAPI | None = None
         self._port = int(config.get("api_server_port", 8000))
+        # MCPMemoryClient for persisting user preferences across sessions.
+        # Injected at construction for testability; falls back to an in-memory
+        # stub when None so the server works without MCP during unit tests.
+        self._memory = memory_client
 
     def _build_app(self) -> FastAPI:
         """Construct the FastAPI application with routes and middleware."""
