@@ -34,6 +34,12 @@
 | P4 | Netlify staging activation: configure NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID secrets so community members can test https://staging.blind-assistant.org with real NVDA+Chrome, TalkBack+Chrome, VoiceOver+Safari | cycle 45 review | 2026-03-18 |
 | P5 | Activate GitHub Pages in repository settings: Settings → Pages → Source → GitHub Actions; this is the one manual step to make learn.blind-assistant.org live after deploy-education.yml is merged | cycle 47 | 2026-03-18 |
 
+## Completed Items (Cycle 48 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| CI fix P0 (issue #102): pytest-timeout added to Web E2E and WCAG axe-core audit pip install steps; ajv v8 override in education package.json fixes education site build; package-lock.json regenerated; 818 Python + 75 JS tests pass | 2026-03-18 | 48 |
+
 ## Completed Items (Cycle 47 additions)
 
 | Item | Completed | Cycle # |
