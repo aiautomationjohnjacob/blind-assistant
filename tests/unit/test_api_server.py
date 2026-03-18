@@ -878,7 +878,7 @@ def test_delete_preferences_returns_400_when_confirm_omitted():
     mem = _make_mock_memory()
     mem.clear_user_data = AsyncMock()
     with _make_server_with_memory(memory_client=mem) as (_, client):
-        resp = client.delete("/profile/preferences", json={}, headers=VALID_HEADERS)
+        resp = client.request("DELETE", "/profile/preferences", json={}, headers=VALID_HEADERS)
     assert resp.status_code == 400
     mem.clear_user_data.assert_not_called()
 
@@ -888,7 +888,7 @@ def test_delete_preferences_requires_auth():
     mem = _make_mock_memory()
     mem.clear_user_data = AsyncMock()
     with _make_server_with_memory(memory_client=mem) as (_, client):
-        resp = client.delete("/profile/preferences", json={"confirm": True})
+        resp = client.request("DELETE", "/profile/preferences", json={"confirm": True})
     assert resp.status_code == 401
     mem.clear_user_data.assert_not_called()
 
