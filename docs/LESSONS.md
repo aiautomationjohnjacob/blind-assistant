@@ -1496,3 +1496,60 @@ with (
 Note: `contextlib.suppress()` applied at this level will also suppress exceptions from
 the patch context managers. In test code this is acceptable since the test assertions
 come after the `with` block completes.
+
+---
+
+## Cycle 28 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: All three Cycle 28 Phase 4 priorities delivered: (1) `role="text"` fix eliminates a WCAG 4.1.2 violation that could cause NVDA/JAWS to silently mishandle 10 DOM elements on the web app; (2) axe-core CI gate means accessibility is enforced structurally — every future feature must pass before merging; (3) 4 stale CI failure issues closed. These are compounding investments — the axe gate will prevent regressions indefinitely.
+
+**Code quality (code-reviewer)**: `Platform.OS === "web" ? undefined : "text"` is the idiomatic React Native pattern for cross-platform rendering. 4 new JS tests correctly use `beforeAll`/`afterAll` to mock Platform.OS. The axe-core CDN injection via `page.evaluate()` is stable across playwright versions. One concern: CDN network dependency in CI — if cdnjs.cloudflare.com is unreachable, 4 E2E tests fail with a network error rather than a graceful skip. Should bundle axe-core locally in Cycle 29. Test count: 121 JS tests (+4); 812 Python tests (unchanged).
+
+**Security (security-specialist)**: CDN injection is CI-only (never runs on user devices). Risk is acceptable but noted: bundle axe-core locally to eliminate CDN dependency and reduce supply chain surface. No user-facing security changes this cycle.
+
+**Accessibility (accessibility-reviewer)**: Fix correctly removes `role="text"` from all 10 DOM positions in MainScreen.tsx (3) and SetupWizardScreen.tsx (7). `aria-label` and `aria-live` remain on all elements so NVDA/VoiceOver still announces them correctly. Phase 4 CI gate at critical severity is correct threshold. Note: color-contrast violations will be logged as warnings by the new audit (not CI failures) — any 'serious' findings from first CI run should be added to OPEN_ISSUES.md manually.
+
+**User perspective (blind-user-tester)**: NVDA on Chrome previously might have read the status area as "group" or nothing; now it reads the aria-label ("Ready. Tap to speak to the assistant.") via the live region. This is a direct improvement in the web experience.
+
+**Ethics (ethics-advisor)**: Encoding WCAG 2.1 AA into CI is a structural commitment to accessibility. Good. No new ethics concerns.
+
+**Goal adherence (goal-adherence-reviewer)**: All Cycle 28 Phase 4 priorities completed. Phase 4 progression: (1) ISSUE-033 resolved, (2) axe-core CI gate established. Next: run the gate in CI and review first-run findings; address any 'serious' violations flagged.
+
+**Consensus recommendation for next cycle**: (1) Wait for CI result from first a11y-audit job run; if serious violations are found, add to OPEN_ISSUES.md and fix them; (2) Bundle axe-core JS locally to eliminate CDN dependency; (3) Begin iOS/Android Phase 4 accessibility hardening (react-native-paper, TalkBack gesture coverage, VoiceOver rotor support).
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) ISSUE-033 fixed — `accessibilityRole="text"` → Platform.OS guard across 10 occurrences in 2 files; (2) Phase 4 axe-core CI gate — `a11y-audit` job in ci.yml, test_wcag_axe_audit.py with 4 tests (critical WCAG, contrast, element naming, ARIA role validity); (3) 4 new JS tests for web platform fix; (4) ISSUE-033 marked RESOLVED in OPEN_ISSUES.md; (5) 4 stale GitHub CI issues closed (80-83)
+- Attempted but failed: none — all planned items completed
+- Confusion/loops: none — clean execution
+- New gaps: (1) axe-core CDN dependency in CI — should bundle locally; (2) First axe-core CI run results unknown — may surface 'serious' violations (color contrast, heading structure) that need to be logged
+- Next cycle recommendation: (1) Check first a11y-audit CI run result; (2) Bundle axe-core locally (eliminate CDN); (3) iOS/Android Phase 4: TalkBack gesture coverage, VoiceOver rotor
+
+**TECHNICAL LESSON (react-native-web accessibilityRole mapping)**:
+`accessibilityRole="text"` on React Native `View` or `Text` components maps to
+`role="text"` in the DOM when rendered via react-native-web. `"text"` is NOT a
+valid WAI-ARIA role (spec: https://www.w3.org/TR/wai-aria-1.2/). Screen readers
+may ignore or mishandle elements with unrecognised roles. Fix pattern:
+
+```tsx
+// WRONG — produces role="text" in DOM (invalid ARIA)
+<View accessibilityRole="text" aria-label="...">
+<Text accessibilityRole="text" aria-live="polite">
+
+// CORRECT — role omitted on web; element identified by aria-label alone
+import { Platform } from "react-native";
+<View accessibilityRole={Platform.OS === "web" ? undefined : "text"} aria-label="...">
+<Text accessibilityRole={Platform.OS === "web" ? undefined : "text"} aria-live="polite">
+```
+
+This pattern applies to ANY accessibilityRole value that does not have a valid
+WAI-ARIA equivalent. Check the react-native-web docs before using any role on
+elements that render on web. Roles that DO map correctly: "button" → role="button",
+"header" → role="heading", "link" → role="link", "none" → role="none".
+
+**TECHNICAL LESSON (axe-core CDN injection in Playwright tests)**:
+Injecting axe-core via `page.evaluate()` with a dynamically added `<script>` tag
+is more stable than the `axe-playwright-python` package, whose async API differs
+across versions. The CDN approach requires only `pytest-playwright` and an internet
+connection in CI. Downside: CDN network dependency. Future improvement: bundle
+`axe.min.js` in the repo at `tests/e2e/platforms/web/axe.min.js` and use
+`page.add_script_tag(path=...)` instead of the CDN URL.
