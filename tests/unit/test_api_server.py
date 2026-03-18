@@ -838,6 +838,91 @@ def test_valid_extra_prefs_is_a_frozenset():
     assert len(VALID_EXTRA_PREFS) >= 4, "Expected at least 4 allowlisted preference keys"
 
 
+# ─────────────────────────────────────────────────────────────
+# DELETE /profile/preferences — clear all MCP preference data (ISSUE-031)
+# ─────────────────────────────────────────────────────────────
+
+
+def test_delete_preferences_returns_204_on_happy_path():
+    """DELETE /profile/preferences returns 204 No Content when confirm=true."""
+    mem = _make_mock_memory()
+    mem.clear_user_data = AsyncMock()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.delete("/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
+    assert resp.status_code == 204
+
+
+def test_delete_preferences_calls_clear_user_data():
+    """DELETE /profile/preferences calls MCPMemoryClient.clear_user_data with the user_id."""
+    mem = _make_mock_memory()
+    mem.clear_user_data = AsyncMock()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        client.delete("/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
+    mem.clear_user_data.assert_called_once_with("local_user")
+
+
+def test_delete_preferences_returns_400_when_confirm_false():
+    """DELETE /profile/preferences returns 400 when confirm=false — must be explicit."""
+    mem = _make_mock_memory()
+    mem.clear_user_data = AsyncMock()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.delete("/profile/preferences", json={"confirm": False}, headers=VALID_HEADERS)
+    assert resp.status_code == 400
+    # Must not have deleted anything
+    mem.clear_user_data.assert_not_called()
+
+
+def test_delete_preferences_returns_400_when_confirm_omitted():
+    """DELETE /profile/preferences returns 400 when confirm is omitted (defaults to false)."""
+    mem = _make_mock_memory()
+    mem.clear_user_data = AsyncMock()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.delete("/profile/preferences", json={}, headers=VALID_HEADERS)
+    assert resp.status_code == 400
+    mem.clear_user_data.assert_not_called()
+
+
+def test_delete_preferences_requires_auth():
+    """DELETE /profile/preferences returns 401 without a valid Authorization header."""
+    mem = _make_mock_memory()
+    mem.clear_user_data = AsyncMock()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.delete("/profile/preferences", json={"confirm": True})
+    assert resp.status_code == 401
+    mem.clear_user_data.assert_not_called()
+
+
+def test_delete_preferences_returns_204_when_no_memory_client():
+    """DELETE /profile/preferences returns 204 even when no MCPMemoryClient is configured.
+
+    If MCP is not configured there is nothing to clear, so we succeed silently.
+    """
+    with _make_server_with_memory(memory_client=None) as (_, client):
+        resp = client.delete("/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
+    assert resp.status_code == 204
+
+
+def test_delete_preferences_returns_204_when_memory_client_raises():
+    """DELETE /profile/preferences returns 204 even if MCPMemoryClient.clear_user_data raises.
+
+    Graceful degradation: if MCP is unreachable the endpoint still succeeds
+    (there is nothing in MCP to clear if it is down).
+    """
+    mem = _make_mock_memory()
+    mem.clear_user_data = AsyncMock(side_effect=RuntimeError("MCP unreachable"))
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.delete("/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
+    assert resp.status_code == 204
+
+
+def test_delete_preferences_400_detail_mentions_confirmation():
+    """The 400 error message explains that confirm=true is required."""
+    with _make_server_with_memory() as (_, client):
+        resp = client.delete("/profile/preferences", json={"confirm": False}, headers=VALID_HEADERS)
+    detail = resp.json()["detail"].lower()
+    assert "confirm" in detail
+
+
 def test_rate_limit_middleware_default_window_is_60_seconds():
     """RateLimitMiddleware uses a 60-second sliding window by default."""
     middleware = RateLimitMiddleware(app=None)  # type: ignore[arg-type]
