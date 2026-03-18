@@ -126,17 +126,26 @@ def _wait_for_app_ready(page: Page) -> None:
         print("DIAGNOSTIC: React did not mount within 30s (ISSUE-041)")
         print("=" * 60)
         if js_errors:
-            print(f"JS page errors ({len(js_errors)}):")
+            print(f"JS page errors via page.on ({len(js_errors)}):")
             for err in js_errors:
                 print(f"  !! {err}")
         else:
-            print("JS page errors: none captured")
+            print("JS page errors via page.on: none captured (registered after goto)")
         if console_errors:
-            print(f"Console errors/warnings ({len(console_errors)}):")
+            print(f"Console errors/warnings via page.on ({len(console_errors)}):")
             for msg in console_errors[:10]:
                 print(f"  {msg}")
         else:
-            print("Console errors: none captured")
+            print("Console errors via page.on: none captured (registered after goto)")
+        # Read errors captured by conftest.py inject_early_error_capture fixture.
+        with contextlib.suppress(Exception):
+            early_errors = page.evaluate("() => window.__webE2EErrors || []")
+            if early_errors:
+                print(f"Early JS errors (from init_script, {len(early_errors)}):")
+                for err in early_errors[:10]:
+                    print(f"  !! {err}")
+            else:
+                print("Early JS errors (from init_script): none captured")
         with contextlib.suppress(Exception):
             dom_summary = page.evaluate(
                 """() => ({
@@ -145,10 +154,12 @@ def _wait_for_app_ready(page: Page) -> None:
                     buttonCount: document.querySelectorAll('[role="button"]').length,
                     inputCount: document.querySelectorAll('input').length,
                     rootHTML: document.getElementById('root')
-                        ? document.getElementById('root').innerHTML.slice(0, 300)
+                        ? document.getElementById('root').innerHTML.slice(0, 500)
                         : 'no #root element',
                     scriptCount: document.querySelectorAll('script').length,
                     expoGlobal: typeof globalThis.expo !== 'undefined' ? 'loaded' : 'missing',
+                    requireDefined: typeof __r !== 'undefined' ? 'yes (Metro loaded)' : 'no (Metro missing)',
+                    reactDefined: typeof React !== 'undefined' ? 'yes' : 'no',
                 })"""
             )
             print(f"DOM state: {dom_summary}")
