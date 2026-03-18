@@ -468,6 +468,9 @@ class TestMarcusFoodOrderingDisclosure:
             patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=page)),
             patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x Salmon roll, $10.99")),
             patch.object(gate, "wait_for_response", new=AsyncMock(return_value="yes")),
+            # wait_for_confirmation is called by confirm_financial_action (risk disclosure ack).
+            # Without this mock, the test waits DEFAULT_TIMEOUT (60s) for a queue that never fills.
+            patch.object(gate, "wait_for_confirmation", new=AsyncMock(return_value=True)),
         ):
             # Some internal paths may raise after the disclosure update is spoken.
             # We capture what was spoken up to the point of any exception and check
@@ -498,6 +501,9 @@ class TestMarcusFoodOrderingDisclosure:
             patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=page)),
             patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x Margherita, $14.99")),
             patch.object(gate, "wait_for_response", new=AsyncMock(return_value="yes")),
+            # wait_for_confirmation guards the financial disclosure ack — must return True
+            # so the flow proceeds past the risk disclosure step without a 60s timeout.
+            patch.object(gate, "wait_for_confirmation", new=AsyncMock(return_value=True)),
             contextlib.suppress(Exception),
         ):
             await orc._handle_order_food(intent, MARCUS_CONTEXT, capture_update)

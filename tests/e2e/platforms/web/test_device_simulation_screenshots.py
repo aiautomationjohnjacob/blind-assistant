@@ -132,9 +132,7 @@ class TestDeviceSimulationScreenshots:
     A test fails only if Playwright itself errors (e.g., page crash).
     """
 
-    def test_capture_initial_load_chromium(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    def test_capture_initial_load_chromium(self, page: Page, web_app_available: bool) -> None:
         """Capture app state immediately after page.goto() — before React hydrates.
 
         This shows the static HTML shell (skip link, loading spinner placeholder).
@@ -159,9 +157,7 @@ class TestDeviceSimulationScreenshots:
         path = _save_screenshot(page, "02_app_ready")
         assert path.exists(), f"Screenshot not saved: {path}"
 
-    def test_capture_setup_wizard_token_step(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    def test_capture_setup_wizard_token_step(self, page: Page, web_app_available: bool) -> None:
         """Capture the setup wizard token-entry step.
 
         The setup wizard is the first screen new users see. It includes:
@@ -223,9 +219,7 @@ class TestDeviceSimulationScreenshots:
         path = _save_screenshot(page, "04_main_screen")
         assert path.exists(), f"Screenshot not saved: {path}"
 
-    def test_capture_mobile_viewport(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    def test_capture_mobile_viewport(self, page: Page, web_app_available: bool) -> None:
         """Capture app at mobile viewport size (375x812 — iPhone 12/13 Pro).
 
         The web app targets TalkBack+Chrome on Android and VoiceOver+Safari on iPhone.
@@ -240,9 +234,7 @@ class TestDeviceSimulationScreenshots:
         path = _save_screenshot(page, "05_mobile_viewport_375x812")
         assert path.exists(), f"Screenshot not saved: {path}"
 
-    def test_capture_tablet_viewport(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    def test_capture_tablet_viewport(self, page: Page, web_app_available: bool) -> None:
         """Capture app at tablet viewport size (768x1024 — iPad).
 
         iPad VoiceOver users interact with the web app at tablet viewport.
@@ -256,9 +248,7 @@ class TestDeviceSimulationScreenshots:
         path = _save_screenshot(page, "06_tablet_viewport_768x1024")
         assert path.exists(), f"Screenshot not saved: {path}"
 
-    def test_screenshot_dir_contains_screenshots(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    def test_screenshot_dir_contains_screenshots(self, page: Page, web_app_available: bool) -> None:
         """Verify that at least one screenshot was saved by previous tests.
 
         This is a sanity check that the screenshot pipeline is working end-to-end.
@@ -270,8 +260,7 @@ class TestDeviceSimulationScreenshots:
         if out_dir.exists():
             screenshots = list(out_dir.glob("*.png"))
             assert len(screenshots) >= 1, (
-                f"Expected at least 1 screenshot in {out_dir}, found 0. "
-                "The screenshot pipeline may be broken."
+                f"Expected at least 1 screenshot in {out_dir}, found 0. The screenshot pipeline may be broken."
             )
         else:
             # Directory doesn't exist yet (tests run in a different order in some runners).
