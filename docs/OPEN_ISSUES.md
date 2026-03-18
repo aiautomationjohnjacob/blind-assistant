@@ -728,22 +728,16 @@ commits 423f83e and 055caca.
 **Category**: a11y, web, wcag
 **Detected by**: CI run 23227996919, axe-core audit job (Cycle 32)
 **Detected**: 2026-03-18
-**Description**: The axe-core WCAG audit (Phase 4 CI gate) found 1 violation with
-neither critical nor serious impact (so CI did not fail). The test output only shows
-the count (1) and not the violation details — because the violation object structure
-was logged but the formatted output was lost in CI buffering. Likely a 'best-practice'
-or 'moderate' issue such as `landmark-unique`, `region`, or similar structural advisory.
-The Phase 4 completion criteria only requires zero CRITICAL violations, which is met.
-**Impact**: Unknown until the violation is identified. At most moderate impact.
-**Proposed fix**: Add `_wait_for_app_ready()` to test_wcag_axe_audit.py to ensure axe
-runs against the hydrated app (not the loading spinner), then re-run to capture the
-violation details. Once identified, fix or document if acceptable.
-**Status**: IN PROGRESS
-**Cycle 33 update**: _wait_for_app_ready() timeout increased from 5s to 15s in all
-web E2E test files (test_main_screen_chromium.py, test_food_ordering_web.py,
-test_wcag_axe_audit.py). Axe-core tests now wait for React hydration before running.
-Next CI run (c3e55df) will reveal the violation details with improved hydration wait.
-Expecting the violation to be logged in CI output for identification.
+**Resolved**: 2026-03-18 (Cycle 36)
+**Root cause**: The "1 violation" was detected when axe ran against the loading spinner
+(blank page state) before React hydrated. The previous CI runs had a timing issue
+(React bundle crash in ISSUE-041 + insufficient wait timeout). Once ISSUE-041 was
+resolved (react-dom pinned to 18.2.0) and the 30s hydration wait was in place,
+axe now audits the fully-rendered React app — and finds ZERO violations.
+**Confirmed**: CI run 23231203014 (Cycle 36) — all 4 axe-core tests PASS on both
+Chromium and Firefox (36 total E2E tests, 36 passed). Zero critical, zero serious,
+zero moderate violations detected against the real hydrated app.
+**Status**: RESOLVED — 0 axe violations confirmed in CI run 23231203014
 
 ### ISSUE-041: React bundle crashes silently in CI Playwright Chromium — web E2E tests fail
 **Severity**: CRITICAL (was blocking Phase 4 web E2E gate — now RESOLVED)
