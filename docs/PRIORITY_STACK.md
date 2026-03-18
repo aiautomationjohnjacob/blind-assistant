@@ -27,6 +27,14 @@
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
+## Completed Items (Cycle 38 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| ISSUE-045 RESOLVED: 2 missed jargon strings in handleConfirmToken fixed (empty: "API token" → "connection code"; too-short: "API tokens" → "Connection codes"); 2 new regression tests; 136 JS tests total | 2026-03-18 | 38 |
+| Full Dorothy scenario test — 13 E2E tests in tests/e2e/core/test_dorothy_scenario.py covering Dorothy (elder) + Alex (newly-blind): food ordering with risk disclosure, Second Brain save/query, general questions, installer language, financial disclosure plain-language | 2026-03-18 | 38 |
+| Phase 5 COMPLETE — both gate criteria met: (1) Dorothy scenario tests pass (13 E2E tests); (2) GRANT_NARRATIVE.md exists | 2026-03-18 | 38 |
+
 ## Completed Items (Cycle 37 additions)
 
 | Item | Completed | Cycle # |
