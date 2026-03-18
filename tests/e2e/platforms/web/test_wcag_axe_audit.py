@@ -134,7 +134,8 @@ def _wait_for_app_ready(page: Page) -> None:
     React-rendered DOM content that users actually interact with.
     """
     with contextlib.suppress(Exception):
-        page.wait_for_selector("[role='button'], input[aria-label]", timeout=5000, state="attached")
+        # 15s timeout: CI can be slow (expo-secure-store async read before React renders)
+        page.wait_for_selector("[role='button'], input[aria-label]", timeout=15000, state="attached")
 
 
 def _inject_axe(page: Page) -> None:
