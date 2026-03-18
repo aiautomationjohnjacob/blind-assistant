@@ -238,7 +238,10 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 
 ## Blockers
 
-None currently. If blockers exist, they will be listed here with workarounds attempted.
+**ISSUE-041**: React bundle not mounting in CI Playwright Chromium. 9 web E2E tests fail.
+Root cause: JS crash in Expo bundle before React initializes. Suspected: `crypto.randomUUID`
+unavailable in non-secure origin Chromium (http://localhost:19006), crashing expo-modules-core.
+Diagnostic logging added in Cycle 34 — next CI run will confirm.
 
 ## Last Cycle Summary
 
