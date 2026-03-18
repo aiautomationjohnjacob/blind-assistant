@@ -257,21 +257,21 @@ No active blockers. Phase 4 COMPLETE as of Cycle 36.
 
 ## Last Cycle Summary
 
-Cycle 47 (Education site GitHub Pages deployment).
+Cycle 48 (P0 CI fix — pytest-timeout + ajv v8 override).
 
-(1) EDUCATION SITE DEPLOYMENT: Created .github/workflows/deploy-education.yml to deploy
-clients/education/ to GitHub Pages on every push to main. The workflow uses the standard
-GitHub Pages action chain (configure-pages@v5, upload-pages-artifact@v3, deploy-pages@v4)
-with Node.js 24-compatible actions throughout. A CNAME file for learn.blind-assistant.org
-is written into the build output automatically.
+(1) PYTEST-TIMEOUT CI FIX: Web E2E and WCAG axe-core audit jobs were failing with
+exit code 4 (unrecognized argument: --timeout=30). Root cause: pyproject.toml addopts
+applies globally to all pytest invocations, but these jobs only installed playwright +
+pytest-playwright without pytest-timeout. Fixed by adding pytest-timeout to both pip
+install steps in ci.yml.
 
-(2) HASHROUTER MIGRATION: Switched clients/education/src/index.tsx from BrowserRouter to
-HashRouter so all routes work on GitHub Pages without server-side rewrites. Added
-homepage="." to package.json so react-scripts generates relative asset paths. All 75
-existing Jest education tests pass unchanged (they use MemoryRouter, not BrowserRouter).
+(2) EDUCATION SITE AJV FIX: The education site GitHub Pages deploy was failing with
+"Cannot find module 'ajv/dist/compile/codegen'" because ajv-keywords@5 requires ajv@^8
+but the top-level ajv was v6.14.0. Fixed with npm overrides: {"ajv": "^8.17.1"} in
+package.json and regenerated package-lock.json. LESSONS.md corrected: the Cycle 47
+claim that "CI uses Node.js 20 and will work correctly" was wrong.
 
-ISSUE-053 created and resolved. One manual step remains: enable GitHub Pages in repository
-Settings → Pages → Source → GitHub Actions.
+GitHub issue #102 closed. CI expected to be green after commit 24c6d9c.
 
 Total tests: 818 Python unit tests (unchanged) + 75 education Jest tests (unchanged).
 
