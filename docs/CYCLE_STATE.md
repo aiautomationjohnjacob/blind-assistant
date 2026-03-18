@@ -260,11 +260,11 @@ Cycle 22 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 20.** Phase 3 in progress. Documentation-steward run complete (every-10th-cycle
-task). CHANGELOG through Cycle 19. CONTRIBUTING.md corrected. 8 docstrings added. 72 new platform
-helper unit tests (device-free). 713 Python unit tests. Ruff clean.
+**Loop completed Cycle 21.** Phase 3 in progress. ROADMAP.md fully rewritten (Phase 1+2 checked
+off, Phase 3 current state, Phase 4+5 planned). v0.3.0 tag pushed → triggered e2e-android (AVD)
+and ios-e2e.yml (iOS Simulator) CI workflows. 713 unit tests unchanged. Ruff clean.
 
-The most important work for Cycle 21 (Phase 3: Blind User Testing):
-1. **P3: ROADMAP.md** — Create with Phase 3-5 milestones; CONTRIBUTING.md links to it
-2. **P3: Android TalkBack device test** — trigger release tag to run the e2e-android AVD CI job
-3. **P3: iOS VoiceOver device test** — trigger release tag on macOS runner (ios-e2e.yml)
+The most important work for Cycle 22 (Phase 3: Blind User Testing):
+1. **P3: Verify Android/iOS CI results** — check v0.3.0 tag run; log pass/fail; update OPEN_ISSUES
+2. **P3: Voice Activity Detection (VAD)** — ISSUE-002; replace fixed-duration recording
+3. **P3: PIL fallback** — ISSUE-003; Playwright screenshot for headless environments
