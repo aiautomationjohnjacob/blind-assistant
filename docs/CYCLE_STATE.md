@@ -257,28 +257,23 @@ No active blockers. Phase 4 COMPLETE as of Cycle 36.
 
 ## Last Cycle Summary
 
-Cycle 48 (P0 CI fix — pytest-timeout + ajv v8 override).
+Cycle 49 (P0 CI fix — education site ajv nested conflict fix).
 
-(1) PYTEST-TIMEOUT CI FIX: Web E2E and WCAG axe-core audit jobs were failing with
-exit code 4 (unrecognized argument: --timeout=30). Root cause: pyproject.toml addopts
-applies globally to all pytest invocations, but these jobs only installed playwright +
-pytest-playwright without pytest-timeout. Fixed by adding pytest-timeout to both pip
-install steps in ci.yml.
-
-(2) EDUCATION SITE AJV FIX: The education site GitHub Pages deploy was failing with
-"Cannot find module 'ajv/dist/compile/codegen'" because ajv-keywords@5 requires ajv@^8
-but the top-level ajv was v6.14.0. Fixed with npm overrides: {"ajv": "^8.17.1"} in
-package.json and regenerated package-lock.json. LESSONS.md corrected: the Cycle 47
-claim that "CI uses Node.js 20 and will work correctly" was wrong.
-
-GitHub issue #102 closed. CI expected to be green after commit 24c6d9c.
+The Cycle 48 ajv@8 top-level override fixed the `Cannot find module 'ajv/dist/compile/codegen'`
+error but introduced a new crash: fork-ts-checker-webpack-plugin, file-loader, babel-loader,
+eslint, and @eslint/eslintrc all have nested ajv-keywords@3.x that need ajv@^6, but with the
+top-level ajv@8 override they resolved ajv@8 (incompatible). npm nested overrides are silently
+ignored when --legacy-peer-deps is used, so the fix had to be a postinstall script:
+scripts/patch-fork-ts-checker.js installs ajv@^6.12.6 inside each affected package's own
+node_modules/ directory. Build verified locally; 75 Jest tests pass; 818 Python tests pass.
+ISSUE-055 resolved.
 
 Total tests: 818 Python unit tests (unchanged) + 75 education Jest tests (unchanged).
 
-Cycle 48 priorities:
-1. **P4: Netlify staging activation** — requires a sighted developer with Netlify account
-   (blocked for the loop; may need community contributor)
-2. **P5: GitHub Pages activation** — one-time manual step in repository settings
+Cycle 49 priorities:
+1. **Confirm CI green** — check that the education site deploy job succeeds with postinstall patch
+2. **Phase 6 creative exploration** — all phases complete; identify next high-impact blind user feature
+3. **P3 (future): Migrate education site from react-scripts to Vite** — eliminate ongoing ajv patch maintenance
 
 ## Known Issues / Technical Debt
 
