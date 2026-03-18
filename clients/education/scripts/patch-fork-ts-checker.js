@@ -1,23 +1,30 @@
 /**
- * Patch script: give legacy webpack plugins their own local ajv@6
+ * Patch script: give legacy webpack plugins and linting tools their own local ajv@6
  *
  * WHY THIS EXISTS:
- *   react-scripts@5 uses several webpack plugins that have nested ajv-keywords@3.x,
- *   which requires ajv@^6. However, schema-utils@4 (also in the tree) requires ajv@^8
- *   and ajv-keywords@^5. The npm `overrides` field forces ajv@^8 at the top level so
- *   schema-utils@4 works, but this breaks any plugin with nested ajv-keywords@3.x
- *   because they resolve ajv from the top level (getting ajv@8, which is incompatible).
+ *   react-scripts@5 is EOL and has two conflicting ajv requirement trees:
+ *   - terser-webpack-plugin, webpack → schema-utils@4 → ajv-keywords@5 → ajv@^8
+ *   - eslint@8, babel-loader, file-loader, fork-ts-checker-webpack-plugin →
+ *       ajv-keywords@3.x → ajv@^6
  *
- *   npm nested overrides (`"fork-ts-checker-webpack-plugin": {"ajv-keywords": "^5"}`)
- *   are silently ignored when `--legacy-peer-deps` is used, so we must patch manually.
+ *   The npm `overrides` field forces ajv@^8 globally so schema-utils@4 works.
+ *   But packages with nested ajv-keywords@3.x then resolve ajv from the top level
+ *   (getting ajv@8), causing API compatibility crashes (_opts undefined, _formats
+ *   undefined, etc).
  *
- *   This script installs ajv@^6 inside each affected plugin's own node_modules directory
- *   so their ajv-keywords@3.x resolves to ajv@6 (the compatible version).
+ *   npm nested overrides do not apply when `--legacy-peer-deps` is used (npm
+ *   ignores override constraints in that mode). So we manually install ajv@^6 inside
+ *   each affected package's own node_modules directory.
  *
- * AFFECTED PLUGINS (have nested ajv-keywords@3.x without their own ajv):
- *   - fork-ts-checker-webpack-plugin@6.5.3
- *   - file-loader@6.2.0
- *   - babel-loader@8.x
+ *   This runs as a `postinstall` script so it applies after every `npm install` or
+ *   `npm ci`. It is idempotent: already-patched packages are skipped.
+ *
+ * AFFECTED PACKAGES (have their own nested ajv-keywords@3.x or eslint that needs ajv@6):
+ *   - fork-ts-checker-webpack-plugin (nested ajv-keywords@3.5.2 + eslint)
+ *   - file-loader (nested ajv-keywords@3.5.2 + eslint + @eslint/eslintrc)
+ *   - babel-loader (nested ajv-keywords@3.5.2 + eslint + @eslint/eslintrc)
+ *   - eslint (top-level; uses ajv@6 API in lib/shared/ajv.js)
+ *   - @eslint/eslintrc (top-level; uses ajv@6 API in lib/shared/ajv.js)
  *
  * SAFE TO DELETE if react-scripts is upgraded to v6+, or replaced with Vite/rspack.
  */
@@ -28,64 +35,85 @@ const path = require('path');
 
 const NODE_MODULES = path.join(__dirname, '..', 'node_modules');
 
-// Packages that have their own nested ajv-keywords@3.x but no local ajv@6
-const AFFECTED_PLUGINS = [
-  'fork-ts-checker-webpack-plugin',
-  'file-loader',
-  'babel-loader',
-];
+/**
+ * Install ajv@^6 inside a specific package's node_modules directory.
+ * Returns true if patched (or already patched), false if failed.
+ */
+function patchPackage(packagePath) {
+  const packageName = packagePath.replace(NODE_MODULES + path.sep, '');
 
-let patchCount = 0;
-
-for (const plugin of AFFECTED_PLUGINS) {
-  const pluginDir = path.join(NODE_MODULES, plugin);
-
-  // Skip if plugin is not installed (optional dep or not in this environment)
-  if (!fs.existsSync(pluginDir)) {
-    console.log(`patch-fork-ts-checker: ${plugin} not found, skipping.`);
-    continue;
+  // Skip if package is not installed
+  if (!fs.existsSync(packagePath)) {
+    return true; // not installed = not broken
   }
 
-  // Only patch plugins that have their own nested ajv-keywords
-  const nestedAjvKeywords = path.join(pluginDir, 'node_modules', 'ajv-keywords');
-  if (!fs.existsSync(nestedAjvKeywords)) {
-    console.log(`patch-fork-ts-checker: ${plugin} has no nested ajv-keywords, skipping.`);
-    continue;
-  }
+  const nestedNodeModules = path.join(packagePath, 'node_modules');
+  const nestedAjv = path.join(nestedNodeModules, 'ajv');
 
-  const nestedAjv = path.join(pluginDir, 'node_modules', 'ajv');
-
-  // Check if ajv@6 is already installed in the nested location
+  // Check if ajv@6 is already present and correct
   if (fs.existsSync(nestedAjv)) {
     try {
-      const ajvPkg = JSON.parse(fs.readFileSync(path.join(nestedAjv, 'package.json'), 'utf8'));
+      const ajvPkg = JSON.parse(
+        fs.readFileSync(path.join(nestedAjv, 'package.json'), 'utf8')
+      );
       if (ajvPkg.version && ajvPkg.version.startsWith('6.')) {
-        console.log(`patch-fork-ts-checker: ${plugin} already has ajv@${ajvPkg.version}, skipping.`);
-        continue;
+        console.log(
+          `patch-ajv6: ${packageName} already has ajv@${ajvPkg.version}, skipping.`
+        );
+        return true;
       }
     } catch (e) {
       // package.json unreadable — fall through and reinstall
     }
   }
 
-  // Install ajv@6 inside this plugin's own node_modules
-  console.log(`patch-fork-ts-checker: Installing ajv@^6.12.6 inside ${plugin}/node_modules/...`);
+  // Ensure node_modules directory exists
+  if (!fs.existsSync(nestedNodeModules)) {
+    fs.mkdirSync(nestedNodeModules, { recursive: true });
+  }
+
+  console.log(`patch-ajv6: Installing ajv@^6.12.6 inside ${packageName}/node_modules/...`);
   try {
     execSync('npm install ajv@^6.12.6 --prefix . --no-save --legacy-peer-deps', {
-      cwd: pluginDir,
+      cwd: packagePath,
       stdio: 'pipe',
     });
-    console.log(`patch-fork-ts-checker: ${plugin} patched successfully.`);
-    patchCount++;
+    console.log(`patch-ajv6: ${packageName} patched successfully.`);
+    return true;
   } catch (err) {
-    // Non-fatal: if the patch fails, the build may fail with a clear error message.
-    console.warn(`patch-fork-ts-checker: Failed to patch ${plugin}:`, err.message);
-    console.warn('If the build fails with ajv-related errors, see scripts/patch-fork-ts-checker.js');
+    console.warn(`patch-ajv6: Failed to patch ${packageName}:`, err.message);
+    return false;
   }
 }
 
-if (patchCount > 0) {
-  console.log(`patch-fork-ts-checker: Done. Patched ${patchCount} plugin(s).`);
+// Packages that use ajv@6 APIs but are exposed to top-level ajv@8 via overrides:
+const PACKAGES_TO_PATCH = [
+  // Webpack loaders with nested ajv-keywords@3.x
+  path.join(NODE_MODULES, 'fork-ts-checker-webpack-plugin'),
+  path.join(NODE_MODULES, 'file-loader'),
+  path.join(NODE_MODULES, 'babel-loader'),
+  // Top-level eslint and @eslint/eslintrc use _opts.defaultMeta (ajv@6 API)
+  path.join(NODE_MODULES, 'eslint'),
+  path.join(NODE_MODULES, '@eslint', 'eslintrc'),
+];
+
+let patchCount = 0;
+let failCount = 0;
+
+for (const pkgPath of PACKAGES_TO_PATCH) {
+  const success = patchPackage(pkgPath);
+  if (success) {
+    patchCount++;
+  } else {
+    failCount++;
+  }
+}
+
+if (failCount > 0) {
+  console.warn(
+    `patch-ajv6: ${failCount} package(s) could not be patched. ` +
+    'Build may fail with ajv-related errors. See scripts/patch-fork-ts-checker.js.'
+  );
 } else {
-  console.log('patch-fork-ts-checker: All plugins already patched or not affected.');
+  console.log(`patch-ajv6: Done. All ${patchCount} packages are ready.`);
 }
