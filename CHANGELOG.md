@@ -6,7 +6,21 @@ Format: [Semantic Versioning](https://semver.org/). Types: `Added`, `Changed`, `
 
 ---
 
-## [Unreleased] — Phase 4: Accessibility Hardening
+## [Unreleased] — Phase 5: Polish & Community Ready
+
+### Added
+- **Plain-language setup wizard** (Cycle 37, a11y): Dorothy test (Phase 5 gate) —
+  all technical jargon removed from SetupWizardScreen and installer/install.py. "API token"
+  replaced with "connection code", "backend server" with "your computer", "passphrase" with
+  "secret phrase", "keychain" with "your computer will remember". Welcome screen now tells
+  Dorothy "You can ask your assistant to repeat anything at any time" — an affordance for
+  users who fear missing spoken instructions. Error messages now give actionable guidance
+  ("tap Retry to try again") rather than blaming the user for a bad token.
+  6 new Dorothy test assertions in SetupWizardScreen.test.tsx (134 JS tests total).
+
+---
+
+## [v0.4.0] — Phase 4: Accessibility Hardening ✅ COMPLETE (Cycles 28–36)
 
 ### Added
 - **Skip link in Expo web export** (Cycle 30): Created `clients/mobile/public/index.html`
