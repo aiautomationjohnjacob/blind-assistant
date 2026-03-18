@@ -696,15 +696,17 @@ class TestVADFunctions:
         assert 0 < VAD_MIN_DURATION < VAD_MAX_DURATION
 
     def test_record_with_vad_sync_raises_import_error_when_webrtcvad_missing(self):
-        """_record_with_vad_sync raises ImportError when webrtcvad is not available."""
-        import sys
+        """_record_with_vad_sync raises ImportError when webrtcvad is not available.
 
-        saved = sys.modules.pop("webrtcvad", None)
-        try:
+        Setting sys.modules['webrtcvad'] = None forces all `import webrtcvad`
+        calls to raise ImportError, even when the C-extension is installed.
+        This is the correct way to simulate an optional dependency being absent.
+        """
+        import sys
+        from unittest.mock import patch
+
+        with patch.dict(sys.modules, {"webrtcvad": None}):
             from blind_assistant.voice.stt import _record_with_vad_sync
 
             with pytest.raises(ImportError, match="webrtcvad"):
                 _record_with_vad_sync()
-        finally:
-            if saved is not None:
-                sys.modules["webrtcvad"] = saved
