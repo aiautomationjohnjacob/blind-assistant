@@ -486,3 +486,227 @@ class TestConstants:
     def test_elder_record_duration_longer_than_default(self):
         """Elder users need more time to speak — elder duration must exceed default."""
         assert ELDER_RECORD_DURATION > DEFAULT_RECORD_DURATION
+
+    def test_default_use_vad_is_true(self):
+        """VAD is enabled by default — the recommended mode (ISSUE-002 fix)."""
+        assert DEFAULT_USE_VAD is True
+
+
+# ─────────────────────────────────────────────────────────────
+# VAD integration in VoiceLocalInterface (ISSUE-002)
+# ─────────────────────────────────────────────────────────────
+
+
+class TestVADIntegration:
+    """Tests that VoiceLocalInterface uses VAD when use_vad=True (the default)."""
+
+    @pytest.fixture
+    def vad_config(self):
+        return {
+            "wake_word": "assistant",
+            "record_duration": 8.0,
+            "use_vad": True,  # Explicitly enable VAD
+        }
+
+    @pytest.fixture
+    def vad_interface(self, mock_orchestrator, vad_config):
+        return VoiceLocalInterface(mock_orchestrator, vad_config)
+
+    def test_use_vad_defaults_to_true_when_not_in_config(self, mock_orchestrator):
+        """When use_vad is not in config, defaults to DEFAULT_USE_VAD (True)."""
+        iface = VoiceLocalInterface(mock_orchestrator, config={})
+        assert iface._use_vad is True
+
+    def test_use_vad_can_be_disabled_via_config(self, mock_orchestrator):
+        """use_vad=False in config disables VAD and uses fixed-duration recording."""
+        iface = VoiceLocalInterface(mock_orchestrator, config={"use_vad": False})
+        assert iface._use_vad is False
+
+    async def test_listen_calls_transcribe_with_vad_when_enabled(self, vad_interface, mock_orchestrator):
+        """When use_vad=True, _listen_and_respond calls transcribe_microphone_with_vad."""
+        from blind_assistant.core.orchestrator import Response
+
+        mock_orchestrator.handle_message = AsyncMock(
+            return_value=Response(text="Okay", spoken_text=None, follow_up_prompt=None)
+        )
+        vad_interface._context = MagicMock(speech_rate=1.0)
+
+        with (
+            patch(
+                "blind_assistant.voice.stt.transcribe_microphone_with_vad",
+                new=AsyncMock(return_value="order me lunch"),
+            ) as mock_vad,
+            patch("blind_assistant.voice.tts.speak_locally", new=AsyncMock()),
+        ):
+            await vad_interface._listen_and_respond()
+
+        # VAD function should have been called
+        mock_vad.assert_called_once()
+
+    async def test_listen_does_not_call_vad_when_disabled(self, interface, mock_orchestrator):
+        """When use_vad=False, _listen_and_respond uses transcribe_microphone (fixed duration)."""
+        from blind_assistant.core.orchestrator import Response
+
+        mock_orchestrator.handle_message = AsyncMock(
+            return_value=Response(text="Okay", spoken_text=None, follow_up_prompt=None)
+        )
+        interface._context = MagicMock(speech_rate=1.0)
+
+        with (
+            patch(
+                "blind_assistant.voice.stt.transcribe_microphone",
+                new=AsyncMock(return_value="order me lunch"),
+            ) as mock_fixed,
+            patch("blind_assistant.voice.stt.transcribe_microphone_with_vad", new=AsyncMock()) as mock_vad,
+            patch("blind_assistant.voice.tts.speak_locally", new=AsyncMock()),
+        ):
+            await interface._listen_and_respond()
+
+        mock_fixed.assert_called()
+        mock_vad.assert_not_called()
+
+    async def test_vad_wake_word_follow_up_also_uses_vad(self, vad_interface):
+        """Wake word only response → follow-up listen also uses VAD (not fixed duration)."""
+        from blind_assistant.core.orchestrator import Response
+
+        vad_interface._context = MagicMock(speech_rate=1.0)
+
+        # First call returns wake word only, second returns real request
+        vad_calls = [AsyncMock(return_value="assistant"), AsyncMock(return_value="what is the weather")]
+
+        async def mock_vad_sequence(*args, **kwargs):
+            return await vad_calls.pop(0)()
+
+        with (
+            patch(
+                "blind_assistant.voice.stt.transcribe_microphone_with_vad",
+                side_effect=mock_vad_sequence,
+            ),
+            patch("blind_assistant.voice.tts.speak_locally", new=AsyncMock()),
+            patch(
+                "blind_assistant.core.orchestrator.Orchestrator.handle_message",
+                new=AsyncMock(
+                    return_value=Response(text="Sunny", spoken_text=None, follow_up_prompt=None)
+                ),
+            ),
+        ):
+            # Should call VAD twice: once for wake word, once for actual request
+            await vad_interface._listen_and_respond()
+
+
+# ─────────────────────────────────────────────────────────────
+# VAD unit tests (stt.py functions — no device needed)
+# ─────────────────────────────────────────────────────────────
+
+
+class TestVADFunctions:
+    """Tests for the VAD recording functions in stt.py."""
+
+    async def test_transcribe_microphone_with_vad_falls_back_when_webrtcvad_missing(self):
+        """Falls back to fixed-duration recording when webrtcvad is not installed."""
+        import sys
+
+        # Simulate webrtcvad not installed
+        saved = sys.modules.pop("webrtcvad", None)
+        try:
+            with (
+                patch(
+                    "blind_assistant.voice.stt.transcribe_microphone",
+                    new=AsyncMock(return_value="fallback transcript"),
+                ) as mock_fixed,
+            ):
+                from blind_assistant.voice.stt import transcribe_microphone_with_vad
+
+                result = await transcribe_microphone_with_vad(fallback_duration=5.0)
+
+            # Should have called fixed-duration fallback
+            mock_fixed.assert_called_once_with(duration_seconds=5.0)
+            assert result == "fallback transcript"
+        finally:
+            if saved is not None:
+                sys.modules["webrtcvad"] = saved
+
+    async def test_transcribe_microphone_with_vad_returns_none_when_no_audio(self):
+        """Returns None when VAD recording captures no audio bytes."""
+        with (
+            patch(
+                "blind_assistant.voice.stt._record_with_vad_sync",
+                return_value=None,
+            ),
+            patch(
+                "blind_assistant.voice.stt.transcribe_microphone",
+                new=AsyncMock(return_value=None),
+            ),
+        ):
+            from blind_assistant.voice.stt import transcribe_microphone_with_vad
+
+            result = await transcribe_microphone_with_vad()
+
+        assert result is None
+
+    async def test_transcribe_microphone_with_vad_transcribes_audio_bytes(self):
+        """When VAD recording succeeds, audio bytes are passed to transcribe_audio."""
+        fake_wav = b"RIFF\x00\x00\x00\x00WAVEfmt "
+        captured_bytes = []
+
+        async def mock_transcribe(audio_bytes, language=None):
+            captured_bytes.append(audio_bytes)
+            return "hello assistant"
+
+        with (
+            patch("blind_assistant.voice.stt._record_with_vad_sync", return_value=fake_wav),
+            patch("blind_assistant.voice.stt.transcribe_audio", side_effect=mock_transcribe),
+        ):
+            from blind_assistant.voice.stt import transcribe_microphone_with_vad
+
+            result = await transcribe_microphone_with_vad()
+
+        assert result == "hello assistant"
+        assert captured_bytes == [fake_wav]
+
+    async def test_transcribe_microphone_with_vad_falls_back_on_unexpected_exception(self):
+        """Falls back to fixed-duration recording when an unexpected error occurs."""
+        with (
+            patch(
+                "blind_assistant.voice.stt._record_with_vad_sync",
+                side_effect=RuntimeError("audio device busy"),
+            ),
+            patch(
+                "blind_assistant.voice.stt.transcribe_microphone",
+                new=AsyncMock(return_value="fallback"),
+            ) as mock_fixed,
+        ):
+            from blind_assistant.voice.stt import transcribe_microphone_with_vad
+
+            result = await transcribe_microphone_with_vad(fallback_duration=7.0)
+
+        mock_fixed.assert_called_once_with(duration_seconds=7.0)
+        assert result == "fallback"
+
+    def test_vad_constants_are_valid(self):
+        """VAD configuration constants are in valid ranges."""
+        from blind_assistant.voice.stt import (
+            VAD_AGGRESSIVENESS,
+            VAD_MAX_DURATION,
+            VAD_MIN_DURATION,
+            VAD_SILENCE_FRAMES,
+        )
+
+        assert 0 <= VAD_AGGRESSIVENESS <= 3
+        assert VAD_SILENCE_FRAMES > 0
+        assert VAD_MAX_DURATION > 0
+        assert 0 < VAD_MIN_DURATION < VAD_MAX_DURATION
+
+    def test_record_with_vad_sync_raises_import_error_when_webrtcvad_missing(self):
+        """_record_with_vad_sync raises ImportError when webrtcvad is not available."""
+        import sys
+
+        saved = sys.modules.pop("webrtcvad", None)
+        try:
+            from blind_assistant.voice.stt import _record_with_vad_sync
+
+            with pytest.raises(ImportError, match="webrtcvad"):
+                _record_with_vad_sync()
+        finally:
+            if saved is not None:
+                sys.modules["webrtcvad"] = saved
