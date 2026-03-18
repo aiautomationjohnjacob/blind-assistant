@@ -5,6 +5,10 @@ Tests cover:
 - start_services() creates MCPMemoryClient and passes it to APIServer when API is enabled
 - start_services() continues gracefully when MCPMemoryClient raises on init
 - start_services() skips MCPMemoryClient when API server is not enabled
+- start_services() starts TelegramBot when telegram_enabled is True
+- start_services() starts both TelegramBot and APIServer when both enabled
+- main() --telegram flag sets telegram_enabled=True in config
+- main() --telegram flag also forces api_server_enabled=True
 
 All external I/O is mocked. main.py uses lazy imports inside start_services(), so
 we must patch at the source module path (not blind_assistant.main.X).
