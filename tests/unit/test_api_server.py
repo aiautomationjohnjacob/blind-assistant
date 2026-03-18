@@ -537,6 +537,198 @@ def test_rate_limit_middleware_is_instance_of_base_http_middleware():
     middleware = RateLimitMiddleware(app=None, auth_limit=30, health_limit=60)  # type: ignore[arg-type]
     assert middleware._auth_limit == 30
     assert middleware._health_limit == 60
+
+
+# ─────────────────────────────────────────────────────────────
+# GET /profile with MCPMemoryClient integration
+# ─────────────────────────────────────────────────────────────
+
+
+def _make_mock_memory(prefs: dict | None = None):
+    """Build an AsyncMock MCPMemoryClient with canned preferences."""
+    mem = MagicMock()
+    returned = prefs if prefs is not None else {}
+    mem.get_all_preferences = AsyncMock(return_value=returned)
+    mem.set_preference = AsyncMock()
+    return mem
+
+
+@contextmanager
+def _make_server_with_memory(memory_client=None, token: str = "test-token-123"):
+    """Build an APIServer+TestClient with a mock MCPMemoryClient injected."""
+    orc = _make_orchestrator()
+    config = {"debug": True}
+    server = APIServer(orc, config, memory_client=memory_client)
+    app = server._build_app()
+    with patch(
+        "blind_assistant.security.credentials.get_credential",
+        return_value=token,
+    ):
+        yield server, TestClient(app, raise_server_exceptions=False)
+
+
+def test_profile_reads_preferences_from_memory_client():
+    """GET /profile returns speech_rate from MCPMemoryClient when available."""
+    mem = _make_mock_memory({"voice_speed": 0.7, "verbosity": "brief"})
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.get("/profile", headers=VALID_HEADERS)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["speech_rate"] == 0.7
+    assert data["verbosity"] == "brief"
+
+
+def test_profile_includes_full_preferences_dict_from_memory():
+    """GET /profile includes the raw preferences dict when MCPMemoryClient is present."""
+    mem = _make_mock_memory({"voice_speed": 1.2, "braille_mode": True, "user_name": "Dorothy"})
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.get("/profile", headers=VALID_HEADERS)
+    prefs = resp.json().get("preferences")
+    assert prefs is not None
+    assert prefs["user_name"] == "Dorothy"
+    assert prefs["braille_mode"] is True
+
+
+def test_profile_without_memory_client_has_null_preferences():
+    """GET /profile returns preferences=null when no MCPMemoryClient is configured."""
+    with _make_server_with_memory(memory_client=None) as (_, client):
+        resp = client.get("/profile", headers=VALID_HEADERS)
+    assert resp.status_code == 200
+    assert resp.json()["preferences"] is None
+
+
+def test_profile_gracefully_handles_memory_client_failure():
+    """GET /profile still returns 200 if MCPMemoryClient.get_all_preferences raises."""
+    mem = MagicMock()
+    mem.get_all_preferences = AsyncMock(side_effect=RuntimeError("MCP unreachable"))
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.get("/profile", headers=VALID_HEADERS)
+    # Must still succeed — never let memory errors surface as 5xx
+    assert resp.status_code == 200
+
+
+# ─────────────────────────────────────────────────────────────
+# PUT /profile — update preferences via MCPMemoryClient
+# ─────────────────────────────────────────────────────────────
+
+
+def test_put_profile_updates_speech_rate_in_memory():
+    """PUT /profile calls MCPMemoryClient.set_preference for voice_speed."""
+    mem = _make_mock_memory({"voice_speed": 0.8})
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put(
+            "/profile",
+            json={"speech_rate": 0.8},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 200
+    # verify set_preference was called with the correct key
+    calls = {call.args[1]: call.args[2] for call in mem.set_preference.call_args_list}
+    assert calls.get("voice_speed") == 0.8
+
+
+def test_put_profile_updates_verbosity_in_memory():
+    """PUT /profile calls MCPMemoryClient.set_preference for verbosity."""
+    mem = _make_mock_memory({"verbosity": "brief"})
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put(
+            "/profile",
+            json={"verbosity": "brief"},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 200
+    calls = {call.args[1]: call.args[2] for call in mem.set_preference.call_args_list}
+    assert calls.get("verbosity") == "brief"
+
+
+def test_put_profile_updates_braille_mode_in_memory():
+    """PUT /profile calls MCPMemoryClient.set_preference for braille_mode."""
+    mem = _make_mock_memory({"braille_mode": True})
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put(
+            "/profile",
+            json={"braille_mode": True},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 200
+    calls = {call.args[1]: call.args[2] for call in mem.set_preference.call_args_list}
+    assert calls.get("braille_mode") is True
+
+
+def test_put_profile_writes_extra_preferences():
+    """PUT /profile persists arbitrary extra key-value pairs via MCPMemoryClient."""
+    mem = _make_mock_memory({"timezone": "America/New_York"})
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put(
+            "/profile",
+            json={"extra": {"timezone": "America/New_York", "user_name": "Dorothy"}},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 200
+    calls = {call.args[1]: call.args[2] for call in mem.set_preference.call_args_list}
+    assert calls.get("timezone") == "America/New_York"
+    assert calls.get("user_name") == "Dorothy"
+
+
+def test_put_profile_without_memory_client_returns_200():
+    """PUT /profile succeeds (session-only) when no MCPMemoryClient is configured."""
+    with _make_server_with_memory(memory_client=None) as (_, client):
+        resp = client.put(
+            "/profile",
+            json={"verbosity": "detailed"},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 200
+
+
+def test_put_profile_gracefully_handles_memory_client_write_failure():
+    """PUT /profile still returns 200 if MCPMemoryClient.set_preference raises."""
+    mem = MagicMock()
+    mem.set_preference = AsyncMock(side_effect=RuntimeError("MCP unreachable"))
+    mem.get_all_preferences = AsyncMock(return_value={})
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put(
+            "/profile",
+            json={"verbosity": "brief"},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 200
+
+
+def test_put_profile_requires_auth():
+    """PUT /profile returns 401 without an Authorization header."""
+    mem = _make_mock_memory()
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put("/profile", json={"verbosity": "brief"})
+    assert resp.status_code == 401
+
+
+def test_put_profile_returns_updated_preferences():
+    """PUT /profile response includes updated speech_rate in the profile body."""
+    mem = _make_mock_memory({"voice_speed": 0.6})
+    with _make_server_with_memory(memory_client=mem) as (_, client):
+        resp = client.put(
+            "/profile",
+            json={"speech_rate": 0.6},
+            headers=VALID_HEADERS,
+        )
+    assert resp.status_code == 200
+    assert resp.json()["speech_rate"] == 0.6
+
+
+def test_api_server_accepts_memory_client_in_constructor():
+    """APIServer stores the injected memory_client on self._memory."""
+    orc = _make_orchestrator()
+    mem = _make_mock_memory()
+    server = APIServer(orc, config={}, memory_client=mem)
+    assert server._memory is mem
+
+
+def test_api_server_memory_client_defaults_to_none():
+    """APIServer._memory is None when no memory_client is provided."""
+    orc = _make_orchestrator()
+    server = APIServer(orc, config={})
+    assert server._memory is None
     assert middleware._window == 60
 
 
