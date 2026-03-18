@@ -327,7 +327,7 @@ class APIServer:
             CORSMiddleware,
             allow_origins=["*"] if self.config.get("debug", False) else ["http://localhost:*"],
             allow_credentials=True,
-            allow_methods=["GET", "POST", "PUT"],
+            allow_methods=["GET", "POST", "PUT", "DELETE"],
             allow_headers=["Authorization", "Content-Type"],
         )
 
