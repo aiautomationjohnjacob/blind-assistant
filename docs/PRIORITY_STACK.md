@@ -27,8 +27,15 @@
 | P3 | Voice Activity Detection (VAD) for voice_local.py (replaces fixed recording duration) | ISSUE-002 | 2026-03-17 |
 | P3 | PIL ImageGrab Playwright fallback for headless/server environments | ISSUE-003 | 2026-03-17 |
 | P3 | MCP memory server integration (cross-session user preferences) | INTEGRATION_MAP.md | 2026-03-17 |
-| P3 | Populate ROADMAP.md with Phase 3-5 milestones | open source | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
+
+## Completed Items (Cycle 21 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| ROADMAP.md rewritten: Phases 1+2 checked off, Phase 3 current state with 16 items completed, Phase 4+5 milestones defined, tech stack table added | 2026-03-17 | 21 |
+| CONTRIBUTING.md: added ROADMAP.md link alongside FEATURE_PRIORITY.md under "Find something to work on" | 2026-03-17 | 21 |
+| v0.3.0 release tag pushed: triggers e2e-android (AVD) + ios-e2e.yml (macOS Simulator) CI workflows | 2026-03-17 | 21 |
 
 ## Completed Items (Cycle 20 additions)
 
