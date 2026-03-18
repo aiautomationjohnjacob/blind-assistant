@@ -547,3 +547,20 @@ key in body.extra is not in that set. Add tests for the allowlist and rejection 
 **Resolved in**: Cycle 25 — VALID_EXTRA_PREFS frozenset added to api_server.py (commit 373a1cd);
 all-or-nothing validation fires before any write; 422 returned with rejected key names + allowed list;
 audit log at WARNING level; 8 new tests in test_api_server.py.
+
+### ISSUE-031: No DELETE /profile/preferences endpoint — users cannot clear MCP preference data
+**Severity**: MEDIUM
+**Category**: ethics, architecture
+**Detected by**: ethics-advisor (Cycle 24 review), orchestrator (Cycle 25 self-assessment)
+**Detected**: 2026-03-18
+**Description**: The API server has GET /profile and PUT /profile but no DELETE endpoint for
+clearing user preferences stored in the MCPMemoryClient. If a user wants to reset their
+preferences (e.g. after sharing a session, or for privacy), there is no way to do so via
+the API. MCPMemoryClient.clear_user_data() exists but is never exposed.
+**Impact**: Users cannot exercise their right to clear their own preference data — a mild
+autonomy and privacy gap, and a concern for GDPR/data-rights compliance in cloud deployments.
+**Proposed fix**: Add DELETE /profile/preferences endpoint. The endpoint should: (1) require
+bearer token auth, (2) require an explicit confirmation body field ("confirm": true) to prevent
+accidental deletion, (3) call MCPMemoryClient.clear_user_data(user_id), (4) return 204 No Content.
+Add unit tests for: happy path (204 returned), missing confirmation (400), auth failure (401).
+**Status**: OPEN

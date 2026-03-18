@@ -20,11 +20,19 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P3 | ISSUE-030: Add PUT /profile allowlist for extra keys — reject unknown keys with 422; prevents arbitrary MCP writes | Cycle 24 security review | 2026-03-18 |
-| P3 | Wire MCPMemoryClient into main.py startup — production server does not create or pass MCPMemoryClient; only injected in tests | Cycle 24 self-assessment | 2026-03-18 |
-| P3 | Verify Android TalkBack CI v0.3.2: confirm e2e-android.yml run passes; single-line pytest fix applied | Cycle 23 | 2026-03-18 |
+| P3 | ISSUE-031: DELETE /profile/preferences endpoint with confirmation flow — exposes MCPMemoryClient.clear_user_data(); required for user autonomy + future GDPR compliance | ethics-advisor (Cycle 24), Cycle 25 self-assessment | 2026-03-18 |
+| P3 | Phase 3 completion assessment — review all sprint items; identify remaining open items; determine Phase 4 readiness | Cycle 25 self-assessment | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
+
+## Completed Items (Cycle 25 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| ISSUE-030: VALID_EXTRA_PREFS frozenset in api_server.py; PUT /profile returns 422 on unknown extra keys; all-or-nothing validation; audit log at WARNING; 8 new tests | 2026-03-18 | 25 |
+| MCPMemoryClient wired into main.py start_services() production API server startup; graceful degradation if constructor raises; 3 new tests in test_main.py | 2026-03-18 | 25 |
+| Android TalkBack CI v0.3.2 verified: run 23223747818 PASSED | 2026-03-18 | 25 |
+| 790 Python unit tests total (+11 from Cycle 25); ruff clean; mypy 0 errors | 2026-03-18 | 25 |
 
 ## Completed Items (Cycle 24 additions)
 
