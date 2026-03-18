@@ -115,17 +115,14 @@ def _wait_for_app_ready(page: Page) -> None:
     """Wait for the React app to hydrate and render an interactive element.
 
     Uses a 30s timeout — CI can be slow.
+    If React does not mount, swallows the error; the screenshot will show what went wrong.
     """
-    try:
+    with contextlib.suppress(Exception):
         page.wait_for_selector(
             '[role="button"], input[aria-label]',
             timeout=30000,
             state="attached",
         )
-    except Exception:
-        # If React did not mount, take a diagnostic screenshot and continue.
-        # The screenshot itself will show what went wrong.
-        pass
 
 
 class TestDeviceSimulationScreenshots:
