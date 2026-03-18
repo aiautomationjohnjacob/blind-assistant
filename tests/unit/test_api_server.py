@@ -1127,3 +1127,95 @@ def test_transcribe_small_payload_is_not_rejected():
             headers=VALID_HEADERS,
         )
     assert resp.status_code == 200
+
+
+# ─────────────────────────────────────────────────────────────
+# /query action dispatch: clear_preferences (Cycle 27)
+# ─────────────────────────────────────────────────────────────
+
+
+def test_query_dispatches_clear_preferences_action_when_set():
+    """When orchestrator returns action='clear_preferences', APIServer calls _clear_preferences_for_user."""
+    orc = _make_orchestrator()
+    orc.handle_message = AsyncMock(
+        return_value=Response(
+            text="Your preferences have been cleared.",
+            action="clear_preferences",
+        )
+    )
+    fake_memory = AsyncMock()
+    fake_memory.clear_user_data = AsyncMock()
+
+    with _make_server(orchestrator=orc) as (server, client):
+        # Inject the memory client after server creation to test dispatch
+        server._memory = fake_memory
+        resp = client.post(
+            "/query",
+            json={"message": "clear my preferences", "session_id": "s1"},
+            headers=VALID_HEADERS,
+        )
+
+    assert resp.status_code == 200
+    fake_memory.clear_user_data.assert_awaited_once()
+
+
+def test_query_does_not_clear_preferences_when_action_is_none():
+    """When orchestrator returns action=None, APIServer must NOT call clear_user_data."""
+    orc = _make_orchestrator()
+    # Default _make_orchestrator returns action=None
+    fake_memory = AsyncMock()
+    fake_memory.clear_user_data = AsyncMock()
+
+    with _make_server(orchestrator=orc) as (server, client):
+        server._memory = fake_memory
+        resp = client.post(
+            "/query",
+            json={"message": "what is the weather?", "session_id": "s2"},
+            headers=VALID_HEADERS,
+        )
+
+    assert resp.status_code == 200
+    fake_memory.clear_user_data.assert_not_called()
+
+
+def test_clear_preferences_for_user_calls_mcp_clear():
+    """_clear_preferences_for_user() calls MCPMemoryClient.clear_user_data with the user_id."""
+    import asyncio
+
+    from blind_assistant.interfaces.api_server import APIServer
+
+    orc = _make_orchestrator()
+    fake_memory = AsyncMock()
+    fake_memory.clear_user_data = AsyncMock()
+
+    server = APIServer(orc, {"api_auth_disabled": True}, memory_client=fake_memory)
+    asyncio.run(server._clear_preferences_for_user("local_user"))
+
+    fake_memory.clear_user_data.assert_awaited_once_with("local_user")
+
+
+def test_clear_preferences_for_user_degrades_when_no_memory_client():
+    """_clear_preferences_for_user() does not raise when memory_client is None."""
+    import asyncio
+
+    from blind_assistant.interfaces.api_server import APIServer
+
+    orc = _make_orchestrator()
+    server = APIServer(orc, {"api_auth_disabled": True}, memory_client=None)
+    # Should not raise even with no memory client
+    asyncio.run(server._clear_preferences_for_user("local_user"))
+
+
+def test_clear_preferences_for_user_degrades_when_mcp_raises():
+    """_clear_preferences_for_user() logs and continues when clear_user_data raises."""
+    import asyncio
+
+    from blind_assistant.interfaces.api_server import APIServer
+
+    orc = _make_orchestrator()
+    fake_memory = AsyncMock()
+    fake_memory.clear_user_data = AsyncMock(side_effect=RuntimeError("MCP down"))
+
+    server = APIServer(orc, {"api_auth_disabled": True}, memory_client=fake_memory)
+    # Should not raise — graceful degradation
+    asyncio.run(server._clear_preferences_for_user("local_user"))

@@ -303,3 +303,26 @@ async def test_classify_intent_lazy_client_initialization(
     # since mocking _get_client bypasses the assignment. This is the correct
     # test of the lazy initialization contract.
     assert not hasattr(planner, "_initialized_client")
+
+
+# ─────────────────────────────────────────────────────────────
+# clear_preferences intent (Cycle 27)
+# ─────────────────────────────────────────────────────────────
+
+
+def test_clear_preferences_in_intent_tool_map() -> None:
+    """clear_preferences must be in INTENT_TOOL_MAP with an empty tools list."""
+    assert "clear_preferences" in INTENT_TOOL_MAP
+    assert INTENT_TOOL_MAP["clear_preferences"] == []
+
+
+def test_clear_preferences_is_not_high_stakes() -> None:
+    """clear_preferences should not be classified as high-stakes (handled via ConfirmationGate)."""
+    assert "clear_preferences" not in HIGH_STAKES_INTENTS
+
+
+def test_clear_preferences_prompt_contains_intent_type() -> None:
+    """CLASSIFICATION_PROMPT must mention 'clear_preferences' for Claude to classify it correctly."""
+    from blind_assistant.core.planner import CLASSIFICATION_PROMPT
+
+    assert "clear_preferences" in CLASSIFICATION_PROMPT

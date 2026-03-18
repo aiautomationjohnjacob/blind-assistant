@@ -1041,3 +1041,119 @@ class TestCheckoutLoopHelpers:
         assert any(
             phrase in response_lower for phrase in ("didn't hear", "not hear", "ready", "try again", "order food")
         ), f"Expected helpful timeout message, got: {result['text']}"
+
+
+# ─────────────────────────────────────────────────────────────
+# _handle_clear_preferences (Cycle 27)
+# ─────────────────────────────────────────────────────────────
+
+
+def _make_clear_prefs_orchestrator(minimal_config: dict) -> Orchestrator:
+    """Build a minimal Orchestrator with just the components needed to test _handle_clear_preferences."""
+    from blind_assistant.core.confirmation import ConfirmationGate
+
+    orc = Orchestrator(minimal_config)
+    orc.confirmation_gate = ConfirmationGate()
+    orc.tool_registry = MagicMock()
+    orc._initialized = True
+    return orc
+
+
+def _make_clear_prefs_intent() -> MagicMock:
+    """Create a mock intent for the clear_preferences flow."""
+    intent = MagicMock()
+    intent.type = "clear_preferences"
+    intent.description = "clear all saved preferences"
+    intent.parameters = {}
+    intent.is_high_stakes = False
+    intent.required_tools = []
+    return intent
+
+
+class TestHandleClearPreferences:
+    """Tests for Orchestrator._handle_clear_preferences (Cycle 27)."""
+
+    async def test_user_confirms_returns_action_clear_preferences(self, minimal_config, standard_context) -> None:
+        """When user confirms, handler returns dict with action='clear_preferences'."""
+        orc = _make_clear_prefs_orchestrator(minimal_config)
+        updates: list[str] = []
+
+        with patch.object(
+            orc.confirmation_gate,
+            "wait_for_confirmation",
+            new=AsyncMock(return_value=True),
+        ):
+
+            async def update_cb(msg: str) -> None:
+                updates.append(msg)
+
+            result = await orc._handle_clear_preferences(_make_clear_prefs_intent(), standard_context, update_cb)
+
+        assert result.get("action") == "clear_preferences"
+        assert "cleared" in result["text"].lower()
+
+    async def test_user_cancels_returns_no_action(self, minimal_config, standard_context) -> None:
+        """When user cancels, handler returns no action field and keeps-unchanged text."""
+        orc = _make_clear_prefs_orchestrator(minimal_config)
+        updates: list[str] = []
+
+        with patch.object(
+            orc.confirmation_gate,
+            "wait_for_confirmation",
+            new=AsyncMock(return_value=False),
+        ):
+
+            async def update_cb(msg: str) -> None:
+                updates.append(msg)
+
+            result = await orc._handle_clear_preferences(_make_clear_prefs_intent(), standard_context, update_cb)
+
+        assert result.get("action") is None
+        assert "cancel" in result["text"].lower() or "unchanged" in result["text"].lower()
+
+    async def test_warning_is_spoken_before_confirmation(self, minimal_config, standard_context) -> None:
+        """Handler must send a warning update before asking for confirmation."""
+        orc = _make_clear_prefs_orchestrator(minimal_config)
+        updates: list[str] = []
+
+        with patch.object(
+            orc.confirmation_gate,
+            "wait_for_confirmation",
+            new=AsyncMock(return_value=False),
+        ):
+
+            async def update_cb(msg: str) -> None:
+                updates.append(msg)
+
+            await orc._handle_clear_preferences(_make_clear_prefs_intent(), standard_context, update_cb)
+
+        assert updates, "No warning update was sent"
+        combined = " ".join(updates).lower()
+        assert "clear" in combined or "preferences" in combined
+
+    async def test_clear_preferences_intent_in_handlers_map(self, minimal_config) -> None:
+        """'clear_preferences' must be in the orchestrator's intent handler map."""
+        orc = _make_clear_prefs_orchestrator(minimal_config)
+        assert "clear_preferences" in orc._intent_handlers
+
+    def test_response_action_field_passes_through_format_response(self, minimal_config, standard_context) -> None:
+        """_format_response must forward the 'action' key from result dict to Response."""
+        from blind_assistant.core.orchestrator import Response
+
+        orc = _make_clear_prefs_orchestrator(minimal_config)
+        result = {"text": "done", "action": "clear_preferences"}
+        response = orc._format_response(result, standard_context)
+
+        assert isinstance(response, Response)
+        assert response.action == "clear_preferences"
+
+    def test_response_without_action_has_none_action(self, minimal_config, standard_context) -> None:
+        """_format_response sets action=None when result has no 'action' key."""
+        from blind_assistant.core.orchestrator import Response
+
+        orc = _make_clear_prefs_orchestrator(minimal_config)
+        result = {"text": "done"}
+        response = orc._format_response(result, standard_context)
+
+        assert isinstance(response, Response)
+        assert response.action is None
