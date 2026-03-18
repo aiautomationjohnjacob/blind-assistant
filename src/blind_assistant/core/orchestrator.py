@@ -989,6 +989,8 @@ class Orchestrator:
             # Food/grocery ordering: real implementation — browser tool + risk disclosure
             "order_food": self._handle_order_food,
             "order_groceries": self._handle_order_food,  # Same flow, different food query
+            # Preference management — clears MCP-persisted user settings on confirmation
+            "clear_preferences": self._handle_clear_preferences,
             # High-stakes intents — stubs until travel/smart home tools built
             "book_travel": self._handle_high_stakes_stub,
             "fill_form": self._handle_high_stakes_stub,
