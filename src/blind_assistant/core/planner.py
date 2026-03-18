@@ -49,6 +49,9 @@ INTENT_TOOL_MAP = {
     "smart_home": ["home_assistant"],
     "search_web": ["browser"],
     "general_question": [],
+    # Preference management — no external tools needed; handled by the orchestrator
+    # calling MCPMemoryClient via the APIServer's action dispatch mechanism.
+    "clear_preferences": [],
 }
 
 HIGH_STAKES_INTENTS = {
