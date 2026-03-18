@@ -68,6 +68,12 @@ jobs:
 
       - name: Deploy to Netlify (staging — draft URL)
         id: deploy
+        # IMPORTANT: If NETLIFY_AUTH_TOKEN or NETLIFY_SITE_ID are not set in GitHub
+        # repository secrets, this step is skipped gracefully. This prevents false P0
+        # CI failure issues being auto-created for repos/forks without Netlify secrets.
+        # Setup instructions: README.md → "Operator Setup → Netlify Staging" section.
+        # See also: ISSUE-029 (docs) and the comment at the top of this workflow.
+        if: ${{ env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != '' }}
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
@@ -90,6 +96,21 @@ jobs:
           echo "**Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Test with: NVDA + Chrome, VoiceOver + Safari, TalkBack + Chrome Mobile" >> $GITHUB_STEP_SUMMARY
+
+      - name: Skip notice (Netlify secrets not configured)
+        if: ${{ env.NETLIFY_AUTH_TOKEN == '' || env.NETLIFY_SITE_ID == '' }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          echo "### Web Staging Deploy — Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "NETLIFY_AUTH_TOKEN or NETLIFY_SITE_ID not set in repository secrets." >> $GITHUB_STEP_SUMMARY
+          echo "This is expected for forks and local development environments." >> $GITHUB_STEP_SUMMARY
+          echo "See README.md → 'Operator Setup → Netlify Staging' for setup instructions." >> $GITHUB_STEP_SUMMARY
+          echo ""
+          echo "Netlify secrets not configured — staging deploy skipped (expected for forks)."
+          echo "See README.md for setup instructions."
 
       - name: Run web E2E accessibility tests against staging URL
         # Run the Playwright tests against the real staging deploy instead of localhost.
