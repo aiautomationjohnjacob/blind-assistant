@@ -202,8 +202,9 @@ export function SetupWizardScreen({
     } catch (err) {
       if (!isMounted.current) return;
       setErrorMessage(
-        "Could not save your token to secure storage. " +
-          "Make sure the app has permission to use the device keychain."
+        "Could not save your connection code. " +
+          "Please make sure the app has permission to store passwords on your device, " +
+          "then tap Retry to try again."
       );
       setStep("error");
     }
