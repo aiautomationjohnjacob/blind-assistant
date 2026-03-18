@@ -203,6 +203,9 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P3: Android TalkBack CI result** — v0.3.1 run 23223429212 FAILED (backslash-continuation bug in `script:` field); fixed in Cycle 23; v0.3.2 tag pushed (Cycle 23)
 - [x] **P3: MCP memory server** — MCPMemoryClient + context.py integration; 33 new tests; 765 Python unit tests (Cycle 23)
 - [x] **P3: Education website scaffold** — clients/education/ React site; AudioPlayer; 39 Jest accessibility tests; test-education CI job (Cycle 23)
+- [x] **P3: MCPMemoryClient in /profile** — GET/PUT /profile now reads/writes preferences via MCPMemoryClient; 14 new Python tests; ProfileUpdateRequest added; PUT /profile with allowable fields (Cycle 24)
+- [x] **P3: Education site test fix** — tests moved to src/__tests__/, imports corrected, 41 new Jest tests, coverage 82.7%; npm ci --legacy-peer-deps in CI; NavLink aria-current fixed (Cycle 24)
+- [x] **P0: CI fix (test_record_with_vad_sync)** — patch.dict(sys.modules, {'webrtcvad': None}) correctly simulates missing C-extension; CI was failing because pop() doesn't prevent re-import of installed .so (Cycle 24)
 
 ## Blockers
 
