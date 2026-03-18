@@ -239,31 +239,33 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 
 ## Blockers
 
-**ISSUE-041**: React bundle not mounting in CI Playwright Chromium. 9 web E2E tests fail.
-Root cause: JS crash in Expo bundle before React initializes. Suspected: `crypto.randomUUID`
-unavailable in non-secure origin Chromium (http://localhost:19006), crashing expo-modules-core.
-Diagnostic logging added in Cycle 34 — next CI run will confirm.
+No active blockers. ISSUE-041 (React bundle crash) and ISSUE-042 (Firefox binary missing)
+both resolved in Cycle 35. Web E2E Chromium: ALL 33 tests pass. Firefox: fix deployed,
+next CI run will confirm.
 
 ## Last Cycle Summary
 
-Cycle 34 (Phase 4: Accessibility Hardening). Two deliverables:
-(1) Analyzed CI artifacts from run c3e55df (Cycle 33 push). Found 9 web E2E tests still failing.
-CI screenshots showed blank white page — React bundle not mounting in CI Playwright Chromium.
-This is a new issue (ISSUE-041) distinct from the hydration timeout. The JS bundle appears to
-crash silently before React initializes. Static HTML elements (skip link, role="main") render
-correctly; React-rendered elements (role="button", aria-live, role="heading") do not appear.
-(2) Added diagnostic logging to _wait_for_app_ready() in all 3 web E2E test files:
-- `page.on("pageerror")` captures uncaught JS exceptions
-- `page.on("console")` captures error/warning console messages
-- Timeout increased from 15s to 30s (15s was still insufficient)
-- On timeout, prints full DOM state: button count, #root innerHTML, expo global, script count
-- Next CI run will reveal the exact JS crash error message
-ISSUE-041 logged in OPEN_ISSUES.md (CRITICAL). PRIORITY_STACK updated (P0 blocking).
+Cycle 35 (Phase 4: Accessibility Hardening). Three deliverables:
 
-Cycle 35 priority:
-1. **P0: ISSUE-041** — push Cycle 34 changes; check CI diagnostic output; identify JS error; fix root cause
-2. **P4: ISSUE-039** — will surface after ISSUE-041 fixed and React mounts correctly
-3. **P4: Phase 4 assessment** — after ISSUE-041 fixed
+(1) ISSUE-041 RESOLVED: Root cause of React bundle crash in CI Playwright identified and fixed.
+Diagnostic: conftest.py `context.add_init_script()` injected early error capture before
+page.goto(), capturing `TypeError: Cannot read properties of undefined (reading 'S')` in
+CI run 23230349145. Root cause: react-dom@19.2.4 incompatible with react@18.2.0 — React DOM
+19 calls `pd.S()` method that doesn't exist in React 18 internals. Fix: downgraded react-dom
+from ^19.2.4 to 18.2.0 in package.json. Result: CI run 23230759864 ALL 33 Chromium E2E PASS.
+
+(2) ISSUE-042 RESOLVED: Firefox E2E tests were failing with "BrowserType.launch: Executable
+doesn't exist" because only Chromium was installed in the e2e-web CI job. Fixed by adding
+`playwright install firefox` and `playwright install-deps firefox` to ci.yml.
+
+(3) State documents updated: OPEN_ISSUES.md (ISSUE-041 resolved + ISSUE-042 logged+resolved),
+LESSONS.md (3 new technical lessons on version pinning, pageerror timing, browser installation),
+CYCLE_STATE.md updated.
+
+Cycle 36 priority:
+1. **P4: ISSUE-039** — identify and fix the 1 moderate axe-core violation (now that React mounts in CI)
+2. **P4: Phase 4 completion assessment** — confirm Firefox CI green; assess Windows/macOS sign-off
+3. **P5: PRIORITY_STACK** — re-evaluate next priority after Phase 4 gates confirmed
 
 ## Known Issues / Technical Debt
 
