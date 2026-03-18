@@ -221,10 +221,17 @@ is_unlocked, get_key, and 4 inner callback functions). 72 new device-free unit t
 _parse_content_descriptions, _parse_bounds, _has_visual_only_language, _has_double_tap_hint
 via importlib dynamic import pattern. 641 → 713 Python unit tests. Ruff clean.
 
-Cycle 21 priority:
-1. **P3: ROADMAP.md** — Create with Phase 3-5 milestones (CONTRIBUTING.md references it)
-2. **P3: Android TalkBack device test** — trigger release tag to run AVD CI job
-3. **P3: iOS VoiceOver device test** — trigger release tag on macOS runner
+Cycle 21 (Phase 3 — ROADMAP.md rewrite + release tag triggering). ROADMAP.md rewritten from
+Phase-1-incomplete stale state to current: Phases 1+2 checked off, Phase 3 current with 16
+completed items + remaining items listed, Phase 4+5 milestones defined, tech stack table added.
+CONTRIBUTING.md updated to link ROADMAP.md alongside FEATURE_PRIORITY.md. v0.3.0 release tag
+pushed to trigger e2e-android (AVD) and ios-e2e.yml (iOS Simulator) CI workflows. 713 Python
+unit tests unchanged. Ruff clean.
+
+Cycle 22 priority:
+1. **P3: Verify Android/iOS CI results** — check v0.3.0 tag CI run; document pass/fail
+2. **P3: Voice Activity Detection (VAD)** — ISSUE-002; replace fixed 8s recording in voice_local.py
+3. **P3: PIL/Playwright fallback** — ISSUE-003; headless server screenshot capability
 
 ## Known Issues / Technical Debt
 
