@@ -217,7 +217,18 @@ class TestWCAGAxeAudit:
         assert len(critical_violations) == 0, (
             f"PHASE 4 GATE FAILED: {len(critical_violations)} CRITICAL WCAG violation(s) found.\n"
             f"These block screen reader access and must be fixed before merge.\n"
-            f"Violations: {json.dumps([{'id': v.get('id'), 'description': v.get('description'), 'nodes': len(v.get('nodes',[]))} for v in critical_violations], indent=2)}"
+            "Violations: "
+            + json.dumps(
+                [
+                    {
+                        "id": v.get("id"),
+                        "description": v.get("description"),
+                        "nodes": len(v.get("nodes", [])),
+                    }
+                    for v in critical_violations
+                ],
+                indent=2,
+            )
         )
 
     async def test_no_critical_wcag_violations_contrast(
