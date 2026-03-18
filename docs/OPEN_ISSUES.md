@@ -746,34 +746,21 @@ Next CI run (c3e55df) will reveal the violation details with improved hydration 
 Expecting the violation to be logged in CI output for identification.
 
 ### ISSUE-041: React bundle crashes silently in CI Playwright Chromium — web E2E tests fail
-**Severity**: CRITICAL (blocks Phase 4 web E2E gate; 9 tests fail in CI)
+**Severity**: CRITICAL (was blocking Phase 4 web E2E gate — now RESOLVED)
 **Category**: ci, e2e, web
 **Detected by**: Cycle 34 CI artifact analysis (e2e-web-chrome.log, screenshots)
 **Detected**: 2026-03-18
-**Description**: In CI, the Expo web bundle (AppEntry-*.js) fails to mount React in
-Playwright Chromium, leaving a blank white page. The static HTML template (skip link,
-`role="main"`) renders correctly, but the React root (`#root`) stays empty. Tests that
-check for React-rendered elements (`role="button"`, `aria-live`, `role="heading"`) fail
-with "no elements found" after the wait timeout.
-Local builds DO mount React correctly — the issue is CI-specific.
-Evidence: CI screenshots show white page; `role="button"` count = 0 after 30s;
-tests looking for static HTML elements pass (axe-core, skip link tests).
-**Root cause (suspected)**: The CI Expo bundle hash differs from local (`877bd2ef` vs
-`f1674830`), suggesting a different build or module ordering. The expo-secure-store web
-stub (`export default {}`) causes TypeError when `getValueWithKeyAsync` is called, but
-that SHOULD be caught by the app.tsx try/catch and transition to SetupWizardScreen.
-The actual crash may be in expo-modules-core or uuid's `crypto.randomUUID` call in a
-CI Chromium context (e.g., non-secure origin → crypto not available).
-**Diagnostic added**: Cycle 34 — `_wait_for_app_ready()` in all 3 web E2E test files
-now captures `page.on("pageerror")` and `page.on("console")` events and prints them on
-timeout. Next CI run will reveal the exact JS error.
-**Impact**: 9 web E2E tests fail in CI. axe-core tests pass trivially (only fail on
-violations; no violations on blank page). Phase 4 web E2E gate blocked until resolved.
-**Proposed fix**: (a) If `crypto.randomUUID` error: add polyfill or catch in expo-modules-core
-wrapper. (b) If secure-store TypeError propagates: tighten app.tsx try/catch scope.
-(c) If Metro module system crash: rebuild with different Expo config.
-**Status**: INVESTIGATING — diagnostic output from next CI run will identify exact error
-**Next step**: Push Cycle 34 changes, check CI logs for DIAGNOSTIC output, fix root cause
+**Resolved**: 2026-03-18 (Cycle 35)
+**Root cause (confirmed)**: `react-dom@19.2.4` was installed while `react@18.2.0` was
+specified. React DOM 19 calls internal `.S` method on the `pd` object during
+initialization — this method does not exist in React 18 internals. The crash was:
+`TypeError: Cannot read properties of undefined (reading 'S')` at bundle line 33.
+Captured in CI run 23230349145 via the `context.add_init_script()` diagnostic added
+in Cycle 34 (which captured errors before `page.on("pageerror")` could register).
+**Fix**: Changed `"react-dom": "^19.2.4"` → `"react-dom": "18.2.0"` in
+`clients/mobile/package.json` and ran `npm install --legacy-peer-deps`.
+**Verification**: CI run 23230759864 — ALL 33 Chromium web E2E tests PASS.
+**Status**: RESOLVED
 
 ### ISSUE-040: WCAG 4.1.3 — aria-live regions conditionally rendered in MainScreen.tsx
 **Severity**: HIGH (now RESOLVED — was causing screen reader to miss first announcement)
