@@ -968,4 +968,7 @@ to flag tests that take more than N seconds as failures.
 **Proposed fix**: (1) Add pytest-timeout to requirements (test deps); (2) Configure a 10-second
 asyncio timeout in pyproject.toml (asyncio_mode="auto" supports asyncio_default_test_loop_scope);
 (3) Lower DEFAULT_TIMEOUT for test environments via a config toggle.
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 46 — pytest-timeout added to Install test dependencies step in ci.yml and
+autonomous-cycle.yml; `--timeout=30` added to pyproject.toml pytest addopts; 818 unit tests pass
+with 30s timeout enforced. All tests complete in 39s total — no hanging tests detected.
