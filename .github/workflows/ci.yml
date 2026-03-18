@@ -454,11 +454,11 @@ jobs:
             --tb=short \
             2>&1 | tee dorothy-e2e.log
 
-      - name: Upload Dorothy E2E log
+      - name: Upload persona gate E2E log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dorothy-e2e-log-${{ github.run_number }}
+          name: persona-gate-e2e-log-${{ github.run_number }}
           path: dorothy-e2e.log
           retention-days: 14
 
