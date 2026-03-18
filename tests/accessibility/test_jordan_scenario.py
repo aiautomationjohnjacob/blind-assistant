@@ -229,6 +229,11 @@ class TestJordanSecondBrain:
 
     All confirmations must be available as text (no audio-only confirmation).
     All note content must be in braille-friendly format.
+
+    Mocking pattern: patch VaultQuery.add_note_from_voice and
+    VaultQuery.answer_query — the orchestrator delegates to VaultQuery after
+    getting the vault. We also patch _get_vault to return a mock vault so the
+    real keychain is never accessed.
     """
 
     async def test_add_note_response_is_braille_friendly(self, tmp_path, mock_keyring):
@@ -236,14 +241,21 @@ class TestJordanSecondBrain:
         config = _make_config(tmp_path)
         orc, _ = _make_orchestrator(config)
 
-        # Jordan types a note to save (text input, not voice)
-        with patch.object(
-            orc,
-            "_save_note_to_vault",
-            new=AsyncMock(return_value="Your note has been saved to your Second Brain."),
+        updates: list[str] = []
+
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+
+        # Patch VaultQuery.add_note_from_voice to return a short note confirmation
+        with (
+            patch.object(orc, "_get_vault", new=AsyncMock(return_value=MagicMock())),
+            patch(
+                "blind_assistant.second_brain.query.VaultQuery.add_note_from_voice",
+                new=AsyncMock(return_value="Saved. You can retrieve it later."),
+            ),
         ):
             intent = _make_intent("add_note", content="Doctor appointment March 20 at 2pm")
-            result = await orc._handle_add_note(intent, JORDAN_CONTEXT)
+            result = await orc._handle_add_note(intent, JORDAN_CONTEXT, update_cb)
 
         response = orc._format_response(result, JORDAN_CONTEXT)
 
@@ -255,13 +267,20 @@ class TestJordanSecondBrain:
         config = _make_config(tmp_path)
         orc, _ = _make_orchestrator(config)
 
-        with patch.object(
-            orc,
-            "_save_note_to_vault",
-            new=AsyncMock(return_value="Note saved. You can retrieve it any time."),
+        updates: list[str] = []
+
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+
+        with (
+            patch.object(orc, "_get_vault", new=AsyncMock(return_value=MagicMock())),
+            patch(
+                "blind_assistant.second_brain.query.VaultQuery.add_note_from_voice",
+                new=AsyncMock(return_value="Note saved. You can retrieve it any time."),
+            ),
         ):
             intent = _make_intent("add_note", content="Take medication at 8am")
-            result = await orc._handle_add_note(intent, JORDAN_CONTEXT)
+            result = await orc._handle_add_note(intent, JORDAN_CONTEXT, update_cb)
 
         response = orc._format_response(result, JORDAN_CONTEXT)
         assert_no_jargon(response.text, persona="Jordan (DeafBlind)")
@@ -271,13 +290,20 @@ class TestJordanSecondBrain:
         config = _make_config(tmp_path)
         orc, _ = _make_orchestrator(config)
 
-        with patch.object(
-            orc,
-            "_query_vault",
-            new=AsyncMock(return_value="Doctor appointment March 20 at 2pm."),
+        updates: list[str] = []
+
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+
+        with (
+            patch.object(orc, "_get_vault", new=AsyncMock(return_value=MagicMock())),
+            patch(
+                "blind_assistant.second_brain.query.VaultQuery.answer_query",
+                new=AsyncMock(return_value="Doctor appointment March 20 at 2pm."),
+            ),
         ):
             intent = _make_intent("query_note", query="doctor appointment")
-            result = await orc._handle_query_note(intent, JORDAN_CONTEXT)
+            result = await orc._handle_query_note(intent, JORDAN_CONTEXT, update_cb)
 
         response = orc._format_response(result, JORDAN_CONTEXT)
         assert_braille_friendly(response.text, max_line_length=40)
@@ -287,13 +313,20 @@ class TestJordanSecondBrain:
         config = _make_config(tmp_path)
         orc, _ = _make_orchestrator(config)
 
-        with patch.object(
-            orc,
-            "_query_vault",
-            new=AsyncMock(return_value="I found your note. Doctor appointment March 20 at 2pm."),
+        updates: list[str] = []
+
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+
+        with (
+            patch.object(orc, "_get_vault", new=AsyncMock(return_value=MagicMock())),
+            patch(
+                "blind_assistant.second_brain.query.VaultQuery.answer_query",
+                new=AsyncMock(return_value="I found your note. Doctor appointment March 20 at 2pm."),
+            ),
         ):
             intent = _make_intent("query_note", query="doctor")
-            result = await orc._handle_query_note(intent, JORDAN_CONTEXT)
+            result = await orc._handle_query_note(intent, JORDAN_CONTEXT, update_cb)
 
         response = orc._format_response(result, JORDAN_CONTEXT)
         assert_no_visual_only_language(response.text, persona="Jordan (DeafBlind)")
