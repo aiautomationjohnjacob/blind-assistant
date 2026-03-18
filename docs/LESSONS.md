@@ -2486,3 +2486,48 @@ pytest-timeout installed will fail with exit code 4 (unrecognized argument).
 Fix: either (1) add pytest-timeout to every pip install step that runs pytest (chosen here),
 or (2) move the timeout configuration to a per-job pytest.ini override (more complex).
 Always check pyproject.toml addopts when adding a new CI job that runs pytest.
+
+## Cycle 49 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: A broken education site CI blocks `learn.blind-assistant.org` — the primary onboarding point for blind community contributors who can't set up a dev environment. Fixing CI is mission-critical even when invisible to end users. The postinstall patch is pragmatic but reveals deeper technical debt: react-scripts@5 is EOL and has unresolvable dependency conflicts. The next major technical investment should be migrating the education site from react-scripts to Vite or Next.js. That migration would also fix the ~15-second CI penalty from the postinstall ajv patching.
+
+**Code quality (code-reviewer)**: The postinstall script is well-structured and idempotent. One concern: `--prefix . --no-save` inside a `node_modules/` subdirectory runs npm in an unusual way — it should be tested on a clean CI environment to confirm it works. The `npm install` subcommand adds ~5-10s per package to CI time. All five affected packages are dev-only tools; this won't affect production bundle size. Test count unchanged (818 Python + 75 JS). No src/ changes.
+
+**Security (security-specialist)**: The postinstall script only installs `ajv@^6.12.6` from the public npm registry, a well-known stable package. No new supply chain surface introduced. The script validates the package exists before installing and fails non-fatally on error.
+
+**Accessibility (accessibility-reviewer)**: No user-facing changes. Education site deployment enables blind community contributors to access the audio-primary learning platform without local setup — directly beneficial to the blind-contributor population.
+
+**User perspective (blind-user-tester)**: CI and deploy infrastructure is invisible to me. When learn.blind-assistant.org goes live after this fix, I'll be able to navigate the courses with NVDA+Chrome and see if the AudioPlayer and course navigation work as documented. That test is still pending a human enabling GitHub Pages in repo settings.
+
+**Ethics (ethics-advisor)**: No autonomy or consent concerns. Infrastructure fix.
+
+**Goal adherence (goal-adherence-reviewer)**: Resolves ISSUE-055 (education site deploy still broken after Cycle 48 fix). Directly serves the community launch goals established in Phase 5. No requirements dropped. No scope creep.
+
+**Consensus recommendation for next cycle**: (1) Confirm CI is green after this push — specifically check that the education site deploy job succeeds with the postinstall patch. (2) Begin Phase 6 creative work: all phases complete, CI should be stable; identify the highest-impact new feature for blind user independence (Story 8.4 timed progress updates or Story 6.1 travel research are strong candidates). (3) Consider adding a P3 item: migrate education site from react-scripts to Vite to eliminate the ongoing ajv patch maintenance burden.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) Diagnosed ISSUE-055 — education site CI still failing after Cycle 48 ajv@8 override; root cause: npm nested overrides are silently ignored with --legacy-peer-deps, so fork-ts-checker, file-loader, babel-loader, eslint, and @eslint/eslintrc all received top-level ajv@8 despite needing ajv@6 API; (2) Created scripts/patch-fork-ts-checker.js — idempotent postinstall script that installs ajv@^6.12.6 inside each affected package's node_modules/; (3) Added `"postinstall": "node scripts/patch-fork-ts-checker.js"` to package.json scripts; (4) Regenerated package-lock.json; (5) Verified build succeeds locally (`CI=false npm run build`); (6) Verified 75 Jest tests still pass; (7) 818 Python unit tests still pass
+- Attempted but failed: Tried using npm nested overrides in package.json — does not work with --legacy-peer-deps (npm silently ignores nested override constraints in that mode)
+- Confusion/loops: Multiple iterations diagnosing the cascading ajv conflict. The Cycle 48 fix introduced a new variant of the same problem because it only patched the top-level ajv without considering that multiple nested packages also need ajv@6.
+- New gaps: (1) react-scripts@5 is EOL and will continue accumulating these kinds of conflicts — should migrate education site to Vite (add to P3 backlog); (2) Phase 6 direction still unset — all phases complete, need to identify next high-impact user feature
+- Next cycle recommendation: Confirm CI is green (check education deploy job result), then start Phase 6 creative exploration — use nonprofit-ceo + gap-analyst to identify next highest-impact feature for blind user independence
+
+**TECHNICAL LESSON (npm overrides are ignored in --legacy-peer-deps mode)**:
+npm's `overrides` feature (npm@8+) allows overriding specific nested package versions. When
+overrides specify a NESTED dependency (e.g., `"foo": {"bar": "1.0.0"}`), this override is
+silently ignored when `npm install --legacy-peer-deps` is used. The `--legacy-peer-deps`
+flag puts npm into a compatibility mode that skips peer dependency validation, but it also
+appears to skip nested override application. The override IS applied for top-level packages
+(e.g., `"ajv": "^8.17.1"` correctly hoists ajv@8 to the top level).
+Rule: If you need to force a specific package version inside a deeply-nested dependency when
+using --legacy-peer-deps, you cannot rely on npm overrides. Instead, use a postinstall script
+to manually install the package in the target directory.
+
+**TECHNICAL LESSON (react-scripts@5 has irreconcilable ajv conflicts)**:
+react-scripts@5.0.1 has two conflicting ajv@6 vs ajv@8 requirement trees that cannot be
+resolved by any single npm override because both are legitimate dependencies:
+- schema-utils@4 (via terser-webpack-plugin, css-minimizer-webpack-plugin) → ajv-keywords@^5 → ajv@^8
+- eslint@8, babel-loader, file-loader, fork-ts-checker-webpack-plugin → ajv-keywords@^3 → ajv@^6
+The only workaround is to give the ajv@6-dependent packages their own local ajv@6 via a
+postinstall script (bypassing npm's dependency hoisting). The permanent fix is to migrate
+from react-scripts to a modern bundler (Vite, Next.js) that doesn't have these conflicts.

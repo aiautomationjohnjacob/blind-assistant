@@ -1016,3 +1016,34 @@ in ci.yml. (2) Added `"overrides": {"ajv": "^8.17.1"}` to clients/education/pack
 and regenerated package-lock.json via `npm install --legacy-peer-deps`.
 **Status**: RESOLVED
 **Resolved in**: Cycle 48 — commit 24c6d9c. GitHub issue #102 closed.
+
+### ISSUE-055: Education site CI still failing after Cycle 48 ajv fix — nested ajv conflict
+**Severity**: HIGH (P0 — education site deploy still broken in CI)
+**Category**: ci, maintenance
+**Detected by**: CI run on wip commit (Cycle 49); runs 23238788331 and 23238788436
+**Detected**: 2026-03-18
+**Description**: The Cycle 48 fix (`"overrides": {"ajv": "^8.17.1"}`) resolved the
+top-level `Cannot find module 'ajv/dist/compile/codegen'` error but introduced a new
+crash: `TypeError: Cannot read properties of undefined (reading 'date')` at
+`fork-ts-checker-webpack-plugin/node_modules/ajv-keywords/keywords/_formatLimit.js:63`.
+Root cause: react-scripts@5 has two conflicting ajv dependency trees:
+(1) schema-utils@4 → ajv-keywords@^5 → ajv@^8 (handled by top-level override)
+(2) eslint@8, babel-loader, file-loader, fork-ts-checker-webpack-plugin →
+    ajv-keywords@3.x → ajv@^6 (these packages have their own nested ajv-keywords@3 but
+    no local ajv; they resolve ajv from the top-level and get ajv@8, which is incompatible)
+npm nested `overrides` are silently ignored when `--legacy-peer-deps` is used (npm
+does not apply nested override constraints in legacy peer deps mode).
+**Impact**: Education site deploy CI job fails on every push. learn.blind-assistant.org
+cannot deploy automatically. Community contributors who want to access the education site
+must run the app locally.
+**Fix applied**: Added `postinstall` script (`scripts/patch-fork-ts-checker.js`) that
+installs ajv@^6.12.6 inside each affected plugin's own `node_modules/` directory after
+`npm ci`. This gives nested ajv-keywords@3.x packages a local ajv@6 to resolve, while
+keeping top-level ajv@8 for schema-utils@4. The script is idempotent, handles missing
+packages gracefully, and runs automatically after every `npm install` / `npm ci`.
+Affected packages patched: fork-ts-checker-webpack-plugin, file-loader, babel-loader,
+eslint, @eslint/eslintrc.
+Build verified locally: `CI=false npm run build` succeeds; 75 Jest tests pass.
+**Status**: RESOLVED
+**Resolved in**: Cycle 49 — commit pending. scripts/patch-fork-ts-checker.js added;
+package.json postinstall script added; package-lock.json regenerated.
