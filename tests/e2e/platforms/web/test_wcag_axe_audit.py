@@ -405,5 +405,16 @@ class TestWCAGAxeAudit:
         critical_aria = [v for v in aria_violations if v.get("impact") in ("critical", "serious")]
         assert len(critical_aria) == 0, (
             f"PHASE 4 GATE FAILED: Critical/serious ARIA role violations found.\n"
-            f"Violations: {json.dumps([{'id': v.get('id'), 'impact': v.get('impact'), 'description': v.get('description')} for v in critical_aria], indent=2)}"
+            "Violations: "
+            + json.dumps(
+                [
+                    {
+                        "id": v.get("id"),
+                        "impact": v.get("impact"),
+                        "description": v.get("description"),
+                    }
+                    for v in critical_aria
+                ],
+                indent=2,
+            )
         )
