@@ -138,6 +138,66 @@ This project is built with the blind community, not just for it.
 
 To report an issue: github.com/blind-assistant/blind-assistant/issues
 
+### Using with NVDA on Windows
+
+NVDA is a free screen reader for Windows. Download it from nvaccess.org.
+
+When using the computer interface (the command line), NVDA will read all
+text output aloud automatically. No special settings are required.
+
+To run the assistant with NVDA:
+
+Step 1: Make sure NVDA is running. Press Control+Alt+N to start NVDA.
+
+Step 2: Open a Command Prompt. Press the Windows key, type "cmd",
+and press Enter. NVDA will say "Command Prompt" when it opens.
+
+Step 3: Type this command and press Enter:
+
+    python -m blind_assistant.main --voice
+
+NVDA will read the startup message aloud. The assistant is ready when
+you hear "Blind Assistant is ready."
+
+Tip: If NVDA does not read the output, press NVDA+2 (Insert+2) to turn on
+"say typed characters" mode, then try again.
+
+Tip: Use NVDA in Browse Mode (Insert+Space) to read longer text responses.
+Use Forms Mode (Insert+Space again) when you need to type commands.
+
+Tip: If you need help during setup, say "I need help" and the assistant
+will explain the current step again in plain language.
+
+### Using with VoiceOver on macOS
+
+VoiceOver is built into every Mac. Press Command+F5 to turn it on.
+
+The same command above works with VoiceOver:
+
+    python -m blind_assistant.main --voice
+
+Open Terminal (press Command+Space, type "Terminal", press Enter).
+VoiceOver will read the terminal output as the assistant speaks.
+
+If Terminal is hard to use with VoiceOver, try running the web app instead.
+The web app at blind-assistant.org is designed to work with VoiceOver in Safari.
+
+### Using with a Braille Display
+
+If you use a refreshable braille display (such as an Orbit Reader, Brailliant,
+or Focus), text responses from the assistant will appear on your display.
+
+The assistant formats its responses in short lines for braille displays.
+Each sentence appears on its own line so you can navigate through the response.
+
+When you use the web app or Telegram, all responses are available as text.
+You do not need to use voice input or output if you prefer text only.
+
+To tell the assistant you prefer text only, say:
+"I prefer text responses only."
+
+The assistant will stop reading responses aloud and send only text.
+
 ---
 
 ## Web App Staging Deployment (Operators Only)
