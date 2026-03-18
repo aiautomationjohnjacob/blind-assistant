@@ -45,7 +45,6 @@ Addresses GitHub issue #92: Add WebKit (VoiceOver+Safari) E2E tests for the web 
 from __future__ import annotations
 
 import contextlib
-import http.client
 import os
 
 import pytest
