@@ -241,8 +241,10 @@ describe('HomePage', () => {
 
   it('mentions keyboard navigation shortcut for screen reader users', () => {
     renderWithRouter(<HomePage />);
-    // The page should mention the H key for heading navigation
-    expect(screen.getByText(/press.*H.*in NVDA/i)).toBeInTheDocument();
+    // The keyboard hint text spans multiple elements (<kbd>H</kbd> breaks the string),
+    // so we check the paragraph's full textContent instead of a single text node.
+    const body = document.body.textContent ?? '';
+    expect(body).toMatch(/press.*H.*in NVDA/i);
   });
 });
 
