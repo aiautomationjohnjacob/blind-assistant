@@ -247,8 +247,6 @@ def test_start_services_does_not_start_telegram_when_disabled():
 
 def test_main_telegram_flag_sets_telegram_enabled_in_config():
     """main() --telegram flag sets telegram_enabled=True in the config dict."""
-    import sys
-
     from blind_assistant.main import main
 
     captured_config: dict = {}
