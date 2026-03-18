@@ -258,10 +258,10 @@ Cycle 28 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 26.** Phase 3 in progress (nearly complete). ISSUE-031 resolved (DELETE /profile/preferences).
-798 Python unit tests. Ruff clean. mypy 0 errors.
+**Loop completed Cycle 27.** Phase 4 (Accessibility Hardening) beginning. Voice clear preferences implemented.
+812 Python unit tests (+14). Ruff clean. mypy 0 errors. All Phase 3 items complete.
 
-The most important work for Cycle 27 (beginning Phase 4: Accessibility Hardening):
-1. **P4: Web WCAG 2.1 AA audit** — call web-accessibility-expert; identify CRITICAL findings; begin Phase 4 sprint
-2. **P4: Document VALID_EXTRA_PREFS 422 disclosure in SECURITY_MODEL.md** — security-specialist recommendation
-3. **P3: Client-side voice trigger for "clear my preferences"** — completes ISSUE-031 client-side UX gap
+The most important work for Cycle 28 (Phase 4: Accessibility Hardening):
+1. **P4: Playwright WCAG audit on Expo web build** — device-simulator agent; real browser accessibility testing
+2. **P4: Fix `accessibilityRole="text"` on web export** — react-native-web non-ARIA role mapping
+3. **P4: Establish Phase 4 CI gate** — a11y audit in CI; zero CRITICAL WCAG violations required for merge
