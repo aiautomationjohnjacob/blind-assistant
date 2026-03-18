@@ -929,4 +929,7 @@ would be unable to run CI. Green CI is critical for the open-source community.
 **Proposed fix**: Bump actions/checkout@v4 → @v5, actions/setup-python@v5 → @v5 (already
 v5 but check), actions/setup-node@v4 → @v5, actions/upload-artifact@v4 → @v5 in all
 workflow files (.github/workflows/*.yml).
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 44 — commit 64dddf7. actions/checkout v4→v5, actions/setup-node v4→v5,
+actions/upload-artifact v4→v5 across all 5 workflow files. setup-python was already @v5.
+YAML validated locally. No src/ or test files changed.
