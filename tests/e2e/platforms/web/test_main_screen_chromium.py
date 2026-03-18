@@ -633,7 +633,7 @@ class TestFocusManagement:
         # Tab to the skip link (it must be first)
         page.keyboard.press("Tab")
         first_tag = page.evaluate("document.activeElement.tagName.toLowerCase()")
-        first_href = page.evaluate("document.activeElement.getAttribute('href') or ''")
+        first_href = page.evaluate("document.activeElement.getAttribute('href') || ''")
 
         if first_tag != "a" or "main" not in (first_href or "").lower():
             pytest.skip("Skip link not first focusable element — covered by test_skip_link_is_first_focusable_element")
