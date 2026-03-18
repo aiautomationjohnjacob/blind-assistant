@@ -103,13 +103,13 @@ def web_app_available() -> bool:
 
 
 def _skip_if_unavailable(web_app_available: bool) -> None:
-    """Skip this test if Playwright, axe-playwright, or the web server is missing."""
+    """Skip this test if Playwright is not installed or the web server is not running.
+
+    axe-playwright-python is NOT required — axe-core is injected from CDN inside
+    each test's page.evaluate() call. AXE_AVAILABLE is kept for future use only.
+    """
     if not PLAYWRIGHT_AVAILABLE:
         pytest.skip("playwright not installed — install with: pip install playwright pytest-playwright")
-    if not AXE_AVAILABLE:
-        pytest.skip(
-            "axe-playwright not installed — install with: pip install axe-playwright-python"
-        )
     if not web_app_available:
         pytest.skip(
             f"Web app not running at {WEB_APP_URL}. "
@@ -136,9 +136,7 @@ class TestWCAGAxeAudit:
     The test fails if any violation with impact='critical' is found.
     """
 
-    async def test_no_critical_wcag_violations_main_screen(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_no_critical_wcag_violations_main_screen(self, page: Page, web_app_available: bool) -> None:
         """
         Phase 4 gate: the main screen must have zero CRITICAL axe violations.
 
@@ -192,18 +190,18 @@ class TestWCAGAxeAudit:
 
         # Log all violations for visibility in CI output (helps with debugging)
         if violations:
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"axe-core WCAG audit: {len(violations)} violation(s) found")
             print(f"  Critical: {len(critical_violations)}")
             print(f"  Serious:  {len(serious_violations)}")
             print(f"  Passes:   {axe_result.get('passes', 0)}")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             for v in violations:
-                print(f"\n[{v.get('impact','?').upper()}] {v.get('id','?')}: {v.get('description','?')}")
-                print(f"  Help: {v.get('helpUrl','?')}")
+                print(f"\n[{v.get('impact', '?').upper()}] {v.get('id', '?')}: {v.get('description', '?')}")
+                print(f"  Help: {v.get('helpUrl', '?')}")
                 for node in v.get("nodes", [])[:3]:  # Show max 3 affected nodes
-                    print(f"  Node: {node.get('html','?')[:100]}")
-            print(f"{'='*60}\n")
+                    print(f"  Node: {node.get('html', '?')[:100]}")
+            print(f"{'=' * 60}\n")
 
         # Log serious violations as warnings — they go to OPEN_ISSUES.md, not CI failure
         if serious_violations:
@@ -231,9 +229,7 @@ class TestWCAGAxeAudit:
             )
         )
 
-    async def test_no_critical_wcag_violations_contrast(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_no_critical_wcag_violations_contrast(self, page: Page, web_app_available: bool) -> None:
         """
         Specifically check colour-contrast violations (WCAG 2.1 SC 1.4.3).
 
@@ -273,21 +269,16 @@ class TestWCAGAxeAudit:
         print(f"\nColor contrast: {passes} pass(es), {len(contrast_violations)} violation(s)")
         for v in contrast_violations:
             for node in v.get("nodes", [])[:5]:
-                print(f"  Contrast failure: {node.get('html','?')[:80]}")
+                print(f"  Contrast failure: {node.get('html', '?')[:80]}")
 
         # Contrast violations are 'serious' not 'critical' — log but don't block CI
         # We assert on zero CRITICAL contrast issues specifically
-        critical_contrast = [
-            v for v in contrast_violations if v.get("impact") == "critical"
-        ]
+        critical_contrast = [v for v in contrast_violations if v.get("impact") == "critical"]
         assert len(critical_contrast) == 0, (
-            f"CRITICAL contrast violation(s) found: "
-            f"{[v.get('id') for v in critical_contrast]}"
+            f"CRITICAL contrast violation(s) found: {[v.get('id') for v in critical_contrast]}"
         )
 
-    async def test_interactive_elements_have_names(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_interactive_elements_have_names(self, page: Page, web_app_available: bool) -> None:
         """
         All interactive elements must have accessible names (WCAG 4.1.2).
 
@@ -325,14 +316,14 @@ class TestWCAGAxeAudit:
         if naming_violations:
             print("\nNaming violations found:")
             for v in naming_violations:
-                print(f"  [{v.get('impact','?').upper()}] {v.get('id','?')}: {v.get('description','?')}")
+                print(f"  [{v.get('impact', '?').upper()}] {v.get('id', '?')}: {v.get('description', '?')}")
                 for node in v.get("nodes", [])[:3]:
-                    print(f"    Node: {node.get('html','?')[:100]}")
+                    print(f"    Node: {node.get('html', '?')[:100]}")
 
         # All naming failures are critical — any failure is a CI block
         assert len(naming_violations) == 0, (
-            f"PHASE 4 GATE FAILED: Interactive element(s) have no accessible name.\n"
-            f"Screen readers cannot identify these elements. NVDA reads them as 'button'.\n"
+            "PHASE 4 GATE FAILED: Interactive element(s) have no accessible name.\n"
+            "Screen readers cannot identify these elements. NVDA reads them as 'button'.\n"
             "Violations: "
             + json.dumps(
                 [{"id": v.get("id"), "nodes": len(v.get("nodes", []))} for v in naming_violations],
@@ -340,9 +331,7 @@ class TestWCAGAxeAudit:
             )
         )
 
-    async def test_no_invalid_aria_roles(
-        self, page: Page, web_app_available: bool
-    ) -> None:
+    async def test_no_invalid_aria_roles(self, page: Page, web_app_available: bool) -> None:
         """
         All ARIA roles must be valid WAI-ARIA roles (WCAG 4.1.2).
 
@@ -400,11 +389,11 @@ class TestWCAGAxeAudit:
         if aria_violations:
             print("\nARIA violations found:")
             for v in aria_violations:
-                print(f"  [{v.get('impact','?').upper()}] {v.get('id','?')}: {v.get('description','?')}")
+                print(f"  [{v.get('impact', '?').upper()}] {v.get('id', '?')}: {v.get('description', '?')}")
 
         critical_aria = [v for v in aria_violations if v.get("impact") in ("critical", "serious")]
         assert len(critical_aria) == 0, (
-            f"PHASE 4 GATE FAILED: Critical/serious ARIA role violations found.\n"
+            "PHASE 4 GATE FAILED: Critical/serious ARIA role violations found.\n"
             "Violations: "
             + json.dumps(
                 [
