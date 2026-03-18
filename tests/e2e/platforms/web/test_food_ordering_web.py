@@ -97,15 +97,64 @@ def _wait_for_app_ready(page: Page) -> None:
     In CI, expo-secure-store returns null → setup wizard shows. In production,
     a stored token would skip to the main screen. Both screens are valid.
 
-    15s timeout: CI can be slow to complete checkStoredCredentials() and
-    transition from the loading spinner state (expo-secure-store async read).
+    On timeout, prints JS console errors and page error events to diagnose
+    why React failed to mount (ISSUE-041: bundle crashes silently in CI).
     """
+    # Collect JS errors for diagnostic output on timeout.
+    js_errors: list[str] = []
+    console_errors: list[str] = []
+
     with contextlib.suppress(Exception):
+        page.on("pageerror", lambda err: js_errors.append(str(err)))
+
+    with contextlib.suppress(Exception):
+        page.on(
+            "console",
+            lambda msg: console_errors.append(f"[{msg.type}] {msg.text}")
+            if msg.type in ("error", "warning")
+            else None,
+        )
+
+    try:
+        # 30s timeout: CI can be slow; 15s was insufficient in CI Chromium (ISSUE-041).
         page.wait_for_selector(
             '[role="button"], input[aria-label]',
-            timeout=15000,
+            timeout=30000,
             state="attached",
         )
+    except Exception:
+        # React did not mount within 30s. Print diagnostics to help diagnose ISSUE-041.
+        print("\n" + "=" * 60)
+        print("DIAGNOSTIC: React did not mount within 30s (ISSUE-041)")
+        print("=" * 60)
+        if js_errors:
+            print(f"JS page errors ({len(js_errors)}):")
+            for err in js_errors:
+                print(f"  !! {err}")
+        else:
+            print("JS page errors: none captured")
+        if console_errors:
+            print(f"Console errors/warnings ({len(console_errors)}):")
+            for msg in console_errors[:10]:
+                print(f"  {msg}")
+        else:
+            print("Console errors: none captured")
+        with contextlib.suppress(Exception):
+            dom_summary = page.evaluate(
+                """() => ({
+                    title: document.title,
+                    bodyText: document.body ? document.body.innerText.slice(0, 200) : 'no body',
+                    buttonCount: document.querySelectorAll('[role="button"]').length,
+                    inputCount: document.querySelectorAll('input').length,
+                    rootHTML: document.getElementById('root')
+                        ? document.getElementById('root').innerHTML.slice(0, 300)
+                        : 'no #root element',
+                    scriptCount: document.querySelectorAll('script').length,
+                    expoGlobal: typeof globalThis.expo !== 'undefined' ? 'loaded' : 'missing',
+                })"""
+            )
+            print(f"DOM state: {dom_summary}")
+        print("=" * 60 + "\n")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
