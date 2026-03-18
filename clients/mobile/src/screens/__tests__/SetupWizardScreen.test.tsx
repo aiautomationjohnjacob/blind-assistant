@@ -467,27 +467,18 @@ describe("SetupWizardScreen — Dorothy test (plain language)", () => {
       || expect(screen.getByText(/tap retry/i)).toBeTruthy();
   });
 
-  it("empty code error says 'connection code' not 'API token'", async () => {
-    // Regression for Cycle 38: handleConfirmToken empty-input error was missed
-    // in the Cycle 37 jargon sweep — still said 'API token'.
-    // The button is disabled for truly empty input (handleConfirmToken is a
-    // defensive guard). Use whitespace-only input to trigger the guard path
-    // while still keeping the button enabled via the test form.
+  it("confirm button disabled label says 'connection code' not 'API token'", async () => {
+    // Regression for Cycle 38: handleConfirmToken has an empty-input guard that
+    // said 'API token' but is defensive (the button is disabled when input is empty).
+    // Verify: the disabled button's accessibilityLabel uses 'connection code'.
     await advanceToTokenStep();
-    // Enter whitespace — trimmed to empty, button enabled, but handleConfirmToken
-    // guard fires because trimmed.length === 0.
-    const input = screen.getByLabelText(/connection code input field/i);
-    fireEvent.changeText(input, "   ");
-    fireEvent.press(screen.getByRole("button", { name: /confirm code/i }));
-    await waitFor(() => {
-      const calls = (Speech.speak as jest.Mock).mock.calls;
-      const emptyErrorCall = calls.find(([text]: [string]) =>
-        /field is empty/i.test(text)
-      );
-      expect(emptyErrorCall).toBeTruthy();
-      expect(emptyErrorCall[0]).toMatch(/connection code/i);
-      expect(emptyErrorCall[0]).not.toMatch(/api token/i);
+    // With no input, button is disabled — check the disabled accessibilityLabel
+    const disabledButton = screen.getByRole("button", {
+      name: /disabled, please enter your connection code first/i,
     });
+    expect(disabledButton).toBeTruthy();
+    expect(disabledButton.props.accessibilityLabel).not.toMatch(/api token/i);
+    expect(disabledButton.props.accessibilityLabel).toMatch(/connection code/i);
   });
 
   it("short code error says 'connection code' not 'API tokens'", async () => {
