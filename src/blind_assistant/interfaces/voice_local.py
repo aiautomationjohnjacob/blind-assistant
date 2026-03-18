@@ -62,6 +62,8 @@ class VoiceLocalInterface:
         # Config
         self._wake_word = config.get("wake_word", DEFAULT_WAKE_WORD).lower()
         self._record_duration = config.get("record_duration", DEFAULT_RECORD_DURATION)
+        # VAD: use voice activity detection for smart cutoff (recommended, resolves ISSUE-002)
+        self._use_vad = config.get("use_vad", DEFAULT_USE_VAD)
 
     async def start(self) -> None:
         """Start the local voice interface loop."""
