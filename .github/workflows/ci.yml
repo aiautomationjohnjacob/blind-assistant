@@ -18,9 +18,9 @@ jobs:
     name: Lint & format (ruff)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -41,9 +41,9 @@ jobs:
     name: Type check (mypy)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -69,9 +69,9 @@ jobs:
     name: Tests & coverage (≥80%)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -92,6 +92,7 @@ jobs:
             pytest-asyncio \
             pytest-cov \
             pytest-mock \
+            pytest-timeout \
             respx \
             httpx \
             keyring \
@@ -134,7 +135,7 @@ jobs:
 
       - name: Upload coverage report
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report-${{ github.run_number }}
           path: |
@@ -149,9 +150,9 @@ jobs:
     name: Security audit (pip-audit + bandit)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -197,7 +198,7 @@ jobs:
 
       - name: Upload security report
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: security-report-${{ github.run_number }}
           path: bandit-output.txt
@@ -216,9 +217,9 @@ jobs:
       run:
         working-directory: clients/mobile
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: npm
@@ -235,7 +236,7 @@ jobs:
 
       - name: Upload JS coverage report
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: js-coverage-report-${{ github.run_number }}
           path: clients/mobile/coverage/
@@ -252,9 +253,9 @@ jobs:
       run:
         working-directory: clients/education
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: npm
@@ -272,7 +273,7 @@ jobs:
 
       - name: Upload education coverage report
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: education-coverage-report-${{ github.run_number }}
           path: clients/education/coverage/
@@ -287,10 +288,10 @@ jobs:
     name: E2E — Web (Playwright accessibility audit)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       # ── Node.js — needed to build the Expo web bundle ──────────────────────
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -306,7 +307,7 @@ jobs:
         # Produces clients/mobile/dist/ with index.html + JS bundle
 
       # ── Python — needed to serve the bundle and run Playwright tests ───────
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -402,7 +403,7 @@ jobs:
 
       - name: Upload E2E screenshots and logs
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: web-e2e-screenshots-${{ github.run_number }}
           path: |
@@ -419,7 +420,7 @@ jobs:
         # NVDA+Firefox → device-sim-screenshots/firefox/
         # VoiceOver+Safari (WebKit) → device-sim-screenshots/webkit/
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: device-sim-screenshots-${{ github.run_number }}
           path: |
@@ -440,9 +441,9 @@ jobs:
     name: "E2E — Persona scenario gate (Dorothy, Jordan, Marcus)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -463,6 +464,7 @@ jobs:
             pytest-asyncio \
             pytest-cov \
             pytest-mock \
+            pytest-timeout \
             respx \
             httpx \
             keyring \
@@ -503,7 +505,7 @@ jobs:
 
       - name: Upload persona gate E2E log
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: persona-gate-e2e-log-${{ github.run_number }}
           path: dorothy-e2e.log
@@ -521,7 +523,7 @@ jobs:
     # Only run on release tags (too slow for every push)
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Check if Android E2E tests exist
         id: check_tests
@@ -543,7 +545,7 @@ jobs:
 
       - name: Set up Python
         if: steps.check_tests.outputs.exists == 'true'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -584,7 +586,7 @@ jobs:
 
       - name: Upload Android screenshots
         if: always() && steps.check_tests.outputs.exists == 'true'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: android-e2e-screenshots-${{ github.run_number }}
           path: |
@@ -602,9 +604,9 @@ jobs:
     name: Browser integration tests (BrowserTool + real Playwright)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -651,7 +653,7 @@ jobs:
 
       - name: Upload browser test log
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: integration-browser-log-${{ github.run_number }}
           path: integration-browser.log
@@ -674,10 +676,10 @@ jobs:
     name: "Phase 4: WCAG axe-core audit (web)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       # ── Node.js — build the Expo web bundle ────────────────
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -692,7 +694,7 @@ jobs:
         run: npx expo export --platform web
 
       # ── Python — serve bundle + run axe-playwright audit ───
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: pip
@@ -730,7 +732,7 @@ jobs:
 
       - name: Upload audit log
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: a11y-audit-${{ github.run_number }}
           path: |

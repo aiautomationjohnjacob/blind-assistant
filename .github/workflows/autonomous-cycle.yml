@@ -28,18 +28,18 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0  # Full history for git log in retrospectives
 
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -103,6 +103,7 @@ jobs:
             pytest-asyncio \
             pytest-cov \
             pytest-mock \
+            pytest-timeout \
             respx \
             httpx \
             keyring \
@@ -130,7 +131,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-${{ github.run_number }}
           path: test-results.log
@@ -139,7 +140,7 @@ jobs:
 
       - name: Upload cycle log as artifact
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: cycle-log-${{ github.run_number }}
           path: cycle-output.log
