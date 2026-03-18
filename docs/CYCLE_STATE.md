@@ -242,20 +242,24 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 33 (Phase 4: Accessibility Hardening). Two deliverables:
-(1) Fixed WCAG 4.1.3 violation (ISSUE-040): transcript and response containers in MainScreen.tsx
-were conditionally rendered — aria-live regions must be in DOM before first content injection.
-Fixed with always-rendered containers + hiddenLiveRegion style (opacity=0, maxHeight=0).
-128 JS tests pass. This means NVDA/VoiceOver users will now hear the first AI response via
-live region announcement automatically.
-(2) Increased _wait_for_app_ready() timeout from 5s to 15s in all 3 web E2E test files.
-CI was running 8 tests against the loading spinner (5s too short). Expected to fix
-test_main_button_has_role_button, test_status_region_uses_polite_live_region, and 6 others.
-Commit c3e55df pushed; CI run 23228687988 in progress.
+Cycle 34 (Phase 4: Accessibility Hardening). Two deliverables:
+(1) Analyzed CI artifacts from run c3e55df (Cycle 33 push). Found 9 web E2E tests still failing.
+CI screenshots showed blank white page — React bundle not mounting in CI Playwright Chromium.
+This is a new issue (ISSUE-041) distinct from the hydration timeout. The JS bundle appears to
+crash silently before React initializes. Static HTML elements (skip link, role="main") render
+correctly; React-rendered elements (role="button", aria-live, role="heading") do not appear.
+(2) Added diagnostic logging to _wait_for_app_ready() in all 3 web E2E test files:
+- `page.on("pageerror")` captures uncaught JS exceptions
+- `page.on("console")` captures error/warning console messages
+- Timeout increased from 15s to 30s (15s was still insufficient)
+- On timeout, prints full DOM state: button count, #root innerHTML, expo global, script count
+- Next CI run will reveal the exact JS crash error message
+ISSUE-041 logged in OPEN_ISSUES.md (CRITICAL). PRIORITY_STACK updated (P0 blocking).
 
-Cycle 34 priority:
-1. **P4: Check CI run c3e55df** — verify web E2E tests now pass; identify ISSUE-039 violation from axe output
-2. **P4: Phase 4 completion assessment** — if ISSUE-039 is acceptable (moderate only), Phase 4 is complete; begin Phase 5
+Cycle 35 priority:
+1. **P0: ISSUE-041** — push Cycle 34 changes; check CI diagnostic output; identify JS error; fix root cause
+2. **P4: ISSUE-039** — will surface after ISSUE-041 fixed and React mounts correctly
+3. **P4: Phase 4 assessment** — after ISSUE-041 fixed
 
 ## Known Issues / Technical Debt
 
