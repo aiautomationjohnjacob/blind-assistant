@@ -993,3 +993,26 @@ learn.blind-assistant.org; (5) Enable GitHub Pages in repository settings (Sourc
 **Resolved in**: Cycle 47 — deploy-education.yml created; BrowserRouter→HashRouter in index.tsx;
 homepage="." in package.json; CNAME written in workflow build step; 75 education tests pass;
 requires one-time GitHub Pages activation in repo settings (Settings → Pages → Source → GitHub Actions).
+
+### ISSUE-054: CI double-failure from Cycle 46 pytest-timeout + Cycle 47 ajv mismatch
+**Severity**: HIGH (P0 — CI was red on main, blocking all community contributions)
+**Category**: ci, maintenance
+**Detected by**: CI run on commit 7ee146b (Cycle 47); GitHub issue #102
+**Detected**: 2026-03-18
+**Description**: Two separate CI failures introduced by previous cycles:
+(1) Cycle 46 added `--timeout=30` to pyproject.toml addopts, which applies globally to all
+pytest invocations. The Web E2E (Playwright) and WCAG axe-core audit jobs install only
+`playwright pytest pytest-playwright` without `pytest-timeout`. When those jobs read
+pyproject.toml and encountered `--timeout=30`, pytest exited with code 4 (unrecognized
+argument). (2) Cycle 47 added the education site GitHub Pages deploy, but the build step
+failed with `Cannot find module 'ajv/dist/compile/codegen'`. Root cause: ajv-keywords@5
+requires ajv@^8 but the top-level ajv in package-lock.json was v6.14.0. The Cycle 47
+LESSONS.md entry incorrectly claimed "CI uses Node.js 20 and will work correctly" — this
+was wrong. The ajv mismatch is a package version issue unrelated to Node.js version.
+**Impact**: Two CI jobs (Web E2E + WCAG audit) were failing on every push, blocking all
+community contributions. The education site deploy had never successfully deployed.
+**Fix applied**: (1) Added `pytest-timeout` to pip install steps in both failing CI jobs
+in ci.yml. (2) Added `"overrides": {"ajv": "^8.17.1"}` to clients/education/package.json
+and regenerated package-lock.json via `npm install --legacy-peer-deps`.
+**Status**: RESOLVED
+**Resolved in**: Cycle 48 — commit 24c6d9c. GitHub issue #102 closed.
