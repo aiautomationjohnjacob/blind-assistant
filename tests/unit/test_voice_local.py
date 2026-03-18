@@ -18,6 +18,7 @@ import pytest
 
 from blind_assistant.interfaces.voice_local import (
     DEFAULT_RECORD_DURATION,
+    DEFAULT_USE_VAD,
     DEFAULT_WAKE_WORD,
     ELDER_RECORD_DURATION,
     VoiceLocalInterface,
