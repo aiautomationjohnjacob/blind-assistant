@@ -254,10 +254,11 @@ Cycle 26 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 24.** Phase 3 in progress. MCPMemoryClient now wired into GET/PUT /profile.
-Education site tests in CI (75 Jest tests, 82.7% coverage). 779 Python unit tests. Ruff clean. mypy 0 errors.
+**Loop completed Cycle 25.** Phase 3 in progress. ISSUE-030 resolved (PUT /profile allowlist).
+MCPMemoryClient wired into main.py production startup. Android TalkBack CI v0.3.2 verified passing.
+790 Python unit tests. Ruff clean. mypy 0 errors.
 
-The most important work for Cycle 25 (Phase 3: Blind User Testing):
-1. **P3: ISSUE-030** — Add PUT /profile allowlist for extra keys; 422 on unknown keys (MEDIUM security)
-2. **P3: Wire MCPMemoryClient into main.py startup** — production server not yet creating MCPMemoryClient
-3. **P3: Verify Android TalkBack CI v0.3.2** — check if e2e-android.yml run passed for v0.3.2 tag
+The most important work for Cycle 26 (Phase 3: Blind User Testing):
+1. **P3: DELETE /profile/preferences** — ethics gap; users must be able to clear MCP preference data; requires confirmation flow
+2. **P3: Phase 3 completion assessment** — review all sprint items; determine Phase 4 readiness
+3. **P4: Document VALID_EXTRA_PREFS 422 as intentional disclosure in threat model (security-specialist)**
