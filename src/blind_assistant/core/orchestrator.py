@@ -240,7 +240,7 @@ class Orchestrator:
         self, intent, context: UserContext, update: Callable[[str], Awaitable[None]]
     ) -> dict:
         """Capture and describe the current screen."""
-        await update("Taking a look at your screen...")
+        await update("Reading your screen now...")
         from blind_assistant.vision.screen_observer import ScreenObserver
 
         observer = ScreenObserver(self.config)
