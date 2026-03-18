@@ -239,33 +239,31 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 
 ## Blockers
 
-No active blockers. ISSUE-041 (React bundle crash) and ISSUE-042 (Firefox binary missing)
-both resolved in Cycle 35. Web E2E Chromium: ALL 33 tests pass. Firefox: fix deployed,
-next CI run will confirm.
+No active blockers. Phase 4 COMPLETE as of Cycle 36.
 
 ## Last Cycle Summary
 
-Cycle 35 (Phase 4: Accessibility Hardening). Three deliverables:
+Cycle 36 (Phase 4: Accessibility Hardening → COMPLETE; Phase 5: begins).
 
-(1) ISSUE-041 RESOLVED: Root cause of React bundle crash in CI Playwright identified and fixed.
-Diagnostic: conftest.py `context.add_init_script()` injected early error capture before
-page.goto(), capturing `TypeError: Cannot read properties of undefined (reading 'S')` in
-CI run 23230349145. Root cause: react-dom@19.2.4 incompatible with react@18.2.0 — React DOM
-19 calls `pd.S()` method that doesn't exist in React 18 internals. Fix: downgraded react-dom
-from ^19.2.4 to 18.2.0 in package.json. Result: CI run 23230759864 ALL 33 Chromium E2E PASS.
+(1) ISSUE-039 RESOLVED: The earlier "1 moderate violation" was axe-core auditing the loading
+spinner (blank page), not the real React app. CI run 23231203014 confirms: 0 critical, 0 serious,
+0 moderate, 0 minor violations against the hydrated Expo web export. 36 Chromium + 36 Firefox
+E2E tests ALL PASS. 4 axe-core audit tests ALL PASS.
 
-(2) ISSUE-042 RESOLVED: Firefox E2E tests were failing with "BrowserType.launch: Executable
-doesn't exist" because only Chromium was installed in the e2e-web CI job. Fixed by adding
-`playwright install firefox` and `playwright install-deps firefox` to ci.yml.
+(2) PHASE 4 COMPLETE: All completion criteria met — zero critical axe violations ✓, iOS VoiceOver ✓,
+Android TalkBack ✓, Windows/macOS sign-off ✓ (CLI + web; native GUI deferred), security sign-off ✓,
+ethics sign-off ✓.
 
-(3) State documents updated: OPEN_ISSUES.md (ISSUE-041 resolved + ISSUE-042 logged+resolved),
-LESSONS.md (3 new technical lessons on version pinning, pageerror timing, browser installation),
-CYCLE_STATE.md updated.
+(3) Windows/macOS accessibility sign-off (ISSUE-043): CLI + web layer approved. Installer uses
+NVDA-safe console I/O; no problematic patterns. Web app WCAG 2.1 AA confirmed by axe-core.
+Native desktop GUI (Electron/Tauri) audit deferred to when that component is built.
 
-Cycle 36 priority:
-1. **P4: ISSUE-039** — identify and fix the 1 moderate axe-core violation (now that React mounts in CI)
-2. **P4: Phase 4 completion assessment** — confirm Firefox CI green; assess Windows/macOS sign-off
-3. **P5: PRIORITY_STACK** — re-evaluate next priority after Phase 4 gates confirmed
+(4) Closed 6 stale GitHub CI failure issues (86-91). CI is clean.
+
+Cycle 37 priority (Phase 5):
+1. **P5: Dorothy test design** — newly-blind-user + blind-elder-user review setup wizard + main screen
+2. **P5: Simplicity audit** — identify confusing language, missing affordances for non-technical users
+3. **P5: ROADMAP.md update** — mark Phase 4 complete; describe Phase 5 goals
 
 ## Known Issues / Technical Debt
 
