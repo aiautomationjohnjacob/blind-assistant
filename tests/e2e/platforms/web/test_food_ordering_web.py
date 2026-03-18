@@ -96,11 +96,14 @@ def _wait_for_app_ready(page: Page) -> None:
 
     In CI, expo-secure-store returns null → setup wizard shows. In production,
     a stored token would skip to the main screen. Both screens are valid.
+
+    15s timeout: CI can be slow to complete checkStoredCredentials() and
+    transition from the loading spinner state (expo-secure-store async read).
     """
     with contextlib.suppress(Exception):
         page.wait_for_selector(
             '[role="button"], input[aria-label]',
-            timeout=5000,
+            timeout=15000,
             state="attached",
         )
 
