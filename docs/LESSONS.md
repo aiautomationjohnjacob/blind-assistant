@@ -18,6 +18,41 @@ Each entry is dated and tagged with:
 
 ---
 
+## Cycle 35 — 2026-03-18
+
+**TECHNICAL LESSON (React major version mismatch = silent bundle crash)**:
+`react` and `react-dom` MUST be pinned to the same major.minor version. When they
+diverge (e.g. `react@18.2.0` + `react-dom@19.2.4`), React DOM 19 calls internal
+methods that don't exist in React 18 internals. The specific crash in this project was:
+`TypeError: Cannot read properties of undefined (reading 'S')` — React DOM 19 calling
+`pd.S()` on a React 18 internal object that lacks the `.S` method.
+
+**Why this is hard to catch locally**: The lockfile (package-lock.json) can persist a
+working version on the developer's machine even after `^19.x.x` is in package.json.
+The mismatch only surfaces in fresh CI installs where npm resolves the `^` range to
+the latest major.
+
+**Rule**: In Expo projects, always pin `react-dom` to exactly `react`'s version (no `^`
+prefix). Check both versions every time Expo is upgraded — Expo's upgrade guide lists
+compatible react-dom versions.
+
+**TECHNICAL LESSON (page.on("pageerror") misses initialization errors)**:
+`page.on("pageerror")` listeners are registered AFTER `page.goto()` is called. Errors
+that occur during initial page load (before the listener is attached) are silently dropped.
+To capture initialization errors, use `context.add_init_script()` in a `conftest.py`
+autouse fixture — this injects JavaScript BEFORE any page script runs, so `window.onerror`
+captures the crash at the moment it occurs. The captured errors are stored in
+`window.__webE2EErrors` and read back by the test helper after navigation.
+
+**TECHNICAL LESSON (CI browser installation must match test suites run)**:
+If a CI job runs tests with `--browser firefox`, it MUST also install Firefox:
+`playwright install firefox && playwright install-deps firefox`. Installing only
+`playwright install chromium` and then running `--browser firefox` causes 100% ERROR
+(not FAIL) on every test — `BrowserType.launch: Executable doesn't exist`. Always
+verify that every `--browser X` step has a matching `playwright install X` step.
+
+---
+
 ## Interface Architecture Update — 2026-03-17 (Founder directive — read before any interface work)
 
 **PRODUCT**: Telegram is NOT the primary interface for Blind Assistant.
