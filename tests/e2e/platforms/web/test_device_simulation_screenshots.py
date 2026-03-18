@@ -90,8 +90,6 @@ def _browser_name(page: Page) -> str:
     """Return the browser name for screenshot file naming."""
     if not PLAYWRIGHT_AVAILABLE:
         return "unknown"
-    from playwright.sync_api import Page as RealPage
-
     # page.context.browser.browser_type.name gives 'chromium', 'firefox', 'webkit'
     try:
         return page.context.browser.browser_type.name  # type: ignore[union-attr]
