@@ -180,6 +180,9 @@ class MCPMemoryClient:
 
     async def _get_from_mcp(self, user_id: str, key: str) -> Any:
         """Fetch a single preference from the MCP memory graph."""
+        # _mcp is guaranteed non-None here: _get_from_mcp is only called when
+        # self._available is True, which requires a successful initialize() probe.
+        assert self._mcp is not None
         try:
             result = await self._mcp.call_tool(
                 "mcp__memory__open_nodes",

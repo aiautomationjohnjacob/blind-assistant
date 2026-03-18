@@ -349,11 +349,7 @@ def test_parse_observations_from_list_of_entities():
 
 def test_parse_observations_from_dict_with_entities_key():
     """_parse_observations must handle the dict-with-entities format."""
-    result = {
-        "entities": [
-            {"name": "e1", "observations": ["foo=bar"]}
-        ]
-    }
+    result = {"entities": [{"name": "e1", "observations": ["foo=bar"]}]}
     obs = MCPMemoryClient._parse_observations(result)
     assert "foo=bar" in obs
 
