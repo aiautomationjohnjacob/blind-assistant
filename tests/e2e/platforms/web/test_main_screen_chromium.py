@@ -463,6 +463,42 @@ class TestPageStructure:
             "The skip link is broken — fix the template HTML or add the target element."
         )
 
+    def test_skip_link_target_has_tabindex_minus_one(self, page: Page, web_app_available: bool) -> None:
+        """
+        The skip link's target (#main-content) must have tabindex='-1'.
+
+        Without tabindex='-1', browsers move the scroll position to the anchor
+        but do NOT move keyboard focus — the skip link appears to work visually
+        but screen reader users remain stuck at the previous focus position.
+
+        tabindex='-1' allows the element to receive programmatic focus (via the
+        href="#main-content" anchor navigation) without adding it to the natural
+        tab order. This is the correct skip link pattern per GOV.UK, GitHub,
+        and the W3C technique G1.
+
+        Cycle 31 fix: identified by test_skip_link_routes_focus_to_main_content
+        in TestFocusManagement — main-content div was missing tabindex='-1'.
+        """
+        _skip_if_unavailable(web_app_available)
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
+
+        tabindex_value = page.evaluate(
+            """() => {
+                const el = document.getElementById('main-content');
+                if (!el) return null;
+                return el.getAttribute('tabindex');
+            }"""
+        )
+
+        assert tabindex_value == "-1", (
+            f"#main-content has tabindex='{tabindex_value}' (expected '-1'). "
+            "Without tabindex='-1', the skip link moves scroll position but NOT "
+            "keyboard focus — screen reader users remain stuck at the skip link "
+            "after activating it. "
+            "Fix: add tabindex='-1' to the #main-content div in public/index.html."
+        )
+
     def test_main_landmark_is_present(self, page: Page, web_app_available: bool) -> None:
         """
         The page must have a 'main' landmark region.
