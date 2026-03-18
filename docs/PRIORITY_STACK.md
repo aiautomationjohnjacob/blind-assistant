@@ -14,17 +14,26 @@
 5. **P4 — IMPROVEMENT**: Enhancement that improves the product meaningfully
 6. **P5 — CREATIVE**: New idea or integration opportunity worth exploring
 
-## Current Stack (Phase 3 → Phase 4 transition)
+## Current Stack (Phase 4 — Accessibility Hardening)
 
-**Phase 3 nearly complete**: Android TalkBack CI ✓, iOS VoiceOver CI ✓, Web E2E CI ✓. Beginning Phase 4 planning.
+**Phase 4 beginning**: All Phase 3 items complete (Android TalkBack ✓, iOS VoiceOver ✓, Web E2E ✓, voice clear preferences ✓). Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P4 | Web WCAG 2.1 AA audit — call web-accessibility-expert; identify CRITICAL findings; begin Phase 4 Accessibility Hardening sprint | Cycle 26 review panel | 2026-03-18 |
-| P4 | Document VALID_EXTRA_PREFS 422 as intentional information disclosure in SECURITY_MODEL.md — security-specialist recommended Cycles 25+26 | security-specialist | 2026-03-18 |
-| P3 | Client-side voice trigger for "clear my preferences" — UX for DELETE /profile/preferences; user should be able to say "clear my settings" and get spoken confirmation prompt | Cycle 26 self-assessment | 2026-03-18 |
+| P4 | Playwright WCAG audit on Expo web build — device-simulator agent; real browser a11y tests against built web app; identify + fix CRITICAL WCAG violations | Cycle 27 review panel | 2026-03-18 |
+| P4 | Fix `accessibilityRole="text"` on web export in MainScreen.tsx — react-native-web maps this to non-ARIA `role="text"`; use Platform.select for web rendering | Cycle 27 a11y audit | 2026-03-18 |
+| P4 | Establish Phase 4 CI gate — a11y audit CI job; zero CRITICAL WCAG violations required before merge | tech-lead recommendation | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
+
+## Completed Items (Cycle 27 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| ISSUE-032: test_main.py ruff violations fixed (I001, SIM105/SIM117/S110); CI lint passing | 2026-03-18 | 27 |
+| SECURITY_MODEL.md §10: VALID_EXTRA_PREFS 422 documented as intentional information disclosure | 2026-03-18 | 27 |
+| Voice clear preferences: `clear_preferences` intent + ConfirmationGate handler + APIServer dispatch; 14 new tests; 812 Python unit tests total | 2026-03-18 | 27 |
+| Phase 3 → Phase 4 transition: CYCLE_STATE.md updated; Phase 3 complete | 2026-03-18 | 27 |
 
 ## Completed Items (Cycle 26 additions)
 
