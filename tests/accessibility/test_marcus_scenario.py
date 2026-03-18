@@ -457,6 +457,7 @@ class TestMarcusFoodOrderingDisclosure:
         orc, mock_browser, gate = _make_orc_with_browser(config)
 
         intent = _make_intent("order_food", query="sushi delivery")
+        page = mock_browser.get_page_state.return_value
 
         updates: list[str] = []
 
@@ -464,11 +465,10 @@ class TestMarcusFoodOrderingDisclosure:
             updates.append(msg)
 
         with (
-            patch.object(orc, "_ask_claude_to_summarize_options", new=AsyncMock(return_value="2 restaurants found. Sushi House or Okura.")),
-            patch.object(orc, "_ask_claude_to_list_menu_highlights", new=AsyncMock(return_value="Salmon roll $8, Tuna roll $9.")),
-            patch.object(orc, "_ask_claude_to_summarize_cart", new=AsyncMock(return_value="Order total: $10.99.")),
-            patch.object(orc, "_ask_claude_to_place_order", new=AsyncMock(return_value="Order placed.")),
-            patch.object(orc, "_navigate_to_restaurant", new=AsyncMock(return_value=mock_browser.get_page_state.return_value)),
+            patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="2 restaurants found. Sushi House or Okura.")),
+            patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=page)),
+            patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=page)),
+            patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x Salmon roll, $10.99")),
             patch.object(gate, "wait_for_response", new=AsyncMock(return_value="yes")),
         ):
             try:
@@ -486,6 +486,7 @@ class TestMarcusFoodOrderingDisclosure:
         orc, mock_browser, gate = _make_orc_with_browser(config)
 
         intent = _make_intent("order_food", query="pizza")
+        page = mock_browser.get_page_state.return_value
 
         updates: list[str] = []
 
@@ -493,11 +494,10 @@ class TestMarcusFoodOrderingDisclosure:
             updates.append(msg)
 
         with (
-            patch.object(orc, "_ask_claude_to_summarize_options", new=AsyncMock(return_value="2 restaurants found.")),
-            patch.object(orc, "_ask_claude_to_list_menu_highlights", new=AsyncMock(return_value="Margherita $12.")),
-            patch.object(orc, "_ask_claude_to_summarize_cart", new=AsyncMock(return_value="Total: $14.99.")),
-            patch.object(orc, "_ask_claude_to_place_order", new=AsyncMock(return_value="Order placed.")),
-            patch.object(orc, "_navigate_to_restaurant", new=AsyncMock(return_value=mock_browser.get_page_state.return_value)),
+            patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="2 restaurants found.")),
+            patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=page)),
+            patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=page)),
+            patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x Margherita, $14.99")),
             patch.object(gate, "wait_for_response", new=AsyncMock(return_value="yes")),
         ):
             try:
