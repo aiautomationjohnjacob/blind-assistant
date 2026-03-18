@@ -835,6 +835,19 @@ No code changes were needed because Phase 4 was already done by Cycle 35.
 **Action**: No action required. Cycle 37 begins Phase 5 implementation.
 **Status**: CLOSED — expected behavior for a phase-transition assessment cycle
 
+### ISSUE-046: ruff format lint failure on test_dorothy_scenario.py
+**Severity**: MEDIUM (blocked CI on main)
+**Category**: ci, testing
+**Detected by**: CI run 23232799267 (cycle 40 orientation)
+**Detected**: 2026-03-18
+**Description**: `test_dorothy_scenario.py` had formatting violations caught by `ruff format --check`.
+This caused the lint job to fail on CI run 23232799267 (commit 693a96e), creating GitHub issues #97 and #98.
+The file was correctly formatted in Cycle 38 but the wip() auto-commit captured it before ruff format ran.
+**Impact**: CI gate (lint job) failed on main; notify-failure created two P0 issues.
+**Proposed fix**: Run `ruff format tests/e2e/core/test_dorothy_scenario.py` before typed commit.
+**Status**: RESOLVED
+**Resolved in**: Cycle 40 — reformatted, committed 0e86ac6. CI issues #97 and #98 closed.
+
 ### ISSUE-045: Missed jargon string in handleConfirmToken validation error
 **Severity**: LOW
 **Category**: accessibility, ux
