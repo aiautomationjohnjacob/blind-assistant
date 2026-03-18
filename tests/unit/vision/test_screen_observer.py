@@ -331,11 +331,9 @@ async def test_capture_screenshot_returns_pil_bytes_when_available():
     """_capture_screenshot returns PIL bytes when PIL succeeds (no Playwright needed)."""
     obs = _make_observer()
     fake_png = b"PNG_BYTES"
-    with (
-        patch.object(obs, "_capture_with_pil", new_callable=AsyncMock, return_value=fake_png),
-        patch.object(obs, "_capture_with_playwright", new_callable=AsyncMock, return_value=None),
-    ) as (mock_pil, _):
-        result = await obs._capture_screenshot()
+    with patch.object(obs, "_capture_with_pil", new_callable=AsyncMock, return_value=fake_png):
+        with patch.object(obs, "_capture_with_playwright", new_callable=AsyncMock, return_value=None):
+            result = await obs._capture_screenshot()
     assert result == fake_png
 
 
