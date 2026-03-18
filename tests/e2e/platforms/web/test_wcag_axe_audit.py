@@ -121,6 +121,22 @@ def _skip_if_unavailable(web_app_available: bool) -> None:
         )
 
 
+def _wait_for_app_ready(page: Page) -> None:
+    """
+    Wait for React to finish hydrating the Expo web bundle.
+
+    The deferred <script> loads and React runs checkStoredCredentials() async.
+    The loading spinner renders with no role="button". We wait for the first
+    role="button" to appear (either setup wizard or main screen), then run axe.
+    This ensures axe audits the real app state, not the transient loading spinner.
+
+    Without this wait, axe may only see the static HTML shell and miss the
+    React-rendered DOM content that users actually interact with.
+    """
+    with contextlib.suppress(Exception):
+        page.wait_for_selector("[role='button'], input[aria-label]", timeout=5000, state="attached")
+
+
 def _inject_axe(page: Page) -> None:
     """
     Inject axe-core into the page from the local bundled file.
