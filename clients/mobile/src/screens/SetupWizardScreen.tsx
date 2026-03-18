@@ -248,8 +248,9 @@ export function SetupWizardScreen({
         accessibilityLiveRegion="polite"
       >
         This is a one-time setup.{"\n\n"}
-        You will need the API token printed by your backend server.{"\n\n"}
-        Have your token ready, then tap Continue.
+        You will need a connection code from your computer.{"\n\n"}
+        Have the code ready, then tap Continue.{"\n\n"}
+        You can ask your assistant to repeat anything at any time.
       </Text>
       <Pressable
         style={styles.button}
