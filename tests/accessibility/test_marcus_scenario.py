@@ -112,7 +112,10 @@ def _make_orc_with_browser(config: dict) -> tuple[Orchestrator, MagicMock, Confi
     page = PageState(
         url="https://www.doordash.com/search/store/?q=sushi",
         title="DoorDash — Sushi near you",
-        text_content="Sushi House — 4.8 stars — 20-30 min — $1.99 delivery\nOkura — 4.6 stars — 15-25 min — $0 delivery\n",
+        text_content=(
+            "Sushi House — 4.8 stars — 20-30 min — $1.99 delivery\n"
+            "Okura — 4.6 stars — 15-25 min — $0 delivery\n"
+        ),
     )
     mock_browser.navigate = AsyncMock(return_value=page)
     mock_browser.get_page_state = AsyncMock(return_value=page)
