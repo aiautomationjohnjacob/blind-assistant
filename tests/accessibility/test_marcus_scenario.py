@@ -481,11 +481,12 @@ class TestMarcusFoodOrderingDisclosure:
             patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x Salmon roll, $10.99")),
             patch.object(gate, "wait_for_response", new=AsyncMock(return_value="yes")),
         ):
-            try:
+            # Some internal paths may raise after the disclosure update is spoken.
+            # We capture what was spoken up to the point of any exception and check
+            # that the financial disclosure was present before the failure.
+            result: dict = {"text": ""}
+            with contextlib.suppress(Exception):
                 result = await orc._handle_order_food(intent, MARCUS_CONTEXT, capture_update)
-            except Exception:
-                # Some internal paths may raise — we still check what was spoken up to that point
-                result = {"text": ""}
 
         all_spoken = " ".join(updates) + " " + result.get("text", "")
         assert_financial_disclosure_present(all_spoken, persona="Marcus")
