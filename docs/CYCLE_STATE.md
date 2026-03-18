@@ -278,15 +278,20 @@ Cycle 33 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 31.** Phase 4 (Accessibility Hardening) in progress. Two deliverables:
-(1) Verified skip link in `expo export` — `dist/index.html` confirmed includes skip link +
-main landmark from `public/index.html` template (Expo public/ folder works correctly);
-(2) ISSUE-037 found and fixed — `#main-content` div was missing `tabindex="-1"`, which
-meant the skip link moved scroll position but NOT keyboard focus (WCAG 2.4.1 Level A was
-broken despite appearing implemented). Fixed in `public/index.html`. 5 new TestFocusManagement
-E2E tests added. 1 new TestPageStructure test added (tabindex=-1 verification).
-`test_can_reach_main_button_by_tab` corrected (was asserting first Tab reaches voice button,
-now correctly handles skip link as first focusable). 812 Python. 128 JS. ruff clean.
+**Loop completed Cycle 32.** Phase 4 (Accessibility Hardening) in progress.
+Key deliverables: (1) Fixed 10 web E2E test failures — Python/JS syntax bug (or vs ||),
+React hydration race (added _wait_for_app_ready() helper), setup wizard vs main screen
+mismatch (expanded label keyword lists). All web E2E tests now use _wait_for_app_ready().
+(2) Added _wait_for_app_ready() to axe-core audit tests so axe audits the hydrated app.
+(3) Axe-core CI gate results reviewed: 0 critical, 0 serious, 1 unidentified moderate
+violation (ISSUE-039 logged). GitHub CI issues 84 and 85 closed. 812 Python unit tests
+unchanged. ruff clean. mypy 0 errors.
+
+Most important for Cycle 33:
+1. **P4: ISSUE-039** — check the new CI run from this push (axe now waits for hydration);
+   identify the 1 moderate violation and fix or document it
+2. **P4: Phase 4 completion assessment** — once ISSUE-039 is resolved, run `/audit-a11y`
+   or get platform agent sign-offs to determine if Phase 4 is complete
 
 The most important work for Cycle 32 (Phase 4: Accessibility Hardening):
 1. **P4: Check axe-core CI gate results** — review 'serious' violations from Cycle 31 push; add any new violations to OPEN_ISSUES.md
