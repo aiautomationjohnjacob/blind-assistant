@@ -330,14 +330,18 @@ jobs:
           curl -f http://localhost:19006/ -o /dev/null --silent && echo "Server up" || echo "Server may not be ready"
 
       - name: Run web E2E accessibility tests (Chromium — NVDA+Chrome)
+        # set -o pipefail: pytest exit code propagates through | tee (was silently swallowed)
         run: |
+          set -o pipefail
           pytest tests/e2e/platforms/web/ \
             --browser chromium \
             --screenshot on \
             -v 2>&1 | tee e2e-web-chrome.log
 
       - name: Run web E2E accessibility tests (Firefox — NVDA+Firefox)
+        # set -o pipefail: pytest exit code propagates through | tee (was silently swallowed)
         run: |
+          set -o pipefail
           pytest tests/e2e/platforms/web/ \
             --browser firefox \
             --screenshot on \
