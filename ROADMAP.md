@@ -4,7 +4,7 @@
 > See `docs/FEATURE_PRIORITY.md` for the full agent-researched priority list.
 > See `docs/CYCLE_STATE.md` for the current sprint status and cycle count.
 >
-> **Current status**: Phase 3 — Blind User Testing (Cycle 21, March 2026)
+> **Current status**: Phase 5 — Polish & Community Ready (Cycle 37, March 2026)
 
 ---
 
