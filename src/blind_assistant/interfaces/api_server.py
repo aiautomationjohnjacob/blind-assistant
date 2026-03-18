@@ -233,6 +233,22 @@ class ProfileUpdateRequest(BaseModel):
     extra: dict | None = None
 
 
+class DeletePreferencesRequest(BaseModel):
+    """Payload for DELETE /profile/preferences — clear all persisted MCP preference data.
+
+    The caller must pass confirm=True to prevent accidental deletion.
+    This is an explicit user autonomy action — it wipes all persisted preference
+    data from MCPMemoryClient for this user (speech rate, timezone, user name, etc.).
+
+    Required so that users can exercise data-rights (e.g. reset for privacy,
+    before sharing a session, or for future GDPR compliance in cloud deployments).
+    """
+
+    # Explicit confirmation prevents accidental calls from misbehaving clients.
+    # The client must send {"confirm": true} — omitting or setting false returns 400.
+    confirm: bool = False
+
+
 class TranscribeRequest(BaseModel):
     """Audio transcription request — base64-encoded audio bytes from the client microphone."""
 
