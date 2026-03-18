@@ -115,8 +115,7 @@ def _mock_browser_page() -> PageState:
         url="https://www.doordash.com/search/store/?q=pizza",
         title="DoorDash — Pizza near you",
         text_content=(
-            "Pizza Palace — 4.5 stars — 25-35 min — $2.99 delivery\n"
-            "Taco Town — 4.2 stars — 20-30 min — $0 delivery\n"
+            "Pizza Palace — 4.5 stars — 25-35 min — $2.99 delivery\nTaco Town — 4.2 stars — 20-30 min — $0 delivery\n"
         ),
     )
 
@@ -149,8 +148,7 @@ def _assert_no_visual_only_language(text: str, persona: str = "Dorothy") -> None
     text_lower = text.lower()
     for phrase in visual_only:
         assert phrase not in text_lower, (
-            f"{persona} test FAILED: Response uses visual-only language '{phrase}'. "
-            f"Response: {text!r}"
+            f"{persona} test FAILED: Response uses visual-only language '{phrase}'. Response: {text!r}"
         )
 
 
@@ -211,10 +209,7 @@ class TestDorothyFoodOrdering:
 
         combined = " ".join(updates).lower()
         # The financial risk disclosure must appear in the spoken output
-        assert any(
-            kw in combined
-            for kw in ["financial", "payment", "risk", "warning", "sharing"]
-        ), (
+        assert any(kw in combined for kw in ["financial", "payment", "risk", "warning", "sharing"]), (
             "Dorothy test FAILED: Food order flow did not speak financial risk disclosure. "
             f"Combined spoken text: {combined!r}"
         )
@@ -321,8 +316,7 @@ class TestDorothySecondBrainSaveNote:
         response_text = result["text"]
         # Confirmation must mention the saved content so Alex knows it worked
         assert "555-1234" in response_text or "pharmacy" in response_text.lower(), (
-            "Alex test FAILED: Note save confirmation doesn't mention what was saved. "
-            f"Got: {response_text!r}"
+            f"Alex test FAILED: Note save confirmation doesn't mention what was saved. Got: {response_text!r}"
         )
 
     async def test_save_note_vault_unavailable_gives_actionable_message(self, tmp_path, mock_keyring):
@@ -346,10 +340,7 @@ class TestDorothySecondBrainSaveNote:
         assert result and "text" in result, "Dorothy got no response when vault unavailable"
         response_text = result["text"]
         # Must give Dorothy a path forward — not just "error"
-        assert any(
-            word in response_text.lower()
-            for word in ["say", "try", "again", "passphrase", "unlock"]
-        ), (
+        assert any(word in response_text.lower() for word in ["say", "try", "again", "passphrase", "unlock"]), (
             "Dorothy test FAILED: Vault unavailable message gives no path forward. "
             f"Dorothy would be stuck. Got: {response_text!r}"
         )
@@ -442,10 +433,7 @@ class TestDorothySecondBrainQuery:
         assert result and "text" in result, "Dorothy got no response when vault unavailable for query"
         response_text = result["text"]
         # Must give Dorothy a path forward
-        assert any(
-            word in response_text.lower()
-            for word in ["say", "try", "again", "passphrase", "unlock"]
-        ), (
+        assert any(word in response_text.lower() for word in ["say", "try", "again", "passphrase", "unlock"]), (
             "Dorothy test FAILED: Vault-unavailable message gives no path forward. "
             f"Dorothy would be stuck. Got: {response_text!r}"
         )
@@ -474,9 +462,7 @@ class TestDorothyGeneralInteraction:
         # Patch the Claude API call used inside _handle_general_question
         with patch(
             "blind_assistant.core.orchestrator.Orchestrator._handle_general_question",
-            new=AsyncMock(
-                return_value={"text": "The weather today is partly cloudy with a high of 72 degrees."}
-            ),
+            new=AsyncMock(return_value={"text": "The weather today is partly cloudy with a high of 72 degrees."}),
         ):
             result = await orc._handle_general_question(
                 _make_intent("general"),
@@ -497,10 +483,7 @@ class TestDorothyGeneralInteraction:
         async def update_cb(msg: str) -> None:
             pass
 
-        _alex_response = (
-            "I can help you read that document. "
-            "Hold your phone over it and say 'describe this'."
-        )
+        _alex_response = "I can help you read that document. Hold your phone over it and say 'describe this'."
         with patch(
             "blind_assistant.core.orchestrator.Orchestrator._handle_general_question",
             new=AsyncMock(return_value={"text": _alex_response}),
@@ -538,9 +521,7 @@ class TestDorothySetupLanguage:
         import importlib.util
         import os
 
-        installer_path = os.path.join(
-            os.path.dirname(__file__), "..", "..", "..", "installer", "install.py"
-        )
+        installer_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "installer", "install.py")
         installer_path = os.path.normpath(installer_path)
         spec = importlib.util.spec_from_file_location("install", installer_path)
         assert spec is not None, f"Cannot find installer at {installer_path}"
