@@ -291,15 +291,15 @@ Cycle 35 priority:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 33.** Phase 4 (Accessibility Hardening) in progress.
-Key deliverables: (1) Fixed WCAG 4.1.3 violation — aria-live regions were conditionally
-rendered in MainScreen.tsx; now always in DOM (hiddenLiveRegion style hides them visually
-when empty). This was ISSUE-040 — logged and resolved in same cycle. (2) Increased
-_wait_for_app_ready() timeout 5s→15s in all web E2E test files; 8 tests were racing
-against loading spinner. CI run c3e55df in progress to verify.
+**Loop completed Cycle 34.** Phase 4 (Accessibility Hardening) in progress.
+Key deliverable: ISSUE-041 identified (React bundle not mounting in CI Playwright Chromium)
+and diagnostic logging added to all 3 web E2E test files. Next CI run will print the
+exact JS crash error via page.on("pageerror") / page.on("console") output.
 
-Most important for Cycle 34:
-1. **P4: Check CI run c3e55df** — verify web E2E tests now pass (8 previously failing);
-   identify ISSUE-039 axe violation from output (should now be visible with 15s hydration)
-2. **P4: Phase 4 completion assessment** — if ISSUE-039 is moderate-only (not critical/serious),
-   Phase 4 is complete; transition to Phase 5 (Polish & Community Ready)
+Most important for Cycle 35:
+1. **P0: ISSUE-041 fix** — push changes, check CI diagnostic output, identify JS crash, fix it
+   - Likely suspects: `crypto.randomUUID` on http: origin; expo-modules-core initialization
+   - If crypto: add polyfill to public/index.html or catch in app.tsx
+   - If other: follow the diagnostic output to the root cause
+2. **P4: ISSUE-039** — the 1 moderate axe violation; will surface after React mounts in CI
+3. **P4: Phase 4 assessment** — iOS ✓, Android ✓, web blocked by ISSUE-041; Windows/macOS pending
