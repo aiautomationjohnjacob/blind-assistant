@@ -58,11 +58,11 @@ New wiring in run-cycle:
 
 ## Current Phase
 
-**Phase**: 4 — Accessibility Hardening
+**Phase**: 5 — Polish & Community Ready
 **Status**: IN PROGRESS
 **Started**: 2026-03-18
 **Last active**: 2026-03-18
-**Cycles completed**: 35
+**Cycles completed**: 36
 
 ## Phase Definitions
 
