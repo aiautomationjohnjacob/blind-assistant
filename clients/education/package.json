@@ -55,6 +55,9 @@
     ]
   },
   "overrides": {
-    "ajv": "^8.17.1"
+    "ajv": "^8.17.1",
+    "fork-ts-checker-webpack-plugin": {
+      "ajv-keywords": "^5.1.0"
+    }
   }
 }
