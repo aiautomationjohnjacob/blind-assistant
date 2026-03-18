@@ -505,7 +505,12 @@ Once done, the staging URL (e.g. https://blind-assistant-staging.netlify.app) sh
   - Added to README.md for testers
   - Used in the NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome Phase 3 testing scenarios
   - Configured in Netlify UI with EXPO_PUBLIC_API_BASE_URL pointing to backend
-**Status**: OPEN
+**Status**: RESOLVED
+**Resolved in**: Cycle 26 — DELETE /profile/preferences added to api_server.py; requires
+confirm=true body to prevent accidental deletion; calls MCPMemoryClient.clear_user_data();
+returns 204 No Content; graceful degradation if MCP is unreachable; 8 new unit tests
+(happy path, confirm=false→400, confirm omitted→400, no auth→401, no memory client→204,
+memory raises→204, 400 detail mentions confirm, CORS allows DELETE). 798 Python unit tests total.
 
 ### ISSUE-028: Missing unit tests for telegram_bot.py, query.py, redaction.py, screen_observer.py
 **Severity**: MEDIUM

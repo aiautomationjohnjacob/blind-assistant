@@ -654,7 +654,7 @@ class APIServer:
                 status_code=400,
                 detail=(
                     "Explicit confirmation required. "
-                    "Send {\"confirm\": true} to clear all preference data. "
+                    'Send {"confirm": true} to clear all preference data. '
                     "This action cannot be undone."
                 ),
             )
@@ -675,9 +675,7 @@ class APIServer:
                     exc,
                 )
         else:
-            logger.debug(
-                "DELETE /profile/preferences: MCPMemoryClient not configured — nothing to clear."
-            )
+            logger.debug("DELETE /profile/preferences: MCPMemoryClient not configured — nothing to clear.")
 
         # 204 No Content — FastAPI returns an empty body when the handler returns None.
 
