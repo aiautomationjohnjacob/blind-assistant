@@ -470,7 +470,11 @@ class TestMarcusFoodOrderingDisclosure:
             updates.append(msg)
 
         with (
-            patch.object(orc, "_extract_options_from_page", new=AsyncMock(return_value="2 restaurants found. Sushi House or Okura.")),
+            patch.object(
+                orc,
+                "_extract_options_from_page",
+                new=AsyncMock(return_value="2 restaurants found. Sushi House or Okura."),
+            ),
             patch.object(orc, "_navigate_to_user_choice", new=AsyncMock(return_value=page)),
             patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=page)),
             patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x Salmon roll, $10.99")),
