@@ -36,6 +36,7 @@ SYNC API NOTE:
 
 from __future__ import annotations
 
+import contextlib
 import http.client
 import os
 
@@ -190,7 +191,18 @@ class TestMainScreenKeyboardNavigation:
         # In CI, expo-secure-store returns null → setup wizard loads instead of main screen.
         # Both are valid initial screens; the test verifies a labeled interactive element
         # is reachable by Tab — not which specific screen is shown.
-        KNOWN_LABELS = ("speak", "assistant", "record", "skip", "continue", "confirm", "token", "next", "setup", "welcome")
+        KNOWN_LABELS = (
+            "speak",
+            "assistant",
+            "record",
+            "skip",
+            "continue",
+            "confirm",
+            "token",
+            "next",
+            "setup",
+            "welcome",
+        )
         assert any(kw in lower for kw in KNOWN_LABELS), (
             f"Keyboard focus did not reach a labeled interactive element. "
             f"Got aria-label: '{focused_label}'. "
@@ -754,7 +766,19 @@ class TestFocusManagement:
 
         # Tab through all focusable elements (max 10) and verify a labeled button is reachable.
         # Accept: voice button labels (main screen) or setup wizard button labels.
-        KNOWN_BUTTON_KEYWORDS = ("speak", "assistant", "record", "stop", "continue", "confirm", "token", "next", "setup", "welcome", "save")
+        KNOWN_BUTTON_KEYWORDS = (
+            "speak",
+            "assistant",
+            "record",
+            "stop",
+            "continue",
+            "confirm",
+            "token",
+            "next",
+            "setup",
+            "welcome",
+            "save",
+        )
         button_found = False
         for _ in range(10):
             page.keyboard.press("Tab")
