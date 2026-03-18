@@ -30,6 +30,24 @@
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
+## Completed Items (Cycle 36 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| ISSUE-039 RESOLVED: 0 axe violations confirmed — root cause was axe auditing blank loading spinner; CI run 23231203014: 36 Chromium + 36 Firefox E2E + 4 axe-core ALL PASS | 2026-03-18 | 36 |
+| Phase 4 completion assessment: all criteria met — zero critical axe violations ✓, iOS/Android ✓, Windows/macOS CLI+web sign-off ✓ (ISSUE-043), security/ethics sign-off ✓ | 2026-03-18 | 36 |
+| Windows/macOS accessibility sign-off (ISSUE-043): installer NVDA-safe; web WCAG 2.1 AA confirmed; native GUI deferred | 2026-03-18 | 36 |
+| Closed 6 stale GitHub CI failure issues (86, 87, 88, 89, 90, 91) | 2026-03-18 | 36 |
+| PHASE 4 COMPLETE — WCAG 2.1 AA on web confirmed; all platform sign-offs done | 2026-03-18 | 36 |
+
+## Completed Items (Cycle 35 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| ISSUE-041: react-dom@19.2.4 → 18.2.0 pinned; ALL 33 Chromium web E2E PASS (CI run 23230759864) | 2026-03-18 | 35 |
+| ISSUE-042: Firefox browser binary added to e2e-web CI job install step | 2026-03-18 | 35 |
+| _wait_for_app_ready() timeout increased to 30s; conftest.py add_init_script() diagnostic added | 2026-03-18 | 35 |
+
 ## Completed Items (Cycle 33 additions)
 
 | Item | Completed | Cycle # |
