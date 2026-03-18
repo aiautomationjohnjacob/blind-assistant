@@ -189,11 +189,11 @@ describe("SetupWizardScreen — welcome step", () => {
     expect(screen.getByRole("button", { name: /continue/i })).toBeTruthy();
   });
 
-  it("advances to token step when Continue is pressed", async () => {
+  it("advances to code entry step when Continue is pressed", async () => {
     renderWizard();
     fireEvent.press(screen.getByRole("button", { name: /continue/i }));
     await waitFor(() => {
-      expect(screen.getByLabelText(/api token input field/i)).toBeTruthy();
+      expect(screen.getByLabelText(/connection code input field/i)).toBeTruthy();
     });
   });
 
