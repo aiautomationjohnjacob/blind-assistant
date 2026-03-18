@@ -52,6 +52,7 @@ SYNC API NOTE:
 
 from __future__ import annotations
 
+import contextlib
 import http.client
 import json
 import os
