@@ -26,6 +26,15 @@
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
+## Completed Items (Cycle 30 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Skip link + main landmark: `clients/mobile/public/index.html` custom Expo template; skip-to-main-content link first focusable element (WCAG 2.4.1); `<div role="main">` wraps React root | 2026-03-17 | 30 |
+| SetupWizardScreen token step live region: `accessibilityLiveRegion="polite"` added to instructions Text; 1 new JS test; 128 JS total | 2026-03-17 | 30 |
+| Web structure E2E tests: 5 new tests in TestPageStructure — skip link first focusable, target exists, main landmark, heading structure, heading labels | 2026-03-17 | 30 |
+| Documentation steward (Cycle 30): CHANGELOG Phase 4 section (Cycles 28-30); README Telegram demoted to optional; test counts updated | 2026-03-17 | 30 |
+
 ## Completed Items (Cycle 29 additions)
 
 | Item | Completed | Cycle # |
