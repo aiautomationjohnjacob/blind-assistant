@@ -160,13 +160,13 @@ export function SetupWizardScreen({
   const handleConfirmToken = useCallback((): void => {
     const trimmed = tokenInput.trim();
     if (!trimmed) {
-      speak("The token field is empty. Please enter your API token.");
+      speak("The connection code field is empty. Please enter your connection code.");
       return;
     }
     if (trimmed.length < 8) {
       speak(
-        "The token you entered looks too short. " +
-          "API tokens are usually at least 32 characters. Please check and try again."
+        "The connection code you entered looks too short. " +
+          "Connection codes are usually at least 32 characters. Please check and try again."
       );
       return;
     }
