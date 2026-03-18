@@ -466,4 +466,40 @@ describe("SetupWizardScreen — Dorothy test (plain language)", () => {
     expect(errorText.props.children || errorText.props.accessibilityLabel || "").toMatch
       || expect(screen.getByText(/tap retry/i)).toBeTruthy();
   });
+
+  it("empty code error says 'connection code' not 'API token'", async () => {
+    // Regression for Cycle 38: handleConfirmToken empty-input error was missed
+    // in the Cycle 37 jargon sweep — still said 'API token'.
+    await advanceToTokenStep();
+    // Leave input empty — press confirm
+    fireEvent.press(screen.getByRole("button", { name: /confirm code/i }));
+    await waitFor(() => {
+      const calls = (Speech.speak as jest.Mock).mock.calls;
+      const emptyErrorCall = calls.find(([text]: [string]) =>
+        /field is empty/i.test(text)
+      );
+      expect(emptyErrorCall).toBeTruthy();
+      expect(emptyErrorCall[0]).toMatch(/connection code/i);
+      expect(emptyErrorCall[0]).not.toMatch(/api token/i);
+    });
+  });
+
+  it("short code error says 'connection code' not 'API tokens'", async () => {
+    // Regression for Cycle 38: handleConfirmToken too-short error was missed
+    // in the Cycle 37 jargon sweep — still said 'API tokens are usually at least 32 characters'.
+    await advanceToTokenStep();
+    const input = screen.getByLabelText(/connection code input field/i);
+    fireEvent.changeText(input, "short");
+    fireEvent.press(screen.getByRole("button", { name: /confirm code/i }));
+    await waitFor(() => {
+      const calls = (Speech.speak as jest.Mock).mock.calls;
+      const shortErrorCall = calls.find(([text]: [string]) =>
+        /too short/i.test(text)
+      );
+      expect(shortErrorCall).toBeTruthy();
+      // Must say 'Connection codes' not 'API tokens'
+      expect(shortErrorCall[0]).toMatch(/connection codes/i);
+      expect(shortErrorCall[0]).not.toMatch(/api token/i);
+    });
+  });
 });
