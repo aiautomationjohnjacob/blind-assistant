@@ -114,8 +114,7 @@ def _make_orc_with_browser(config: dict) -> tuple[Orchestrator, MagicMock, Confi
         url="https://www.doordash.com/search/store/?q=sushi",
         title="DoorDash — Sushi near you",
         text_content=(
-            "Sushi House — 4.8 stars — 20-30 min — $1.99 delivery\n"
-            "Okura — 4.6 stars — 15-25 min — $0 delivery\n"
+            "Sushi House — 4.8 stars — 20-30 min — $1.99 delivery\nOkura — 4.6 stars — 15-25 min — $0 delivery\n"
         ),
     )
     mock_browser.navigate = AsyncMock(return_value=page)
@@ -180,9 +179,7 @@ class TestMarcusPreambleTrimming:
         orc = Orchestrator(config)
 
         result = orc._trim_preamble("Great question! The answer is 42.")
-        assert result == "The answer is 42.", (
-            f"Marcus test FAILED: 'Great question!' was not trimmed. Got: {result!r}"
-        )
+        assert result == "The answer is 42.", f"Marcus test FAILED: 'Great question!' was not trimmed. Got: {result!r}"
 
     def test_trim_preamble_removes_sure(self):
         """'Sure!' must be stripped."""
@@ -200,9 +197,7 @@ class TestMarcusPreambleTrimming:
         orc = Orchestrator(config)
 
         result = orc._trim_preamble("Absolutely! I can help with that.")
-        assert result == "I can help with that.", (
-            f"Marcus test FAILED: 'Absolutely!' was not trimmed. Got: {result!r}"
-        )
+        assert result == "I can help with that.", f"Marcus test FAILED: 'Absolutely!' was not trimmed. Got: {result!r}"
 
     def test_trim_preamble_removes_id_be_happy(self):
         """'I'd be happy to help with that.' must be stripped."""
@@ -221,9 +216,7 @@ class TestMarcusPreambleTrimming:
 
         original = "Your note about the Python bug has been saved."
         result = orc._trim_preamble(original)
-        assert result == original, (
-            f"Marcus test FAILED: non-preamble text was incorrectly modified. Got: {result!r}"
-        )
+        assert result == original, f"Marcus test FAILED: non-preamble text was incorrectly modified. Got: {result!r}"
 
     def test_trim_preamble_does_not_trim_mid_text_preamble_words(self):
         """Preamble detection is START-of-string only. Mid-text occurrence must be preserved."""
@@ -248,9 +241,7 @@ class TestMarcusPreambleTrimming:
         assert not result.startswith(preamble), (
             f"Marcus test FAILED: preamble {preamble!r} was not stripped. Got: {result!r}"
         )
-        assert "Here is the result." in result, (
-            f"Marcus test FAILED: content after preamble was lost. Got: {result!r}"
-        )
+        assert "Here is the result." in result, f"Marcus test FAILED: content after preamble was lost. Got: {result!r}"
 
 
 # ─────────────────────────────────────────────────────────────
@@ -302,8 +293,7 @@ class TestMarcusBriefModeFormatResponse:
 
         # Standard mode preserves the preamble — Dorothy benefits from it
         assert response.text.startswith("Certainly!"), (
-            f"Standard-mode test FAILED: preamble was incorrectly stripped for Dorothy. "
-            f"Got: {response.text!r}"
+            f"Standard-mode test FAILED: preamble was incorrectly stripped for Dorothy. Got: {response.text!r}"
         )
 
     def test_brief_mode_does_not_affect_braille_mode(self):
@@ -402,8 +392,7 @@ class TestMarcusSecondBrain:
         ):
             mock_vault.return_value = MagicMock()
             mock_query.return_value = (
-                "Found 2 notes about asyncio. "
-                "First note: gather() vs wait() — use gather() for concurrent tasks."
+                "Found 2 notes about asyncio. First note: gather() vs wait() — use gather() for concurrent tasks."
             )
 
             result = await orc._handle_query_note(intent, MARCUS_CONTEXT, capture_update)
@@ -436,8 +425,7 @@ class TestMarcusSecondBrain:
         # Apply _format_response to simulate full pipeline
         response = orc._format_response(result, MARCUS_CONTEXT)
         assert not response.text.startswith("Certainly!"), (
-            f"Marcus test FAILED: brief mode did not strip preamble from note-save response. "
-            f"Got: {response.text!r}"
+            f"Marcus test FAILED: brief mode did not strip preamble from note-save response. Got: {response.text!r}"
         )
 
 
@@ -618,8 +606,7 @@ class TestMarcusNoDependencyPatterns:
         orc = Orchestrator(config)
 
         error_text = (
-            "I couldn't access your notes vault. "
-            "Say 'unlock my notes' and provide your passphrase to try again."
+            "I couldn't access your notes vault. Say 'unlock my notes' and provide your passphrase to try again."
         )
         result = {"text": error_text}
 
@@ -640,6 +627,5 @@ class TestMarcusNoDependencyPatterns:
         twice = orc._trim_preamble(once)
 
         assert once == twice, (
-            f"Marcus test FAILED: _trim_preamble() is not idempotent. "
-            f"First: {once!r}, Second: {twice!r}"
+            f"Marcus test FAILED: _trim_preamble() is not idempotent. First: {once!r}, Second: {twice!r}"
         )
