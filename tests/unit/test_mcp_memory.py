@@ -15,19 +15,17 @@ from __future__ import annotations
 
 import json
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from blind_assistant.memory.mcp_memory import (
     DEFAULT_PREFERENCES,
     PREF_BRAILLE_MODE,
-    PREF_OUTPUT_MODE,
     PREF_VERBOSITY,
     PREF_VOICE_SPEED,
     MCPMemoryClient,
 )
-
 
 # ─────────────────────────────────────────────────────────────
 # HELPERS
