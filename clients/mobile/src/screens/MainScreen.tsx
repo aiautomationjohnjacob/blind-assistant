@@ -344,53 +344,68 @@ export function MainScreen(): React.JSX.Element {
       </Pressable>
 
       {/* Last transcript — shown for braille display users to verify STT */}
-      {/* Phase 4 fix (ISSUE-036): accessibilityLiveRegion moved from View to the inner Text.
-          On iOS/VoiceOver, live regions only fire when content changes inside a Text node —
-          a View wrapper with accessibilityLiveRegion is silently ignored by VoiceOver.
-          On Android/TalkBack, both View and Text support live regions, but Text is safer.
-          The View uses accessibilityElementsHidden=false (default) and no live region;
-          the accessible name and live announcement come from the inner Text node. */}
-      {lastTranscript ? (
-        <View
-          style={styles.transcriptContainer}
-          accessibilityRole={Platform.OS === "web" ? undefined : "text"}
-          accessibilityLabel={`You said: ${lastTranscript}`}
+      {/*
+        WCAG 4.1.3 / ARIA best-practice: aria-live regions MUST exist in the DOM
+        before content is injected. If we render the live region only when
+        `lastTranscript` is non-empty (conditional rendering), the screen reader
+        has not registered the live region yet when content first appears — it
+        misses the announcement.
+
+        Fix (Cycle 33): Always render the transcript container. Use empty string
+        when there is no transcript. The container is visually hidden via opacity=0
+        when empty so it does not distract sighted users or add blank lines.
+
+        Phase 4 fix (ISSUE-036): accessibilityLiveRegion on inner Text, not View,
+        for iOS VoiceOver compatibility (VoiceOver ignores live regions on Views).
+      */}
+      <View
+        style={[
+          styles.transcriptContainer,
+          !lastTranscript && styles.hiddenLiveRegion,
+        ]}
+        accessibilityRole={Platform.OS === "web" ? undefined : "text"}
+        accessibilityLabel={lastTranscript ? `You said: ${lastTranscript}` : undefined}
+      >
+        <Text style={styles.transcriptLabel} accessibilityElementsHidden importantForAccessibility="no">
+          {lastTranscript ? "You said:" : ""}
+        </Text>
+        {/* accessibilityLiveRegion on Text — iOS VoiceOver announces this node when it changes.
+            Empty string when idle so the live region is registered but silent. */}
+        <Text
+          style={styles.transcriptText}
+          accessibilityLiveRegion="polite"
+          accessibilityLabel={lastTranscript ? `You said: ${lastTranscript}` : undefined}
         >
-          <Text style={styles.transcriptLabel} accessibilityElementsHidden importantForAccessibility="no">
-            You said:
-          </Text>
-          {/* accessibilityLiveRegion on Text — iOS VoiceOver announces this node when it changes */}
-          <Text
-            style={styles.transcriptText}
-            accessibilityLiveRegion="polite"
-            accessibilityLabel={`You said: ${lastTranscript}`}
-          >
-            {lastTranscript}
-          </Text>
-        </View>
-      ) : null}
+          {lastTranscript}
+        </Text>
+      </View>
 
       {/* Last response — shown as text for braille display users */}
-      {/* Same Phase 4 fix: accessibilityLiveRegion on the inner Text, not the View wrapper. */}
-      {lastResponse ? (
-        <View
-          style={styles.responseContainer}
-          accessibilityRole={Platform.OS === "web" ? undefined : "text"}
-          accessibilityLabel={`Assistant replied: ${lastResponse}`}
+      {/*
+        Same WCAG 4.1.3 fix: always render the response container so the
+        aria-live region is registered before the assistant first responds.
+        Visually hidden via opacity=0 when empty.
+      */}
+      <View
+        style={[
+          styles.responseContainer,
+          !lastResponse && styles.hiddenLiveRegion,
+        ]}
+        accessibilityRole={Platform.OS === "web" ? undefined : "text"}
+        accessibilityLabel={lastResponse ? `Assistant replied: ${lastResponse}` : undefined}
+      >
+        <Text style={styles.responseLabel} accessibilityElementsHidden importantForAccessibility="no">
+          {lastResponse ? "Assistant:" : ""}
+        </Text>
+        {/* accessibilityLiveRegion on Text — always in DOM; empty when no response yet. */}
+        <Text
+          style={styles.responseText}
+          accessibilityLiveRegion="polite"
+          accessibilityLabel={lastResponse ? `Assistant replied: ${lastResponse}` : undefined}
         >
-          <Text style={styles.responseLabel} accessibilityElementsHidden importantForAccessibility="no">
-            Assistant:
-          </Text>
-          {/* accessibilityLiveRegion on Text — iOS VoiceOver announces this node when it changes */}
-          <Text
-            style={styles.responseText}
-            accessibilityLiveRegion="polite"
-            accessibilityLabel={`Assistant replied: ${lastResponse}`}
-          >
-            {lastResponse}
-          </Text>
-        </View>
-      ) : null}
+          {lastResponse}
+        </Text>
+      </View>
 
       {/* Developer note: platform hint text removed (ISSUE-020).
           "Double-tap to activate" contradicts VoiceOver/TalkBack guidelines which say
