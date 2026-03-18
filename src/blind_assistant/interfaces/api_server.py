@@ -218,16 +218,18 @@ class ProfileResponse(BaseModel):
 class ProfileUpdateRequest(BaseModel):
     """Payload for PUT /profile — update one or more user preferences.
 
-    All fields are optional — only provided fields are written to the memory store.
-    Unrecognised keys are silently ignored so clients remain forward-compatible.
+    All structured fields are optional — only provided fields are written.
+    Extra keys must be in VALID_EXTRA_PREFS; unknown keys return HTTP 422.
+    This allowlist prevents arbitrary data from being written to the MCP
+    memory graph via authenticated but misbehaving clients (ISSUE-030).
     """
 
     verbosity: str | None = None
     speech_rate: float | None = None
     output_mode: str | None = None
     braille_mode: bool | None = None
-    # Arbitrary preference key-value pairs (e.g. timezone, user_name, common_tasks).
-    # These are passed directly to MCPMemoryClient.set_preference().
+    # Extra preference key-value pairs — MUST be in VALID_EXTRA_PREFS.
+    # Unknown keys are rejected with 422 and logged for security audit.
     extra: dict | None = None
 
 
