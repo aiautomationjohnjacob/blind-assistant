@@ -287,6 +287,13 @@ export function MainScreen(): React.JSX.Element {
       </Text>
 
       {/* Press-to-talk button — the primary interaction element */}
+      {/* Phase 4 (ISSUE-036): accessibilityActions added for VoiceOver rotor support.
+          VoiceOver's "Actions" rotor item lists custom actions on the focused element.
+          This lets VoiceOver users know the button has a single "activate" action,
+          matching TalkBack's "Actions" node in the accessibility tree.
+          On TalkBack, swipe-up-then-right opens the Actions menu — we expose the same
+          semantic action label there. The onAccessibilityAction handler calls the same
+          handleButtonPress so behavior is identical to a direct tap. */}
       <Pressable
         style={[
           styles.button,
@@ -303,6 +310,19 @@ export function MainScreen(): React.JSX.Element {
             : "Starts recording your voice. Activate again when done speaking."
         }
         accessibilityState={{ disabled: isButtonDisabled }}
+        accessibilityActions={[
+          // Custom action visible in VoiceOver rotor (Actions item) and TalkBack Actions menu.
+          // Label describes what will happen — not the gesture ("activate" not "double-tap").
+          {
+            name: "activate",
+            label: state === "listening" ? "Stop recording" : "Start speaking",
+          },
+        ]}
+        onAccessibilityAction={(event) => {
+          if (event.nativeEvent.actionName === "activate") {
+            handleButtonPress();
+          }
+        }}
         // Minimum 44dp touch target (Android accessibility guideline)
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
