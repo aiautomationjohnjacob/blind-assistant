@@ -256,27 +256,21 @@ No active blockers. Phase 4 COMPLETE as of Cycle 36.
 
 ## Last Cycle Summary
 
-Cycle 43 (Telegram super-user channel + CI fix).
+Cycle 44 (Node.js 24 GitHub Actions migration).
 
-(1) CI FIX: ruff format violation in test_marcus_scenario.py (same pattern as Cycle 40
-ISSUE-046 with test_dorothy_scenario.py). Fixed before the main Telegram feature work.
-GitHub issue #99 closed.
+(1) GITHUB ACTIONS MIGRATION: Bumped actions/checkout v4→v5, actions/setup-node v4→v5,
+and actions/upload-artifact v4→v5 across all 5 workflow files (ci.yml, autonomous-cycle.yml,
+deploy-staging.yml, e2e-android.yml, ios-e2e.yml). Resolves ISSUE-050 — prevents CI breakage
+after GitHub's June 2, 2026 Node.js 20 runner deprecation. Note: actions/setup-python was
+already at v5 (Node.js 24 internally). actions/github-script@v7 is current latest. YAML
+validated with python3 yaml.safe_load().
 
-(2) TELEGRAM INTEGRATION: --telegram flag added to main.py CLI. When passed, sets
-telegram_enabled=True AND api_server_enabled=True (so the bot always has a backend).
-This completes the P3 "Telegram integration" item — power users like Marcus can now
-run both the API server and Telegram bot concurrently with a single command:
-  python -m blind_assistant.main --api --telegram
+Total tests: 925 (unchanged — no src/ or test files modified this cycle).
 
-(3) FORBIDDEN_JARGON: confirmed already resolved in Cycle 41 (no duplicate in
-test_dorothy_scenario.py). P4 item closed as already done.
-
-Total tests: 848 Python unit + 30 E2E core + 47 accessibility + [web E2E: run in CI only] = 925.
-
-Cycle 44 priorities:
-1. **P3: Device simulation CI** — Android AVD + Playwright (complex infrastructure)
-2. **P4: Node.js 24 migration** — Node.js 20 actions deprecated (forcing June 2026); update
-   actions/checkout, actions/setup-python, actions/setup-node, actions/upload-artifact to v5+
+Cycle 45 priorities:
+1. **P3: Device simulation CI** — the only remaining stack item; start with Playwright
+   screenshot artifacts as CI output (lightweight, no emulator required); document what
+   AVD + ADB would verify for Android TalkBack testing
 
 ## Known Issues / Technical Debt
 
