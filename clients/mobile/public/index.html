@@ -100,8 +100,18 @@
       id="main-content" is the target of the skip link above.
       role="main" makes this a 'main' landmark — screen readers can jump
       to it using the landmark navigation shortcut (NVDA: Q, VoiceOver: VO+CMD+M).
+
+      tabindex="-1" is required so that the skip link href="#main-content" actually
+      moves keyboard focus here, not just scroll. Without tabindex="-1", anchor
+      navigation in browsers moves the scroll position but does NOT move focus —
+      the keyboard user remains at the skip link position in the tab order.
+      tabindex="-1" allows programmatic focus (via href anchor or JS focus()) without
+      adding the div to the natural tab order (positive tabindex would do that).
+
+      This is the standard pattern used by GOV.UK, GitHub, and Google.
+      See: https://www.w3.org/WAI/WCAG21/Techniques/general/G1
     -->
-    <div id="main-content" role="main">
+    <div id="main-content" role="main" tabindex="-1">
       <div id="root"></div>
     </div>
   </body>
