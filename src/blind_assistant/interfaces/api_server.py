@@ -290,7 +290,7 @@ class APIServer:
             CORSMiddleware,
             allow_origins=["*"] if self.config.get("debug", False) else ["http://localhost:*"],
             allow_credentials=True,
-            allow_methods=["GET", "POST"],
+            allow_methods=["GET", "POST", "PUT"],
             allow_headers=["Authorization", "Content-Type"],
         )
 
@@ -302,6 +302,7 @@ class APIServer:
         app.post("/describe", response_model=DescribeResponse)(self._describe)
         app.post("/task", response_model=TaskResponse)(self._task)
         app.get("/profile", response_model=ProfileResponse)(self._profile)
+        app.put("/profile", response_model=ProfileResponse)(self._update_profile)
 
         # Global error handler: never expose internal details to clients
         @app.exception_handler(Exception)
