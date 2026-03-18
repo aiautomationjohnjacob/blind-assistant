@@ -25,6 +25,16 @@
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
+## Completed Items (Cycle 32 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Check axe-core CI gate results (Cycle 31 push): 0 critical, 0 serious, 1 unidentified moderate; ISSUE-039 logged | 2026-03-18 | 32 |
+| Fix 10 web E2E test failures: Python `or`→`||` bug, React hydration race, setup wizard vs main screen mismatch; _wait_for_app_ready() added | 2026-03-18 | 32 |
+| Add _wait_for_app_ready() to axe-core audit tests (test_wcag_axe_audit.py) | 2026-03-18 | 32 |
+| ISSUE-038 resolved: web E2E hydration race documented and fixed | 2026-03-18 | 32 |
+| Closed stale GitHub CI issues 84 and 85 | 2026-03-18 | 32 |
+
 ## Completed Items (Cycle 31 additions)
 
 | Item | Completed | Cycle # |
