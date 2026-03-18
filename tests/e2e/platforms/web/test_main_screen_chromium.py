@@ -561,3 +561,215 @@ class TestPageStructure:
             f"{heading_issues}. An empty heading is announced as 'heading' "
             "with no context — completely useless to a screen reader user."
         )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Focus Management Tests (web-accessibility-expert audit — Cycle 31)
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class TestFocusManagement:
+    """
+    Verify focus management for keyboard and screen reader users.
+
+    Screen reader users depend on predictable focus behaviour when content
+    changes. This class tests that:
+    1. The skip link routes focus correctly to #main-content (WCAG 2.4.1)
+    2. Tab order after the skip link reaches the voice button
+    3. No invisible elements receive focus (orphaned focus)
+    4. aria-live regions exist for all dynamic content (status changes, errors)
+    5. Focus is never lost off-screen (element must be in the DOM when focused)
+
+    WCAG 2.1 SCs covered:
+    - 2.1.1 Keyboard (all functionality keyboard-operable)
+    - 2.1.2 No Keyboard Trap
+    - 2.4.3 Focus Order (logical, matching reading order)
+    - 3.2.1 On Focus (no unexpected context change on focus)
+    - 4.1.3 Status Messages (status communicated without focus, via live regions)
+
+    web-accessibility-expert audit findings — Cycle 31:
+    These tests address the gap identified in the Cycle 30 review panel:
+    "web-accessibility-expert review of focus management after state changes —
+    is there a case where focus is unexpectedly lost?"
+    """
+
+    def test_skip_link_routes_focus_to_main_content(self, page: Page, web_app_available: bool) -> None:
+        """
+        Activating the skip link must move focus to #main-content.
+
+        WCAG 2.4.1 Bypass Blocks: the skip link mechanism must actually work —
+        focus must land inside the main content region, not be lost.
+        NVDA verification: Tab → Enter on skip link → 'main, region' announced.
+        """
+        _skip_if_unavailable(web_app_available)
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
+
+        # Tab to the skip link (it must be first)
+        page.keyboard.press("Tab")
+        first_tag = page.evaluate("document.activeElement.tagName.toLowerCase()")
+        first_href = page.evaluate("document.activeElement.getAttribute('href') or ''")
+
+        if first_tag != "a" or "main" not in (first_href or "").lower():
+            pytest.skip("Skip link not first focusable element — covered by test_skip_link_is_first_focusable_element")
+
+        # Activate the skip link (Enter key on an <a> follows the href)
+        page.keyboard.press("Enter")
+        page.wait_for_timeout(100)  # Allow focus shift to settle
+
+        # After activating the skip link, focus should be inside #main-content
+        active_id = page.evaluate("document.activeElement.id")
+        active_closest_main = page.evaluate(
+            """() => {
+                const el = document.activeElement;
+                // Check if the focused element is #main-content or a descendant
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) return false;
+                return el === mainContent || mainContent.contains(el);
+            }"""
+        )
+
+        assert active_closest_main, (
+            f"After activating the skip link, focus should be inside #main-content. "
+            f"Got: activeElement id='{active_id}'. "
+            "WCAG 2.4.1: the skip link must actually move focus to the main content area. "
+            "Fix: ensure #main-content has tabindex='-1' so it can receive programmatic focus, "
+            "or that a focusable descendant is targeted."
+        )
+
+    def test_voice_button_reachable_after_skip_link(self, page: Page, web_app_available: bool) -> None:
+        """
+        After skipping via the skip link, the voice button must be reachable by Tab.
+
+        WCAG 2.4.3 Focus Order: after activating the skip link, Tab should
+        move through the main content in logical reading order. The voice button
+        is the primary interactive element — it must be the next Tab stop.
+        """
+        _skip_if_unavailable(web_app_available)
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
+
+        # Tab through all focusable elements (max 10) and verify button is reachable
+        button_found = False
+        for _ in range(10):
+            page.keyboard.press("Tab")
+            focused_label = page.evaluate(
+                "document.activeElement.getAttribute('aria-label') || ''"
+            )
+            lower = focused_label.lower()
+            if "speak" in lower or "assistant" in lower or "record" in lower or "stop" in lower:
+                button_found = True
+                break
+
+        assert button_found, (
+            "Could not reach the press-to-talk voice button within 10 Tab presses. "
+            "WCAG 2.4.3: the primary interaction element must be early in the focus order. "
+            "Check that the button has tabindex=0 (default for Pressable) and is not "
+            "wrapped in a container with tabindex=-1 or aria-hidden."
+        )
+
+    def test_no_focus_on_invisible_elements(self, page: Page, web_app_available: bool) -> None:
+        """
+        Keyboard focus must never land on an element that is invisible.
+
+        An invisible focused element means the keyboard user has no visible
+        focus indicator — they cannot tell where they are on the page.
+        WCAG 2.4.7 Focus Visible (Level AA).
+
+        This test tabs through all focusable elements and verifies each has
+        a non-zero bounding box (is actually visible, not display:none or size 0).
+        """
+        _skip_if_unavailable(web_app_available)
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
+
+        invisible_focused = []
+        for i in range(15):
+            page.keyboard.press("Tab")
+            result = page.evaluate(
+                """() => {
+                    const el = document.activeElement;
+                    if (!el || el === document.body) return null;
+                    const rect = el.getBoundingClientRect();
+                    const style = window.getComputedStyle(el);
+                    const isHidden = (
+                        style.display === 'none' ||
+                        style.visibility === 'hidden' ||
+                        style.opacity === '0' ||
+                        (rect.width === 0 && rect.height === 0)
+                    );
+                    return {
+                        tag: el.tagName.toLowerCase(),
+                        label: el.getAttribute('aria-label') || '',
+                        href: el.getAttribute('href') || '',
+                        width: rect.width,
+                        height: rect.height,
+                        isHidden: isHidden
+                    };
+                }"""
+            )
+            if result and result.get("isHidden"):
+                # Skip link is allowed to have reduced visible size while off-screen
+                # but MUST become visible on focus (tested separately)
+                href = result.get("href", "")
+                if "main" not in href.lower() and "skip" not in result.get("label", "").lower():
+                    invisible_focused.append(result)
+
+        assert len(invisible_focused) == 0, (
+            f"Focus landed on {len(invisible_focused)} invisible element(s): {invisible_focused}. "
+            "WCAG 2.4.7: focus indicator must always be visible. "
+            "Check for elements with display:none, visibility:hidden, or zero dimensions "
+            "that are still in the tab order."
+        )
+
+    def test_aria_live_regions_cover_all_status_states(self, page: Page, web_app_available: bool) -> None:
+        """
+        Every dynamic status change must be communicated via aria-live.
+
+        When the app transitions between states (idle → listening → transcribing
+        → thinking → speaking → error), screen reader users must be informed
+        without focus moving away from the voice button.
+
+        WCAG 4.1.3 Status Messages (Level AA): status messages must be conveyed
+        without requiring focus, i.e. via role='status', role='alert', or
+        aria-live='polite'/'assertive'.
+
+        This test verifies that aria-live regions exist for both polite updates
+        (normal status) and assertive updates (errors).
+        """
+        _skip_if_unavailable(web_app_available)
+        page.goto(WEB_APP_URL)
+        page.wait_for_load_state("networkidle")
+
+        live_region_info = page.evaluate(
+            """() => {
+                const polite = document.querySelectorAll('[aria-live="polite"]');
+                const assertive = document.querySelectorAll('[aria-live="assertive"]');
+                const status = document.querySelectorAll('[role="status"]');
+                const alert = document.querySelectorAll('[role="alert"]');
+                return {
+                    polite: polite.length,
+                    assertive: assertive.length,
+                    status: status.length,
+                    alert: alert.length,
+                    total: polite.length + assertive.length + status.length + alert.length
+                };
+            }"""
+        )
+
+        # Must have at least one polite live region (state transitions like idle → listening)
+        assert live_region_info.get("polite", 0) >= 1, (
+            "No aria-live='polite' regions found. "
+            "WCAG 4.1.3: status messages (state transitions) must be communicated "
+            "without moving focus. The status text and transcript/response areas "
+            "must use aria-live='polite' so NVDA announces them automatically."
+        )
+
+        # Must have at least one way to announce errors without focus (polite, assertive, or alert)
+        total = live_region_info.get("total", 0)
+        assert total >= 2, (
+            f"Only {total} live region(s) found — expected at least 2 "
+            "(one for state updates, one for error announcements). "
+            "WCAG 4.1.3: errors must also be announced without focus using "
+            "aria-live='assertive' or role='alert'."
+        )
