@@ -259,6 +259,7 @@ class MCPMemoryClient:
 
     async def _delete_from_mcp(self, user_id: str, key: str) -> None:
         """Remove a specific preference observation from the MCP memory graph."""
+        assert self._mcp is not None  # only called when self._available is True
         try:
             # Read current observations, remove the target, then re-write.
             result = await self._mcp.call_tool(
