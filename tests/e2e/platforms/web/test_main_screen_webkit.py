@@ -65,35 +65,18 @@ except ImportError:
 WEB_APP_URL = os.environ.get("WEB_APP_URL", "http://localhost:19006")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Fixtures
-# ─────────────────────────────────────────────────────────────────────────────
-
-
-@pytest.fixture(scope="session")
-def web_app_available() -> bool:
-    """
-    Check if the web app server is running before any tests execute.
-    Avoids confusing connection-refused errors in test output.
-    Returns True if the server responds, False otherwise.
-    """
-    try:
-        # Use http.client directly — WEB_APP_URL is always http://localhost:19006
-        # (no dynamic scheme from user input), so S310 does not apply here.
-        conn = http.client.HTTPConnection("localhost", 19006, timeout=3)
-        conn.request("GET", "/")
-        resp = conn.getresponse()
-        return resp.status == 200
-    except (TimeoutError, http.client.HTTPException, OSError):
-        return False
-
-
-# ─────────────────────────────────────────────────────────────────────────────
 # Helpers
+#
+# NOTE: web_app_available fixture is defined in conftest.py (DRY: shared
+# across all 4 web E2E test files).
 # ─────────────────────────────────────────────────────────────────────────────
 
 
 def _skip_if_unavailable(web_app_available: bool) -> None:
-    """Raise pytest.skip if the web app or Playwright is not available."""
+    """Raise pytest.skip if the web app or Playwright is not available.
+
+    NOTE: web_app_available is injected from the session fixture in conftest.py.
+    """
     if not PLAYWRIGHT_AVAILABLE:
         pytest.skip(
             "pytest-playwright is not installed. WebKit E2E tests run only in the 'e2e-web' CI job. "
