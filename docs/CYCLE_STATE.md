@@ -231,8 +231,10 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P4: web-accessibility-expert audit (partial)** — 10 E2E test accuracy issues found and fixed (React hydration race, Python/JS syntax bug, setup wizard vs main screen mismatch); _wait_for_app_ready() added to all web E2E tests + axe-core tests; ISSUE-038 resolved, ISSUE-039 open (Cycle 32)
 - [x] **P4: ISSUE-040: fix aria-live regions conditionally rendered (WCAG 4.1.3)** — MainScreen.tsx: transcript + response containers always rendered (opacity=0+maxHeight=0 when empty); hiddenLiveRegion style added; 128 JS tests pass; ISSUE-040 logged+resolved (Cycle 33)
 - [x] **P4: web E2E CI hydration timeout** — _wait_for_app_ready() timeout 5s→15s in all 3 web E2E test files; 8 previously-failing tests expected to pass in next CI run; commit c3e55df (Cycle 33)
-- [ ] **P4: ISSUE-039: identify and fix 1 moderate axe-core violation** — violation ID/impact unknown; awaiting CI run c3e55df (15s hydration wait should surface violation details)
-- [ ] **P4: Phase 4 completion assessment** — zero CRITICAL axe violations ✓; ISSUE-039 pending CI c3e55df; platform agent sign-offs: web ✓ (code reviewed), iOS ✓ (CI pass), Android ✓ (CI pass), Windows/macOS pending formal sign-off
+- [x] **P0: ISSUE-041 identified + diagnostic added (Cycle 34)** — React bundle not mounting in CI Playwright Chromium; 9 web E2E tests fail; screenshots show blank white page; diagnostic logging added to _wait_for_app_ready() in all 3 web E2E test files (page.on("pageerror") + page.on("console")); timeout increased to 30s; ISSUE-041 logged in OPEN_ISSUES.md; awaiting next CI run for exact JS error
+- [ ] **P0: ISSUE-041: fix React bundle crash in CI** — check next CI run diagnostic output; identify JS error (suspect crypto.randomUUID or expo-modules-core); fix root cause
+- [ ] **P4: ISSUE-039: identify and fix 1 moderate axe-core violation** — will surface once ISSUE-041 resolved and React actually mounts in CI
+- [ ] **P4: Phase 4 completion assessment** — zero CRITICAL axe violations ✓; ISSUE-041 blocking web E2E gate; platform sign-offs: iOS ✓, Android ✓, Windows/macOS pending
 
 ## Blockers
 
