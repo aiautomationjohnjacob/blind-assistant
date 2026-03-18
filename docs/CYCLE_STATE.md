@@ -311,11 +311,18 @@ Cycle 42 priorities:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 39.** Phase 5 (Polish & Community Ready) is COMPLETE.
+**Loop completed Cycle 41.** Phase 5 (Polish & Community Ready) is COMPLETE.
 
-Key deliverables Cycle 39: (1) CONTRIBUTING.md expanded with blind contributor welcome, braille
-display callout, Dorothy persona explanation, JS test instructions, good-first-issue guide,
-commit format. (2) 5 GitHub good-first-issues created (#92-#96). (3) CHANGELOG v0.5.0 entry.
+Key deliverables Cycle 41: (1) Jordan (DeafBlind) scenario tests — 16 tests in
+tests/accessibility/test_jordan_scenario.py covering braille formatting, Second Brain text-only,
+financial disclosure via text, food ordering. (2) Shared accessibility helpers extracted to
+tests/accessibility/helpers.py. (3) _format_for_braille() fixed to word-wrap at 40 chars.
+(4) 2 visual-only language strings fixed in orchestrator. (5) Windows NVDA + VoiceOver + braille
+display README sections added. (6) GitHub issues #93/#94/#95 closed.
+
+Next cycle priorities: (1) Telegram integration (`--telegram` flag, concurrent API server + bot);
+(2) Marcus (power user) scenario tests; (3) Consolidate FORBIDDEN_JARGON list (currently duplicated
+in helpers.py and test_dorothy_scenario.py).
 Phase 5 is fully complete — all criteria met (Dorothy scenario tests ✓, GRANT_NARRATIVE.md ✓,
 community launch prep ✓).
 
