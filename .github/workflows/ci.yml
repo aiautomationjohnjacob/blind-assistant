@@ -390,7 +390,7 @@ jobs:
   # Addresses issue #96: add Dorothy E2E tests to CI.
   # ──────────────────────────────────────────────────────────
   dorothy-e2e:
-    name: "E2E — Dorothy scenario (elder + newly-blind persona gate)"
+    name: "E2E — Persona scenario gate (Dorothy, Jordan, Marcus)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
