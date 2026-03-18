@@ -23,6 +23,7 @@ Design principles (mirrors test_dorothy_scenario.py and test_jordan_scenario.py)
 
 from __future__ import annotations
 
+import contextlib
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
