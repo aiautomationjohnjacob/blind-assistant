@@ -20,11 +20,19 @@
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
+| P3 | ISSUE-030: Add PUT /profile allowlist for extra keys — reject unknown keys with 422; prevents arbitrary MCP writes | Cycle 24 security review | 2026-03-18 |
+| P3 | Wire MCPMemoryClient into main.py startup — production server does not create or pass MCPMemoryClient; only injected in tests | Cycle 24 self-assessment | 2026-03-18 |
 | P3 | Verify Android TalkBack CI v0.3.2: confirm e2e-android.yml run passes; single-line pytest fix applied | Cycle 23 | 2026-03-18 |
-| P3 | Wire MCPMemoryClient into api_server.py: /profile GET/PUT endpoints should persist preferences via MCPMemoryClient; test-engineer needed | Cycle 23 | 2026-03-18 |
-| P3 | Education site package-lock.json: run `npm install` in clients/education/ so test-education CI uses reproducible installs | Cycle 23 | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
+
+## Completed Items (Cycle 24 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| MCPMemoryClient wired into GET/PUT /profile in api_server.py: 14 new tests; ProfileUpdateRequest added; preferences persist across server restarts | 2026-03-18 | 24 |
+| Education site tests fixed: moved to src/__tests__/, 41 new Jest tests, coverage 82.7%, npm ci in CI, NavLink aria-current corrected | 2026-03-18 | 24 |
+| CI failure fixed: test_record_with_vad_sync now uses patch.dict(sys.modules, {'webrtcvad': None}); 779 Python unit tests | 2026-03-18 | 24 |
 
 ## Completed Items (Cycle 23 additions)
 
