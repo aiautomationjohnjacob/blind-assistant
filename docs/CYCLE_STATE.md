@@ -209,6 +209,7 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P3: ISSUE-030 resolved** — VALID_EXTRA_PREFS frozenset in api_server.py; PUT /profile returns 422 on unknown extra keys; all-or-nothing validation (no write on rejection); audit log at WARNING; 8 new allowlist tests in test_api_server.py (Cycle 25)
 - [x] **P3: MCPMemoryClient wired into main.py** — production API server now creates MCPMemoryClient on startup and injects it into APIServer; graceful degradation if MCPMemoryClient raises; 3 new tests in test_main.py (Cycle 25)
 - [x] **P3: Android TalkBack CI v0.3.2 verified** — run 23223747818 PASSED (Cycle 25)
+- [x] **P3: ISSUE-031 resolved** — DELETE /profile/preferences endpoint added; confirm=true required; calls MCPMemoryClient.clear_user_data(); returns 204; graceful MCP degradation; CORS updated for DELETE; 8 new unit tests; 798 Python unit tests total (Cycle 26)
 
 ## Blockers
 

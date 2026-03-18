@@ -1401,3 +1401,43 @@ with patch("blind_assistant.core.orchestrator.Orchestrator", ...):
 
 This also applies to `APIServer`, `VoiceLocalInterface`, `TelegramBot`, and
 `MCPMemoryClient` — all imported lazily in main.py.
+
+---
+
+## Cycle 26 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: ISSUE-031 resolves a concrete data-rights gap. Users now have a programmatic path to clear their MCP preference data before sharing a device or session — a small but meaningful autonomy win. The cycle was tightly scoped. Recommendation: begin Phase 4 accessibility hardening next cycle and add client-side UX for the new clear-preferences action.
+
+**Code quality (code-reviewer)**: DELETE /profile/preferences is implemented correctly. Auth fires first, then confirm check, then MCP call — correct ordering. Graceful degradation (MCP unreachable → 204) is correct. DeletePreferencesRequest Pydantic model mirrors existing patterns. CORS updated to allow DELETE. 798 unit tests, no regression, ruff clean, mypy 0 errors. Test count increased from 790 to 798.
+
+**Security (security-specialist)**: explicit confirm=True requirement prevents accidental deletion by misbehaving clients. 400 response reveals confirm=true is needed — acceptable since unauthenticated callers get 401 before seeing the 400. No new security concerns introduced.
+
+**Accessibility (accessibility-reviewer)**: No user-facing voice output or UI changes this cycle. The DELETE endpoint is backend-only. Blind users who want to "clear my preferences" will need client-side UX in a future cycle — the backend is now ready to support it.
+
+**User perspective (blind-user-tester)**: Preference clearing is invisible today (no client UI yet), but correct for privacy. If I want to reset speech rate or timezone after a bad session, I can now do that. The confirm=true pattern prevents accidental wipes.
+
+**Ethics (ethics-advisor)**: ISSUE-031 fully resolved. Users have a data-erasure path for MCP preference data. Remaining ethics gap: client-side voice-accessible trigger for this endpoint.
+
+**Goal adherence (goal-adherence-reviewer)**: All Cycle 26 priority items addressed. ISSUE-031 resolved. Phase 3 completion assessment performed — criteria nearly met (Android/iOS/Web CI green; device-simulator screenshot artifacts deferred to release CI). No scope drift.
+
+**Consensus recommendation for next cycle**: (1) Begin Phase 4 Accessibility Hardening — run /audit-a11y on web app; call web-accessibility-expert for WCAG 2.1 AA audit; (2) Add client-side voice trigger for "clear my preferences"; (3) Document VALID_EXTRA_PREFS 422 as intentional disclosure in SECURITY_MODEL.md (security-specialist recommended this in Cycle 25).
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) ISSUE-031 resolved — DELETE /profile/preferences with confirm=true guard, MCPMemoryClient.clear_user_data() exposure, graceful MCP degradation; (2) 8 new unit tests covering all paths; 798 Python unit tests total (+8 from Cycle 26); (3) ruff clean, mypy 0 errors; (4) Phase 3 completion assessment: Android TalkBack CI ✓, iOS VoiceOver CI ✓, Web E2E CI ✓ — device screenshot artifacts deferred to release CI (expected); (5) OPEN_ISSUES.md ISSUE-031 marked RESOLVED
+- Attempted but failed: none — all planned items completed
+- Confusion/loops: TestClient.delete() does not accept json= kwarg in this httpx/Starlette version; must use client.request("DELETE", url, json=...) instead. Fixed immediately on first test run.
+- New gaps: (1) No client-side UX for clearing preferences (voice trigger needed); (2) VALID_EXTRA_PREFS 422 disclosure not yet documented in SECURITY_MODEL.md; (3) Phase 3 device-simulator screenshot artifacts not committed (tests pass in CI but no screenshot files captured)
+- Next cycle recommendation: (1) Begin Phase 4 — web accessibility audit (web-accessibility-expert + /audit-a11y skill); (2) Document VALID_EXTRA_PREFS in SECURITY_MODEL.md; (3) Consider advancing CYCLE_STATE.md to Phase 4 after confirming no SHOWSTOPPER issues outstanding
+
+**TECHNICAL LESSON (Starlette TestClient DELETE with JSON body)**:
+`TestClient.delete()` does NOT accept a `json=` keyword argument in Starlette ≥ 0.36 /
+httpx ≥ 0.24. Use `client.request("DELETE", url, json=...)` instead, which passes
+through to httpx's lower-level request builder that supports all HTTP methods with body.
+
+```python
+# WRONG — raises TypeError: delete() got an unexpected keyword argument 'json'
+client.delete("/profile/preferences", json={"confirm": True}, headers=headers)
+
+# CORRECT — request() accepts json= for any HTTP method
+client.request("DELETE", "/profile/preferences", json={"confirm": True}, headers=headers)
+```
