@@ -167,10 +167,7 @@ def main() -> None:
         # messages through. Forcing api_server_enabled ensures both run concurrently.
         config["telegram_enabled"] = True
         config["api_server_enabled"] = True
-        logger.info(
-            "Telegram super-user channel enabled. "
-            "API server will also start so the bot can reach the backend."
-        )
+        logger.info("Telegram super-user channel enabled. API server will also start so the bot can reach the backend.")
 
     asyncio.run(start_services(config))
 
