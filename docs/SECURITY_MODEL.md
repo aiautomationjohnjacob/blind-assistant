@@ -433,7 +433,38 @@ If a security breach is detected:
 
 ---
 
-## 10. Privacy-by-Default Configuration
+## 10. API Profile Allowlist — Intentional Information Disclosure (Cycle 25)
+
+### 10.1 VALID_EXTRA_PREFS Allowlist
+
+The `PUT /profile` endpoint rejects unknown preference keys with HTTP 422. The 422 response
+body contains the list of valid keys (`VALID_EXTRA_PREFS` frozenset in `api_server.py`).
+
+**Is this a security concern?** Minor. The allowlist exposes that keys like `timezone`,
+`tts_voice_id`, and `screen_reader` exist. This is **intentional information disclosure** —
+not a vulnerability — for the following reasons:
+
+1. **Requires authentication first**: The 422 response is only reachable after a valid
+   Bearer token is presented. Unauthenticated callers receive 401 before seeing the 422.
+2. **No sensitive data in the allowed key names**: The keys name preferences, not values.
+   Knowing that `tts_voice_id` is a valid key reveals nothing about the user's data.
+3. **Disclosure aids legitimate client developers**: Client apps (iOS, Android, Web)
+   need to know which preference keys the server accepts. Embedding this in 422 responses
+   is a deliberate design choice over requiring out-of-band documentation.
+
+**Threat model classification**: INFORMATIONAL — document, not fix.
+
+**Audit controls already in place**:
+- Rejected keys (unknown extras) are logged at WARNING level for security review
+- All-or-nothing validation: if any key is invalid, zero keys are written to MCP
+- The allowlist is a frozenset — immutable at runtime; additions require code review
+
+**If this becomes a concern in production**: add an endpoint `GET /profile/schema` that
+documents valid preference keys explicitly, then suppress the key list from 422 bodies.
+
+---
+
+## 11. Privacy-by-Default Configuration
 
 Users who want maximum privacy can enable "Privacy Mode":
 - No conversation logs stored
