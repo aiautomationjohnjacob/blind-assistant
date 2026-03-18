@@ -554,7 +554,7 @@ def _make_mock_memory(prefs: dict | None = None):
 
 
 @contextmanager
-def _make_server_with_memory(memory_client=None, token: str = "test-token-123"):
+def _make_server_with_memory(memory_client=None, token: str = "test-token-123"):  # noqa: S107
     """Build an APIServer+TestClient with a mock MCPMemoryClient injected."""
     orc = _make_orchestrator()
     config = {"debug": True}
