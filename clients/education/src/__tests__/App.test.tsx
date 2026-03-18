@@ -302,4 +302,196 @@ describe('App routing', () => {
     const main = screen.getByRole('main');
     expect(main).toHaveAttribute('tabindex', '-1');
   });
+
+  it('renders CoursePage at /course/:id', () => {
+    renderApp('/course/getting-started');
+    expect(
+      screen.getByRole('heading', { level: 1, name: /getting started/i })
+    ).toBeInTheDocument();
+  });
+
+  it('renders LessonPage at /lesson/:id', () => {
+    renderApp('/lesson/gs-1');
+    expect(
+      screen.getByRole('heading', { level: 1, name: /welcome and overview/i })
+    ).toBeInTheDocument();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// SITE HEADER — landmark and navigation
+// ─────────────────────────────────────────────────────────────
+
+describe('SiteHeader', () => {
+  it('renders a <header> landmark', () => {
+    renderWithRouter(<SiteHeader />);
+    expect(screen.getByRole('banner')).toBeInTheDocument();
+  });
+
+  it('has a <nav> with aria-label "Primary navigation"', () => {
+    renderWithRouter(<SiteHeader />);
+    expect(screen.getByRole('navigation', { name: /primary navigation/i })).toBeInTheDocument();
+  });
+
+  it('site logo link has descriptive aria-label', () => {
+    renderWithRouter(<SiteHeader />);
+    expect(
+      screen.getByRole('link', { name: /blind assistant learning.*home/i })
+    ).toBeInTheDocument();
+  });
+
+  it('nav link list uses role=list for VoiceOver compatibility', () => {
+    renderWithRouter(<SiteHeader />);
+    const nav = screen.getByRole('navigation', { name: /primary navigation/i });
+    expect(within(nav).getByRole('list')).toBeInTheDocument();
+  });
+
+  it('marks Courses link as aria-current=page on home route', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <SiteHeader />
+      </MemoryRouter>
+    );
+    const coursesLink = screen.getByRole('link', { name: /^courses$/i });
+    expect(coursesLink).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('courses link has no aria-current on non-home route', () => {
+    render(
+      <MemoryRouter initialEntries={['/course/getting-started']}>
+        <SiteHeader />
+      </MemoryRouter>
+    );
+    const coursesLink = screen.getByRole('link', { name: /^courses$/i });
+    // When not active, aria-current is not present (NavLink uses callback form)
+    expect(coursesLink).not.toHaveAttribute('aria-current', 'page');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// COURSE PAGE — lesson listing accessibility
+// ─────────────────────────────────────────────────────────────
+
+function renderCoursePage(courseId: string) {
+  return render(
+    <MemoryRouter initialEntries={[`/course/${courseId}`]}>
+      <Routes>
+        <Route path="/course/:courseId" element={<CoursePage />} />
+      </Routes>
+    </MemoryRouter>
+  );
+}
+
+describe('CoursePage', () => {
+  it('renders the course title as h1', () => {
+    renderCoursePage('getting-started');
+    expect(
+      screen.getByRole('heading', { level: 1, name: /getting started with blind assistant/i })
+    ).toBeInTheDocument();
+  });
+
+  it('shows an ordered list of lessons', () => {
+    renderCoursePage('getting-started');
+    expect(screen.getByRole('list')).toBeInTheDocument();
+  });
+
+  it('lesson links include lesson number and title', () => {
+    renderCoursePage('getting-started');
+    expect(screen.getByRole('link', { name: /lesson 1.*welcome/i })).toBeInTheDocument();
+  });
+
+  it('has a back link to course catalogue', () => {
+    renderCoursePage('getting-started');
+    expect(screen.getByRole('link', { name: /back to courses/i })).toBeInTheDocument();
+  });
+
+  it('shows 404-style message for unknown course', () => {
+    renderCoursePage('not-a-real-course');
+    expect(
+      screen.getByRole('heading', { level: 1, name: /course not found/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /return to course catalogue/i })).toBeInTheDocument();
+  });
+
+  it('lesson list has aria-label identifying the course', () => {
+    renderCoursePage('getting-started');
+    expect(
+      screen.getByRole('list', { name: /lessons in getting started with blind assistant/i })
+    ).toBeInTheDocument();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// LESSON PAGE — audio player and accessibility
+// ─────────────────────────────────────────────────────────────
+
+function renderLessonPage(lessonId: string) {
+  return render(
+    <MemoryRouter initialEntries={[`/lesson/${lessonId}`]}>
+      <Routes>
+        <Route path="/lesson/:lessonId" element={<LessonPage />} />
+      </Routes>
+    </MemoryRouter>
+  );
+}
+
+describe('LessonPage', () => {
+  it('renders lesson title as h1', () => {
+    renderLessonPage('gs-1');
+    expect(
+      screen.getByRole('heading', { level: 1, name: /welcome and overview/i })
+    ).toBeInTheDocument();
+  });
+
+  it('has a breadcrumb navigation', () => {
+    renderLessonPage('gs-1');
+    expect(screen.getByRole('navigation', { name: /breadcrumb/i })).toBeInTheDocument();
+  });
+
+  it('current page breadcrumb has aria-current="page"', () => {
+    renderLessonPage('gs-1');
+    const breadcrumb = screen.getByRole('navigation', { name: /breadcrumb/i });
+    const current = within(breadcrumb).getByText(/welcome and overview/i);
+    expect(current).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('has a "Mark as complete" button with aria-pressed=false initially', () => {
+    renderLessonPage('gs-1');
+    const btn = screen.getByRole('button', { name: /mark as complete/i });
+    expect(btn).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('toggling "Mark as complete" updates aria-pressed to true', () => {
+    renderLessonPage('gs-1');
+    const btn = screen.getByRole('button', { name: /mark as complete/i });
+    fireEvent.click(btn);
+    expect(screen.getByRole('button', { name: /marked as complete/i })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  });
+
+  it('shows 404-style message for unknown lesson', () => {
+    renderLessonPage('not-a-real-lesson');
+    expect(
+      screen.getByRole('heading', { level: 1, name: /lesson not found/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /return to courses/i })).toBeInTheDocument();
+  });
+
+  it('link to next lesson is present when a next lesson exists', () => {
+    renderLessonPage('gs-1');
+    expect(screen.getByRole('link', { name: /next lesson/i })).toBeInTheDocument();
+  });
+
+  it('no previous lesson link on first lesson', () => {
+    renderLessonPage('gs-1');
+    expect(screen.queryByRole('link', { name: /previous lesson/i })).not.toBeInTheDocument();
+  });
+
+  it('both previous and next lesson links on middle lesson', () => {
+    renderLessonPage('gs-2');
+    expect(screen.getByRole('link', { name: /previous lesson/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /next lesson/i })).toBeInTheDocument();
+  });
 });
