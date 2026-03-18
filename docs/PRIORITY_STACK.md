@@ -26,12 +26,20 @@
 **Telegram integration COMPLETE (Cycle 43)**: --telegram CLI flag; api_server_enabled forced; 6 new tests in test_main.py (9 total); ruff CI fix; 925 tests total.
 **Node.js 24 migration COMPLETE (Cycle 44)**: checkout/setup-node/upload-artifact v4→v5 across all 5 workflow files; ISSUE-050 resolved; June 2026 deadline met.
 **Device simulation CI COMPLETE (Cycle 45)**: Playwright screenshot tests (7 tests); named device-sim-screenshots/{browser}/ artifact in CI; Netlify deploy skips gracefully without secrets; Marcus test hang fixed (wait_for_confirmation mock missing).
+**Node.js 24 full migration COMPLETE (Cycle 46)**: upload-artifact v5→v7, setup-python v5→v6, checkout v5→v6, setup-node v5→v6 across all 5 workflow files; ISSUE-052 resolved (pytest-timeout=30s in pyproject.toml + ci.yml + autonomous-cycle.yml).
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
 | P4 | Netlify staging activation: configure NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID secrets so community members can test https://staging.blind-assistant.org with real NVDA+Chrome, TalkBack+Chrome, VoiceOver+Safari | cycle 45 review | 2026-03-18 |
-| P4 | pytest-timeout: add pytest-timeout package + asyncio_timeout config so tests that block for DEFAULT_TIMEOUT (60s) fail fast instead of silently hanging in CI | cycle 45 review | 2026-03-18 |
 | P5 | Education site deployment: deploy clients/education/ to learn.blind-assistant.org; document as a community touchpoint for blind contributors who prefer reading course material to browsing GitHub | cycle 45 creative | 2026-03-18 |
+
+## Completed Items (Cycle 46 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Node.js 24 full action migration (P4): upload-artifact v5→v7, setup-python v5→v6, checkout v5→v6, setup-node v5→v6 across all 5 workflow files; CI deprecation warnings eliminated; YAML validated | 2026-03-18 | 46 |
+| pytest-timeout (P4): pytest-timeout added to Install test dependencies in ci.yml + autonomous-cycle.yml; `--timeout=30` in pyproject.toml addopts; 818 unit tests all pass within 30s; ISSUE-052 resolved | 2026-03-18 | 46 |
+| GitHub issue #101 closed: stale CI failure from intermediate wip commit (413e8ba) — ruff format was fixed in final cycle-45 commit (c65bb24); current main passes ruff check | 2026-03-18 | 46 |
 
 ## Completed Items (Cycle 45 additions)
 
