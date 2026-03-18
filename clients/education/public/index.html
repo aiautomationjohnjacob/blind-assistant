@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Blind Assistant Learning Platform — audio-primary courses for blind and visually impaired users"
+    />
+    <title>Blind Assistant Learning</title>
+    <!--
+      Colour palette meets WCAG 2.1 AA at all text sizes.
+      Focus indicators are always visible — outline:none is never used.
+      All interaction is keyboard-navigable with no mouse required.
+    -->
+  </head>
+  <body>
+    <!-- Skip link — the very first focusable element, per WCAG 2.4.1 -->
+    <a
+      href="#main-content"
+      style="
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        background: #000;
+        color: #fff;
+        padding: 8px 16px;
+        z-index: 9999;
+        font-size: 1rem;
+      "
+      onfocus="this.style.left='0'"
+      onblur="this.style.left='-9999px'"
+    >
+      Skip to main content
+    </a>
+    <noscript>
+      <p>
+        Blind Assistant Learning requires JavaScript. Please enable JavaScript
+        in your browser settings and refresh the page.
+      </p>
+    </noscript>
+    <div id="root"></div>
+  </body>
+</html>
