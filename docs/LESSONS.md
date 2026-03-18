@@ -2441,3 +2441,48 @@ Solutions:
   2. 404.html redirect trick — copy index.html to 404.html; JS redirects query-param back
   3. Custom domain with Netlify/Vercel proxy — supports BrowserRouter but needs account
 HashRouter is the right choice for a static educational site on GitHub Pages.
+
+## Cycle 48 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: Both fixes are pure infrastructure — they don't advance the mission directly, but a broken CI gate blocks all future work and community contributions. A green CI is table stakes for blind contributors who may be opening their first PR. With CI green again, Phase 6 direction is the next meaningful question: all five phases are complete and the project is community-ready. The next impactful decision is what user feature or integration to build next.
+
+**Code quality (code-reviewer)**: Minimal, targeted changes. The pytest-timeout fix adds exactly one package to two pip install steps — no overreach. The ajv override is the correct npm pattern; the package-lock.json shrunk as redundant nested ajv@6 installs were replaced by the v8 override. Test count unchanged: 818 Python + 75 JS. No src/ files modified. No test count decreased.
+
+**Security (security-specialist)**: The ajv upgrade from v6 to v8 is actually a security improvement — ajv@8 contains patches for vulnerabilities present in ajv@6. The npm audit still shows 26 vulnerabilities (9 low, 3 moderate, 14 high) but these are all transitive dependencies of react-scripts 5 and are pre-existing. No new security surface introduced.
+
+**Accessibility (accessibility-reviewer)**: No user-facing changes. CI reliability indirectly protects blind users by ensuring accessibility fixes land quickly and correctly. A broken CI is an accessibility risk because it erodes confidence in every commit.
+
+**User perspective (blind-user-tester)**: Invisible to users today. But a broken CI blocks blind developers who want to contribute. The CI gate is the entry point for community participation — if it's red, no one can merge a PR with confidence.
+
+**Ethics (ethics-advisor)**: No autonomy or consent concerns. Pure infrastructure.
+
+**Goal adherence (goal-adherence-reviewer)**: Directly resolves P0 issue #102. Both CI failures traced back to cascading effects of previous cycle work: Cycle 46's pytest-timeout addition broke any pytest job that didn't install pytest-timeout, and Cycle 47's education site deploy assumed Node.js 20 would avoid the ajv issue (it didn't). Both gaps are now closed. No requirements dropped.
+
+**Consensus recommendation for next cycle**: (1) Confirm CI is green after the push by checking the run that triggered from commit 24c6d9c. (2) Begin Phase 6 creative exploration — all phases are complete; the loop should ask "what would most improve a blind user's daily independence?" and identify the next high-impact feature or integration. (3) LESSONS.md correction: the Cycle 47 lesson about react-scripts + Node.js 20 was wrong — see technical lesson below.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) Diagnosed P0 CI failure (issue #102) — two root causes: missing pytest-timeout in Web E2E and WCAG axe-core jobs; and ajv v6/v8 mismatch in education site build; (2) Fixed ci.yml (added pytest-timeout to two pip install steps); (3) Fixed clients/education/package.json (npm overrides: ajv@^8.17.1); (4) Regenerated package-lock.json (npm install --legacy-peer-deps); (5) Verified 818 Python tests and 75 JS tests all pass; (6) Pushed fix; (7) Closed GitHub issue #102
+- Attempted but failed: none
+- Confusion/loops: none — clear diagnosis from CI log
+- New gaps: The Cycle 47 LESSONS.md lesson about "CI uses Node.js 20 and will work correctly" was incorrect. Node.js 20 did NOT avoid the ajv issue. The real fix is the npm overrides approach.
+- Next cycle recommendation: Confirm CI is green, then begin Phase 6 planning with nonprofit-ceo and gap-analyst
+
+**TECHNICAL LESSON CORRECTION (react-scripts 5 and ajv: Node.js 20 does NOT fix it)**:
+The Cycle 47 LESSONS.md entry said "CI uses Node.js 20 and builds successfully." This was wrong.
+The ajv-keywords/ajv incompatibility occurs on ALL Node.js versions because it is a package
+version conflict, not a Node.js version issue. The error is:
+  Cannot find module 'ajv/dist/compile/codegen'
+This happens because ajv-keywords@5 requires ajv@^8, but the top-level ajv was v6.14.0.
+The correct fix is NOT to change the Node.js version — it is to force ajv@^8 via npm overrides:
+  In package.json: "overrides": { "ajv": "^8.17.1" }
+Then run: npm install --legacy-peer-deps
+This regenerates package-lock.json with ajv@8 at the top level, satisfying ajv-keywords@5.
+
+**TECHNICAL LESSON (pyproject.toml addopts applies to ALL pytest invocations)**:
+When you add --timeout=30 to [tool.pytest.ini_options] addopts in pyproject.toml, this flag
+is passed to EVERY pytest invocation that uses pyproject.toml as its config file, including
+CI jobs that install a minimal set of pytest plugins. Any job that runs pytest without
+pytest-timeout installed will fail with exit code 4 (unrecognized argument).
+Fix: either (1) add pytest-timeout to every pip install step that runs pytest (chosen here),
+or (2) move the timeout configuration to a per-job pytest.ini override (more complex).
+Always check pyproject.toml addopts when adding a new CI job that runs pytest.
