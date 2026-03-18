@@ -81,29 +81,18 @@ pytestmark = pytest.mark.web
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Fixtures
-# ─────────────────────────────────────────────────────────────────────────────
-
-
-@pytest.fixture(scope="session")
-def web_app_available() -> bool:
-    """Check if the web server is reachable before running axe tests."""
-    try:
-        conn = http.client.HTTPConnection("localhost", 19006, timeout=3)
-        conn.request("GET", "/")
-        resp = conn.getresponse()
-        return resp.status == 200
-    except (TimeoutError, http.client.HTTPException, OSError):
-        return False
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Helper
+# Helpers
+#
+# NOTE: web_app_available fixture is defined in conftest.py (DRY: shared
+# across all 4 web E2E test files).
 # ─────────────────────────────────────────────────────────────────────────────
 
 
 def _skip_if_unavailable(web_app_available: bool) -> None:
-    """Skip this test if Playwright is not installed or the web server is not running."""
+    """Skip this test if Playwright is not installed or the web server is not running.
+
+    NOTE: web_app_available is injected from the session fixture in conftest.py.
+    """
     if not PLAYWRIGHT_AVAILABLE:
         pytest.skip(
             "pytest-playwright is not installed. Web E2E tests run only in the 'e2e-web' CI job. "
