@@ -39,6 +39,12 @@ from blind_assistant.core.confirmation import ConfirmationGate
 from blind_assistant.core.orchestrator import Orchestrator, UserContext
 from blind_assistant.security.disclosure import FINANCIAL_RISK_DISCLOSURE
 from blind_assistant.tools.browser import BrowserTool, PageState
+from tests.accessibility.helpers import (
+    FORBIDDEN_JARGON,
+    assert_financial_disclosure_present,
+    assert_no_jargon,
+    assert_no_visual_only_language,
+)
 
 pytestmark = pytest.mark.e2e
 
@@ -64,19 +70,6 @@ ALEX_CONTEXT = UserContext(
     output_mode="voice_text",
     braille_mode=False,
 )
-
-# Jargon words that must NEVER appear in spoken responses to Dorothy or Alex.
-# Per Cycle 37 + 38 Dorothy test: technical terms are accessibility barriers.
-FORBIDDEN_JARGON = [
-    "api",
-    "backend",
-    "keychain",
-    "subprocess",
-    "endpoint",
-    "bearer",
-    "json",
-    "http",
-]
 
 
 # ─────────────────────────────────────────────────────────────
