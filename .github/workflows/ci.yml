@@ -703,8 +703,10 @@ jobs:
 
       - name: Install Playwright + pytest
         # pytest-asyncio NOT installed — tests use sync playwright API (no event loop conflict)
+        # pytest-timeout is required because pyproject.toml addopts includes --timeout=30;
+        # without it pytest exits with error code 4 (unrecognized argument).
         run: |
-          pip install playwright pytest pytest-playwright
+          pip install playwright pytest pytest-playwright pytest-timeout
           playwright install chromium || true
           playwright install-deps chromium || true
 
