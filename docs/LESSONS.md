@@ -1350,3 +1350,54 @@ with patch.dict(sys.modules, {"webrtcvad": None}):
     with pytest.raises(ImportError, match="webrtcvad"):
         _record_with_vad_sync()
 ```
+
+---
+
+## Cycle 25 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: Cycle 25 addressed two concrete security/quality gaps. The PUT /profile allowlist (ISSUE-030) closes a medium-severity security gap that matters most once the backend is cloud-deployed. Wiring MCPMemoryClient into main.py startup means real API-server users now get persistent preferences — Dorothy's speech rate and timezone survive server restarts without re-configuration. Android TalkBack CI v0.3.2 was confirmed passing. Tightly scoped and clean. Next cycle: DELETE /profile/preferences (ethics concern from Cycle 24 review) or begin Phase 4 (accessibility hardening) once all Phase 3 items are assessed.
+
+**Code quality (code-reviewer)**: VALID_EXTRA_PREFS frozenset is correct (immutable, O(1) lookup). Validation fires before any write — correct all-or-nothing semantics. 422 response includes both rejected keys AND allowed list. main.py wiring has proper exception handling with graceful degradation. test_main.py correctly patches at source module paths (not blind_assistant.main.X) because main.py uses lazy imports inside start_services(). 790 unit tests; test count did not decrease; no new src/ files without tests.
+
+**Security (security-specialist)**: ISSUE-030 resolved correctly. frozenset prevents runtime mutation. Audit logging fires at WARNING before 422 return. All-or-nothing validation is correct. One minor note: the 422 response body reveals the complete allowed key list — acceptable since the API requires bearer token auth, but document this in the threat model as intentional information disclosure to legitimate clients.
+
+**Accessibility (accessibility-reviewer)**: No user-facing voice output or UI changes this cycle. The new allowlisted preference keys ('tts_voice_id', 'screen_reader') are accessibility-positive additions — they allow clients to inform the backend which screen reader the user is running and override TTS voice. No WCAG issues introduced.
+
+**User perspective (blind-user-tester)**: MCPMemoryClient wired into production startup is invisible to me but impactful: every server restart previously wiped my speech rate and verbosity settings. Now they persist. The allowlist is transparent — I'd never know it's there, but it protects my memory store from corruption by a buggy client.
+
+**Ethics (ethics-advisor)**: Allowlist prevents writing arbitrary keys that could infer sensitive data. The outstanding DELETE /profile/preferences gap means users cannot currently clear their preference data from the MCP store. This is not a Phase 3 blocker but should be addressed before cloud deployment.
+
+**Goal adherence (goal-adherence-reviewer)**: All three Cycle 25 priority items addressed: ISSUE-030 (security), MCPMemoryClient production wiring, Android TalkBack CI v0.3.2 verification. No scope drift. Work matches Phase 3 sprint plan.
+
+**Consensus recommendation for next cycle**: (1) Add DELETE /profile/preferences endpoint with confirmation flow (ethics gap from Cycle 24 review); (2) Assess Phase 3 completion criteria — are all 5 persona test scenarios coverable with current implementation? (3) Begin Phase 4 accessibility hardening planning.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) ISSUE-030 resolved — VALID_EXTRA_PREFS frozenset + 422 on unknown keys + no-write-on-rejection; (2) MCPMemoryClient wired into main.py start_services() production startup with graceful degradation; (3) 11 new tests: 8 in test_api_server.py (allowlist) + 3 in new test_main.py; 790 Python unit tests total; (4) Android TalkBack CI v0.3.2 verified as passing (run 23223747818)
+- Attempted but failed: none — all planned items completed
+- Confusion/loops: test_main.py initially tried to patch blind_assistant.main.Orchestrator, which fails because main.py uses lazy imports inside start_services(). Patching at the source module path (blind_assistant.core.orchestrator.Orchestrator) is correct for lazy-import functions.
+- New gaps: (1) PUT /profile 422 response reveals full allowed key list — low risk but document in threat model; (2) DELETE /profile/preferences missing (ethics); (3) Phase 3 completion assessment needed
+- Next cycle recommendation: (1) DELETE /profile/preferences with confirmation flow; (2) Phase 3 completion assessment vs. Phase 4 readiness check
+
+**TECHNICAL LESSON (patching lazy imports in pytest)**:
+When a function uses lazy imports (imports inside the function body), the imported
+names do NOT appear as attributes of the containing module. Patching
+`module.FunctionImportedLazily` will raise AttributeError.
+
+```python
+# main.py — lazy import pattern
+async def start_services(config):
+    from blind_assistant.core.orchestrator import Orchestrator  # lazy import
+    orchestrator = Orchestrator(config)
+    ...
+
+# WRONG — Orchestrator is not an attribute of blind_assistant.main
+with patch("blind_assistant.main.Orchestrator", ...):
+    ...  # AttributeError: module has no attribute 'Orchestrator'
+
+# CORRECT — patch at the source module where the class lives
+with patch("blind_assistant.core.orchestrator.Orchestrator", ...):
+    ...  # Works correctly
+```
+
+This also applies to `APIServer`, `VoiceLocalInterface`, `TelegramBot`, and
+`MCPMemoryClient` — all imported lazily in main.py.
