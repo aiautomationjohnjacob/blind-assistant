@@ -128,6 +128,16 @@ def main() -> None:
         help="Start the REST API server on localhost:8000 (for client apps)",
     )
     parser.add_argument(
+        "--telegram",
+        action="store_true",
+        help=(
+            "Enable Telegram bot (secondary/super-user channel). "
+            "Requires --api. Must have completed manual Telegram setup first "
+            "(visual process — not for primary blind user setup). "
+            "Bot token and allowed user IDs must be stored in OS keychain via installer."
+        ),
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         help="Enable debug logging",
@@ -150,6 +160,17 @@ def main() -> None:
 
     if args.api:
         config["api_server_enabled"] = True
+
+    if args.telegram:
+        # Telegram requires the API server to be running — they share the same orchestrator.
+        # Enabling --telegram without --api would leave the bot with no backend to route
+        # messages through. Forcing api_server_enabled ensures both run concurrently.
+        config["telegram_enabled"] = True
+        config["api_server_enabled"] = True
+        logger.info(
+            "Telegram super-user channel enabled. "
+            "API server will also start so the bot can reach the backend."
+        )
 
     asyncio.run(start_services(config))
 
