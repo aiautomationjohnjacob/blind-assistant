@@ -221,8 +221,13 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P4: Bundle axe-core locally** — axe.min.js (4.9.1, 555KB) committed; page.add_script_tag(path=...); CDN dependency eliminated; ISSUE-035 resolved (Cycle 29)
 - [x] **P4: Check first a11y-audit CI run result** — ALL 26 web E2E tests were silently failing (async/sync mismatch + pipefail); fixed with sync playwright API; ISSUE-034 resolved (Cycle 29)
 - [x] **P4: iOS/Android Phase 4 accessibility** — VoiceOver live region bug fixed (View→Text); accessibilityActions added for rotor; ISSUE-036 resolved; +6 JS tests; 127 JS total (Cycle 29)
-- [ ] **P4: web-accessibility-expert full audit** — NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome flows; heading structure; skip link; focus management after route changes
-- [ ] **P4: SetupWizardScreen live region audit** — check for same VoiceOver live region bug in SetupWizardScreen (progress/step announcements)
+- [x] **P4: Skip link + main landmark** — `clients/mobile/public/index.html` custom Expo template; skip-to-main-content link is first focusable element; `<div role="main">` wraps React root; WCAG 2.4.1 Level A (Cycle 30)
+- [x] **P4: SetupWizardScreen token step live region** — `accessibilityLiveRegion="polite"` added to token entry instructions Text; matches pattern from all other steps; 1 new JS test; 128 JS total (Cycle 30)
+- [x] **P4: Web structure E2E tests** — 5 new tests in `TestPageStructure`: skip link first focusable, skip link target exists, main landmark, heading structure, heading labels (Cycle 30)
+- [x] **Documentation steward (Cycle 30)** — CHANGELOG updated with Phase 4 section (Cycles 28-30); README "What You Will Need" corrects Telegram to optional; test counts updated to current (812 Python, 128 JS, 75 education)
+- [ ] **P4: Verify skip link in expo export** — run `expo export --platform web` and confirm `dist/index.html` includes the skip link from `public/index.html`
+- [ ] **P4: web-accessibility-expert full audit** — NVDA+Chrome, VoiceOver+Safari, TalkBack+Chrome flows; focus management after state changes; review axe-core gate results
+- [ ] **P4: Check axe-core CI gate results** — first run after sync API fix; review any 'serious' violations found; add to OPEN_ISSUES.md
 
 ## Blockers
 
