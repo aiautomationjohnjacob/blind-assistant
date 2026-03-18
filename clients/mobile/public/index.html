@@ -26,6 +26,44 @@
         The skip link uses a visible :focus style (see inline styles below).
     -->
 
+    <!--
+      crypto.randomUUID polyfill — required for Expo/uuid on plain http: origins.
+
+      WHY: Expo's uuid dependency (expo-modules-core) calls crypto.randomUUID()
+      at initialization time. On HTTPS origins (production) and modern Chrome,
+      crypto.randomUUID() is always available. However, in some CI Playwright
+      Chromium environments using plain http:// (even localhost), the browser may
+      not expose randomUUID on the crypto object.
+
+      The polyfill uses crypto.getRandomValues() which IS always available (even
+      on non-secure origins) and produces a cryptographically random v4 UUID.
+
+      This script runs synchronously before the deferred Expo bundle so
+      crypto.randomUUID is available when expo-modules-core initializes.
+
+      SECURITY: We only polyfill if randomUUID is absent — we never override
+      the browser's native implementation. The polyfill uses the same entropy
+      source (crypto.getRandomValues) as the native API.
+
+      References: ISSUE-041 (Expo bundle crash in CI Playwright Chromium)
+    -->
+    <script>
+      /* istanbul ignore next */
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID !== "function") {
+        crypto.randomUUID = function () {
+          // RFC 4122 v4 UUID using crypto.getRandomValues for entropy.
+          return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+            /[xy]/g,
+            function (c) {
+              var r = crypto.getRandomValues(new Uint8Array(1))[0] % 16;
+              var v = c === "x" ? r : (r & 0x3) | 0x8;
+              return v.toString(16);
+            }
+          );
+        };
+      }
+    </script>
+
     <!-- The `react-native-web` recommended style reset -->
     <style id="expo-reset">
       /* These styles make the body full-height */

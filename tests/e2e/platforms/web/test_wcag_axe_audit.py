@@ -146,9 +146,7 @@ def _wait_for_app_ready(page: Page) -> None:
     with contextlib.suppress(Exception):
         page.on(
             "console",
-            lambda msg: console_errors.append(f"[{msg.type}] {msg.text}")
-            if msg.type in ("error", "warning")
-            else None,
+            lambda msg: console_errors.append(f"[{msg.type}] {msg.text}") if msg.type in ("error", "warning") else None,
         )
 
     try:
