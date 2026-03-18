@@ -313,10 +313,14 @@ jobs:
 
       - name: Install Playwright Python bindings
         # pytest-asyncio NOT installed — tests use sync playwright API (no event loop conflict)
+        # Install both chromium and firefox: the e2e-web job runs tests against both browsers
+        # (NVDA+Chrome and NVDA+Firefox are separate accessibility test suites).
         run: |
           pip install playwright pytest pytest-playwright
           playwright install chromium || true
           playwright install-deps chromium || true
+          playwright install firefox || true
+          playwright install-deps firefox || true
 
       - name: Start web server (serve Expo dist/)
         working-directory: clients/mobile
