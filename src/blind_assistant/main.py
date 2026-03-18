@@ -44,8 +44,22 @@ async def start_services(config: dict) -> None:
     # API server — primary connection point for all native client apps
     if config.get("api_server_enabled", False):
         from blind_assistant.interfaces.api_server import APIServer
+        from blind_assistant.memory.mcp_memory import MCPMemoryClient
 
-        api_server = APIServer(orchestrator, config)
+        # MCPMemoryClient persists user preferences across server restarts.
+        # Initialised here so the production server has memory; injected for testability.
+        memory_client: MCPMemoryClient | None = None
+        try:
+            memory_client = MCPMemoryClient()
+            logger.info("MCPMemoryClient initialised — user preferences will persist.")
+        except Exception as exc:
+            logger.warning(
+                "MCPMemoryClient could not be initialised (%s) — "
+                "profile preferences will be session-only.",
+                exc,
+            )
+
+        api_server = APIServer(orchestrator, config, memory_client=memory_client)
         tasks.append(asyncio.create_task(api_server.start(), name="api_server"))
         logger.info("REST API server starting on localhost:8000...")
 
