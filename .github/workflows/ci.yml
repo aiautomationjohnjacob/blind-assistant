@@ -261,7 +261,9 @@ jobs:
           cache-dependency-path: clients/education/package-lock.json
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        # package-lock.json is now committed — use ci for reproducible installs.
+        # --legacy-peer-deps resolves the react-scripts 5 / TypeScript 5 peer conflict.
+        run: npm ci --legacy-peer-deps
 
       - name: Run Jest accessibility tests
         run: npm test -- --watchAll=false --ci
