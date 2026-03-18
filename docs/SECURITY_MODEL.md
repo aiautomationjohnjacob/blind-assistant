@@ -464,7 +464,7 @@ documents valid preference keys explicitly, then suppress the key list from 422 
 
 ---
 
-## 11. Privacy-by-Default Configuration
+## 12. Privacy-by-Default Configuration
 
 Users who want maximum privacy can enable "Privacy Mode":
 - No conversation logs stored
