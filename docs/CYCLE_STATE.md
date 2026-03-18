@@ -229,8 +229,10 @@ Second Brain — all without sighted help and without ever asking "what do I do 
 - [x] **P4: ISSUE-037 fix: tabindex="-1" on #main-content** — skip link was non-functional (moves scroll not focus); fixed in public/index.html; 5 new TestFocusManagement E2E tests + 1 TestPageStructure test; test_can_reach_main_button_by_tab corrected; ruff clean; 812 Python + 128 JS all passing (Cycle 31)
 - [x] **P4: Check axe-core CI gate results** — CI run 23227996919: 0 critical, 0 serious, 1 unidentified moderate/minor violation (ISSUE-039 logged); Phase 4 gate PASSED (Cycle 32)
 - [x] **P4: web-accessibility-expert audit (partial)** — 10 E2E test accuracy issues found and fixed (React hydration race, Python/JS syntax bug, setup wizard vs main screen mismatch); _wait_for_app_ready() added to all web E2E tests + axe-core tests; ISSUE-038 resolved, ISSUE-039 open (Cycle 32)
-- [ ] **P4: ISSUE-039: identify and fix 1 moderate axe-core violation** — violation ID/impact unknown; axe tests now wait for hydration so next CI run will surface details
-- [ ] **P4: Phase 4 completion assessment** — zero CRITICAL axe violations ✓; ISSUE-039 must resolve first; platform agent sign-offs pending
+- [x] **P4: ISSUE-040: fix aria-live regions conditionally rendered (WCAG 4.1.3)** — MainScreen.tsx: transcript + response containers always rendered (opacity=0+maxHeight=0 when empty); hiddenLiveRegion style added; 128 JS tests pass; ISSUE-040 logged+resolved (Cycle 33)
+- [x] **P4: web E2E CI hydration timeout** — _wait_for_app_ready() timeout 5s→15s in all 3 web E2E test files; 8 previously-failing tests expected to pass in next CI run; commit c3e55df (Cycle 33)
+- [ ] **P4: ISSUE-039: identify and fix 1 moderate axe-core violation** — violation ID/impact unknown; awaiting CI run c3e55df (15s hydration wait should surface violation details)
+- [ ] **P4: Phase 4 completion assessment** — zero CRITICAL axe violations ✓; ISSUE-039 pending CI c3e55df; platform agent sign-offs: web ✓ (code reviewed), iOS ✓ (CI pass), Android ✓ (CI pass), Windows/macOS pending formal sign-off
 
 ## Blockers
 

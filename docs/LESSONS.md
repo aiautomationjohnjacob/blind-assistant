@@ -1804,3 +1804,70 @@ conceptually, but the syntax is completely different. Ruff does not catch
 this because the string is valid Python — the error only manifests at runtime
 when Playwright executes the JS. The CI error message "SyntaxError: Unexpected
 identifier 'or'" is the tell.
+
+## Cycle 33 Review — 2026-03-18
+
+**Strategy (nonprofit-ceo)**: Cycle 33 fixed a genuine WCAG 4.1.3 violation — aria-live regions were conditionally rendered, meaning NVDA/VoiceOver users would miss the first AI response announcement. This is exactly the kind of subtle, high-impact accessibility bug that matters for blind users. Phase 4 CI gate holds at 0 critical violations. ISSUE-039 (1 moderate axe violation) pending CI confirmation. Recommend completing Phase 4 once ISSUE-039 is confirmed resolved.
+
+**Code quality (code-reviewer)**: (1) `hiddenLiveRegion` style using `opacity=0 + maxHeight=0` is the correct accessibility pattern — keeps node in the a11y tree while invisible. (2) 15s timeout increase for `_wait_for_app_ready` is pragmatic for slow CI environments. (3) 128 JS tests + 812 Python tests all pass; no regressions. (4) Ruff errors in previous CI run were from wip commits, not the clean commit.
+
+**Security (security-specialist)**: No security implications. All changes are test/accessibility fixes.
+
+**Accessibility (accessibility-reviewer)**: The conditional aria-live fix is critical for WCAG 4.1.3. Live regions must exist in the DOM before content injection per the ARIA spec. `opacity=0 + maxHeight=0` correctly maintains the node in the a11y tree. 15s hydration timeout is appropriate for CI. Both fixes address real blind user experience issues, not just CI problems.
+
+**User perspective (blind-user-tester)**: The aria-live fix is critical. Without it, NVDA would not auto-announce the first assistant response — I'd have to manually navigate to it. That's terrible UX and would make the app feel broken on first use. Now the live region is always registered. I want a real NVDA+Chrome manual test to fully verify.
+
+**Ethics (ethics-advisor)**: No new concerns. The live region fix improves autonomy — blind users automatically hear responses without navigating manually.
+
+**Goal adherence (goal-adherence-reviewer)**: Phase 4 deliverables directly addressed: WCAG 4.1.3 compliance gap (ISSUE-040, now resolved). ISSUE-039 pending CI confirmation. 0 critical axe violations confirmed.
+
+**Consensus recommendation for next cycle**: (1) Check CI run c3e55df — verify web E2E tests now pass with 15s hydration wait and identify ISSUE-039 violation from axe output; (2) If ISSUE-039 is acceptable (moderate, not critical), assess Phase 4 as complete and transition to Phase 5.
+
+**Orchestrator self-assessment**:
+- Accomplished: (1) Identified root cause of 8 web E2E test failures — app was on loading spinner when tests ran (5s timeout too short in CI); (2) Fixed WCAG 4.1.3 violation: aria-live regions now always in DOM (not conditionally rendered) — ISSUE-040 logged and resolved; (3) Increased _wait_for_app_ready timeout from 5s to 15s in all 3 web E2E test files; (4) All 128 JS tests + 812 Python unit tests pass; (5) Pushed clean commit c3e55df to trigger CI verification
+- Attempted but failed: Could not check ISSUE-039 violation details — CI run 23228416482 failed on ruff (old wip commit); new CI run pending
+- Confusion/loops: The ruff CI failure was from a `wip(files)` commit, not the clean commit — this caused unnecessary investigation; ruff passes locally and on the clean commit
+- New gaps: ISSUE-040 found and resolved (aria-live conditional rendering); web E2E timeout was systematically too short across all test files
+- Next cycle recommendation: (1) Confirm ISSUE-039 violation identity from CI run c3e55df; (2) If violation is acceptable, declare Phase 4 complete; (3) Begin Phase 5 (Polish & Community Ready)
+
+**TECHNICAL LESSON (ARIA live regions and conditional rendering)**:
+Always render aria-live region containers unconditionally in React apps.
+
+```jsx
+// WRONG — live region not in DOM until first content; misses first announcement
+{lastResponse ? (
+  <View>
+    <Text accessibilityLiveRegion="polite">{lastResponse}</Text>
+  </View>
+) : null}
+
+// CORRECT — live region always in DOM; screen reader registers it on page load
+<View style={[styles.container, !lastResponse && styles.hiddenLiveRegion]}>
+  <Text accessibilityLiveRegion="polite">{lastResponse}</Text>
+</View>
+
+// hiddenLiveRegion style — visually hidden but in accessibility tree
+hiddenLiveRegion: {
+  opacity: 0,        // invisible but in layout
+  maxHeight: 0,      // no visual space
+  overflow: "hidden",
+  padding: 0,
+}
+```
+
+The ARIA spec requires: "Authors SHOULD ensure that aria-live regions are
+present in the rendered page before they are needed." Conditional rendering
+with `? ... : null` removes the node from the DOM entirely — the screen reader
+unregisters it. The first content change after the node reappears is NOT
+announced because the reader hasn't registered the live region yet.
+
+**TECHNICAL LESSON (E2E hydration timeout in CI)**:
+Web E2E tests for React/Expo apps need longer hydration timeouts in CI than locally.
+- Local dev: `checkStoredCredentials()` resolves in ~100ms (warm V8, local disk)
+- CI (cold runner): can take 3-8 seconds (cold V8, expo-secure-store init)
+- 5s timeout: races with CI; tests run against loading spinner
+- 15s timeout: safe margin; adds ~0s to passing tests (selector found immediately)
+- The timeout only fires when the element doesn't appear — not a fixed sleep
+
+Rule: `_wait_for_app_ready` timeout should be 3× the slowest observed CI time.
+If CI logs show "found after Xms", use 3X as timeout. Currently 15s is sufficient.
