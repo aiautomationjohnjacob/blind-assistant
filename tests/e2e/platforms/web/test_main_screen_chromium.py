@@ -246,25 +246,40 @@ class TestMainScreenARIA:
     """
 
     def test_main_button_has_role_button(self, page: Page, web_app_available: bool) -> None:
-        """The press-to-talk button must have role=button for NVDA/TalkBack."""
+        """
+        The press-to-talk button (main screen) or Continue/Confirm buttons (setup wizard)
+        must have role=button for NVDA/TalkBack.
+
+        In CI, expo-secure-store returns null so the setup wizard loads. Both
+        screens use Pressable with accessibilityRole='button', which react-native-web
+        renders as role='button'. This test verifies that at least one button is
+        present after React hydrates.
+        """
         _skip_if_unavailable(web_app_available)
         page.goto(WEB_APP_URL)
         page.wait_for_load_state("networkidle")
+        # Wait for React to hydrate — the loading spinner has no role=button
+        _wait_for_app_ready(page)
         buttons = page.query_selector_all('[role="button"]')
         assert len(buttons) > 0, (
-            "No elements with role=button found — screen readers cannot identify interactive elements"
+            "No elements with role=button found — screen readers cannot identify interactive elements. "
+            "Both MainScreen and SetupWizardScreen use Pressable with accessibilityRole='button'. "
+            "If this fails, React may not have hydrated yet (check _wait_for_app_ready timeout) or "
+            "react-native-web's role mapping may have changed."
         )
 
     def test_main_button_has_accessible_label(self, page: Page, web_app_available: bool) -> None:
         """
-        Every button must have a non-empty aria-label.
+        Every button must have a non-empty accessible name (aria-label or text content).
         An unlabelled button reads as 'button' with no context — useless to NVDA.
         """
         _skip_if_unavailable(web_app_available)
         page.goto(WEB_APP_URL)
         page.wait_for_load_state("networkidle")
+        # Wait for React to hydrate before querying buttons
+        _wait_for_app_ready(page)
         buttons = page.query_selector_all('[role="button"]')
-        assert len(buttons) > 0, "No buttons found"
+        assert len(buttons) > 0, "No buttons found — check _wait_for_app_ready timeout"
         for button in buttons:
             label = button.get_attribute("aria-label")
             text_content = (button.text_content() or "").strip()
@@ -277,13 +292,21 @@ class TestMainScreenARIA:
         Status updates (processing, error) must use aria-live='polite'.
         'assertive' would interrupt the user mid-sentence — unacceptable for
         screen reader users. WCAG 2.1 SC 4.1.3 (Status Messages).
+
+        Both MainScreen (statusText) and SetupWizardScreen (step instructions)
+        use accessibilityLiveRegion='polite', which react-native-web renders as
+        aria-live='polite'. We must wait for React to hydrate before checking.
         """
         _skip_if_unavailable(web_app_available)
         page.goto(WEB_APP_URL)
         page.wait_for_load_state("networkidle")
+        # Wait for React to hydrate — aria-live attrs are set by React, not static HTML
+        _wait_for_app_ready(page)
         live_regions = page.query_selector_all('[aria-live="polite"]')
         assert len(live_regions) > 0, (
-            "No aria-live='polite' regions found — status updates will not be announced to screen reader users"
+            "No aria-live='polite' regions found — status updates will not be announced to screen reader users. "
+            "Both MainScreen.statusText and SetupWizardScreen step instructions use "
+            "accessibilityLiveRegion='polite'. Check that React has hydrated before this assertion runs."
         )
 
     def test_html_element_has_lang_attribute(self, page: Page, web_app_available: bool) -> None:
