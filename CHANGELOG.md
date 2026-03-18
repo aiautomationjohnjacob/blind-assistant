@@ -6,7 +6,48 @@ Format: [Semantic Versioning](https://semver.org/). Types: `Added`, `Changed`, `
 
 ---
 
-## [Unreleased] — Phase 3: Blind User Testing
+## [Unreleased] — Phase 4: Accessibility Hardening
+
+### Added
+- **Skip link in Expo web export** (Cycle 30): Created `clients/mobile/public/index.html`
+  — a custom Expo HTML template that adds a skip-to-main-content link as the first focusable
+  element. WCAG 2.4.1 Bypass Blocks (Level A). NVDA+Chrome users can Tab from the address
+  bar and immediately land on the skip link; activating it jumps to `#main-content`.
+  Also wraps the React root in `<div role="main">` for landmark navigation (D key in NVDA).
+- **Web structure E2E tests** (Cycle 30): 5 new web E2E tests in `test_main_screen_chromium.py`
+  (`TestPageStructure`): skip link is first focusable element, skip link target exists,
+  main landmark is present, heading structure present, headings have accessible labels.
+  Total web E2E tests: 33 (was 26 runnable + the 7 new tests + structural class additions).
+- **SetupWizardScreen token step live region** (Cycle 30): `accessibilityLiveRegion="polite"`
+  added to the instructions Text in the token-entry step. Previously this step was the only
+  step without a live region — VoiceOver would not auto-announce the instructions when
+  the screen transitioned from welcome → token. 1 new JS test; 128 JS total.
+
+### Fixed
+- **VoiceOver live region on View (ISSUE-036)** (Cycle 29): `accessibilityLiveRegion` was
+  placed on `<View>` containers in MainScreen.tsx. iOS VoiceOver silently ignores live regions
+  on View — they must be on `<Text>` nodes. Fixed transcript and response displays. 6 new
+  JS tests added.
+- **Web E2E tests silently passing despite failures (ISSUE-034)** (Cycle 29): All 26 web E2E
+  tests were written as `async def` using the sync pytest-playwright `page` fixture. This
+  created a RuntimeError that was swallowed, making all tests appear to pass with 0 assertions.
+  Converted all 26 tests to `def` (sync). Fixed CI `pipefail` bug where `| tee` discarded
+  pytest exit codes. All 26 tests now run and assert correctly.
+- **axe-core CDN dependency (ISSUE-035)** (Cycle 29): axe-core was injected from cdnjs CDN.
+  Committed `axe.min.js` (4.9.1, 555KB) locally; `page.add_script_tag(path=...)` eliminates
+  the network dependency in CI. CDN failures now cannot cause false test passes.
+- **`accessibilityRole="text"` on web (ISSUE-033)** (Cycle 28): react-native-web maps
+  `accessibilityRole="text"` to `role="text"` — not a valid WAI-ARIA role, which causes
+  axe-core violations and confuses screen readers. Fixed with `Platform.OS === "web" ?
+  undefined : "text"` guard across 10 occurrences in MainScreen.tsx and SetupWizardScreen.tsx.
+- **WCAG axe-core CI gate** (Cycle 28): New `a11y-audit` job in ci.yml builds Expo web,
+  serves it on :19006, and runs `test_wcag_axe_audit.py`. Fails CI on any CRITICAL WCAG
+  violation. Audits: full WCAG 2.1 AA, colour-contrast, interactive element naming, ARIA roles.
+  axe.min.js bundled locally; no CDN dependency.
+
+---
+
+## [Phase 3 Complete] — Phase 3: Blind User Testing
 
 ### Added
 - **Android TalkBack E2E tests** (Cycle 19): Full test suite for Android TalkBack accessibility.
