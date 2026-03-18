@@ -376,7 +376,11 @@ class VoiceInstaller:
         api_key = self._wait_for_input("Claude API key:")
 
         if not api_key or not api_key.startswith("sk-"):
-            self._speak("That doesn't look quite right. Claude API keys start with sk-ant. Try again.")
+            self._speak(
+                "That doesn't look quite right. "
+                "Claude API keys start with the letters s-k, then a dash. "
+                "Please check the key on the Anthropic website and try again."
+            )
             api_key = self._wait_for_input("Claude API key:")
 
         store_credential(CLAUDE_API_KEY, api_key)
