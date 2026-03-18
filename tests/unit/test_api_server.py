@@ -858,7 +858,7 @@ def test_delete_preferences_calls_clear_user_data():
     mem = _make_mock_memory()
     mem.clear_user_data = AsyncMock()
     with _make_server_with_memory(memory_client=mem) as (_, client):
-        client.delete("/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
+        client.request("DELETE", "/profile/preferences", json={"confirm": True}, headers=VALID_HEADERS)
     mem.clear_user_data.assert_called_once_with("local_user")
 
 
