@@ -35,6 +35,10 @@ DEFAULT_WAKE_WORD = "assistant"
 # Fallback recording duration if VAD (webrtcvad) is not available (seconds)
 DEFAULT_RECORD_DURATION = 8.0
 
+# Extended fallback duration for elder/slow users who need more time to speak.
+# Used when constructing VoiceLocalInterface with a "elder" profile config.
+ELDER_RECORD_DURATION = 12.0
+
 # Whether to use Voice Activity Detection (VAD) for smart cutoff.
 # Set to False in config if webrtcvad causes issues on a specific platform.
 DEFAULT_USE_VAD = True
