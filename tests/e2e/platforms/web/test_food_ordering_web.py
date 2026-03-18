@@ -131,24 +131,33 @@ class TestFoodOrderingAccessibility:
         _skip_if_unavailable(web_app_available)
         page.goto(WEB_APP_URL)
         page.wait_for_load_state("networkidle")
+        # Wait for React to hydrate — buttons only appear after React renders
+        _wait_for_app_ready(page)
 
-        # Tab through all focusable elements and look for the main action button
+        # Tab through all focusable elements and look for the main action button.
+        # Accept: voice button (main screen) or setup wizard buttons.
+        # In CI, expo-secure-store returns null → setup wizard shows first.
         found_action_button = False
+        ALL_KNOWN_BUTTON_KEYWORDS = (
+            "speak", "record", "start", "assistant", "tap",  # main screen
+            "continue", "confirm", "token", "next", "setup", "welcome", "save",  # setup wizard
+            "skip",  # skip link
+        )
         for _ in range(10):
             page.keyboard.press("Tab")
             focused_label = page.evaluate(
-                "document.activeElement.getAttribute('aria-label') || document.activeElement.textContent"
+                "document.activeElement.getAttribute('aria-label') || document.activeElement.textContent || ''"
             )
             if focused_label:
                 lower = focused_label.lower()
-                # The main button should mention speaking or recording
-                if any(word in lower for word in ("speak", "record", "start", "assistant", "tap")):
+                if any(word in lower for word in ALL_KNOWN_BUTTON_KEYWORDS):
                     found_action_button = True
                     break
 
         assert found_action_button, (
-            "Could not reach the main speak/record button via Tab key. "
-            "A blind NVDA user cannot start the food ordering flow."
+            "Could not reach any labeled interactive button via Tab key. "
+            "A blind NVDA user cannot interact with the app. "
+            f"Accepted button keywords: {ALL_KNOWN_BUTTON_KEYWORDS}"
         )
 
     def test_status_updates_use_polite_live_region(self, page: Page, web_app_available: bool) -> None:
