@@ -188,7 +188,7 @@ class ScreenObserver:
         Returns PNG bytes on success, or None if Playwright is unavailable.
         """
         try:
-            from playwright.async_api import async_playwright
+            from playwright.async_api import FloatRect, async_playwright
 
             async with async_playwright() as pw:
                 browser = await pw.chromium.launch(headless=True)
@@ -197,11 +197,11 @@ class ScreenObserver:
                     # Navigate to blank to ensure browser is ready
                     await page.goto("about:blank")
 
-                    # Apply region clipping if requested
-                    clip = None
+                    # Apply region clipping if requested (Playwright requires FloatRect, not dict)
+                    clip: FloatRect | None = None
                     if region:
                         x, y, w, h = region
-                        clip = {"x": x, "y": y, "width": w, "height": h}
+                        clip = FloatRect(x=float(x), y=float(y), width=float(w), height=float(h))
 
                     screenshot_bytes: bytes = await page.screenshot(
                         full_page=False,
