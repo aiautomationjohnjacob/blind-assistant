@@ -23,12 +23,20 @@
 **CI hardening COMPLETE (Cycle 40)**: lint fix (issue #97/#98); WebKit E2E CI (issue #92); Dorothy E2E CI job (issue #96); 842 Python tests + 7 new WebKit tests.
 **Jordan DeafBlind scenario COMPLETE (Cycle 41)**: 16 Jordan tests; braille formatter fix; shared accessibility helpers; NVDA/braille README; issues #93/#94/#95 closed; 858 tests total.
 **Marcus power user scenario COMPLETE (Cycle 42)**: 31 Marcus tests; brief mode pipeline verified; financial disclosure survives brief mode; DRY web_app_available fixture; CI renamed to persona gate; 919 tests total.
+**Telegram integration COMPLETE (Cycle 43)**: --telegram CLI flag; api_server_enabled forced; 6 new tests in test_main.py (9 total); ruff CI fix; 925 tests total.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
-| P4 | Consolidate FORBIDDEN_JARGON: remove duplicate list in test_dorothy_scenario.py; both files should use helpers.py | code-reviewer (Cycle 41) | 2026-03-18 |
+| P4 | Node.js 24 migration: update actions/checkout, actions/setup-python, actions/setup-node, actions/upload-artifact from v4→v5+ to avoid Node.js 20 deprecation (deadline June 2026) | CI annotation Cycle 43 | 2026-03-18 |
+
+## Completed Items (Cycle 43 additions)
+
+| Item | Completed | Cycle # |
+|------|-----------|---------|
+| Telegram integration (P3): --telegram flag in main.py; forces api_server_enabled=True; 6 new tests in test_main.py (test_start_services_starts_telegram_when_enabled, starts_both_telegram_and_api, does_not_start_telegram_when_disabled, main_telegram_flag_sets_telegram_enabled, main_telegram_flag_forces_api_server_enabled, main_no_telegram_flag_leaves_telegram_disabled) | 2026-03-18 | 43 |
+| CI fix (P0): ruff format violation in test_marcus_scenario.py; GitHub issue #99 closed | 2026-03-18 | 43 |
+| P4 Consolidate FORBIDDEN_JARGON: confirmed already resolved in Cycle 41 (no duplicate list in test_dorothy_scenario.py); item closed as done | 2026-03-18 | 43 |
 
 ## Completed Items (Cycle 42 additions)
 
