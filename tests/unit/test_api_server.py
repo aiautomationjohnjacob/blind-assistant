@@ -729,7 +729,6 @@ def test_api_server_memory_client_defaults_to_none():
     orc = _make_orchestrator()
     server = APIServer(orc, config={})
     assert server._memory is None
-    assert middleware._window == 60
 
 
 def test_rate_limit_middleware_default_window_is_60_seconds():
