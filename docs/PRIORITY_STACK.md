@@ -16,12 +16,12 @@
 
 ## Current Stack (Phase 4 — Accessibility Hardening)
 
-**Phase 4 in progress**: Skip link (WCAG 2.4.1) added + tabindex="-1" fix (ISSUE-037); main landmark added; SetupWizardScreen token step live region fixed; axe-core CI gate active; 5 new TestFocusManagement E2E tests. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
+**Phase 4 in progress**: Skip link (WCAG 2.4.1) + tabindex="-1" fix; main landmark; SetupWizardScreen live regions; axe-core CI gate (0 critical, 0 serious); React hydration wait added to all web E2E tests + axe audit. Phase 4 goal: WCAG 2.1 AA on web; native accessibility APIs on iOS/Android; NVDA/JAWS on Desktop.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
-| P4 | Check axe-core CI gate results — review 'serious' violations from Cycle 31 push; add any new violations to OPEN_ISSUES.md | Cycle 31 | 2026-03-17 |
-| P4 | web-accessibility-expert full audit — VoiceOver+Safari and TalkBack+Chrome flows; focus management after app state changes (beyond keyboard navigation) | web-accessibility-expert | 2026-03-17 |
+| P4 | ISSUE-039: identify and fix 1 moderate axe-core violation found in CI run 23227996919 — check new CI run from Cycle 32 push (axe now waits for React hydration before running) | Cycle 32 | 2026-03-18 |
+| P4 | Phase 4 completion assessment — 0 critical axe violations ✓; resolve ISSUE-039 first; then get platform agent sign-offs (ios-accessibility-expert, android-accessibility-expert, web-accessibility-expert, windows-accessibility-expert, macos-accessibility-expert) | Cycle 32 | 2026-03-18 |
 | P3 | Device simulation CI: Android emulator (AVD) + Playwright for web E2E in CI | device-simulator agent | 2026-03-17 |
 | P3 | Telegram integration: secondary/super-user channel only; voice-guided Telegram setup for power users who want remote access; NOT required for primary blind user experience | cloud-architect | 2026-03-17 |
 
