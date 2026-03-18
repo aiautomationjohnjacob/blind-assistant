@@ -510,9 +510,9 @@ class TestMarcusFoodOrderingDisclosure:
             patch.object(orc, "_add_item_to_cart", new=AsyncMock(return_value=page)),
             patch.object(orc, "_extract_order_summary", new=AsyncMock(return_value="1x Margherita, $14.99")),
             patch.object(gate, "wait_for_response", new=AsyncMock(return_value="yes")),
+            contextlib.suppress(Exception),
         ):
-            with contextlib.suppress(Exception):
-                await orc._handle_order_food(intent, MARCUS_CONTEXT, capture_update)
+            await orc._handle_order_food(intent, MARCUS_CONTEXT, capture_update)
 
         for update_text in updates:
             assert_no_jargon(update_text, persona="Marcus")
