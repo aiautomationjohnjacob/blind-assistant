@@ -428,6 +428,11 @@ class APIServer:
             response_callback=collect_update,
         )
 
+        # Dispatch any server-side action the orchestrator signalled via response.action.
+        # Currently only "clear_preferences" is supported; future actions can be added here.
+        if getattr(response, "action", None) == "clear_preferences":
+            await self._clear_preferences_for_user(user_id)
+
         return QueryResponse(
             text=response.text,
             spoken_text=response.spoken_text,
