@@ -738,6 +738,30 @@ The Phase 4 completion criteria only requires zero CRITICAL violations, which is
 **Proposed fix**: Add `_wait_for_app_ready()` to test_wcag_axe_audit.py to ensure axe
 runs against the hydrated app (not the loading spinner), then re-run to capture the
 violation details. Once identified, fix or document if acceptable.
-**Status**: OPEN
-**Next step**: Update test_wcag_axe_audit.py to wait for React hydration, then re-run
-to get the violation ID. Add to OPEN_ISSUES.md with specific fix. P4/P5 priority.
+**Status**: IN PROGRESS
+**Cycle 33 update**: _wait_for_app_ready() timeout increased from 5s to 15s in all
+web E2E test files (test_main_screen_chromium.py, test_food_ordering_web.py,
+test_wcag_axe_audit.py). Axe-core tests now wait for React hydration before running.
+Next CI run (c3e55df) will reveal the violation details with improved hydration wait.
+Expecting the violation to be logged in CI output for identification.
+
+### ISSUE-040: WCAG 4.1.3 — aria-live regions conditionally rendered in MainScreen.tsx
+**Severity**: HIGH (now RESOLVED — was causing screen reader to miss first announcement)
+**Category**: a11y, wcag, mobile-web
+**Detected by**: Cycle 33 analysis of web E2E test failures
+**Detected**: 2026-03-18
+**Description**: The transcript and response containers in MainScreen.tsx used conditional
+rendering (`{lastTranscript ? <View>...</View> : null}`). ARIA requires live regions to
+exist in the DOM before content is injected — screen readers register them on page load.
+When the container appeared for the first time (first assistant response), the screen
+reader had not registered the live region and missed the announcement. This means NVDA
+and VoiceOver users would not hear the first assistant response spoken automatically.
+**Impact**: Blind users would not hear the first AI response automatically via NVDA/VoiceOver
+live region. They would need to manually navigate to the response text. Subsequent responses
+(live region already registered) would work correctly. First-impression UX severely degraded.
+**Proposed fix**: Always render the transcript/response containers; hide visually with
+opacity=0 + maxHeight=0 when empty. The aria-live region is in the DOM from page load.
+**Status**: RESOLVED
+**Resolved in**: Cycle 33, commit c3e55df — MainScreen.tsx always renders both containers;
+hiddenLiveRegion style (opacity=0, maxHeight=0, overflow:hidden) keeps them invisible when
+empty. 128 JS tests passing; no test assertions changed.
