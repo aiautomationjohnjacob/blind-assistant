@@ -9,10 +9,11 @@ connect to the API server. The local voice interface is the development demo tar
 Telegram is an optional super-user channel — not the primary interface.
 
 Usage:
-  python -m blind_assistant.main          # Local voice interface (default)
-  python -m blind_assistant.main --api    # Start the REST API server (port 8000)
-  python -m blind_assistant.main --voice  # Explicitly enable local voice interface
-  python -m blind_assistant.main --setup  # Run voice-guided setup wizard
+  python -m blind_assistant.main                  # Local voice interface (default)
+  python -m blind_assistant.main --api            # Start the REST API server (port 8000)
+  python -m blind_assistant.main --voice          # Explicitly enable local voice interface
+  python -m blind_assistant.main --setup          # Run voice-guided setup wizard
+  python -m blind_assistant.main --api --telegram # API server + Telegram bot concurrently
 """
 
 import argparse
