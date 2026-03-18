@@ -972,3 +972,24 @@ asyncio timeout in pyproject.toml (asyncio_mode="auto" supports asyncio_default_
 **Resolved in**: Cycle 46 — pytest-timeout added to Install test dependencies step in ci.yml and
 autonomous-cycle.yml; `--timeout=30` added to pyproject.toml pytest addopts; 818 unit tests pass
 with 30s timeout enforced. All tests complete in 39s total — no hanging tests detected.
+
+### ISSUE-053: Education site not deployed — learn.blind-assistant.org unavailable
+**Severity**: MEDIUM
+**Category**: ci, community, accessibility
+**Detected by**: Cycle 47 gap scan (was P5 backlog item since Cycle 45)
+**Detected**: 2026-03-18
+**Description**: The education site (clients/education/) is built and tested in CI but has
+never been deployed to a public URL. learn.blind-assistant.org is a planned community
+touchpoint for blind contributors who prefer structured course material to browsing GitHub.
+The P5 backlog identified this as fully automatable via GitHub Pages.
+**Impact**: Blind contributors cannot access the audio-primary learning platform without
+cloning the repository and running a local dev server — a significant barrier.
+**Proposed fix**: (1) Create .github/workflows/deploy-education.yml using GitHub Pages
+actions (configure-pages@v5, upload-pages-artifact@v3, deploy-pages@v4); (2) Switch
+index.tsx to HashRouter so all routes work on static hosts without server rewrites;
+(3) Add homepage="." to package.json for correct asset paths; (4) Add CNAME file for
+learn.blind-assistant.org; (5) Enable GitHub Pages in repository settings (Source: GitHub Actions).
+**Status**: RESOLVED
+**Resolved in**: Cycle 47 — deploy-education.yml created; BrowserRouter→HashRouter in index.tsx;
+homepage="." in package.json; CNAME written in workflow build step; 75 education tests pass;
+requires one-time GitHub Pages activation in repo settings (Settings → Pages → Source → GitHub Actions).
