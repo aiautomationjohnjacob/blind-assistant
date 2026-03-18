@@ -526,3 +526,21 @@ These files were created in Phase 1/2 before the strict rule was enforced.
 tests/unit/test_telegram_bot.py (24), tests/unit/second_brain/test_query.py (49),
 tests/unit/vision/test_redaction.py (27), tests/unit/vision/test_screen_observer.py (18).
 Total unit test count: 583. Ruff format CI blocker from Cycle 15 also fixed.
+
+### ISSUE-030: PUT /profile accepts arbitrary extra keys with no allowlist
+**Severity**: MEDIUM
+**Category**: security, architecture
+**Detected by**: security-specialist (Cycle 24 review)
+**Detected**: 2026-03-18
+**Description**: The PUT /profile endpoint accepts `body.extra: dict | None` and writes
+every key-value pair directly to MCPMemoryClient with no key validation. A client with
+a valid bearer token could write arbitrary keys (e.g. `is_admin`, `payment_method`) to
+the user's MCP memory graph. While the API requires authentication and the current attack
+surface is low (localhost-only in dev), this is a defence-in-depth gap.
+**Impact**: Authenticated callers can pollute the MCP memory graph with unexpected keys.
+In a cloud deployment where multiple users share a backend, this could be a vector for
+privilege escalation if MCP key names are not namespaced per user.
+**Proposed fix**: Define a VALID_EXTRA_PREFS set in api_server.py (e.g. {'timezone',
+'user_name', 'common_tasks'}) and return HTTP 422 with a clear error message if any
+key in body.extra is not in that set. Add tests for the allowlist and rejection path.
+**Status**: OPEN
