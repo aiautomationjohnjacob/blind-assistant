@@ -4,15 +4,19 @@
  * Key assertions:
  * 1. Accessibility: every interactive element has an accessibilityLabel
  * 2. Welcome step renders with Continue button
- * 3. Token entry step renders with text input and Confirm Token button
- * 4. Token validation rejects empty input
- * 5. Token validation rejects tokens shorter than 8 characters
- * 6. Confirm step shows token preview (first 4 + last 4 characters)
+ * 3. Code entry step renders with text input and Confirm button
+ * 4. Code validation rejects empty input
+ * 5. Code validation rejects codes shorter than 8 characters
+ * 6. Confirm step shows code preview (first 4 + last 4 characters)
  * 7. Saving step shows loading indicator
  * 8. Done step calls onSetupComplete
  * 9. Error step shows retry button
  * 10. TTS is spoken on each step transition
  * 11. AccessibilityInfo.announceForAccessibility fires on each step
+ *
+ * Dorothy test (Cycle 37): language updated from "API token"/"backend server"
+ * to "connection code"/"your computer" throughout — verified by newly-blind-user
+ * and blind-elder-user persona review.
  *
  * Per CLAUDE.md accessibility rules:
  * - Every interactive element MUST have an accessible name
