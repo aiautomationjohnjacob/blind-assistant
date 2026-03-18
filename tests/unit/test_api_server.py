@@ -550,6 +550,7 @@ def _make_mock_memory(prefs: dict | None = None):
     returned = prefs if prefs is not None else {}
     mem.get_all_preferences = AsyncMock(return_value=returned)
     mem.set_preference = AsyncMock()
+    mem.clear_user_data = AsyncMock()
     return mem
 
 
