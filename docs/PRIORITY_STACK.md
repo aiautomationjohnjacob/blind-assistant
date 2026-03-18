@@ -27,6 +27,7 @@
 **Node.js 24 migration COMPLETE (Cycle 44)**: checkout/setup-node/upload-artifact v4→v5 across all 5 workflow files; ISSUE-050 resolved; June 2026 deadline met.
 **Device simulation CI COMPLETE (Cycle 45)**: Playwright screenshot tests (7 tests); named device-sim-screenshots/{browser}/ artifact in CI; Netlify deploy skips gracefully without secrets; Marcus test hang fixed (wait_for_confirmation mock missing).
 **Node.js 24 full migration COMPLETE (Cycle 46)**: upload-artifact v5→v7, setup-python v5→v6, checkout v5→v6, setup-node v5→v6 across all 5 workflow files; ISSUE-052 resolved (pytest-timeout=30s in pyproject.toml + ci.yml + autonomous-cycle.yml).
+**Education site deployment COMPLETE (Cycle 47)**: deploy-education.yml created; HashRouter for GitHub Pages compatibility; 75 Jest tests pass; ISSUE-053 resolved; one manual step: enable GitHub Pages in repo settings.
 
 | Priority | Item | Source | Added |
 |----------|------|---------|-------|
