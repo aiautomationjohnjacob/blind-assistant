@@ -226,7 +226,7 @@ Cycle 23 priority:
 
 ## Known Issues / Technical Debt
 
-- `transcribe_microphone` uses fixed duration — needs Voice Activity Detection (VAD) — ISSUE-002
+- ~~`transcribe_microphone` uses fixed duration~~ — RESOLVED: VAD implemented (ISSUE-002, Cycle 22)
 - Tool implementations (doordash.py, instacart.py, etc.) are empty stubs — not needed (browser handles)
 - `src/blind_assistant/memory/mcp_memory.py` not yet implemented — P3
 - ~~Platform hint text in MainScreen says "Double-tap to activate"~~ — RESOLVED (ISSUE-020, Cycle 12)
