@@ -575,9 +575,28 @@ class APIServer:
         """
         user_id = await self._authenticate(request)
 
+        # Validate extra keys against the allowlist BEFORE writing anything (ISSUE-030).
+        # This prevents authenticated clients from polluting the MCP memory graph with
+        # arbitrary key names (e.g. "is_admin", "payment_method").
+        if body.extra:
+            unknown_keys = set(body.extra.keys()) - VALID_EXTRA_PREFS
+            if unknown_keys:
+                logger.warning(
+                    "PUT /profile rejected unknown extra keys for user %s: %s",
+                    user_id,
+                    sorted(unknown_keys),
+                )
+                raise HTTPException(
+                    status_code=422,
+                    detail=(
+                        f"Unknown preference key(s): {sorted(unknown_keys)}. "
+                        f"Allowed keys: {sorted(VALID_EXTRA_PREFS)}."
+                    ),
+                )
+
         if self._memory is not None:
             try:
-                # Write each provided field to the memory store.
+                # Write each provided structured field to the memory store.
                 if body.verbosity is not None:
                     await self._memory.set_preference(user_id, "verbosity", body.verbosity)
                 if body.speech_rate is not None:
@@ -586,7 +605,7 @@ class APIServer:
                     await self._memory.set_preference(user_id, "output_mode", body.output_mode)
                 if body.braille_mode is not None:
                     await self._memory.set_preference(user_id, "braille_mode", body.braille_mode)
-                # Write arbitrary extra preferences (e.g. timezone, user_name).
+                # Write allowlisted extra preferences (timezone, user_name, etc.).
                 if body.extra:
                     for key, value in body.extra.items():
                         await self._memory.set_preference(user_id, key, value)
