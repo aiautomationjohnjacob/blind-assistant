@@ -302,13 +302,15 @@ Cycle 47 priorities:
 
 ## Loop Status for Next Run
 
-**Loop completed Cycle 44.** Phase 5 (Polish & Community Ready) is COMPLETE.
+**Loop completed Cycle 46.** Phase 5 (Polish & Community Ready) is COMPLETE.
 
-Key deliverables Cycle 44: Node.js 24 GitHub Actions migration — bumped checkout/setup-node/
-upload-artifact from v4→v5 across all 5 workflow files. Resolves ISSUE-050 (June 2026
-deprecation deadline). No product code changed. 925 tests unchanged.
+Key deliverables Cycle 46: (1) Completed Node.js 24 GitHub Actions migration — bumped
+upload-artifact v5→v7, setup-python v5→v6, checkout v5→v6, setup-node v5→v6 across all
+5 workflow files; (2) Added pytest-timeout (30s ceiling) to CI and pyproject.toml; 818 tests
+pass; ISSUE-052 resolved; GitHub issue #101 closed.
 
-Next cycle priorities: (1) Device simulation CI (P3) — the only remaining stack item;
-start with Playwright screenshot artifacts for web; document Android AVD test plan.
-Phase 5 is fully complete — all criteria met (Dorothy scenario tests ✓, GRANT_NARRATIVE.md ✓,
-community launch prep ✓, Telegram super-user channel ✓, Node.js 24 migration ✓).
+Next cycle priorities: Education site deployment (P5) — deploy clients/education/ to
+learn.blind-assistant.org via GitHub Pages. Fully automatable. Netlify staging (P4) requires
+a sighted developer with a Netlify account and cannot be automated by the loop.
+Phase 5 is fully complete — all criteria met (Dorothy/Jordan/Marcus scenario tests ✓,
+GRANT_NARRATIVE.md ✓, community launch prep ✓, Node.js 24 full migration ✓, pytest-timeout ✓).
