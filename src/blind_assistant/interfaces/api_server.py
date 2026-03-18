@@ -508,9 +508,33 @@ class APIServer:
         )
 
     async def _profile(self, request: Request) -> ProfileResponse:
-        """Return the user's current preferences and configuration."""
+        """Return the user's current preferences and configuration.
+
+        If MCPMemoryClient is available, persisted preferences override the
+        session-default context values so Dorothy's speech-rate setting from
+        yesterday's session still applies today.
+        """
         user_id = await self._authenticate(request)
         context = await self._get_context(user_id, "profile")
+
+        # Pull persisted preferences from the memory store when available.
+        extra_prefs: dict | None = None
+        if self._memory is not None:
+            try:
+                prefs = await self._memory.get_all_preferences(user_id)
+                # Apply memory-stored values over context defaults so the
+                # profile reflects what the user last configured.
+                if "verbosity" in prefs and prefs["verbosity"] is not None:
+                    context.verbosity = prefs["verbosity"]
+                if "voice_speed" in prefs and prefs["voice_speed"] is not None:
+                    context.speech_rate = float(prefs["voice_speed"])
+                if "output_mode" in prefs and prefs["output_mode"] is not None:
+                    context.output_mode = prefs["output_mode"]
+                if "braille_mode" in prefs and prefs["braille_mode"] is not None:
+                    context.braille_mode = bool(prefs["braille_mode"])
+                extra_prefs = prefs
+            except Exception as exc:
+                logger.warning("Could not read preferences from MCPMemoryClient: %s", exc)
 
         return ProfileResponse(
             user_id=context.user_id,
@@ -518,7 +542,40 @@ class APIServer:
             speech_rate=context.speech_rate,
             output_mode=context.output_mode,
             braille_mode=context.braille_mode,
+            preferences=extra_prefs,
         )
+
+    async def _update_profile(self, body: ProfileUpdateRequest, request: Request) -> ProfileResponse:
+        """Persist user preference updates and return the updated profile.
+
+        Writes structured fields (verbosity, speech_rate, etc.) and any extra
+        key-value pairs to MCPMemoryClient so they survive server restarts.
+        Returns the full updated profile, identical to GET /profile.
+        """
+        user_id = await self._authenticate(request)
+
+        if self._memory is not None:
+            try:
+                # Write each provided field to the memory store.
+                if body.verbosity is not None:
+                    await self._memory.set_preference(user_id, "verbosity", body.verbosity)
+                if body.speech_rate is not None:
+                    await self._memory.set_preference(user_id, "voice_speed", body.speech_rate)
+                if body.output_mode is not None:
+                    await self._memory.set_preference(user_id, "output_mode", body.output_mode)
+                if body.braille_mode is not None:
+                    await self._memory.set_preference(user_id, "braille_mode", body.braille_mode)
+                # Write arbitrary extra preferences (e.g. timezone, user_name).
+                if body.extra:
+                    for key, value in body.extra.items():
+                        await self._memory.set_preference(user_id, key, value)
+            except Exception as exc:
+                logger.warning("Could not write preferences to MCPMemoryClient: %s", exc)
+        else:
+            logger.debug("MCPMemoryClient not configured — profile update is session-only.")
+
+        # Return the current profile after writes (re-reads from memory).
+        return await self._profile(request)
 
     # ─────────────────────────────────────────────────────────
     # Context helper
