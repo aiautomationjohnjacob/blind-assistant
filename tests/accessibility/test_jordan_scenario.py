@@ -435,13 +435,21 @@ class TestJordanGeneralQuestions:
         config = _make_config(tmp_path)
         orc, _ = _make_orchestrator(config)
 
-        with patch(
-            "blind_assistant.core.orchestrator.Orchestrator._handle_general_question",
+        updates: list[str] = []
+
+        async def update_cb(msg: str) -> None:
+            updates.append(msg)
+
+        # Patch the method at class level — the AsyncMock becomes the method body
+        with patch.object(
+            orc,
+            "_handle_general_question",
             new=AsyncMock(return_value={"text": "The weather today is cloudy. No rain expected."}),
         ):
             result = await orc._handle_general_question(
                 _make_intent("general_question", query="What is the weather?"),
                 JORDAN_CONTEXT,
+                update_cb,
             )
 
         response = orc._format_response(result, JORDAN_CONTEXT)
