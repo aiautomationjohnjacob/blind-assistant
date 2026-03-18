@@ -220,16 +220,16 @@ None currently. If blockers exist, they will be listed here with workarounds att
 
 ## Last Cycle Summary
 
-Cycle 26 (Phase 3 — ISSUE-031 resolved). DELETE /profile/preferences added to api_server.py; requires
-confirm=true body; calls MCPMemoryClient.clear_user_data(); returns 204 No Content; graceful degradation
-if MCP unreachable; CORS updated to allow DELETE method; 8 new unit tests. Phase 3 completion assessment:
-Android TalkBack CI ✓, iOS VoiceOver CI ✓, Web E2E CI ✓ — criteria nearly met. 798 Python unit tests
-total (was 790). Ruff clean. mypy 0 errors.
+Cycle 27 (Phase 3→4 transition). Three deliverables: (1) P0 CI fix — test_main.py ruff violations
+repaired; CI lint was failing since Cycle 25; (2) SECURITY_MODEL §10 added — VALID_EXTRA_PREFS 422
+documented as intentional information disclosure, no fix required; (3) Voice clear preferences —
+`clear_preferences` intent + ConfirmationGate handler + APIServer action dispatch; 14 new tests.
+812 Python unit tests total (+14). ruff clean; mypy 0 errors. Phase 3 complete → Phase 4 beginning.
 
-Cycle 27 priority:
-1. **P4: Begin Phase 4 Accessibility Hardening** — run web-accessibility-expert WCAG 2.1 AA audit on clients/web/; call /audit-a11y skill; identify CRITICAL findings
-2. **P4: Document VALID_EXTRA_PREFS 422 as intentional disclosure in SECURITY_MODEL.md** — security-specialist recommended (Cycles 25+26)
-3. **P3: Client-side UX for clear preferences** — add voice-accessible trigger in mobile/web client so users can say "clear my preferences"
+Cycle 28 priority:
+1. **P4: Playwright WCAG audit on Expo web build** — device-simulator agent; run real a11y tests against built web app; identify and fix CRITICAL WCAG violations
+2. **P4: Investigate `accessibilityRole="text"` on web** — react-native-web mapping to non-ARIA role; may need to use platform-specific code for web rendering
+3. **P4: Begin Phase 4 Accessibility Hardening sprint** — call /audit-a11y on web client; establish Phase 4 CI gate
 
 ## Known Issues / Technical Debt
 
